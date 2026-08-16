@@ -53,10 +53,16 @@ developer's application.
   live-demo principles used by shadcn/ui.
 - The registry workbench is a catalog tool: graphite surfaces, dotted hairlines,
   graphite pill selection, numbered titles, and cobalt for focus only.
-- Distributed components follow Beautiful UI product chrome: 14px surfaces,
-  28px ghost controls, ink send, and compact raised menus. Cobalt is not the
-  send color. Prompt Composer also ships ghost (no card) and compact (24px
-  sidebar) variants of the same controls.
+- Distributed components follow Beautiful UI product chrome: flat 14px bordered
+  surfaces, 28px ghost controls, ink send, and compact raised menus. Cobalt is
+  not the send color. Prompt Composer also ships ghost (no card) and compact
+  (24px sidebar) variants of the same controls.
+- Thinking presents live work and completed evidence through explicit states,
+  structured activity, and user-controlled disclosure. It shows observable
+  actions without presenting private chain-of-thought.
+- Approval Card makes the risk and downstream impact of an AI-proposed action
+  explicit before a person decides. Its evidence is composable, its async state
+  is consumer-controlled, and critical actions require typed confirmation.
 - Copy is direct and practical. It does not use unsupported claims.
 
 ## Evidence on hand

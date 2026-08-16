@@ -59,23 +59,44 @@ export function AskUai() {
     id: "thinking",
     name: "Thinking",
     category: "AI",
-    description: "An accessible disclosure for model progress, elapsed time, and reasoning steps.",
+    description:
+      "A live and inspectable activity disclosure with explicit states and structured evidence.",
     icon: BrainCircuit,
     usage: `import { Thinking } from "@/components/ui/uai/thinking"
 
-export function ReasoningState() {
+const activities = [
+  {
+    id: "read-source",
+    type: "file" as const,
+    label: "Read the component source",
+    path: "src/components/prompt.tsx",
+    elapsed: "0.8s",
+  },
+  {
+    id: "run-checks",
+    type: "tool" as const,
+    label: "Checked the implementation",
+    tool: "bun run test",
+    elapsed: "1.8s",
+  },
+]
+
+export function ActivityState() {
   return (
     <Thinking
+      status="complete"
       summary="Checking the component contract."
       duration="1.8s"
-      steps={["Read the props.", "Check keyboard behavior."]}
+      activities={activities}
     />
   )
 }`,
     accessibility: [
       "The trigger exposes expanded and collapsed state.",
       "The trigger references the disclosed content.",
-      "Reasoning steps keep their ordered-list semantics.",
+      "New activity is announced through a polite live log.",
+      "Activity entries keep their ordered-list semantics.",
+      "Status is communicated with text instead of color alone.",
       "Decorative state icons stay hidden from assistive technology.",
     ],
   },
@@ -84,24 +105,41 @@ export function ReasoningState() {
     name: "Approval Card",
     category: "Feedback",
     description:
-      "A protected decision surface for actions that need explicit approval or rejection.",
+      "A controlled decision surface for reviewing an AI action's risk, evidence, and impact.",
     icon: ShieldCheck,
-    usage: `import { ApprovalCard } from "@/components/ui/uai/approval-card"
+    usage: `import {
+  ApprovalCard,
+  ApprovalCardDetail,
+  type ApprovalCardState,
+} from "@/components/ui/uai/approval-card"
 
-export function PublishDecision() {
+export function PolicyDecision({ state }: { state: ApprovalCardState }) {
   return (
     <ApprovalCard
-      title="Publish the generated summary?"
-      description="Review the draft before it becomes visible."
-      onDecision={(decision) => saveDecision(decision)}
-    />
+      {...state}
+      risk="high"
+      variant="detailed"
+      title="Deploy the generated refund policy?"
+      description="This changes how new refunds are routed."
+      onApprove={() => deployPolicy()}
+      onReject={() => rejectPolicy()}
+    >
+      <ApprovalCardDetail label="Affected resources">
+        refund-policy-v4 · 3 queues
+      </ApprovalCardDetail>
+      <ApprovalCardDetail label="Downstream impact">
+        New requests use this policy immediately.
+      </ApprovalCardDetail>
+    </ApprovalCard>
   )
 }`,
     accessibility: [
-      "Both outcomes use native buttons.",
-      "The decision result is announced through a live region.",
-      "The reset action remains keyboard accessible.",
-      "Labels name the consequence instead of relying on color.",
+      "Risk and status always appear as text in addition to icon and color.",
+      "Approve and Reject use native buttons with visible keyboard focus.",
+      "Submitting disables duplicate decisions and exposes busy state.",
+      "Critical approval stays disabled until the confirmation phrase matches.",
+      "Errors use an alert while preserving the evidence and retry actions.",
+      "Composable details retain description-list semantics.",
     ],
   },
   {

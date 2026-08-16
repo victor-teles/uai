@@ -58,6 +58,38 @@ describe("Uai registry", () => {
     const source = await Bun.file("src/registry/uai/components/prompt-composer.tsx").text();
 
     expect(source).toContain('["rounded", "pill", "ghost", "compact"]');
+    expect(source).not.toContain("style={{");
+    expect(source).not.toContain(".style.");
+    expect(source).not.toContain("0 8px 24px");
+  });
+
+  test("thinking ships explicit states and structured evidence", async () => {
+    const source = await Bun.file("src/registry/uai/components/thinking.tsx").text();
+
+    expect(source).toContain('["thinking", "complete", "error"]');
+    expect(source).toContain('{ type: "tool"; tool: string }');
+    expect(source).toContain('{ type: "file"; path: string }');
+    expect(source).toContain('{ type: "search"; query: string }');
+    expect(source).toContain('role="log"');
+    expect(source).toContain('aria-busy={status === "thinking"}');
+  });
+
+  test("approval card separates risk, content, and controlled async states", async () => {
+    const source = await Bun.file("src/registry/uai/components/approval-card.tsx").text();
+
+    expect(source).toContain('["low", "medium", "high", "critical"]');
+    expect(source).toContain('["compact", "detailed"]');
+    expect(source).toContain('"submitting"');
+    expect(source).toContain('"approved"');
+    expect(source).toContain('"rejected"');
+    expect(source).toContain('"error"');
+    expect(source).toContain('risk: "critical"');
+    expect(source).toContain("confirmation: ApprovalConfirmation");
+    expect(source).toContain("aria-busy={isSubmitting}");
+    expect(source).toContain('role="alert"');
+    expect(source).toContain("export type ApprovalCardState");
+    expect(source).toContain("export function ApprovalCardDetail");
+    expect(source).not.toContain("onDecision");
   });
 
   test("publishes tokens for light and dark themes", async () => {

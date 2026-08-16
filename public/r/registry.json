@@ -59,7 +59,7 @@
       "name": "thinking",
       "type": "registry:ui",
       "title": "Thinking",
-      "description": "An accessible disclosure for model reasoning steps and elapsed time.",
+      "description": "A live and inspectable activity disclosure with explicit states and structured evidence.",
       "dependencies": ["lucide-react"],
       "registryDependencies": [
         "http://localhost:3000/r/uai-theme.json",
@@ -78,7 +78,7 @@
       "name": "approval-card",
       "type": "registry:ui",
       "title": "Approval Card",
-      "description": "A focused decision surface for actions that need explicit approval.",
+      "description": "A controlled decision surface that makes an AI action's risk, evidence, and impact explicit.",
       "dependencies": ["lucide-react"],
       "registryDependencies": [
         "http://localhost:3000/r/uai-theme.json",

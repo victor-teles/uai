@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import {
   type ComponentProps,
-  type CSSProperties,
   type FormEvent,
   type KeyboardEvent,
   type ReactNode,
@@ -68,22 +67,31 @@ function composerChrome(
     compact,
     pill,
     controlSize: compact ? 24 : 28,
-    controlRadius: pill ? 999 : compact ? 6 : 8,
-    cardRadius: pill ? (hasAttachments || expanded ? 24 : 999) : compact ? 12 : 14,
-    chipRadius: pill ? 999 : compact ? 5 : 6,
-    chipHeight: compact ? 22 : 26,
-    padding: compact || ghost ? 4 : 6,
-    gap: compact ? 4 : 6,
-    fieldSize: compact ? 12.5 : 13,
-    fieldLineHeight: compact ? 16 : 18,
-    fieldPad: compact ? 4 : 5,
-    modelSize: compact ? 11 : 12,
+    controlClass: compact ? "size-6" : "size-7",
+    controlHeightClass: compact ? "h-6" : "h-7",
+    controlRadiusClass: pill ? "rounded-full" : compact ? "rounded-[6px]" : "rounded-lg",
+    cardClass: cn(
+      "bg-[var(--uai-surface)]",
+      pill
+        ? hasAttachments || expanded
+          ? "rounded-3xl p-1 gap-1"
+          : "rounded-full p-1 gap-1"
+        : compact
+          ? "rounded-xl p-1 gap-1"
+          : ghost
+            ? "rounded-[14px] bg-transparent p-1 gap-1.5"
+            : "rounded-[14px] p-1.5 gap-1.5",
+    ),
+    chipClass: cn(
+      compact ? "h-[22px] text-[11px]" : "h-[26px] text-[11.5px]",
+      pill ? "rounded-full" : compact ? "rounded-[5px]" : "rounded-md",
+    ),
+    fieldClass: compact
+      ? "min-h-6 py-1 text-[12.5px] leading-4"
+      : "min-h-7 py-[5px] text-[13px] leading-[18px]",
+    maxFieldHeightClass: compact ? "max-h-20" : "max-h-[100px]",
+    modelClass: compact ? "text-[11px]" : "text-xs",
     iconClass: compact ? "size-3.5" : "size-4",
-    maxFieldHeight: compact ? 80 : 100,
-    background: ghost ? "transparent" : "var(--uai-surface)",
-    shadow: ghost
-      ? "none"
-      : "inset 0 1px 0 color-mix(in oklab, var(--uai-text) 6%, transparent), 0 1px 2px color-mix(in oklab, black 6%, transparent), 0 8px 24px color-mix(in oklab, black 8%, transparent)",
   };
 }
 
@@ -92,64 +100,6 @@ const DEFAULT_SOURCES: readonly PromptComposerSource[] = [
   { id: "notes", label: "Workspace notes", description: "Attach saved context" },
   { id: "search", label: "Web search", description: "Live results" },
 ];
-
-const COMPOSER_STYLE = `
-@keyframes uai-prompt-pop-in {
-  from { opacity: 0; transform: scale(0.96); }
-  to { opacity: 1; transform: scale(1); }
-}
-[data-uai-composer] textarea {
-  caret-color: var(--uai-text);
-}
-[data-uai-composer] textarea::selection {
-  background: color-mix(in oklab, var(--uai-text) 18%, transparent);
-}
-[data-uai-menu] [role="menuitem"],
-[data-uai-menu] [role="menuitemradio"] {
-  position: relative;
-  z-index: 1;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  color: inherit;
-  font: inherit;
-}
-[data-uai-composer] [data-uai-card] {
-  border: 1px solid var(--uai-border);
-  transition: border-color 150ms ease;
-}
-[data-uai-composer] [data-uai-card]:focus-within {
-  border-color: var(--uai-border-strong);
-}
-[data-uai-composer][data-invalid] [data-uai-card] {
-  border-color: var(--uai-danger);
-}
-[data-uai-composer][data-variant="ghost"] [data-uai-card] {
-  border-color: transparent;
-}
-[data-uai-composer][data-variant="ghost"] [data-uai-card]:focus-within {
-  border-color: var(--uai-border-strong);
-}
-[data-uai-composer][data-variant="ghost"][data-invalid] [data-uai-card],
-[data-uai-composer][data-variant="ghost"][data-invalid] [data-uai-card]:focus-within {
-  border-color: var(--uai-danger);
-}
-@media (prefers-reduced-motion: reduce) {
-  [data-uai-menu] { animation: none !important; }
-}
-`;
-
-const menuPanelStyle: CSSProperties = {
-  position: "absolute",
-  bottom: "100%",
-  zIndex: 10,
-  marginBottom: 8,
-  borderRadius: 14,
-  background: "var(--uai-surface)",
-  boxShadow:
-    "0 0 0 1px var(--uai-border-strong), 0 10px 28px color-mix(in oklab, black 42%, transparent)",
-  animation: "uai-prompt-pop-in 180ms cubic-bezier(0.23, 1, 0.32, 1) both",
-};
 
 function SourceGlyph({ id }: { id: string }) {
   if (id === "files") return <Paperclip className="size-4" strokeWidth={1.8} aria-hidden="true" />;
@@ -160,16 +110,12 @@ function SourceGlyph({ id }: { id: string }) {
 function FloatingMenu({
   id,
   label,
-  origin,
-  width,
-  align,
+  kind,
   children,
 }: {
   id: string;
   label: string;
-  origin: string;
-  width: number | string;
-  align: "start" | "end";
+  kind: "sources" | "models";
   children: ReactNode;
 }) {
   return (
@@ -178,37 +124,15 @@ function FloatingMenu({
       role="menu"
       aria-label={label}
       data-uai-menu=""
-      style={{
-        ...menuPanelStyle,
-        left: align === "start" ? 0 : "auto",
-        right: align === "end" ? 0 : "auto",
-        width,
-        transformOrigin: origin,
-      }}
+      className={cn(
+        "absolute bottom-full z-10 mb-2 rounded-[14px] bg-[var(--uai-surface)] shadow-[0_0_0_1px_var(--uai-border-strong),0_10px_28px_color-mix(in_oklab,black_42%,transparent)] transition-[opacity,transform] duration-180 ease-[cubic-bezier(0.23,1,0.32,1)] starting:scale-[0.96] starting:opacity-0 motion-reduce:transition-none",
+        kind === "sources"
+          ? "left-0 w-[min(100%,280px)] origin-bottom-left"
+          : "right-0 w-44 origin-bottom-right",
+      )}
     >
-      <div style={{ position: "relative", overflow: "hidden", borderRadius: 13, padding: 4 }}>
-        {children}
-      </div>
+      <div className="relative overflow-hidden rounded-[13px] p-1">{children}</div>
     </div>
-  );
-}
-
-function HoverPill({ top, height }: { top: number; height: number }) {
-  return (
-    <div
-      aria-hidden="true"
-      style={{
-        position: "absolute",
-        top,
-        right: 4,
-        left: 4,
-        height,
-        borderRadius: 8,
-        background: "var(--uai-surface-raised)",
-        pointerEvents: "none",
-        transition: "top 140ms cubic-bezier(0.23, 1, 0.32, 1)",
-      }}
-    />
   );
 }
 
@@ -231,8 +155,6 @@ export function PromptComposer({
   const [attachments, setAttachments] = useState<{ id: string; file: File }[]>([]);
   const [plusOpen, setPlusOpen] = useState(false);
   const [modelOpen, setModelOpen] = useState(false);
-  const [sourceHover, setSourceHover] = useState<string | null>(null);
-  const [modelHover, setModelHover] = useState<string | null>(null);
   const [model, setModel] = useState<PromptComposerModel>(
     models?.[0] ?? { id: "default", label: modelLabel },
   );
@@ -253,8 +175,6 @@ export function PromptComposer({
   const canSend = !locked && (prompt.trim().length > 0 || attachments.length > 0);
   const modelOptions = models ?? [model];
   const layoutKey = `${attachments.length}:${model.label}:${variant}`;
-  const sourceHoverIndex = sources.findIndex((source) => source.id === sourceHover);
-  const modelHoverIndex = modelOptions.findIndex((option) => option.id === modelHover);
 
   useEffect(() => {
     if (!plusOpen && !modelOpen) return;
@@ -280,17 +200,11 @@ export function PromptComposer({
     };
   }, [plusOpen, modelOpen]);
 
-  useEffect(() => {
-    if (!plusOpen) setSourceHover(null);
-    if (!modelOpen) setModelHover(null);
-  }, [plusOpen, modelOpen]);
-
   useLayoutEffect(() => {
-    const input = textareaRef.current;
     const controls = controlsRef.current;
     const measure = measureRef.current;
     const modelButton = modelRef.current;
-    if (!input || !controls || !measure) return;
+    if (!controls || !measure) return;
 
     void layoutKey;
     const controlWidth =
@@ -299,12 +213,7 @@ export function PromptComposer({
     const inlineInputWidth = controls.clientWidth - controlWidth - inlineGaps;
     const needsFullWidth = prompt.includes("\n") || measure.offsetWidth + 8 > inlineInputWidth;
     if (needsFullWidth !== expanded) setExpanded(needsFullWidth);
-
-    input.style.height = "0px";
-    const contentHeight = input.scrollHeight;
-    input.style.height = `${Math.min(Math.max(contentHeight, chrome.controlSize), chrome.maxFieldHeight)}px`;
-    input.style.overflowY = contentHeight > chrome.maxFieldHeight ? "auto" : "hidden";
-  }, [prompt, expanded, layoutKey, chrome.compact, chrome.controlSize, chrome.maxFieldHeight]);
+  }, [prompt, expanded, layoutKey, chrome.compact, chrome.controlSize]);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -361,20 +270,16 @@ export function PromptComposer({
       }}
       className={cn(
         "flex shrink-0 items-center justify-center text-[var(--uai-muted)] transition-[background-color,color,transform] duration-150 hover:bg-[var(--uai-surface-raised)] hover:text-[var(--uai-text)] focus-visible:bg-[var(--uai-surface-raised)] active:scale-[0.94] disabled:cursor-not-allowed",
+        chrome.controlClass,
+        chrome.controlRadiusClass,
         plusOpen && "bg-[var(--uai-surface-raised)] text-[var(--uai-text)]",
       )}
-      style={{
-        width: chrome.controlSize,
-        height: chrome.controlSize,
-        borderRadius: chrome.controlRadius,
-      }}
     >
       <span
-        style={{
-          display: "grid",
-          transition: "transform 160ms cubic-bezier(0.23, 1, 0.32, 1)",
-          transform: plusOpen ? "rotate(45deg)" : "none",
-        }}
+        className={cn(
+          "grid transition-transform duration-160 ease-[cubic-bezier(0.23,1,0.32,1)]",
+          plusOpen && "rotate-45",
+        )}
       >
         <Plus className={chrome.iconClass} strokeWidth={2} aria-hidden="true" />
       </span>
@@ -393,20 +298,23 @@ export function PromptComposer({
             setPlusOpen(false);
             setModelOpen((open) => !open);
           }}
-          className="flex shrink-0 items-center gap-1 px-1.5 font-medium text-[var(--uai-muted)] transition-colors duration-150 hover:bg-[var(--uai-surface-raised)] hover:text-[var(--uai-text)] focus-visible:bg-[var(--uai-surface-raised)] disabled:cursor-not-allowed"
-          style={{
-            height: chrome.controlSize,
-            borderRadius: chrome.controlRadius,
-            fontSize: chrome.modelSize,
-          }}
+          className={cn(
+            "flex shrink-0 items-center gap-1 px-1.5 font-medium text-[var(--uai-muted)] transition-colors duration-150 hover:bg-[var(--uai-surface-raised)] hover:text-[var(--uai-text)] focus-visible:bg-[var(--uai-surface-raised)] disabled:cursor-not-allowed",
+            chrome.controlHeightClass,
+            chrome.controlRadiusClass,
+            chrome.modelClass,
+          )}
         >
           {model.label}
           <ChevronDown className="size-3" strokeWidth={2.4} aria-hidden="true" />
         </button>
       ) : (
         <span
-          className="flex shrink-0 items-center px-1.5 font-medium text-[var(--uai-muted)]"
-          style={{ height: chrome.controlSize, fontSize: chrome.modelSize }}
+          className={cn(
+            "flex shrink-0 items-center px-1.5 font-medium text-[var(--uai-muted)]",
+            chrome.controlHeightClass,
+            chrome.modelClass,
+          )}
         >
           {model.label}
         </span>
@@ -418,14 +326,14 @@ export function PromptComposer({
       type="submit"
       aria-label={busy ? "Sending prompt" : "Send"}
       disabled={!canSend}
-      className="flex shrink-0 items-center justify-center transition-[background-color,color,transform] duration-200 enabled:active:scale-[0.94] disabled:cursor-not-allowed"
-      style={{
-        width: chrome.controlSize,
-        height: chrome.controlSize,
-        borderRadius: chrome.controlRadius,
-        background: canSend || busy ? "var(--uai-text)" : "var(--uai-border-strong)",
-        color: canSend || busy ? "var(--uai-surface)" : "var(--uai-muted)",
-      }}
+      className={cn(
+        "flex shrink-0 items-center justify-center transition-[background-color,color,transform] duration-200 enabled:active:scale-[0.94] disabled:cursor-not-allowed",
+        chrome.controlClass,
+        chrome.controlRadiusClass,
+        canSend || busy
+          ? "bg-[var(--uai-text)] text-[var(--uai-surface)]"
+          : "bg-[var(--uai-border-strong)] text-[var(--uai-muted)]",
+      )}
     >
       {busy ? (
         <LoaderCircle
@@ -473,87 +381,40 @@ export function PromptComposer({
         }}
       />
 
-      <style>{COMPOSER_STYLE}</style>
-
       {plusOpen ? (
-        <FloatingMenu
-          id={sourceMenuId}
-          label="Attachments and sources"
-          origin="bottom left"
-          width="min(100%, 280px)"
-          align="start"
-        >
-          {sourceHoverIndex >= 0 ? <HoverPill top={4 + sourceHoverIndex * 44} height={44} /> : null}
+        <FloatingMenu id={sourceMenuId} label="Attachments and sources" kind="sources">
           {sources.map((source) => (
             <button
               key={source.id}
               type="button"
               role="menuitem"
               onMouseDown={(event) => event.preventDefault()}
-              onMouseEnter={() => setSourceHover(source.id)}
-              onFocus={() => setSourceHover(source.id)}
               onClick={() => pickSource(source)}
-              style={{
-                display: "flex",
-                width: "100%",
-                height: 44,
-                alignItems: "center",
-                gap: 10,
-                paddingInline: 8,
-                border: 0,
-                borderRadius: 8,
-                background: "transparent",
-                cursor: "pointer",
-                textAlign: "left",
-              }}
+              className="relative flex h-11 w-full cursor-pointer items-center gap-2.5 rounded-lg border-0 bg-transparent px-2 text-left font-[inherit] text-[inherit] transition-colors duration-150 hover:bg-[var(--uai-surface-raised)] focus-visible:bg-[var(--uai-surface-raised)]"
             >
-              <span
-                className="grid shrink-0 place-items-center text-[var(--uai-muted)]"
-                style={{ width: 22, height: 22 }}
-              >
+              <span className="grid size-[22px] shrink-0 place-items-center text-[var(--uai-muted)]">
                 <SourceGlyph id={source.id} />
               </span>
               <span className="min-w-0 flex-1">
-                <span
-                  className="block truncate font-medium text-[var(--uai-text)]"
-                  style={{ fontSize: 12.5, lineHeight: "16px" }}
-                >
+                <span className="block truncate text-[12.5px] leading-4 font-medium text-[var(--uai-text)]">
                   {source.label}
                 </span>
                 {source.description ? (
-                  <span
-                    className="block truncate text-[var(--uai-muted)]"
-                    style={{ fontSize: 11.5, lineHeight: "15px" }}
-                  >
+                  <span className="block truncate text-[11.5px] leading-[15px] text-[var(--uai-muted)]">
                     {source.description}
                   </span>
                 ) : null}
               </span>
             </button>
           ))}
-          <div
-            className="text-[var(--uai-muted)]"
-            style={{
-              marginTop: 4,
-              borderTop: "1px solid var(--uai-border)",
-              padding: "7px 8px 5px",
-              fontSize: 11,
-            }}
-          >
+          <div className="mt-1 border-t border-[var(--uai-border)] px-2 pt-[7px] pb-[5px] text-[11px] text-[var(--uai-muted)]">
             Attach files or mention a source
           </div>
         </FloatingMenu>
       ) : null}
 
       {modelOpen && modelOptions.length > 1 ? (
-        <FloatingMenu
-          id={modelMenuId}
-          label="Choose model"
-          origin="bottom right"
-          width={176}
-          align="end"
-        >
-          {modelHoverIndex >= 0 ? <HoverPill top={4 + modelHoverIndex * 32} height={32} /> : null}
+        <FloatingMenu id={modelMenuId} label="Choose model" kind="models">
           {modelOptions.map((option) => (
             <button
               key={option.id}
@@ -561,31 +422,14 @@ export function PromptComposer({
               role="menuitemradio"
               aria-checked={option.id === model.id}
               onMouseDown={(event) => event.preventDefault()}
-              onMouseEnter={() => setModelHover(option.id)}
-              onFocus={() => setModelHover(option.id)}
               onClick={() => {
                 setModel(option);
                 setModelOpen(false);
                 textareaRef.current?.focus();
               }}
-              style={{
-                display: "flex",
-                width: "100%",
-                height: 32,
-                alignItems: "center",
-                gap: 8,
-                paddingInline: 8,
-                border: 0,
-                borderRadius: 8,
-                background: "transparent",
-                cursor: "pointer",
-                textAlign: "left",
-              }}
+              className="relative flex h-8 w-full cursor-pointer items-center gap-2 rounded-lg border-0 bg-transparent px-2 text-left font-[inherit] text-[inherit] transition-colors duration-150 hover:bg-[var(--uai-surface-raised)] focus-visible:bg-[var(--uai-surface-raised)]"
             >
-              <span
-                className="min-w-0 flex-1 truncate font-medium text-[var(--uai-text)]"
-                style={{ fontSize: 12.5 }}
-              >
+              <span className="min-w-0 flex-1 truncate text-[12.5px] font-medium text-[var(--uai-text)]">
                 {option.label}
               </span>
               <Check
@@ -603,20 +447,17 @@ export function PromptComposer({
 
       <div
         data-uai-card=""
-        className="relative isolate flex flex-col overflow-hidden"
-        style={{
-          borderRadius: chrome.cardRadius,
-          background: chrome.background,
-          boxShadow: chrome.shadow,
-          padding: chrome.padding,
-          gap: chrome.gap,
-        }}
+        className={cn(
+          "relative isolate flex flex-col overflow-hidden border border-[var(--uai-border)] transition-colors duration-150 focus-within:border-[var(--uai-border-strong)]",
+          chrome.cardClass,
+          variant === "ghost" && "border-transparent",
+          invalid && "border-[var(--uai-danger)] focus-within:border-[var(--uai-danger)]",
+        )}
       >
         <span
           ref={measureRef}
           aria-hidden="true"
-          className="pointer-events-none invisible absolute whitespace-pre"
-          style={{ fontSize: chrome.fieldSize, lineHeight: `${chrome.fieldLineHeight}px` }}
+          className={cn("pointer-events-none invisible absolute whitespace-pre", chrome.fieldClass)}
         >
           {prompt}
         </span>
@@ -626,12 +467,10 @@ export function PromptComposer({
             {attachments.map((item) => (
               <span
                 key={item.id}
-                className="flex items-center gap-1.5 bg-[var(--uai-surface-raised)] py-1 pr-1 pl-1.5 text-[var(--uai-muted)]"
-                style={{
-                  height: chrome.chipHeight,
-                  fontSize: chrome.compact ? 11 : 11.5,
-                  borderRadius: chrome.chipRadius,
-                }}
+                className={cn(
+                  "flex items-center gap-1.5 bg-[var(--uai-surface-raised)] py-1 pr-1 pl-1.5 text-[var(--uai-muted)]",
+                  chrome.chipClass,
+                )}
               >
                 <FileText className="size-3" aria-hidden="true" />
                 <span className="max-w-36 truncate text-[var(--uai-text)]">{item.file.name}</span>
@@ -642,8 +481,10 @@ export function PromptComposer({
                   onClick={() =>
                     setAttachments((current) => current.filter((entry) => entry.id !== item.id))
                   }
-                  className="grid size-4 place-items-center text-[var(--uai-muted)] transition-colors duration-100 hover:text-[var(--uai-text)]"
-                  style={{ borderRadius: chrome.pill ? 999 : 4 }}
+                  className={cn(
+                    "grid size-4 place-items-center text-[var(--uai-muted)] transition-colors duration-100 hover:text-[var(--uai-text)]",
+                    chrome.pill ? "rounded-full" : "rounded",
+                  )}
                 >
                   <X className="size-2.5" strokeWidth={2.5} aria-hidden="true" />
                 </button>
@@ -671,17 +512,11 @@ export function PromptComposer({
             }}
             onKeyDown={onPromptKeyDown}
             className={cn(
-              "resize-none bg-transparent px-1 text-[var(--uai-text)] outline-none placeholder:text-[var(--uai-muted)] disabled:cursor-not-allowed",
+              "resize-none overflow-y-auto bg-transparent px-1 text-[var(--uai-text)] caret-[var(--uai-text)] outline-none! [field-sizing:content] selection:bg-[color-mix(in_oklab,var(--uai-text)_18%,transparent)] placeholder:text-[var(--uai-muted)] disabled:cursor-not-allowed",
+              chrome.fieldClass,
+              chrome.maxFieldHeightClass,
               expanded ? "w-full" : "min-w-0 flex-1",
             )}
-            style={{
-              minHeight: chrome.controlSize,
-              fontSize: chrome.fieldSize,
-              lineHeight: `${chrome.fieldLineHeight}px`,
-              paddingTop: chrome.fieldPad,
-              paddingBottom: chrome.fieldPad,
-              outline: "none",
-            }}
           />
           {expanded ? (
             <div className="flex items-center gap-1">
