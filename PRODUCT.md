@@ -51,6 +51,8 @@ developer's application.
 - The product name is Uai.
 - The component browser follows the open-code, composition, distribution, and
   live-demo principles used by shadcn/ui.
+- Distributed interfaces use named compound components: roots retain shared
+  behavior and accessibility while consumers compose replaceable regions.
 - The registry workbench is a catalog tool: graphite surfaces, dotted hairlines,
   graphite pill selection, numbered titles, and cobalt for focus only.
 - Distributed components follow Beautiful UI product chrome: flat 14px bordered
@@ -74,7 +76,7 @@ assets. Documentation and demonstrations must not invent those claims.
 
 1. Ship source code that developers own.
 2. Prefer complete product patterns over isolated decoration.
-3. Keep public interfaces small and implementations detailed.
+3. Keep public interfaces composition-first and small, with detailed behavior behind them.
 4. Demonstrate every component in realistic states.
 5. Treat accessibility, keyboard behavior, and reduced motion as implementation
    requirements.

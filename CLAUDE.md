@@ -17,6 +17,36 @@ CSS, and the shadcn registry schema.
 Generated files under `public/r` are build outputs from `registry.json` and the
 registry source files. Do not edit them by hand.
 
+## React composition
+
+Build distributed registry components as named compound components. The root owns
+shared state, behavior, styling, and accessibility through private context; consumers
+compose replaceable structure and content through exported children.
+
+```tsx
+<PromptComposer variant="rounded">
+  <PromptComposerAdd>
+    ...
+  </PromptComposerAdd>
+
+  <PromptComposerInput />
+
+  <PromptComposerActions>
+    ...
+  </PromptComposerActions>
+</PromptComposer>
+```
+
+- Prefer children over arrays, data objects, render configuration, or root-level
+  content props.
+- Keep state and visual switches on the narrowest component that owns the behavior.
+- Use named exports such as `PromptComposerAdd`, not properties such as
+  `PromptComposer.Add`.
+- Do not inspect child types, clone children, or use display names to coordinate
+  compound layout. Use private context when regions share state.
+- Context-dependent children must throw a clear error when rendered outside their
+  matching root. Do not add context to purely structural components.
+
 ## Visual direction
 
 Uai has two visual layers. Read `DESIGN.md` before changing either.
@@ -49,3 +79,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+## Coding standards
+
+Use 10x-coder skills to always apply code best practices

@@ -59,7 +59,7 @@
       "name": "thinking",
       "type": "registry:ui",
       "title": "Thinking",
-      "description": "A live and inspectable activity disclosure with explicit states and structured evidence.",
+      "description": "A composable activity disclosure with explicit states and structured evidence.",
       "dependencies": ["lucide-react"],
       "registryDependencies": [
         "http://localhost:3000/r/uai-theme.json",
@@ -78,7 +78,7 @@
       "name": "approval-card",
       "type": "registry:ui",
       "title": "Approval Card",
-      "description": "A controlled decision surface that makes an AI action's risk, evidence, and impact explicit.",
+      "description": "A composable decision surface that keeps risk, evidence, and impact explicit.",
       "dependencies": ["lucide-react"],
       "registryDependencies": [
         "http://localhost:3000/r/uai-theme.json",
@@ -97,7 +97,7 @@
       "name": "task-list",
       "type": "registry:ui",
       "title": "Task List",
-      "description": "A compact ordered list for complete, active, and pending work.",
+      "description": "A composable ordered list for complete, active, and pending work.",
       "dependencies": ["lucide-react"],
       "registryDependencies": [
         "http://localhost:3000/r/uai-theme.json",
@@ -116,7 +116,7 @@
       "name": "prompt-composer",
       "type": "registry:ui",
       "title": "Prompt Composer",
-      "description": "A prompt bar with ghost plus, ink send, and rounded, pill, ghost, and compact variants.",
+      "description": "A compound prompt bar with composable add, input, and action regions.",
       "dependencies": ["lucide-react"],
       "registryDependencies": [
         "http://localhost:3000/r/uai-theme.json",
@@ -135,7 +135,7 @@
       "name": "task-flow",
       "type": "registry:block",
       "title": "Task Flow",
-      "description": "A composed AI workflow with reasoning, approval, task, and prompt stages.",
+      "description": "A compound workflow layout for composing arbitrary AI task stages.",
       "dependencies": ["lucide-react"],
       "registryDependencies": [
         "http://localhost:3000/r/thinking.json",

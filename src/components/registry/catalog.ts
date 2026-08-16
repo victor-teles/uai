@@ -34,16 +34,28 @@ export const registryCatalog: readonly RegistryCatalogItem[] = [
     description:
       "A prompt bar with ghost plus, ink send, and rounded, pill, ghost, and compact variants.",
     icon: MessageSquareText,
-    usage: `import { PromptComposer } from "@/components/ui/uai/prompt-composer"
+    usage: `import {
+  PromptComposer,
+  PromptComposerActions,
+  PromptComposerAdd,
+  PromptComposerFileItem,
+  PromptComposerInput,
+  PromptComposerModelSelect,
+  PromptComposerSubmit,
+} from "@/components/ui/uai/prompt-composer"
 
 export function AskUai() {
   return (
-    <PromptComposer
-      placeholder="Write a message…"
-      modelLabel="Your model"
-      variant="rounded"
-      onSubmit={(prompt) => sendPrompt(prompt)}
-    />
+    <PromptComposer variant="rounded" onSubmit={(prompt) => sendPrompt(prompt)}>
+      <PromptComposerAdd>
+        <PromptComposerFileItem />
+      </PromptComposerAdd>
+      <PromptComposerInput placeholder="Write a message…" />
+      <PromptComposerActions>
+        <PromptComposerModelSelect models={[{ id: "default", label: "Your model" }]} />
+        <PromptComposerSubmit />
+      </PromptComposerActions>
+    </PromptComposer>
   )
 }`,
     accessibility: [
@@ -62,33 +74,26 @@ export function AskUai() {
     description:
       "A live and inspectable activity disclosure with explicit states and structured evidence.",
     icon: BrainCircuit,
-    usage: `import { Thinking } from "@/components/ui/uai/thinking"
-
-const activities = [
-  {
-    id: "read-source",
-    type: "file" as const,
-    label: "Read the component source",
-    path: "src/components/prompt.tsx",
-    elapsed: "0.8s",
-  },
-  {
-    id: "run-checks",
-    type: "tool" as const,
-    label: "Checked the implementation",
-    tool: "bun run test",
-    elapsed: "1.8s",
-  },
-]
+    usage: `import {
+  Thinking,
+  ThinkingActivity,
+  ThinkingContent,
+  ThinkingTrigger,
+} from "@/components/ui/uai/thinking"
 
 export function ActivityState() {
   return (
-    <Thinking
-      status="complete"
-      summary="Checking the component contract."
-      duration="1.8s"
-      activities={activities}
-    />
+    <Thinking status="complete">
+      <ThinkingTrigger summary="Checking the component contract." duration="1.8s" />
+      <ThinkingContent>
+        <ThinkingActivity type="file" path="src/components/prompt.tsx" elapsed="0.8s">
+          Read the component source
+        </ThinkingActivity>
+        <ThinkingActivity type="tool" tool="bun run test" elapsed="1.8s">
+          Checked the implementation
+        </ThinkingActivity>
+      </ThinkingContent>
+    </Thinking>
   )
 }`,
     accessibility: [
@@ -109,27 +114,33 @@ export function ActivityState() {
     icon: ShieldCheck,
     usage: `import {
   ApprovalCard,
+  ApprovalCardActions,
+  ApprovalCardApprove,
   ApprovalCardDetail,
-  type ApprovalCardState,
+  ApprovalCardDetails,
+  ApprovalCardHeader,
+  ApprovalCardReject,
 } from "@/components/ui/uai/approval-card"
 
-export function PolicyDecision({ state }: { state: ApprovalCardState }) {
+export function PolicyDecision() {
   return (
-    <ApprovalCard
-      {...state}
-      risk="high"
-      variant="detailed"
-      title="Deploy the generated refund policy?"
-      description="This changes how new refunds are routed."
-      onApprove={() => deployPolicy()}
-      onReject={() => rejectPolicy()}
-    >
-      <ApprovalCardDetail label="Affected resources">
-        refund-policy-v4 · 3 queues
-      </ApprovalCardDetail>
-      <ApprovalCardDetail label="Downstream impact">
-        New requests use this policy immediately.
-      </ApprovalCardDetail>
+    <ApprovalCard risk="high" variant="detailed">
+      <ApprovalCardHeader
+        title="Deploy the generated refund policy?"
+        description="This changes how new refunds are routed."
+      />
+      <ApprovalCardDetails>
+        <ApprovalCardDetail label="Affected resources">
+          refund-policy-v4 · 3 queues
+        </ApprovalCardDetail>
+        <ApprovalCardDetail label="Downstream impact">
+          New requests use this policy immediately.
+        </ApprovalCardDetail>
+      </ApprovalCardDetails>
+      <ApprovalCardActions>
+        <ApprovalCardReject onClick={() => rejectPolicy()} />
+        <ApprovalCardApprove onClick={() => deployPolicy()}>Deploy policy</ApprovalCardApprove>
+      </ApprovalCardActions>
     </ApprovalCard>
   )
 }`,
@@ -149,15 +160,25 @@ export function PolicyDecision({ state }: { state: ApprovalCardState }) {
     description:
       "An ordered view of complete, active, and pending work with visible status labels.",
     icon: ListChecks,
-    usage: `import { TaskList } from "@/components/ui/uai/task-list"
-
-const tasks = [
-  { id: "review", label: "Review interface", status: "complete" },
-  { id: "test", label: "Check keyboard paths", status: "active" },
-]
+    usage: `import {
+  TaskList,
+  TaskListDescription,
+  TaskListItem,
+  TaskListTitle,
+} from "@/components/ui/uai/task-list"
 
 export function Progress() {
-  return <TaskList tasks={tasks} />
+  return (
+    <TaskList>
+      <TaskListItem status="complete">
+        <TaskListTitle>Review interface</TaskListTitle>
+        <TaskListDescription>Props and public behavior</TaskListDescription>
+      </TaskListItem>
+      <TaskListItem status="active">
+        <TaskListTitle>Check keyboard paths</TaskListTitle>
+      </TaskListItem>
+    </TaskList>
+  )
 }`,
     accessibility: [
       "Tasks retain ordered-list semantics.",
@@ -172,15 +193,19 @@ export function Progress() {
     category: "Workflow",
     description: "The complete reasoning, approval, work, and prompt sequence behind an AI task.",
     icon: Workflow,
-    usage: `import { TaskFlow } from "@/components/uai/task-flow"
+    usage: `import { MessageSquare, Sparkles } from "lucide-react"
+import { TaskFlow, TaskFlowStep } from "@/components/uai/task-flow"
 
 export function ReviewFlow() {
   return (
-    <TaskFlow
-      data={reviewFlow}
-      onDecision={(decision) => saveDecision(decision)}
-      onPromptSubmit={(prompt) => sendPrompt(prompt)}
-    />
+    <TaskFlow>
+      <TaskFlowStep label="Thinking" icon={<Sparkles aria-hidden="true" />} active>
+        {thinkingDisclosure}
+      </TaskFlowStep>
+      <TaskFlowStep label="Prompt" icon={<MessageSquare aria-hidden="true" />}>
+        {promptComposer}
+      </TaskFlowStep>
+    </TaskFlow>
   )
 }`,
     accessibility: [
