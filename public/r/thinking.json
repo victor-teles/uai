@@ -1,0 +1,26 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "thinking",
+  "title": "Thinking",
+  "description": "An accessible disclosure for model reasoning steps and elapsed time.",
+  "dependencies": [
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "http://localhost:3000/r/uai-theme.json",
+    "http://localhost:3000/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/thinking.tsx",
+      "content": "\"use client\";\n\nimport { ChevronDown, LoaderCircle, Sparkles } from \"lucide-react\";\nimport { type ComponentProps, useId, useState } from \"react\";\n\nimport { cn } from \"@/lib/uai-utils\";\n\nexport type ThinkingProps = Omit<ComponentProps<\"section\">, \"title\"> & {\n  title?: string;\n  summary?: string;\n  duration?: string;\n  steps?: readonly string[];\n  defaultOpen?: boolean;\n};\n\nexport function Thinking({\n  title = \"Thinking\",\n  summary = \"Review the steps behind this response.\",\n  duration,\n  steps = [],\n  defaultOpen = true,\n  className,\n  ...props\n}: ThinkingProps) {\n  const [open, setOpen] = useState(defaultOpen);\n  const contentId = useId();\n\n  return (\n    <section\n      className={cn(\n        \"overflow-hidden rounded-xl border border-[var(--uai-border)] bg-[var(--uai-surface)] text-[var(--uai-text)]\",\n        className,\n      )}\n      {...props}\n    >\n      <button\n        type=\"button\"\n        className=\"flex min-h-14 w-full items-center gap-3 px-4 text-left outline-none transition-colors hover:bg-[var(--uai-surface-raised)] focus-visible:ring-2 focus-visible:ring-[var(--uai-accent)] focus-visible:ring-inset\"\n        aria-controls={contentId}\n        aria-expanded={open}\n        onClick={() => setOpen((value) => !value)}\n      >\n        <span className=\"grid size-8 shrink-0 place-items-center rounded-lg border border-[var(--uai-border)] bg-[var(--uai-surface-raised)]\">\n          {open ? (\n            <LoaderCircle\n              className=\"size-4 text-[var(--uai-accent)] motion-safe:animate-spin\"\n              aria-hidden=\"true\"\n            />\n          ) : (\n            <Sparkles className=\"size-4 text-[var(--uai-muted)]\" aria-hidden=\"true\" />\n          )}\n        </span>\n        <span className=\"min-w-0 flex-1\">\n          <span className=\"block text-sm font-medium\">{title}</span>\n          <span className=\"block truncate text-xs text-[var(--uai-muted)]\">{summary}</span>\n        </span>\n        {duration ? (\n          <span className=\"rounded-full border border-[var(--uai-border)] px-2 py-0.5 font-mono text-[11px] tabular-nums text-[var(--uai-muted)]\">\n            {duration}\n          </span>\n        ) : null}\n        <ChevronDown\n          className={cn(\n            \"size-4 text-[var(--uai-muted)] transition-transform\",\n            open && \"rotate-180\",\n          )}\n          aria-hidden=\"true\"\n        />\n      </button>\n      {open ? (\n        <div id={contentId} className=\"border-t border-[var(--uai-border)] px-4 py-3\">\n          {steps.length > 0 ? (\n            <ol className=\"space-y-2 text-sm text-[var(--uai-muted)]\">\n              {steps.map((step, index) => (\n                <li key={step} className=\"flex gap-3\">\n                  <span className=\"mt-1.5 size-1.5 shrink-0 rounded-full bg-[var(--uai-border-strong)]\" />\n                  <span>\n                    <span className=\"sr-only\">Step {index + 1}: </span>\n                    {step}\n                  </span>\n                </li>\n              ))}\n            </ol>\n          ) : (\n            <p className=\"text-sm text-[var(--uai-muted)]\">No reasoning steps are available.</p>\n          )}\n        </div>\n      ) : null}\n    </section>\n  );\n}\n",
+      "type": "registry:ui",
+      "target": "@ui/uai/thinking.tsx"
+    }
+  ],
+  "categories": [
+    "ai",
+    "feedback"
+  ],
+  "type": "registry:ui"
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "approval-card",
+  "title": "Approval Card",
+  "description": "A focused decision surface for actions that need explicit approval.",
+  "dependencies": [
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "http://localhost:3000/r/uai-theme.json",
+    "http://localhost:3000/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/approval-card.tsx",
+      "content": "\"use client\";\n\nimport { Check, RotateCcw, X } from \"lucide-react\";\nimport { type ComponentProps, useState } from \"react\";\n\nimport { cn } from \"@/lib/uai-utils\";\n\nexport type ApprovalDecision = \"approved\" | \"rejected\";\n\nexport type ApprovalCardProps = Omit<ComponentProps<\"section\">, \"title\"> & {\n  title: string;\n  description?: string;\n  approveLabel?: string;\n  rejectLabel?: string;\n  onDecision?: (decision: ApprovalDecision) => void;\n};\n\nexport function ApprovalCard({\n  title,\n  description,\n  approveLabel = \"Approve\",\n  rejectLabel = \"Reject\",\n  onDecision,\n  className,\n  ...props\n}: ApprovalCardProps) {\n  const [decision, setDecision] = useState<ApprovalDecision | null>(null);\n\n  const decide = (nextDecision: ApprovalDecision) => {\n    setDecision(nextDecision);\n    onDecision?.(nextDecision);\n  };\n\n  return (\n    <section\n      className={cn(\n        \"rounded-xl border border-[var(--uai-border)] bg-[var(--uai-surface)] p-4 text-[var(--uai-text)]\",\n        className,\n      )}\n      aria-live=\"polite\"\n      {...props}\n    >\n      <div className=\"flex items-start gap-3\">\n        <span className=\"mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg border border-[var(--uai-border)] bg-[var(--uai-surface-raised)]\">\n          {decision === \"approved\" ? (\n            <Check className=\"size-4 text-[var(--uai-success)]\" aria-hidden=\"true\" />\n          ) : decision === \"rejected\" ? (\n            <X className=\"size-4 text-[var(--uai-danger)]\" aria-hidden=\"true\" />\n          ) : (\n            <span className=\"size-2 rounded-full bg-[var(--uai-warning)]\" aria-hidden=\"true\" />\n          )}\n        </span>\n        <div className=\"min-w-0 flex-1\">\n          <h3 className=\"text-sm font-medium\">{title}</h3>\n          {description ? (\n            <p className=\"mt-1 max-w-[62ch] text-sm leading-5 text-[var(--uai-muted)]\">\n              {description}\n            </p>\n          ) : null}\n        </div>\n      </div>\n\n      <div className=\"mt-4 flex flex-wrap items-center justify-end gap-2\">\n        {decision ? (\n          <>\n            <span className=\"mr-auto text-xs text-[var(--uai-muted)]\">\n              {decision === \"approved\" ? \"Approved\" : \"Rejected\"}\n            </span>\n            <button\n              type=\"button\"\n              className=\"inline-flex h-9 items-center gap-2 rounded-lg border border-[var(--uai-border)] px-3 text-sm outline-none transition-colors hover:bg-[var(--uai-surface-raised)] focus-visible:ring-2 focus-visible:ring-[var(--uai-accent)]\"\n              onClick={() => setDecision(null)}\n            >\n              <RotateCcw className=\"size-3.5\" aria-hidden=\"true\" />\n              Reset\n            </button>\n          </>\n        ) : (\n          <>\n            <button\n              type=\"button\"\n              className=\"h-9 rounded-lg border border-[var(--uai-border)] px-3 text-sm outline-none transition-colors hover:bg-[var(--uai-surface-raised)] focus-visible:ring-2 focus-visible:ring-[var(--uai-accent)]\"\n              onClick={() => decide(\"rejected\")}\n            >\n              {rejectLabel}\n            </button>\n            <button\n              type=\"button\"\n              className=\"h-9 rounded-lg bg-[var(--uai-accent)] px-3 text-sm font-medium text-[var(--uai-accent-foreground)] outline-none transition-[filter] hover:brightness-110 focus-visible:ring-2 focus-visible:ring-[var(--uai-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uai-surface)]\"\n              onClick={() => decide(\"approved\")}\n            >\n              {approveLabel}\n            </button>\n          </>\n        )}\n      </div>\n    </section>\n  );\n}\n",
+      "type": "registry:ui",
+      "target": "@ui/uai/approval-card.tsx"
+    }
+  ],
+  "categories": [
+    "ai",
+    "feedback"
+  ],
+  "type": "registry:ui"
+}

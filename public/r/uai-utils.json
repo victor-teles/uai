@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "uai-utils",
+  "title": "Uai Utilities",
+  "description": "A small class-name merge utility shared by Uai components.",
+  "dependencies": [
+    "clsx",
+    "tailwind-merge"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/lib/uai-utils.ts",
+      "content": "import { type ClassValue, clsx } from \"clsx\";\nimport { twMerge } from \"tailwind-merge\";\n\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs));\n}\n",
+      "type": "registry:lib",
+      "target": "@lib/uai-utils.ts"
+    }
+  ],
+  "categories": [
+    "utility"
+  ],
+  "type": "registry:lib"
+}

@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-14T23:00:00Z",
+  "title": "Design System: Uai",
+  "extensions": {
+    "colorMeta": {
+      "accent-dark": {
+        "role": "primary",
+        "displayName": "Cobalt Signal",
+        "canonical": "oklch(0.64 0.19 257)",
+        "tonalRamp": [
+          "oklch(0.15 0.08 257)",
+          "oklch(0.27 0.12 257)",
+          "oklch(0.39 0.16 257)",
+          "oklch(0.51 0.19 257)",
+          "oklch(0.63 0.19 257)",
+          "oklch(0.75 0.15 257)",
+          "oklch(0.87 0.08 257)",
+          "oklch(0.95 0.03 257)"
+        ]
+      },
+      "canvas-dark": {
+        "role": "neutral",
+        "displayName": "Graphite Canvas",
+        "canonical": "oklch(0.145 0.006 255)",
+        "tonalRamp": [
+          "oklch(0.10 0.006 255)",
+          "oklch(0.15 0.006 255)",
+          "oklch(0.22 0.007 255)",
+          "oklch(0.32 0.008 255)",
+          "oklch(0.45 0.008 255)",
+          "oklch(0.62 0.007 255)",
+          "oklch(0.80 0.005 255)",
+          "oklch(0.95 0.002 255)"
+        ]
+      },
+      "surface-dark": {
+        "role": "neutral",
+        "displayName": "Graphite Surface",
+        "canonical": "oklch(0.19 0.007 255)",
+        "tonalRamp": [
+          "oklch(0.10 0.007 255)",
+          "oklch(0.19 0.007 255)",
+          "oklch(0.29 0.008 255)",
+          "oklch(0.40 0.008 255)",
+          "oklch(0.53 0.007 255)",
+          "oklch(0.67 0.006 255)",
+          "oklch(0.82 0.004 255)",
+          "oklch(0.95 0.002 255)"
+        ]
+      },
+      "border-dark": {
+        "role": "neutral",
+        "displayName": "Hairline Border",
+        "canonical": "oklch(0.29 0.01 255)",
+        "tonalRamp": [
+          "oklch(0.12 0.01 255)",
+          "oklch(0.20 0.01 255)",
+          "oklch(0.29 0.01 255)",
+          "oklch(0.40 0.01 255)",
+          "oklch(0.53 0.009 255)",
+          "oklch(0.67 0.007 255)",
+          "oklch(0.82 0.004 255)",
+          "oklch(0.95 0.002 255)"
+        ]
+      },
+      "text-dark": {
+        "role": "neutral",
+        "displayName": "Primary Ink",
+        "canonical": "oklch(0.965 0.003 255)",
+        "tonalRamp": [
+          "oklch(0.15 0.003 255)",
+          "oklch(0.27 0.003 255)",
+          "oklch(0.39 0.003 255)",
+          "oklch(0.51 0.003 255)",
+          "oklch(0.63 0.003 255)",
+          "oklch(0.75 0.003 255)",
+          "oklch(0.87 0.003 255)",
+          "oklch(0.965 0.003 255)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "title": {
+        "displayName": "Component Title",
+        "purpose": "Names the selected registry item."
+      },
+      "body": {
+        "displayName": "Workbench Body",
+        "purpose": "Describes components and interactive fields."
+      },
+      "navigation": {
+        "displayName": "Shell Navigation",
+        "purpose": "Labels the Components destination, workbench tabs, and dense catalog controls."
+      },
+      "label": {
+        "displayName": "Catalog Label",
+        "purpose": "Names categories, dock controls, and component states."
+      },
+      "detail": {
+        "displayName": "Disclosure Detail",
+        "purpose": "Carries Usage and Accessibility explanations and lists."
+      },
+      "mono": {
+        "displayName": "Command Mono",
+        "purpose": "Shows install commands, shortcuts, and machine-facing values."
+      },
+      "code": {
+        "displayName": "Highlighted TSX",
+        "purpose": "Shows Shiki-highlighted source in Code and Usage."
+      }
+    },
+    "shadows": [
+      {
+        "name": "prompt-inset",
+        "value": "inset 0 1px 0 color-mix(in oklab, var(--uai-text) 6%, transparent)",
+        "purpose": "Adds a restrained top highlight inside the composer bar."
+      },
+      {
+        "name": "prompt-card",
+        "value": "0 1px 2px color-mix(in oklab, black 6%, transparent), 0 8px 24px color-mix(in oklab, black 8%, transparent)",
+        "purpose": "Sits Prompt Composer on the canvas."
+      },
+      {
+        "name": "floating-menu",
+        "value": "0 0 0 1px var(--uai-border-strong), 0 10px 28px color-mix(in oklab, black 42%, transparent)",
+        "purpose": "Gives plus and model menus a visible rounded outline and offset depth."
+      },
+      {
+        "name": "fixed-dock-depth",
+        "value": "0 -18px 44px color-mix(in oklab, black 22%, transparent)",
+        "purpose": "Separates the persistent install dock from scrolling workbench content."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-fast",
+        "value": "140ms ease-out",
+        "purpose": "Updates catalog hover, border, and color states."
+      },
+      {
+        "name": "menu-pop",
+        "value": "180ms cubic-bezier(0.23, 1, 0.32, 1)",
+        "purpose": "Opens composer menus from scale(0.96). Disabled when reduced motion is requested."
+      },
+      {
+        "name": "details-height",
+        "value": "220ms ease-out",
+        "purpose": "Expands and collapses the install details drawer."
+      },
+      {
+        "name": "details-opacity",
+        "value": "160ms ease-out",
+        "purpose": "Fades install details in and out alongside the height transition."
+      },
+      {
+        "name": "stream-dot",
+        "value": "1.1s ease-in-out infinite alternate",
+        "purpose": "Shows active response generation and stops for reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "catalog-collapse",
+        "value": "900px"
+      },
+      {
+        "name": "compact",
+        "value": "640px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Active Catalog Item",
+      "kind": "nav",
+      "refersTo": "catalog-item-active",
+      "description": "Marks the component shown in the workbench.",
+      "html": "<button class=\"ds-catalog-item\">Prompt Composer<span></span></button>",
+      "css": ".ds-catalog-item { width: 280px; height: 34px; display: flex; align-items: center; justify-content: space-between; padding: 0 8px; border: 1px solid oklch(0.64 0.19 257); border-radius: 6px; background: color-mix(in oklab, oklch(0.64 0.19 257) 8%, oklch(0.19 0.007 255)); color: oklch(0.965 0.003 255); font: 520 12.8px/1.4 Geist, sans-serif; } .ds-catalog-item span { width: 6px; height: 6px; border-radius: 999px; background: oklch(0.64 0.19 257); } .ds-catalog-item:focus-visible { outline: 2px solid oklch(0.64 0.19 257); outline-offset: 3px; }"
+    },
+    {
+      "name": "Preview Tab",
+      "kind": "nav",
+      "description": "Switches between the live preview and source code.",
+      "html": "<button class=\"ds-tab\">Preview</button>",
+      "css": ".ds-tab { position: relative; height: 46px; padding: 0 4px; border: 0; background: transparent; color: oklch(0.965 0.003 255); font: 520 12px/1 Geist, sans-serif; } .ds-tab::after { position: absolute; right: 0; bottom: 0; left: 0; height: 2px; background: oklch(0.64 0.19 257); content: ''; } .ds-tab:focus-visible { outline: 2px solid oklch(0.64 0.19 257); outline-offset: 3px; }"
+    },
+    {
+      "name": "Prompt Composer",
+      "kind": "input",
+      "refersTo": "prompt-composer",
+      "description": "Compact Beautiful UI prompt bar with ghost plus, ink send, and a raised source menu.",
+      "html": "<div class=\"ds-prompt\"><button aria-label=\"Add attachments and sources\">+</button><input aria-label=\"Prompt\" placeholder=\"Write a message…\"><button aria-label=\"Send\">↑</button></div>",
+      "css": ".ds-prompt { width: 420px; display: flex; align-items: center; gap: 4px; padding: 6px; border: 1px solid oklch(0.29 0.01 255); border-radius: 14px; background: oklch(0.19 0.007 255); box-shadow: inset 0 1px 0 color-mix(in oklab, oklch(0.965 0.003 255) 6%, transparent), 0 8px 24px color-mix(in oklab, black 8%, transparent); } .ds-prompt:focus-within { border-color: oklch(0.4 0.012 255); } .ds-prompt input { min-width: 0; flex: 1; height: 28px; border: 0; background: transparent; color: oklch(0.965 0.003 255); font: 400 13px/18px Geist, sans-serif; outline: 0; } .ds-prompt button:first-child { width: 28px; height: 28px; border: 0; border-radius: 8px; background: transparent; color: oklch(0.68 0.012 255); } .ds-prompt button:last-child { width: 28px; height: 28px; border: 0; border-radius: 8px; background: oklch(0.965 0.003 255); color: oklch(0.19 0.007 255); } .ds-prompt button:focus-visible { outline: 2px solid oklch(0.4 0.012 255); outline-offset: 2px; }"
+    },
+    {
+      "name": "Install Details Toggle",
+      "kind": "button",
+      "refersTo": "install-details-toggle",
+      "description": "Opens the in-place Usage and Accessibility disclosure from the fixed dock.",
+      "html": "<button class=\"ds-install-toggle\" aria-expanded=\"false\"><span class=\"ds-install-label\"><span aria-hidden=\"true\">⌁</span>Install</span><span class=\"ds-details-label\">Show details <span aria-hidden=\"true\">⌃</span></span></button>",
+      "css": ".ds-install-toggle { width: 420px; min-height: 36px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 10px; border: 0; border-radius: 7px; background: transparent; color: oklch(0.68 0.012 255); font: 520 11.52px/1.4 Geist, sans-serif; text-align: left; transition: background 140ms ease-out, color 140ms ease-out; } .ds-install-toggle:hover { background: oklch(0.225 0.008 255); color: oklch(0.965 0.003 255); } .ds-install-toggle:focus-visible { outline: 2px solid oklch(0.64 0.19 257); outline-offset: 3px; } .ds-install-label, .ds-details-label { display: flex; align-items: center; gap: 8px; } .ds-install-label { color: oklch(0.965 0.003 255); font-weight: 560; } .ds-install-label > span { color: oklch(0.64 0.19 257); }"
+    },
+    {
+      "name": "Install Command",
+      "kind": "custom",
+      "refersTo": "install-command",
+      "description": "Shows the source-install command with an attached copy action.",
+      "html": "<div class=\"ds-install\"><code>bunx shadcn@latest add http://localhost:3000/r/prompt-composer.json</code><button aria-label=\"Copy install command\">Copy</button></div>",
+      "css": ".ds-install { width: 470px; height: 36px; display: flex; align-items: stretch; overflow: hidden; border: 1px solid oklch(0.29 0.01 255); border-radius: 8px; background: oklch(0.19 0.007 255); } .ds-install code { min-width: 0; flex: 1; overflow: auto; padding: 11px 13px; color: oklch(0.68 0.012 255); font: 400 11.2px/1 'Geist Mono', monospace; white-space: nowrap; } .ds-install button { width: 52px; border: 0; border-left: 1px solid oklch(0.29 0.01 255); background: transparent; color: oklch(0.68 0.012 255); } .ds-install button:hover { background: oklch(0.225 0.008 255); color: oklch(0.965 0.003 255); } .ds-install button:focus-visible { outline: 2px solid oklch(0.64 0.19 257); outline-offset: -3px; }"
+    },
+    {
+      "name": "Highlighted TSX Code",
+      "kind": "custom",
+      "refersTo": "highlighted-code",
+      "description": "Represents the Shiki-highlighted TSX used in both Code and Usage.",
+      "html": "<pre class=\"ds-code\"><code><span class=\"ds-keyword\">import</span> { PromptComposer } <span class=\"ds-keyword\">from</span> <span class=\"ds-string\">\"@/components/ui/uai/prompt-composer\"</span>\n\n<span class=\"ds-keyword\">export function</span> <span class=\"ds-function\">AskUai</span>() {\n  <span class=\"ds-keyword\">return</span> &lt;<span class=\"ds-tag\">PromptComposer</span> /&gt;\n}</code></pre>",
+      "css": ".ds-code { width: 620px; max-width: 100%; min-height: 220px; overflow: auto; margin: 0; padding: 24px; border: 1px solid oklch(0.29 0.01 255); border-radius: 8px; background: oklch(0.19 0.007 255); color: oklch(0.965 0.003 255); font: 400 11.84px/1.7 'Geist Mono', monospace; white-space: pre; } .ds-keyword { color: #ff7b8b; } .ds-string { color: #8fc5ff; } .ds-function { color: #c8a0ff; } .ds-tag { color: #79b8ff; } .ds-code:focus-visible { outline: 2px solid oklch(0.64 0.19 257); outline-offset: 3px; }"
+    },
+    {
+      "name": "Expanded Details Drawer",
+      "kind": "card",
+      "description": "Keeps Usage and Accessibility attached to the fixed install dock and stacks them on mobile.",
+      "html": "<div class=\"ds-details\"><section><h2>Usage</h2><p>Import the component and keep its source inside your application.</p><pre><span>import</span> { PromptComposer } from \"@/components/ui/uai/prompt-composer\"</pre></section><section><h2>Accessibility</h2><p>Each registry item ships with its interaction semantics intact.</p><ul><li>✓ Persistent accessible label</li><li>✓ Named icon-only actions</li></ul></section></div>",
+      "css": ".ds-details { width: 900px; max-width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; padding: 24px 28px 28px; border-top: 1px solid oklch(0.29 0.01 255); border-bottom: 1px solid oklch(0.29 0.01 255); background: color-mix(in oklab, oklch(0.145 0.006 255) 92%, oklch(0.19 0.007 255)); color: oklch(0.965 0.003 255); font-family: Geist, sans-serif; } .ds-details section { min-width: 0; } .ds-details h2 { margin: 0; font-size: 13.12px; line-height: 1.4; } .ds-details p, .ds-details li { color: oklch(0.68 0.012 255); font-size: 11.84px; line-height: 1.5; } .ds-details pre { max-width: 100%; overflow: auto; padding: 12px 16px; border: 1px solid oklch(0.29 0.01 255); border-radius: 8px; background: oklch(0.19 0.007 255); color: oklch(0.965 0.003 255); font: 400 11.84px/1.7 'Geist Mono', monospace; } .ds-details pre span { color: #ff7b8b; } .ds-details ul { padding: 0; list-style: none; } @media (max-width: 640px) { .ds-details { grid-template-columns: 1fr; gap: 32px; padding-inline: 16px; } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Registry Workbench",
+    "overview": "Uai has two visual layers. The registry workbench is a precise developer tool: a dense catalog rail, graphite surfaces, and cobalt for location and focus. Distributed components are product chrome. They follow the compact Beautiful UI language: 14px surfaces, 28px ghost controls, ink send, and raised menus.",
+    "keyCharacteristics": [
+      "Dense catalog navigation with a stable 312px desktop rail.",
+      "One Components destination with no global documentation search or parallel docs shell.",
+      "Flat graphite workbench surfaces separated by hairline borders.",
+      "Compact type with mono reserved for commands, shortcuts, and code.",
+      "Sparse cobalt signals for workbench state. Ink send on Prompt Composer.",
+      "Five real registry items, highlighted TSX, install commands, and accessibility notes in one workbench."
+    ],
+    "rules": [
+      {
+        "name": "The Sparse Signal Rule",
+        "body": "Use cobalt only for workbench state and focus. Do not use it as a decorative fill.",
+        "section": "colors"
+      },
+      {
+        "name": "The Ink Send Rule",
+        "body": "Prompt Composer send uses Primary Ink on Graphite Surface when the field can submit. Idle send uses Border Strong. Do not paint send cobalt.",
+        "section": "colors"
+      },
+      {
+        "name": "The Utility Type Rule",
+        "body": "Reserve mono for commands, code, shortcuts, and the Uai wordmark.",
+        "section": "typography"
+      },
+      {
+        "name": "The Divider-Led Rule",
+        "body": "Use borders and tonal changes before adding elevation. Reserve wide shadows for the dock and for floating menus.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Floating Menu Rule",
+        "body": "Menus open from the control that spawned them. They use 14px corners, 4px padding, a visible outline, and a pop-in from scale(0.96) in 180ms cubic-bezier(0.23, 1, 0.32, 1).",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do preserve the 312px catalog and flexible workbench split on desktop.",
+      "Do keep the product focused on its single Components destination and verified five-item catalog.",
+      "Do use hairline dividers to create hierarchy.",
+      "Do keep component states visible together when they help comparison.",
+      "Do keep Usage and Accessibility attached to the install dock as an accessible disclosure.",
+      "Do use highlighted TSX for both source views and Usage examples.",
+      "Do keep cobalt rare and workbench-specific.",
+      "Do use ink send, 14px composer corners, and 28px ghost controls on Prompt Composer.",
+      "Do give plus and model menus a visible rounded outline and a compact width."
+    ],
+    "donts": [
+      "Don't replace the workbench with a marketing hero or card grid.",
+      "Don't add gradients, decorative illustrations, or large ambient shadows.",
+      "Don't use fictional registry inventory to create density.",
+      "Don't reintroduce documentation routes, a global docs search, or a second content shell.",
+      "Don't let command or code content create page-level horizontal overflow.",
+      "Don't make closed disclosure content focusable or available to pointer interaction.",
+      "Don't use mono for general prose.",
+      "Don't paint Prompt Composer send cobalt.",
+      "Don't ship a square floating menu or a full-bleed slab over the preview."
+    ]
+  }
+}

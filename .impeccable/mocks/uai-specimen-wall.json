@@ -1,0 +1,7 @@
+{
+  "name": "Specimen wall",
+  "image": "uai-specimen-wall.png",
+  "approved": true,
+  "approval": "Primary composition, combined with the documentation workbench's install command and Task Flow depth.",
+  "prompt": "Create a high-fidelity 1536 by 1024 desktop homepage for the Uai open-code component registry. Use Beautiful UI as the binding visual-language reference and shadcn as the information-architecture reference. Build a restrained top navigation, an asymmetric 35/65 opening with the headline Built to be opened, and a continuous specimen wall of thinking, approval, task, and prompt patterns. Thread a thin cobalt state rail through the examples as the signature. Begin the next fold with Own every line and a live preview beside source code. Use near-black graphite materials, compact type, micro-labels, subtle one-pixel borders, and precise state color. Avoid gradients, glow, glass, giant centered heroes, bento grids, stock dashboards, photography, 3D, abstract blobs, and watermarks."
+}

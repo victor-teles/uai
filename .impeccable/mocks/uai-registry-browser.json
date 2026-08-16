@@ -1,0 +1,6 @@
+{
+  "name": "Registry browser",
+  "image": "uai-registry-browser.png",
+  "approved": false,
+  "prompt": "Create a high-fidelity 1536 by 1024 desktop component-registry landing page for Uai. Use Beautiful UI as the binding visual-language reference and shadcn as the information-architecture reference. Build a compact top bar and a 25/75 split workspace with a dense searchable component index on the left and a large Prompt Bar preview on the right. Show several useful component states on one continuous surface, a sticky shadcn install strip, and the beginning of Usage and Accessibility documentation. Use a graphite dark system, off-white text, muted gray copy, thin borders, compact sans type, mono code, and one cobalt accent. Avoid gradients, glow, glass, huge headlines, bento grids, analytics, rainbow tags, photography, 3D, and watermarks."
+}

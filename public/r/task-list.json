@@ -1,0 +1,26 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "task-list",
+  "title": "Task List",
+  "description": "A compact ordered list for complete, active, and pending work.",
+  "dependencies": [
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "http://localhost:3000/r/uai-theme.json",
+    "http://localhost:3000/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/task-list.tsx",
+      "content": "import { Check, ChevronRight, Circle, LoaderCircle } from \"lucide-react\";\nimport type { ComponentProps } from \"react\";\n\nimport { cn } from \"@/lib/uai-utils\";\n\nexport type TaskStatus = \"complete\" | \"active\" | \"pending\";\n\nexport type Task = {\n  id: string;\n  label: string;\n  status: TaskStatus;\n  detail?: string;\n};\n\nexport type TaskListProps = ComponentProps<\"ol\"> & {\n  tasks: readonly Task[];\n};\n\nconst statusCopy: Record<TaskStatus, string> = {\n  complete: \"Complete\",\n  active: \"In progress\",\n  pending: \"Pending\",\n};\n\nfunction StatusIcon({ status }: { status: TaskStatus }) {\n  if (status === \"complete\") {\n    return <Check className=\"size-4 text-[var(--uai-success)]\" aria-hidden=\"true\" />;\n  }\n\n  if (status === \"active\") {\n    return (\n      <LoaderCircle\n        className=\"size-4 text-[var(--uai-accent)] motion-safe:animate-spin\"\n        aria-hidden=\"true\"\n      />\n    );\n  }\n\n  return <Circle className=\"size-4 text-[var(--uai-muted)]\" aria-hidden=\"true\" />;\n}\n\nexport function TaskList({ tasks, className, ...props }: TaskListProps) {\n  return (\n    <ol\n      className={cn(\n        \"divide-y divide-[var(--uai-border)] overflow-hidden rounded-xl border border-[var(--uai-border)] bg-[var(--uai-surface)] text-[var(--uai-text)]\",\n        className,\n      )}\n      {...props}\n    >\n      {tasks.map((task) => (\n        <li key={task.id} className=\"flex min-h-14 items-center gap-3 px-4\">\n          <StatusIcon status={task.status} />\n          <span className=\"min-w-0 flex-1\">\n            <span className=\"block truncate text-sm font-medium\">{task.label}</span>\n            {task.detail ? (\n              <span className=\"block truncate text-xs text-[var(--uai-muted)]\">{task.detail}</span>\n            ) : null}\n          </span>\n          <span\n            className={cn(\n              \"rounded-full border px-2 py-0.5 text-[11px]\",\n              task.status === \"complete\" &&\n                \"border-[color-mix(in_oklab,var(--uai-success)_35%,transparent)] text-[var(--uai-success)]\",\n              task.status === \"active\" &&\n                \"border-[color-mix(in_oklab,var(--uai-accent)_35%,transparent)] text-[var(--uai-accent)]\",\n              task.status === \"pending\" && \"border-[var(--uai-border)] text-[var(--uai-muted)]\",\n            )}\n          >\n            {statusCopy[task.status]}\n          </span>\n          <ChevronRight className=\"size-4 text-[var(--uai-muted)]\" aria-hidden=\"true\" />\n        </li>\n      ))}\n    </ol>\n  );\n}\n",
+      "type": "registry:ui",
+      "target": "@ui/uai/task-list.tsx"
+    }
+  ],
+  "categories": [
+    "ai",
+    "data-display"
+  ],
+  "type": "registry:ui"
+}

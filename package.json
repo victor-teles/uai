@@ -1,0 +1,41 @@
+{
+  "name": "uai",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "bun run registry:build && next build --webpack",
+    "dev": "next dev --webpack",
+    "format": "biome format --write .",
+    "lint": "biome check .",
+    "registry:build": "shadcn build registry.json",
+    "start": "next start",
+    "test": "bun run registry:build && bun test",
+    "typecheck": "next typegen && tsc --noEmit"
+  },
+  "dependencies": {
+    "@fontsource-variable/geist": "^5.2.8",
+    "@fontsource-variable/geist-mono": "^5.2.8",
+    "clsx": "^2.1.1",
+    "fumadocs-core": "16.14.3",
+    "fumadocs-ui": "npm:@fumadocs/base-ui@16.14.3",
+    "lucide-react": "^1.28.0",
+    "next": "16.3.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "tailwind-merge": "^3.5.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.7",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/bun": "latest",
+    "@types/mdx": "^2.0.14",
+    "@types/node": "^26.1.2",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "postcss": "^8.5.25",
+    "shadcn": "latest",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.3"
+  }
+}

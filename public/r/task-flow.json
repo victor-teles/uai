@@ -1,0 +1,30 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "task-flow",
+  "title": "Task Flow",
+  "description": "A composed AI workflow with reasoning, approval, task, and prompt stages.",
+  "dependencies": [
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "http://localhost:3000/r/thinking.json",
+    "http://localhost:3000/r/approval-card.json",
+    "http://localhost:3000/r/task-list.json",
+    "http://localhost:3000/r/prompt-composer.json",
+    "http://localhost:3000/r/uai-theme.json",
+    "http://localhost:3000/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/task-flow.tsx",
+      "content": "\"use client\";\n\nimport { Check, MessageSquare, Sparkles, Workflow } from \"lucide-react\";\nimport type { ComponentProps } from \"react\";\n\nimport { ApprovalCard, type ApprovalDecision } from \"@/components/ui/uai/approval-card\";\nimport { PromptComposer } from \"@/components/ui/uai/prompt-composer\";\nimport { type Task, TaskList } from \"@/components/ui/uai/task-list\";\nimport { Thinking } from \"@/components/ui/uai/thinking\";\nimport { cn } from \"@/lib/uai-utils\";\n\nexport type TaskFlowData = {\n  thinking: {\n    summary: string;\n    duration?: string;\n    steps: readonly string[];\n  };\n  approval: {\n    title: string;\n    description?: string;\n  };\n  tasks: readonly Task[];\n  composer?: {\n    placeholder?: string;\n    modelLabel?: string;\n  };\n};\n\nexport type TaskFlowProps = ComponentProps<\"section\"> & {\n  data: TaskFlowData;\n  onDecision?: (decision: ApprovalDecision) => void;\n  onPromptSubmit?: (prompt: string) => void | Promise<void>;\n};\n\nconst stages = [\n  { label: \"Thinking\", icon: Sparkles },\n  { label: \"Approval\", icon: Check },\n  { label: \"Tasks\", icon: Workflow },\n  { label: \"Prompt\", icon: MessageSquare },\n] as const;\n\nexport function TaskFlow({ data, onDecision, onPromptSubmit, className, ...props }: TaskFlowProps) {\n  const content = [\n    <Thinking\n      key=\"thinking\"\n      summary={data.thinking.summary}\n      duration={data.thinking.duration}\n      steps={data.thinking.steps}\n    />,\n    <ApprovalCard\n      key=\"approval\"\n      title={data.approval.title}\n      description={data.approval.description}\n      onDecision={onDecision}\n    />,\n    <TaskList key=\"tasks\" tasks={data.tasks} />,\n    <PromptComposer\n      key=\"prompt\"\n      placeholder={data.composer?.placeholder}\n      modelLabel={data.composer?.modelLabel}\n      onSubmit={onPromptSubmit}\n    />,\n  ];\n\n  return (\n    <section\n      className={cn(\n        \"rounded-xl border border-[var(--uai-border)] bg-[var(--uai-canvas)] p-3 text-[var(--uai-text)] sm:p-4\",\n        className,\n      )}\n      aria-label=\"Task flow\"\n      {...props}\n    >\n      <ol className=\"relative space-y-3 before:absolute before:bottom-8 before:left-[17px] before:top-8 before:w-px before:bg-[var(--uai-accent)] before:opacity-60 sm:before:left-[120px]\">\n        {stages.map((stage, index) => {\n          const Icon = stage.icon;\n\n          return (\n            <li\n              key={stage.label}\n              className=\"relative grid gap-2 sm:grid-cols-[104px_minmax(0,1fr)] sm:gap-5\"\n            >\n              <div className=\"relative z-10 flex items-center gap-2 bg-[var(--uai-canvas)] py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--uai-muted)] sm:justify-end sm:text-right\">\n                <span\n                  data-active={index === 0 ? \"true\" : undefined}\n                  className={cn(\n                    \"grid size-8 shrink-0 place-items-center rounded-lg border border-[var(--uai-border)] bg-[var(--uai-surface)] sm:order-2\",\n                    index === 0 && \"border-[var(--uai-accent)] text-[var(--uai-accent)]\",\n                  )}\n                >\n                  <Icon className=\"size-3.5\" aria-hidden=\"true\" />\n                </span>\n                <span>{stage.label}</span>\n              </div>\n              <div className=\"min-w-0\">{content[index]}</div>\n            </li>\n          );\n        })}\n      </ol>\n    </section>\n  );\n}\n",
+      "type": "registry:component",
+      "target": "@components/uai/task-flow.tsx"
+    }
+  ],
+  "categories": [
+    "ai",
+    "workflow"
+  ],
+  "type": "registry:block"
+}

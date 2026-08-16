@@ -1,0 +1,51 @@
+{
+  "title": "Choose Uai's documentation composition",
+  "question": "Select the structure that should carry Uai's documentation and registry. You can also combine details or request a revision.",
+  "options": [
+    {
+      "id": "docs-workbench",
+      "label": "Documentation workbench",
+      "kicker": "OPTION A",
+      "lineage": "shadcn documentation plus a live AI task surface",
+      "thesis": "The documentation page itself behaves like a focused product workbench.",
+      "palette": ["#0b0c0e", "#181a1d", "#2a2d32", "#f4f4f5", "#3478f6"],
+      "materials": ["graphite panels", "fine interface hairlines", "compact code strips"],
+      "viewport": "A narrow documentation rail opens into one dominant live Task Flow demonstration and its install command.",
+      "risk": "The deep sidebar makes the homepage feel closer to a reference page than a welcoming registry entrance.",
+      "sketch": ".impeccable/mocks/uai-docs-workbench.png"
+    },
+    {
+      "id": "registry-browser",
+      "label": "Registry browser",
+      "kicker": "OPTION B",
+      "lineage": "component catalog plus continuous state documentation",
+      "thesis": "Discovery, preview, installation, and accessibility share one dense workspace.",
+      "case": "Strongest for developers who arrive knowing which component they need.",
+      "palette": ["#0b0c0e", "#181a1d", "#2a2d32", "#f4f4f5", "#3478f6"],
+      "materials": ["continuous registry canvas", "state rows", "sticky command strip"],
+      "viewport": "A searchable component index sits beside a large selected-component preview with several useful states.",
+      "risk": "The catalog-first opening communicates utility before it communicates Uai's point of view.",
+      "sketch": ".impeccable/mocks/uai-registry-browser.png"
+    },
+    {
+      "id": "specimen-wall",
+      "label": "Specimen wall",
+      "kicker": "RECOMMENDED",
+      "lineage": "Beautiful UI specimens plus shadcn open-code principles",
+      "thesis": "A cobalt state rail turns the opening into one living component system rather than a marketing collage.",
+      "case": "Best balance of product identity, live examples, and a clear path into the registry.",
+      "palette": ["#0b0c0e", "#181a1d", "#2a2d32", "#f4f4f5", "#3478f6"],
+      "materials": [
+        "continuous specimen surface",
+        "cobalt state rail",
+        "preview and source pairing"
+      ],
+      "viewport": "A restrained introduction occupies one third while four connected AI-native patterns dominate the remaining canvas.",
+      "risk": "The signature rail must remain functional in documentation pages or it becomes decorative branding.",
+      "sketch": ".impeccable/mocks/uai-specimen-wall.png"
+    }
+  ],
+  "reroll": false,
+  "canon": false,
+  "steer": true
+}
