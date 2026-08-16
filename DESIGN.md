@@ -116,6 +116,20 @@ components:
     textColor: "{colors.text-dark}"
     rounded: "{rounded.composer}"
     padding: "4px"
+  thinking:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.composer}"
+  approval-card:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.composer}"
+    padding: "16px"
+  approval-action:
+    backgroundColor: "{colors.text-dark}"
+    textColor: "{colors.surface-dark}"
+    rounded: "{rounded.control}"
+    height: "32px"
   install-command:
     backgroundColor: "{colors.surface-dark}"
     textColor: "{colors.muted-dark}"
@@ -152,6 +166,8 @@ Graphite surfaces and dotted hairline dividers create workbench structure withou
 - Numbered titles, 16px preview stages, and floating inverted variant pills.
 - Compact type with mono reserved for commands, shortcuts, and code.
 - Cobalt reserved for focus. Ink send on Prompt Composer.
+- User-controlled Thinking disclosure with chronological, observable activity evidence.
+- Semantic, evidence-led approval states with typed confirmation for critical actions.
 - Five real registry items, highlighted TSX, install commands, and accessibility notes in one workbench.
 
 ## Colors
@@ -215,12 +231,10 @@ Spacing follows a compact 4px foundation. Common gaps use 8px, 12px, 16px, 24px,
 
 ## Elevation & Depth
 
-Uai is flat by default. Tonal surface changes and one-pixel borders create depth. Prompt Composer uses one subtle inset highlight on the bar. Two lifted exceptions exist: the fixed install dock, and floating composer menus.
+Uai is flat by default. Tonal surface changes and one-pixel borders create depth. Prompt Composer cards stay flat and border-defined. Two lifted exceptions exist: the fixed install dock, and floating composer menus.
 
 ### Shadow Vocabulary
 
-- **Prompt inset** (`inset 0 1px 0 color-mix(in oklab, var(--uai-text) 6%, transparent)`): A restrained top highlight inside the composer bar.
-- **Prompt card** (`0 1px 2px color-mix(in oklab, black 6%, transparent), 0 8px 24px color-mix(in oklab, black 8%, transparent)`): Sits the composer on canvas.
 - **Floating menu** (`0 0 0 1px var(--uai-border-strong), 0 10px 28px color-mix(in oklab, black 42%, transparent)`): A 1px outline that follows the 14px radius, plus an offset drop shadow. The outline is the rounded border. Do not ship a square menu.
 - **Fixed dock depth** (`0 -18px 44px color-mix(in oklab, black 22%, transparent)`): Separates persistent chrome from scrolling workbench content.
 
@@ -270,17 +284,66 @@ Borders are one pixel. Workbench focused fields may add a cobalt inset line. Pro
 
 Compact product chrome for writing, attaching, choosing a model, and sending. This is the visual authority for installed AI input, not the workbench prompt mock. Plus, model, and send stay the same across variants.
 
-- **Rounded:** 14px card. Graphite Surface. 6px padding. Hairline border. Inset highlight plus a short offset shadow. 28px controls with 8px corners.
+- **Rounded:** 14px card. Graphite Surface. 6px padding. Hairline border with no card shadow. 28px controls with 8px corners.
 - **Pill:** Full pill on one line, 24px when the field expands or attachments appear. Same 28px controls with pill corners.
 - **Ghost:** No fill, no shadow, transparent hairline at rest. For docks and custom shells. Focus and invalid restore a 14px hairline. 28px controls with 8px corners.
 - **Compact:** 12px card, 4px padding, 24px controls with 6px corners. Field type is 12.5px / 16px. Model label is 11px. Use in sidebars.
 - **Row:** One line of controls: ghost plus, textarea, 12px model label (11px in compact), ink send. When the prompt wraps, the textarea takes the full width and the controls move to a second row.
 - **Plus:** Ghost control. No border. Hover uses Raised Graphite. Open state rotates the icon 45 degrees and keeps the raised fill.
 - **Send:** Enabled and busy use Primary Ink fill with Graphite Surface glyph. Idle uses Border Strong fill with muted glyph. Press scale is `0.94`. Never cobalt.
-- **Menu:** 14px radius, 4px padding, 280px max for sources and 176px for models. Visible 1px outline through box-shadow. Rows stack a 12.5px name over an 11.5px description. A sliding Raised Graphite pill follows hover and focus. Menus keep this size in compact.
+- **Menu:** 14px radius, 4px padding, 280px max for sources and 176px for models. Visible 1px outline through box-shadow. Rows stack a 12.5px name over an 11.5px description. Raised Graphite marks hover and focus. Menus keep this size in compact.
 - **Focus:** Stronger hairline on the card. Caret and text selection use Primary Ink. Ghost shows the hairline only while focused.
 - **Error:** Danger border on the card. Keep the graphite surface, or the transparent ghost fill.
 - **Disabled:** Preserve structure and reduce the complete composer to 55% opacity.
+
+### Thinking
+
+An inspectable activity disclosure for live AI work and completed evidence. It describes
+observable actions without presenting private chain-of-thought.
+
+- **Surface:** Flat 14px Graphite Surface with one Hairline Border. Error changes the
+  border to Danger; other states keep the neutral border.
+- **Header:** A compact status glyph, title, explicit state label, user-safe summary,
+  total elapsed time, and disclosure chevron. Cobalt appears only on keyboard focus.
+- **States:** Thinking uses restrained motion, Complete uses Success, and Error uses
+  Danger. State meaning always appears in text as well as color and iconography.
+- **Activity:** Expanded content is a chronological, divider-led list. Update, Tool,
+  File, and Search entries pair a plain-language label with optional structured evidence
+  and per-entry elapsed time. File paths and queries wrap inside the component.
+- **Disclosure:** Users control expansion. Status updates do not collapse content or
+  replace the activity history. New live entries use a polite activity log, and reduced
+  motion removes the spinner.
+- **Empty:** Live work waits for its first activity; completed and failed work explain
+  when no activity was recorded.
+
+### Approval Card
+
+A human-in-the-loop checkpoint for consequential AI-proposed actions. It makes the
+risk, evidence, affected resources, changes, and downstream impact understandable
+before a person approves or rejects the action.
+
+- **Surface:** Flat 14px Graphite Surface with a Hairline Border and no shadow.
+  Critical risk changes the border to Danger. The card remains compact rather than
+  becoming an oversized alert.
+- **Risk:** Low, Medium, High, and Critical always appear as text with semantic
+  iconography. Color reinforces meaning but never carries it alone.
+- **Content:** Compact presents risk, action, consequence, and decisions. Detailed
+  adds a divider-led description list composed from consumer-owned `ApprovalCardDetail`
+  regions. Long names and evidence wrap within the card.
+- **States:** Ready, Submitting, Approved, Rejected, and Error are controlled by the
+  consumer. Submitting exposes busy state and disables duplicate decisions. Approved
+  and Rejected are terminal results.
+- **Critical confirmation:** Critical risk requires an explicit confirmation phrase.
+  Approval stays disabled until the exact phrase matches; rejection remains available.
+- **Actions:** Reject is a bordered secondary action. Approve uses Primary Ink on
+  Graphite Surface. Both are 32px controls with 8px corners and explicit labels. Do
+  not use cobalt as an action fill.
+- **Error:** Preserve the action context and composed evidence, announce the failure,
+  name the recovery, and keep the decision actions available for retry.
+- **Preview variants:** Demonstrate Compact, Detailed, Critical, and Error scenarios.
+  Decisions visibly progress through Submitting to their terminal result. Detailed
+  preview stages grow with their content so evidence, actions, and the variant control
+  are never clipped on mobile.
 
 ### Install command
 
@@ -321,6 +384,9 @@ Compact product chrome for writing, attaching, choosing a model, and sending. Th
 - **Do** keep cobalt rare and limited to focus.
 - **Do** use ink send, 14px composer corners, and 28px ghost controls on Prompt Composer. Use ghost for docks and compact for sidebars.
 - **Do** give plus and model menus a visible rounded outline and a compact width.
+- **Do** keep Thinking disclosure user-controlled and preserve its chronological activity history across status changes.
+- **Do** keep Approval Card risk, content density, and async status as independent dimensions.
+- **Do** require typed confirmation before a critical action can be approved.
 
 ### Don't:
 
@@ -334,3 +400,5 @@ Compact product chrome for writing, attaching, choosing a model, and sending. Th
 - **Don't** paint Prompt Composer send cobalt.
 - **Don't** give the ghost variant a card fill or drop shadow.
 - **Don't** ship a square floating menu or a full-bleed slab over the preview.
+- **Don't** present private chain-of-thought as Thinking activity; show only user-safe summaries and observable evidence.
+- **Don't** hide approval risk in color alone or let a critical action bypass confirmation.

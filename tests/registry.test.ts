@@ -50,7 +50,6 @@ describe("Uai registry", () => {
     );
 
     expect(outputs.join("\n")).not.toContain("@/registry/");
-    expect(outputs.join("\n")).toContain("@/components/ui/uai/thinking");
     expect(outputs.join("\n")).toContain("@/lib/uai-utils");
   });
 
@@ -58,6 +57,60 @@ describe("Uai registry", () => {
     const source = await Bun.file("src/registry/uai/components/prompt-composer.tsx").text();
 
     expect(source).toContain('["rounded", "pill", "ghost", "compact"]');
+    expect(source).toContain("export function PromptComposerAdd");
+    expect(source).toContain("export function PromptComposerInput");
+    expect(source).toContain("export function PromptComposerActions");
+    expect(source).toContain("export function PromptComposerSubmit");
+    expect(source).not.toContain("PromptComposerSource");
+    expect(source).not.toContain("style={{");
+    expect(source).not.toContain(".style.");
+    expect(source).not.toContain("0 8px 24px");
+  });
+
+  test("thinking ships explicit states and structured evidence", async () => {
+    const source = await Bun.file("src/registry/uai/components/thinking.tsx").text();
+
+    expect(source).toContain('["thinking", "complete", "error"]');
+    expect(source).toContain("export function ThinkingTrigger");
+    expect(source).toContain("export function ThinkingContent");
+    expect(source).toContain("export function ThinkingActivity");
+    expect(source).toContain('role="log"');
+    expect(source).toContain('aria-busy={status === "thinking"}');
+    expect(source).not.toContain("activities?:");
+    expect(source).not.toContain("steps?:");
+  });
+
+  test("approval card separates risk, content, and controlled async states", async () => {
+    const source = await Bun.file("src/registry/uai/components/approval-card.tsx").text();
+
+    expect(source).toContain('["low", "medium", "high", "critical"]');
+    expect(source).toContain('["compact", "detailed"]');
+    expect(source).toContain('"submitting"');
+    expect(source).toContain('"approved"');
+    expect(source).toContain('"rejected"');
+    expect(source).toContain('"error"');
+    expect(source).toContain('risk: "critical"');
+    expect(source).toContain("export function ApprovalCardHeader");
+    expect(source).toContain("export function ApprovalCardDetails");
+    expect(source).toContain("export function ApprovalCardConfirmation");
+    expect(source).toContain("export function ApprovalCardActions");
+    expect(source).toContain("export function ApprovalCardApprove");
+    expect(source).toContain("aria-busy={isSubmitting}");
+    expect(source).toContain('role="alert"');
+    expect(source).toContain("export type ApprovalCardState");
+    expect(source).toContain("export function ApprovalCardDetail");
+    expect(source).not.toContain("errorMessage");
+  });
+
+  test("task modules expose composition instead of data props", async () => {
+    const taskList = await Bun.file("src/registry/uai/components/task-list.tsx").text();
+    const taskFlow = await Bun.file("src/registry/uai/blocks/task-flow.tsx").text();
+
+    expect(taskList).toContain("export function TaskListItem");
+    expect(taskList).toContain("export function TaskListTitle");
+    expect(taskList).not.toContain("tasks:");
+    expect(taskFlow).toContain("export function TaskFlowStep");
+    expect(taskFlow).not.toContain("TaskFlowData");
   });
 
   test("publishes tokens for light and dark themes", async () => {

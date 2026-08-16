@@ -126,6 +126,7 @@ export function PreviewStage({
   switcher,
   label,
   status,
+  className,
   contentClassName,
   swapping = false,
 }: {
@@ -133,11 +134,12 @@ export function PreviewStage({
   switcher?: ReactNode;
   label?: string;
   status?: ReactNode;
+  className?: string;
   contentClassName?: string;
   swapping?: boolean;
 }) {
   return (
-    <div className="uai-preview-stage">
+    <div className={["uai-preview-stage", className].filter(Boolean).join(" ")}>
       {label ? <span className="uai-preview-stage__label">{label}</span> : null}
       {status ? <span className="uai-preview-stage__status">{status}</span> : null}
       <div

@@ -34,16 +34,28 @@ export const registryCatalog: readonly RegistryCatalogItem[] = [
     description:
       "A prompt bar with ghost plus, ink send, and rounded, pill, ghost, and compact variants.",
     icon: MessageSquareText,
-    usage: `import { PromptComposer } from "@/components/ui/uai/prompt-composer"
+    usage: `import {
+  PromptComposer,
+  PromptComposerActions,
+  PromptComposerAdd,
+  PromptComposerFileItem,
+  PromptComposerInput,
+  PromptComposerModelSelect,
+  PromptComposerSubmit,
+} from "@/components/ui/uai/prompt-composer"
 
 export function AskUai() {
   return (
-    <PromptComposer
-      placeholder="Write a message…"
-      modelLabel="Your model"
-      variant="rounded"
-      onSubmit={(prompt) => sendPrompt(prompt)}
-    />
+    <PromptComposer variant="rounded" onSubmit={(prompt) => sendPrompt(prompt)}>
+      <PromptComposerAdd>
+        <PromptComposerFileItem />
+      </PromptComposerAdd>
+      <PromptComposerInput placeholder="Write a message…" />
+      <PromptComposerActions>
+        <PromptComposerModelSelect models={[{ id: "default", label: "Your model" }]} />
+        <PromptComposerSubmit />
+      </PromptComposerActions>
+    </PromptComposer>
   )
 }`,
     accessibility: [
@@ -59,23 +71,37 @@ export function AskUai() {
     id: "thinking",
     name: "Thinking",
     category: "AI",
-    description: "An accessible disclosure for model progress, elapsed time, and reasoning steps.",
+    description:
+      "A live and inspectable activity disclosure with explicit states and structured evidence.",
     icon: BrainCircuit,
-    usage: `import { Thinking } from "@/components/ui/uai/thinking"
+    usage: `import {
+  Thinking,
+  ThinkingActivity,
+  ThinkingContent,
+  ThinkingTrigger,
+} from "@/components/ui/uai/thinking"
 
-export function ReasoningState() {
+export function ActivityState() {
   return (
-    <Thinking
-      summary="Checking the component contract."
-      duration="1.8s"
-      steps={["Read the props.", "Check keyboard behavior."]}
-    />
+    <Thinking status="complete">
+      <ThinkingTrigger summary="Checking the component contract." duration="1.8s" />
+      <ThinkingContent>
+        <ThinkingActivity type="file" path="src/components/prompt.tsx" elapsed="0.8s">
+          Read the component source
+        </ThinkingActivity>
+        <ThinkingActivity type="tool" tool="bun run test" elapsed="1.8s">
+          Checked the implementation
+        </ThinkingActivity>
+      </ThinkingContent>
+    </Thinking>
   )
 }`,
     accessibility: [
       "The trigger exposes expanded and collapsed state.",
       "The trigger references the disclosed content.",
-      "Reasoning steps keep their ordered-list semantics.",
+      "New activity is announced through a polite live log.",
+      "Activity entries keep their ordered-list semantics.",
+      "Status is communicated with text instead of color alone.",
       "Decorative state icons stay hidden from assistive technology.",
     ],
   },
@@ -84,24 +110,47 @@ export function ReasoningState() {
     name: "Approval Card",
     category: "Feedback",
     description:
-      "A protected decision surface for actions that need explicit approval or rejection.",
+      "A controlled decision surface for reviewing an AI action's risk, evidence, and impact.",
     icon: ShieldCheck,
-    usage: `import { ApprovalCard } from "@/components/ui/uai/approval-card"
+    usage: `import {
+  ApprovalCard,
+  ApprovalCardActions,
+  ApprovalCardApprove,
+  ApprovalCardDetail,
+  ApprovalCardDetails,
+  ApprovalCardHeader,
+  ApprovalCardReject,
+} from "@/components/ui/uai/approval-card"
 
-export function PublishDecision() {
+export function PolicyDecision() {
   return (
-    <ApprovalCard
-      title="Publish the generated summary?"
-      description="Review the draft before it becomes visible."
-      onDecision={(decision) => saveDecision(decision)}
-    />
+    <ApprovalCard risk="high" variant="detailed">
+      <ApprovalCardHeader
+        title="Deploy the generated refund policy?"
+        description="This changes how new refunds are routed."
+      />
+      <ApprovalCardDetails>
+        <ApprovalCardDetail label="Affected resources">
+          refund-policy-v4 · 3 queues
+        </ApprovalCardDetail>
+        <ApprovalCardDetail label="Downstream impact">
+          New requests use this policy immediately.
+        </ApprovalCardDetail>
+      </ApprovalCardDetails>
+      <ApprovalCardActions>
+        <ApprovalCardReject onClick={() => rejectPolicy()} />
+        <ApprovalCardApprove onClick={() => deployPolicy()}>Deploy policy</ApprovalCardApprove>
+      </ApprovalCardActions>
+    </ApprovalCard>
   )
 }`,
     accessibility: [
-      "Both outcomes use native buttons.",
-      "The decision result is announced through a live region.",
-      "The reset action remains keyboard accessible.",
-      "Labels name the consequence instead of relying on color.",
+      "Risk and status always appear as text in addition to icon and color.",
+      "Approve and Reject use native buttons with visible keyboard focus.",
+      "Submitting disables duplicate decisions and exposes busy state.",
+      "Critical approval stays disabled until the confirmation phrase matches.",
+      "Errors use an alert while preserving the evidence and retry actions.",
+      "Composable details retain description-list semantics.",
     ],
   },
   {
@@ -111,15 +160,25 @@ export function PublishDecision() {
     description:
       "An ordered view of complete, active, and pending work with visible status labels.",
     icon: ListChecks,
-    usage: `import { TaskList } from "@/components/ui/uai/task-list"
-
-const tasks = [
-  { id: "review", label: "Review interface", status: "complete" },
-  { id: "test", label: "Check keyboard paths", status: "active" },
-]
+    usage: `import {
+  TaskList,
+  TaskListDescription,
+  TaskListItem,
+  TaskListTitle,
+} from "@/components/ui/uai/task-list"
 
 export function Progress() {
-  return <TaskList tasks={tasks} />
+  return (
+    <TaskList>
+      <TaskListItem status="complete">
+        <TaskListTitle>Review interface</TaskListTitle>
+        <TaskListDescription>Props and public behavior</TaskListDescription>
+      </TaskListItem>
+      <TaskListItem status="active">
+        <TaskListTitle>Check keyboard paths</TaskListTitle>
+      </TaskListItem>
+    </TaskList>
+  )
 }`,
     accessibility: [
       "Tasks retain ordered-list semantics.",
@@ -134,15 +193,19 @@ export function Progress() {
     category: "Workflow",
     description: "The complete reasoning, approval, work, and prompt sequence behind an AI task.",
     icon: Workflow,
-    usage: `import { TaskFlow } from "@/components/uai/task-flow"
+    usage: `import { MessageSquare, Sparkles } from "lucide-react"
+import { TaskFlow, TaskFlowStep } from "@/components/uai/task-flow"
 
 export function ReviewFlow() {
   return (
-    <TaskFlow
-      data={reviewFlow}
-      onDecision={(decision) => saveDecision(decision)}
-      onPromptSubmit={(prompt) => sendPrompt(prompt)}
-    />
+    <TaskFlow>
+      <TaskFlowStep label="Thinking" icon={<Sparkles aria-hidden="true" />} active>
+        {thinkingDisclosure}
+      </TaskFlowStep>
+      <TaskFlowStep label="Prompt" icon={<MessageSquare aria-hidden="true" />}>
+        {promptComposer}
+      </TaskFlowStep>
+    </TaskFlow>
   )
 }`,
     accessibility: [
