@@ -8,11 +8,11 @@ import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
   title: {
-    default: "Uai — Open code for AI products",
+    default: "Uai — Open code for web products",
     template: "%s — Uai",
   },
   description:
-    "Open-code React patterns for AI-native products, distributed through the shadcn CLI.",
+    "Open-code React patterns for websites and web applications, distributed through the shadcn CLI.",
 };
 
 const designContract = `<!--

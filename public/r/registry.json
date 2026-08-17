@@ -132,27 +132,60 @@
       "categories": ["ai", "forms"]
     },
     {
-      "name": "task-flow",
-      "type": "registry:block",
-      "title": "Task Flow",
-      "description": "A compound workflow layout for composing arbitrary AI task stages.",
+      "name": "coupon-field",
+      "type": "registry:ui",
+      "title": "Coupon Field",
+      "description": "A compound discount field with rounded, pill, and compact variants.",
       "dependencies": ["lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/thinking.json",
-        "http://localhost:3000/r/approval-card.json",
-        "http://localhost:3000/r/task-list.json",
-        "http://localhost:3000/r/prompt-composer.json",
         "http://localhost:3000/r/uai-theme.json",
         "http://localhost:3000/r/uai-utils.json"
       ],
       "files": [
         {
-          "path": "src/registry/uai/blocks/task-flow.tsx",
-          "type": "registry:component",
-          "target": "@components/uai/task-flow.tsx"
+          "path": "src/registry/uai/components/coupon-field.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/coupon-field.tsx"
         }
       ],
-      "categories": ["ai", "workflow"]
+      "categories": ["commerce", "forms"]
+    },
+    {
+      "name": "price-summary",
+      "type": "registry:ui",
+      "title": "Price Summary",
+      "description": "A compound order total with card, plain, and compact variants.",
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/price-summary.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/price-summary.tsx"
+        }
+      ],
+      "categories": ["commerce", "data-display"]
+    },
+    {
+      "name": "order-status",
+      "type": "registry:ui",
+      "title": "Order Status",
+      "description": "A compound fulfillment timeline with card, plain, and compact variants.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/order-status.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/order-status.tsx"
+        }
+      ],
+      "categories": ["commerce", "data-display"]
     }
   ]
 }

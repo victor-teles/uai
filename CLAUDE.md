@@ -46,6 +46,10 @@ compose replaceable structure and content through exported children.
   compound layout. Use private context when regions share state.
 - Context-dependent children must throw a clear error when rendered outside their
   matching root. Do not add context to purely structural components.
+- Every distributed component must ship meaningful named variants. Export the
+  supported names as a source-owned readonly constant and type, keep `variant` on
+  the root, and demonstrate every variant in the live preview. States and scenarios
+  do not count as visual variants.
 
 ## Visual direction
 

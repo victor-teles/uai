@@ -13,9 +13,9 @@ Fumadocs UI, Tailwind CSS, and Bun. The first deployment target is Vercel.
 
 ## Users
 
-Assumed after the initial intake received no answer: React developers who build
-polished AI products and internal tools. They use Uai to add complete interface
-patterns without rebuilding interaction details from scratch.
+React developers who build websites, products, and internal tools. They use Uai
+to add complete interface patterns without rebuilding interaction details from
+scratch.
 
 ## Product purpose
 
@@ -26,7 +26,8 @@ a hidden runtime package.
 
 ## Positioning
 
-Uai starts with complete patterns for AI-native product interfaces. Each registry
+Uai provides complete patterns for general-purpose web interfaces. The catalog can
+include application, marketing, commerce, content, and AI patterns. Each registry
 item combines a small React interface with detailed interaction, accessibility,
 motion, and visual implementation.
 
@@ -43,12 +44,13 @@ developer's application.
 - Bun manages dependencies and project scripts.
 - The first release targets React and Tailwind CSS.
 - The registry structure must allow more frameworks in the future.
-- The first release prioritizes AI-native patterns and includes the primitives they
-  need.
+- The catalog supports application, marketing, commerce, content, and AI patterns.
 
 ## Brand commitments
 
 - The product name is Uai.
+- The Uai identity pairs a compact three-part modular `u` mark with the lowercase
+  mono wordmark. The same mark identifies the product in the browser favicon.
 - The component browser follows the open-code, composition, distribution, and
   live-demo principles used by shadcn/ui.
 - Distributed interfaces use named compound components: roots retain shared
@@ -65,6 +67,15 @@ developer's application.
 - Approval Card makes the risk and downstream impact of an AI-proposed action
   explicit before a person decides. Its evidence is composable, its async state
   is consumer-controlled, and critical actions require typed confirmation.
+- Coupon Field keeps apply, replace, remove, and feedback behavior composable while
+  leaving discount validation and async state with the consuming checkout. It ships
+  rounded, pill, and compact variants for checkout, promotion, and cart contexts.
+- Price Summary keeps order amounts composable and semantic while giving subtotal,
+  discounts, shipping, taxes, and total an explicit visual hierarchy. It ships card,
+  plain, and compact variants for checkout, payment, and cart contexts.
+- Order Status keeps fulfillment stages, tracking facts, and support actions composable
+  while leaving carrier data and order updates with the consuming application. It ships
+  card, plain, and compact variants for account, confirmation, and drawer contexts.
 - Copy is direct and practical. It does not use unsupported claims.
 
 ## Evidence on hand

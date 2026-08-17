@@ -3,8 +3,10 @@ import {
   ListChecks,
   type LucideIcon,
   MessageSquareText,
+  PackageCheck,
+  ReceiptText,
   ShieldCheck,
-  Workflow,
+  TicketPercent,
 } from "lucide-react";
 
 export type RegistryItemId =
@@ -12,9 +14,11 @@ export type RegistryItemId =
   | "thinking"
   | "approval-card"
   | "task-list"
-  | "task-flow";
+  | "coupon-field"
+  | "price-summary"
+  | "order-status";
 
-export type RegistryCategory = "All" | "AI" | "Feedback" | "Forms" | "Data Display" | "Workflow";
+export type RegistryCategory = "All" | "AI" | "Feedback" | "Forms" | "Data Display" | "Commerce";
 
 export type RegistryCatalogItem = {
   id: RegistryItemId;
@@ -188,31 +192,159 @@ export function Progress() {
     ],
   },
   {
-    id: "task-flow",
-    name: "Task Flow",
-    category: "Workflow",
-    description: "The complete reasoning, approval, work, and prompt sequence behind an AI task.",
-    icon: Workflow,
-    usage: `import { MessageSquare, Sparkles } from "lucide-react"
-import { TaskFlow, TaskFlowStep } from "@/components/uai/task-flow"
+    id: "coupon-field",
+    name: "Coupon Field",
+    category: "Commerce",
+    description: "A checkout-safe discount field with rounded, pill, and compact variants.",
+    icon: TicketPercent,
+    usage: `import {
+  CouponField,
+  CouponFieldApply,
+  CouponFieldControl,
+  CouponFieldFeedback,
+  CouponFieldInput,
+  CouponFieldLabel,
+  CouponFieldMessage,
+  CouponFieldRemove,
+} from "@/components/ui/uai/coupon-field"
 
-export function ReviewFlow() {
+export function DiscountCode() {
   return (
-    <TaskFlow>
-      <TaskFlowStep label="Thinking" icon={<Sparkles aria-hidden="true" />} active>
-        {thinkingDisclosure}
-      </TaskFlowStep>
-      <TaskFlowStep label="Prompt" icon={<MessageSquare aria-hidden="true" />}>
-        {promptComposer}
-      </TaskFlowStep>
-    </TaskFlow>
+    <CouponField
+      variant="rounded"
+      status="applied"
+      appliedCode="WELCOME20"
+      onApply={(code) => validateCoupon(code)}
+    >
+      <CouponFieldLabel>Discount code</CouponFieldLabel>
+      <CouponFieldControl>
+        <CouponFieldInput />
+        <CouponFieldApply />
+      </CouponFieldControl>
+      <CouponFieldFeedback>
+        <CouponFieldMessage>20% off this order</CouponFieldMessage>
+        <CouponFieldRemove onClick={() => removeCoupon()} />
+      </CouponFieldFeedback>
+    </CouponField>
   )
 }`,
     accessibility: [
-      "The workflow keeps an ordered stage sequence.",
-      "Each stage preserves its native component semantics.",
-      "Decision and prompt feedback use live regions.",
-      "The composition shrinks without horizontal overflow.",
+      "The visible label is programmatically associated with the input.",
+      "Enter applies a valid draft without introducing a nested form.",
+      "Applying disables duplicate submissions and exposes busy state.",
+      "Success and error feedback use the matching live-region urgency.",
+      "Invalid state is communicated through text, icon, border, and aria-invalid.",
+      "Apply, Replace, and Remove name the action that will happen.",
+    ],
+  },
+  {
+    id: "price-summary",
+    name: "Price Summary",
+    category: "Commerce",
+    description: "A composable order total with card, plain, and compact variants.",
+    icon: ReceiptText,
+    usage: `import {
+  PriceSummary,
+  PriceSummaryDescription,
+  PriceSummaryHeader,
+  PriceSummaryItem,
+  PriceSummaryList,
+  PriceSummaryNote,
+  PriceSummaryTitle,
+  PriceSummaryTotal,
+} from "@/components/ui/uai/price-summary"
+
+export function CheckoutTotal() {
+  return (
+    <PriceSummary variant="card">
+      <PriceSummaryHeader>
+        <PriceSummaryTitle>Order summary</PriceSummaryTitle>
+        <PriceSummaryDescription>3 items · USD</PriceSummaryDescription>
+      </PriceSummaryHeader>
+      <PriceSummaryList>
+        <PriceSummaryItem label="Subtotal">$128.00</PriceSummaryItem>
+        <PriceSummaryItem label="WELCOME20" tone="success">−$20.00</PriceSummaryItem>
+        <PriceSummaryItem label="Shipping" tone="success">Free</PriceSummaryItem>
+        <PriceSummaryItem label="Estimated tax">$9.72</PriceSummaryItem>
+        <PriceSummaryTotal hint="Includes estimated tax">$117.72</PriceSummaryTotal>
+      </PriceSummaryList>
+      <PriceSummaryNote>The final amount is confirmed at payment.</PriceSummaryNote>
+    </PriceSummary>
+  )
+}`,
+    accessibility: [
+      "The root is labelled by the composed summary title.",
+      "Line items and totals retain description-list semantics.",
+      "Discounts and free shipping use explicit text in addition to color.",
+      "Tabular numerals keep changing amounts aligned and scannable.",
+      "Long labels and localized currency values wrap without horizontal overflow.",
+      "Card, plain, and compact variants preserve the same semantic structure.",
+    ],
+  },
+  {
+    id: "order-status",
+    name: "Order Status",
+    category: "Commerce",
+    description: "A composable fulfillment timeline with card, plain, and compact variants.",
+    icon: PackageCheck,
+    usage: `import {
+  OrderStatus,
+  OrderStatusAction,
+  OrderStatusActions,
+  OrderStatusBadge,
+  OrderStatusDescription,
+  OrderStatusDetail,
+  OrderStatusDetails,
+  OrderStatusHeader,
+  OrderStatusProgress,
+  OrderStatusStep,
+  OrderStatusStepDescription,
+  OrderStatusStepTitle,
+  OrderStatusTitle,
+} from "@/components/ui/uai/order-status"
+
+export function ShipmentProgress() {
+  return (
+    <OrderStatus variant="card">
+      <OrderStatusHeader>
+        <div>
+          <OrderStatusTitle>Arriving Friday</OrderStatusTitle>
+          <OrderStatusDescription>Order #UAI-2048 · 2 items</OrderStatusDescription>
+        </div>
+        <OrderStatusBadge tone="progress">In transit</OrderStatusBadge>
+      </OrderStatusHeader>
+      <OrderStatusProgress>
+        <OrderStatusStep status="complete">
+          <OrderStatusStepTitle>Order confirmed</OrderStatusStepTitle>
+          <OrderStatusStepDescription>Aug 15 · 9:42 AM</OrderStatusStepDescription>
+        </OrderStatusStep>
+        <OrderStatusStep status="current">
+          <OrderStatusStepTitle>In transit</OrderStatusStepTitle>
+          <OrderStatusStepDescription>Departed the regional facility</OrderStatusStepDescription>
+        </OrderStatusStep>
+        <OrderStatusStep>
+          <OrderStatusStepTitle>Delivered</OrderStatusStepTitle>
+          <OrderStatusStepDescription>Expected Aug 21</OrderStatusStepDescription>
+        </OrderStatusStep>
+      </OrderStatusProgress>
+      <OrderStatusDetails>
+        <OrderStatusDetail label="Carrier">Northstar Parcel</OrderStatusDetail>
+        <OrderStatusDetail label="Tracking">NSP-2048-1182</OrderStatusDetail>
+      </OrderStatusDetails>
+      <OrderStatusActions>
+        <OrderStatusAction href={trackingUrl} emphasis="primary">Track package</OrderStatusAction>
+        <OrderStatusAction href={supportUrl}>Get help</OrderStatusAction>
+      </OrderStatusActions>
+    </OrderStatus>
+  )
+}`,
+    accessibility: [
+      "The root is labelled by the composed order status title.",
+      "Fulfillment stages retain ordered-list semantics.",
+      "The current stage exposes aria-current without relying on color.",
+      "Complete, current, upcoming, and issue states include visible text labels.",
+      "Tracking facts retain description-list semantics and wrap long values.",
+      "Card, plain, and compact variants preserve the same semantic structure.",
     ],
   },
 ] as const;
@@ -223,7 +355,7 @@ export const registryCategories: readonly RegistryCategory[] = [
   "Feedback",
   "Forms",
   "Data Display",
-  "Workflow",
+  "Commerce",
 ] as const;
 
 export function getRegistryItem(id: RegistryItemId) {

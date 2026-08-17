@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, FileText, Globe, MessageSquare, Sparkles, Workflow } from "lucide-react";
+import { FileText, Globe } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -16,6 +16,48 @@ import {
   type ApprovalCardStatus,
   type ApprovalDecision,
 } from "@/components/ui/uai/approval-card";
+import {
+  COUPON_FIELD_VARIANTS,
+  CouponField,
+  CouponFieldApply,
+  CouponFieldControl,
+  CouponFieldFeedback,
+  CouponFieldInput,
+  CouponFieldLabel,
+  CouponFieldMessage,
+  CouponFieldRemove,
+  type CouponFieldStatus,
+  type CouponFieldVariant,
+} from "@/components/ui/uai/coupon-field";
+import {
+  ORDER_STATUS_VARIANTS,
+  OrderStatus,
+  OrderStatusAction,
+  OrderStatusActions,
+  OrderStatusBadge,
+  OrderStatusDescription,
+  OrderStatusDetail,
+  OrderStatusDetails,
+  OrderStatusHeader,
+  OrderStatusProgress,
+  OrderStatusStep,
+  OrderStatusStepDescription,
+  OrderStatusStepTitle,
+  OrderStatusTitle,
+  type OrderStatusVariant,
+} from "@/components/ui/uai/order-status";
+import {
+  PRICE_SUMMARY_VARIANTS,
+  PriceSummary,
+  PriceSummaryDescription,
+  PriceSummaryHeader,
+  PriceSummaryItem,
+  PriceSummaryList,
+  PriceSummaryNote,
+  PriceSummaryTitle,
+  PriceSummaryTotal,
+  type PriceSummaryVariant,
+} from "@/components/ui/uai/price-summary";
 import {
   PROMPT_COMPOSER_VARIANTS,
   PromptComposer,
@@ -40,7 +82,6 @@ import {
   ThinkingContent,
   ThinkingTrigger,
 } from "@/components/ui/uai/thinking";
-import { TaskFlow, TaskFlowStep } from "@/registry/uai/blocks/task-flow";
 
 import type { RegistryItemId } from "./catalog";
 import { PreviewStage, SegmentedControl } from "./preview-chrome";
@@ -374,66 +415,245 @@ function ApprovalCardPreview() {
   );
 }
 
-function TaskFlowPreview() {
+const couponVariantCopy: Record<CouponFieldVariant, { label: string; scene: string }> = {
+  rounded: { label: "Rounded", scene: "Checkout summary" },
+  pill: { label: "Pill", scene: "Promotion panel" },
+  compact: { label: "Compact", scene: "Cart drawer" },
+};
+
+function CouponFieldPreview() {
+  const [variant, setVariant] = useState<CouponFieldVariant>("rounded");
+  const [status, setStatus] = useState<CouponFieldStatus>("applied");
+  const [appliedCode, setAppliedCode] = useState<string | undefined>("WELCOME20");
+  const [draft, setDraft] = useState("WELCOME20");
+  const timerRef = useRef<number | null>(null);
+  const swapping = useSwapFlag(variant);
+  const copy = couponVariantCopy[variant];
+
+  useEffect(
+    () => () => {
+      if (timerRef.current) window.clearTimeout(timerRef.current);
+    },
+    [],
+  );
+
+  const applyCoupon = (code: string) => {
+    if (timerRef.current) window.clearTimeout(timerRef.current);
+    setDraft(code);
+    setStatus("applying");
+    timerRef.current = window.setTimeout(() => {
+      const normalizedCode = code.toUpperCase();
+      if (normalizedCode === "WELCOME20" || normalizedCode === "SAVE20") {
+        setDraft(normalizedCode);
+        setAppliedCode(normalizedCode);
+        setStatus("applied");
+        return;
+      }
+
+      setStatus("error");
+    }, 700);
+  };
+
+  const removeCoupon = () => {
+    if (timerRef.current) window.clearTimeout(timerRef.current);
+    setAppliedCode(undefined);
+    setStatus("idle");
+  };
+
+  const feedback =
+    status === "applying"
+      ? "Checking this code…"
+      : status === "error"
+        ? `${draft.trim().toUpperCase() || "This code"} wasn’t recognized. Check it and try again.${appliedCode ? ` ${appliedCode} still applies.` : ""}`
+        : status === "applied"
+          ? `${appliedCode} applied · 20% off this order`
+          : "Add a code before you check out.";
+
   return (
-    <TaskFlow>
-      <TaskFlowStep
-        label="Thinking"
-        icon={<Sparkles className="size-3.5" aria-hidden="true" />}
-        active
-      >
-        <Thinking status="complete">
-          <ThinkingTrigger
-            summary="Reviewing the requested component and its interaction contract."
-            duration="1.8s"
-          />
-          <ThinkingContent>
-            <ThinkingActivity type="search" query="Thinking component states" elapsed="0.3s">
-              Found the component contract
-            </ThinkingActivity>
-            <ThinkingActivity
-              type="file"
-              path="src/registry/uai/components/thinking.tsx"
-              elapsed="0.8s"
-            >
-              Reviewed the public interface
-            </ThinkingActivity>
-            <ThinkingActivity type="progress" elapsed="1.8s">
-              Prepared a source-owned change
-            </ThinkingActivity>
-          </ThinkingContent>
-        </Thinking>
-      </TaskFlowStep>
-      <TaskFlowStep label="Approval" icon={<Check className="size-3.5" aria-hidden="true" />}>
-        <ApprovalCard risk="medium">
-          <ApprovalCardHeader
-            title="Add this component to the registry?"
-            description="Review the source change before it becomes available to consumers."
-          />
-          <ApprovalCardActions>
-            <ApprovalCardReject />
-            <ApprovalCardApprove />
-          </ApprovalCardActions>
-        </ApprovalCard>
-      </TaskFlowStep>
-      <TaskFlowStep label="Tasks" icon={<Workflow className="size-3.5" aria-hidden="true" />}>
-        <TaskList>
-          <RegistryTaskItems />
-        </TaskList>
-      </TaskFlowStep>
-      <TaskFlowStep label="Prompt" icon={<MessageSquare className="size-3.5" aria-hidden="true" />}>
-        <PromptComposer>
-          <PromptComposerAdd>
-            <ComposerSourceItems />
-          </PromptComposerAdd>
-          <PromptComposerInput placeholder="Describe an adaptation…" />
-          <PromptComposerActions>
-            <PromptComposerModelSelect models={[{ id: "default", label: "Your model" }]} />
-            <PromptComposerSubmit />
-          </PromptComposerActions>
-        </PromptComposer>
-      </TaskFlowStep>
-    </TaskFlow>
+    <PreviewStage
+      contentClassName="uai-preview-medium"
+      label={copy.scene}
+      swapping={swapping}
+      switcher={
+        <SegmentedControl
+          ariaLabel="Coupon field variant"
+          value={variant}
+          onChange={(id) => setVariant(id as CouponFieldVariant)}
+          options={COUPON_FIELD_VARIANTS.map((option) => ({
+            id: option,
+            label: couponVariantCopy[option].label,
+          }))}
+        />
+      }
+    >
+      <div className={variant === "compact" ? "w-full max-w-[320px]" : "w-full max-w-[380px]"}>
+        <div className="mb-5 flex items-baseline justify-between border-b border-[var(--uai-border)] pb-3">
+          <h2 className="text-sm leading-5 font-medium">Order summary</h2>
+          <span className="text-[12px] text-[var(--uai-muted)]">2 items</span>
+        </div>
+
+        <CouponField
+          variant={variant}
+          status={status}
+          appliedCode={appliedCode}
+          value={draft}
+          onValueChange={setDraft}
+          onApply={applyCoupon}
+        >
+          <CouponFieldLabel>Discount code</CouponFieldLabel>
+          <CouponFieldControl>
+            <CouponFieldInput />
+            <CouponFieldApply />
+          </CouponFieldControl>
+          <CouponFieldFeedback>
+            <CouponFieldMessage>{feedback}</CouponFieldMessage>
+            <CouponFieldRemove onClick={removeCoupon} />
+          </CouponFieldFeedback>
+        </CouponField>
+
+        <dl className="mt-5 space-y-2 border-t border-[var(--uai-border)] pt-4 text-[12px] leading-4 tabular-nums">
+          <div className="flex justify-between text-[var(--uai-muted)]">
+            <dt>Subtotal</dt>
+            <dd>$90.00</dd>
+          </div>
+          {appliedCode ? (
+            <div className="flex justify-between text-[var(--uai-success)]">
+              <dt>Discount</dt>
+              <dd>−$18.00</dd>
+            </div>
+          ) : null}
+          <div className="flex justify-between pt-1 text-sm font-medium">
+            <dt>Total</dt>
+            <dd>{appliedCode ? "$72.00" : "$90.00"}</dd>
+          </div>
+        </dl>
+      </div>
+    </PreviewStage>
+  );
+}
+
+const priceSummaryVariantCopy: Record<PriceSummaryVariant, { label: string; scene: string }> = {
+  card: { label: "Card", scene: "Checkout sidebar" },
+  plain: { label: "Plain", scene: "Payment step" },
+  compact: { label: "Compact", scene: "Cart drawer" },
+};
+
+function PriceSummaryPreview() {
+  const [variant, setVariant] = useState<PriceSummaryVariant>("card");
+  const swapping = useSwapFlag(variant);
+  const copy = priceSummaryVariantCopy[variant];
+
+  return (
+    <PreviewStage
+      contentClassName="uai-preview-narrow"
+      label={copy.scene}
+      swapping={swapping}
+      switcher={
+        <SegmentedControl
+          ariaLabel="Price summary variant"
+          value={variant}
+          onChange={(id) => setVariant(id as PriceSummaryVariant)}
+          options={PRICE_SUMMARY_VARIANTS.map((option) => ({
+            id: option,
+            label: priceSummaryVariantCopy[option].label,
+          }))}
+        />
+      }
+    >
+      <div className={variant === "compact" ? "w-full max-w-[320px]" : "w-full max-w-[380px]"}>
+        <PriceSummary variant={variant}>
+          <PriceSummaryHeader>
+            <PriceSummaryTitle>Order summary</PriceSummaryTitle>
+            <PriceSummaryDescription>3 items · Ready to check out</PriceSummaryDescription>
+          </PriceSummaryHeader>
+          <PriceSummaryList>
+            <PriceSummaryItem label="Subtotal">$128.00</PriceSummaryItem>
+            <PriceSummaryItem label="WELCOME20" tone="success">
+              −$20.00
+            </PriceSummaryItem>
+            <PriceSummaryItem label="Shipping" tone="success">
+              Free
+            </PriceSummaryItem>
+            <PriceSummaryItem label="Estimated tax">$9.72</PriceSummaryItem>
+            <PriceSummaryTotal hint="Includes estimated tax">$117.72</PriceSummaryTotal>
+          </PriceSummaryList>
+          <PriceSummaryNote>The final amount is confirmed at payment.</PriceSummaryNote>
+        </PriceSummary>
+      </div>
+    </PreviewStage>
+  );
+}
+
+const orderStatusVariantCopy: Record<OrderStatusVariant, { label: string; scene: string }> = {
+  card: { label: "Card", scene: "Account order" },
+  plain: { label: "Plain", scene: "Confirmation page" },
+  compact: { label: "Compact", scene: "Order drawer" },
+};
+
+function OrderStatusPreview() {
+  const [variant, setVariant] = useState<OrderStatusVariant>("card");
+  const swapping = useSwapFlag(variant);
+  const copy = orderStatusVariantCopy[variant];
+
+  return (
+    <PreviewStage
+      contentClassName="uai-preview-narrow"
+      label={copy.scene}
+      swapping={swapping}
+      switcher={
+        <SegmentedControl
+          ariaLabel="Order status variant"
+          value={variant}
+          onChange={(id) => setVariant(id as OrderStatusVariant)}
+          options={ORDER_STATUS_VARIANTS.map((option) => ({
+            id: option,
+            label: orderStatusVariantCopy[option].label,
+          }))}
+        />
+      }
+    >
+      <div className={variant === "compact" ? "w-full max-w-[320px]" : "w-full max-w-[380px]"}>
+        <OrderStatus variant={variant}>
+          <OrderStatusHeader>
+            <div className="min-w-0">
+              <OrderStatusTitle>Arriving Friday</OrderStatusTitle>
+              <OrderStatusDescription>Order #UAI-2048 · 2 items</OrderStatusDescription>
+            </div>
+            <OrderStatusBadge tone="progress">In transit</OrderStatusBadge>
+          </OrderStatusHeader>
+          <OrderStatusProgress>
+            <OrderStatusStep status="complete">
+              <OrderStatusStepTitle>Order confirmed</OrderStatusStepTitle>
+              <OrderStatusStepDescription>Aug 15 · 9:42 AM</OrderStatusStepDescription>
+            </OrderStatusStep>
+            <OrderStatusStep status="complete">
+              <OrderStatusStepTitle>Shipped</OrderStatusStepTitle>
+              <OrderStatusStepDescription>Aug 17 · Northstar Parcel</OrderStatusStepDescription>
+            </OrderStatusStep>
+            <OrderStatusStep status="current">
+              <OrderStatusStepTitle>In transit</OrderStatusStepTitle>
+              <OrderStatusStepDescription>
+                Departed the regional facility in Austin, TX
+              </OrderStatusStepDescription>
+            </OrderStatusStep>
+            <OrderStatusStep status="upcoming">
+              <OrderStatusStepTitle>Delivered</OrderStatusStepTitle>
+              <OrderStatusStepDescription>Expected Aug 21 by 8:00 PM</OrderStatusStepDescription>
+            </OrderStatusStep>
+          </OrderStatusProgress>
+          <OrderStatusDetails>
+            <OrderStatusDetail label="Carrier">Northstar Parcel</OrderStatusDetail>
+            <OrderStatusDetail label="Tracking">NSP-2048-1182</OrderStatusDetail>
+          </OrderStatusDetails>
+          <OrderStatusActions>
+            <OrderStatusAction href="https://example.com/track" emphasis="primary">
+              Track package
+            </OrderStatusAction>
+            <OrderStatusAction href="https://example.com/help">Get help</OrderStatusAction>
+          </OrderStatusActions>
+        </OrderStatus>
+      </div>
+    </PreviewStage>
   );
 }
 
@@ -441,20 +661,15 @@ export function RegistryPreview({ itemId }: { itemId: RegistryItemId }) {
   if (itemId === "prompt-composer") return <PromptComposerPreview />;
   if (itemId === "thinking") return <ThinkingPreview />;
   if (itemId === "approval-card") return <ApprovalCardPreview />;
-
-  if (itemId === "task-list") {
-    return (
-      <PreviewStage contentClassName="uai-preview-medium" label="Mixed progress">
-        <TaskList>
-          <RegistryTaskItems />
-        </TaskList>
-      </PreviewStage>
-    );
-  }
+  if (itemId === "coupon-field") return <CouponFieldPreview />;
+  if (itemId === "price-summary") return <PriceSummaryPreview />;
+  if (itemId === "order-status") return <OrderStatusPreview />;
 
   return (
-    <PreviewStage contentClassName="uai-preview-flow" label="Complete workflow">
-      <TaskFlowPreview />
+    <PreviewStage contentClassName="uai-preview-medium" label="Mixed progress">
+      <TaskList>
+        <RegistryTaskItems />
+      </TaskList>
     </PreviewStage>
   );
 }

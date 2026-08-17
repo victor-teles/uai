@@ -1,4 +1,3 @@
-import { TaskFlow, TaskFlowStep } from "@/registry/uai/blocks/task-flow";
 import {
   ApprovalCard,
   ApprovalCardActions,
@@ -6,6 +5,33 @@ import {
   ApprovalCardHeader,
   ApprovalCardReject,
 } from "@/registry/uai/components/approval-card";
+import {
+  CouponField,
+  CouponFieldApply,
+  CouponFieldControl,
+  CouponFieldFeedback,
+  CouponFieldInput,
+  CouponFieldLabel,
+  CouponFieldMessage,
+  CouponFieldRemove,
+} from "@/registry/uai/components/coupon-field";
+import {
+  OrderStatus,
+  OrderStatusBadge,
+  OrderStatusHeader,
+  OrderStatusProgress,
+  OrderStatusStep,
+  OrderStatusStepTitle,
+  OrderStatusTitle,
+} from "@/registry/uai/components/order-status";
+import {
+  PriceSummary,
+  PriceSummaryHeader,
+  PriceSummaryItem,
+  PriceSummaryList,
+  PriceSummaryTitle,
+  PriceSummaryTotal,
+} from "@/registry/uai/components/price-summary";
 import {
   PromptComposer,
   PromptComposerActions,
@@ -24,42 +50,65 @@ import {
 
 export function RegistryCompositionFixture() {
   return (
-    <TaskFlow>
-      <TaskFlowStep label="Thinking" icon={<span aria-hidden="true">1</span>} active>
-        <Thinking>
-          <ThinkingTrigger summary="Checking the interface." />
-          <ThinkingContent>
-            <ThinkingActivity type="progress">Started the review</ThinkingActivity>
-          </ThinkingContent>
-        </Thinking>
-      </TaskFlowStep>
-      <TaskFlowStep label="Approval" icon={<span aria-hidden="true">2</span>}>
-        <ApprovalCard>
-          <ApprovalCardHeader title="Publish this change?" />
-          <ApprovalCardActions>
-            <ApprovalCardReject />
-            <ApprovalCardApprove />
-          </ApprovalCardActions>
-        </ApprovalCard>
-      </TaskFlowStep>
-      <TaskFlowStep label="Tasks" icon={<span aria-hidden="true">3</span>}>
-        <TaskList>
-          <TaskListItem status="active">
-            <TaskListTitle>Validate the registry</TaskListTitle>
-          </TaskListItem>
-        </TaskList>
-      </TaskFlowStep>
-      <TaskFlowStep label="Prompt" icon={<span aria-hidden="true">4</span>}>
-        <PromptComposer>
-          <PromptComposerAdd>
-            <PromptComposerFileItem />
-          </PromptComposerAdd>
-          <PromptComposerInput />
-          <PromptComposerActions>
-            <PromptComposerSubmit />
-          </PromptComposerActions>
-        </PromptComposer>
-      </TaskFlowStep>
-    </TaskFlow>
+    <>
+      <Thinking>
+        <ThinkingTrigger summary="Checking the interface." />
+        <ThinkingContent>
+          <ThinkingActivity type="progress">Started the review</ThinkingActivity>
+        </ThinkingContent>
+      </Thinking>
+      <ApprovalCard>
+        <ApprovalCardHeader title="Publish this change?" />
+        <ApprovalCardActions>
+          <ApprovalCardReject />
+          <ApprovalCardApprove />
+        </ApprovalCardActions>
+      </ApprovalCard>
+      <TaskList>
+        <TaskListItem status="active">
+          <TaskListTitle>Validate the registry</TaskListTitle>
+        </TaskListItem>
+      </TaskList>
+      <PromptComposer>
+        <PromptComposerAdd>
+          <PromptComposerFileItem />
+        </PromptComposerAdd>
+        <PromptComposerInput />
+        <PromptComposerActions>
+          <PromptComposerSubmit />
+        </PromptComposerActions>
+      </PromptComposer>
+      <CouponField variant="pill" status="applied" appliedCode="SAVE20">
+        <CouponFieldLabel />
+        <CouponFieldControl>
+          <CouponFieldInput />
+          <CouponFieldApply />
+        </CouponFieldControl>
+        <CouponFieldFeedback>
+          <CouponFieldMessage>20% off this order</CouponFieldMessage>
+          <CouponFieldRemove />
+        </CouponFieldFeedback>
+      </CouponField>
+      <PriceSummary variant="compact">
+        <PriceSummaryHeader>
+          <PriceSummaryTitle>Order summary</PriceSummaryTitle>
+        </PriceSummaryHeader>
+        <PriceSummaryList>
+          <PriceSummaryItem label="Subtotal">$90.00</PriceSummaryItem>
+          <PriceSummaryTotal>$72.00</PriceSummaryTotal>
+        </PriceSummaryList>
+      </PriceSummary>
+      <OrderStatus variant="plain">
+        <OrderStatusHeader>
+          <OrderStatusTitle>Arriving Friday</OrderStatusTitle>
+          <OrderStatusBadge tone="progress">In transit</OrderStatusBadge>
+        </OrderStatusHeader>
+        <OrderStatusProgress>
+          <OrderStatusStep status="current">
+            <OrderStatusStepTitle>In transit</OrderStatusStepTitle>
+          </OrderStatusStep>
+        </OrderStatusProgress>
+      </OrderStatus>
+    </>
   );
 }

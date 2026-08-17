@@ -7,7 +7,7 @@ Uai needs no image-native production asset for the approved home surface. The pr
 The approved PNG files are build references only:
 
 - `.impeccable/mocks/uai-specimen-wall.png` defines the primary composition.
-- `.impeccable/mocks/uai-docs-workbench.png` defines the install command and Task Flow depth.
+- `.impeccable/mocks/uai-docs-workbench.png` defines the install command and component-preview depth.
 
 Do not import these files at runtime. Do not copy them into `public/` or another deployable asset directory.
 
@@ -33,7 +33,7 @@ Do not import these files at runtime. Do not copy them into `public/` or another
 | Cobalt state rail and nodes | Semantic list markup and CSS pseudo-elements | Connect Thinking, Approval, Task, and Prompt as meaningful ordered states. |
 | Thinking disclosure | Interactive React | Use an accessible disclosure with live text and status metadata. |
 | Approval decision | Interactive React | Use real buttons, status text, keyboard behavior, and focus states. |
-| Task rows and Task Flow | Interactive React | Render progress, tools, approval, response, and timing as structured live state. |
+| Task rows and progress states | Interactive React | Render progress, tools, approval, response, and timing as structured live state. |
 | Prompt composer | Form controls and React | Keep attachment, tool, model, and submit controls operable. |
 | Install command and source preview | `code` or `pre`, React state, and CSS | Keep the command selectable. Give copy feedback with the Clipboard API. |
 | Preview and source tabs | React tabs and highlighted text spans | Do not flatten the preview or code into an image. |

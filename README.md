@@ -1,8 +1,8 @@
 # Uai
 
-Uai is an open-code React component library for AI interfaces. It works as a
-shadcn registry: the CLI copies each component and its dependencies into the
-consumer's application, where the team can inspect and change every line.
+Uai is an open-code React component library for websites and web applications.
+It works as a shadcn registry: the CLI copies each component and its dependencies
+into the consumer's application, where the team can inspect and change every line.
 
 The repository includes a component browser built with Next.js, Fumadocs UI,
 Tailwind CSS, and Bun.
@@ -24,12 +24,11 @@ documents are available under `/r`.
 Keep the Uai development server running. In a shadcn project, run:
 
 ```bash
-bunx shadcn@latest add http://localhost:3000/r/task-flow.json
+bunx shadcn@latest add http://localhost:3000/r/prompt-composer.json
 ```
 
-Task Flow installs the four supporting components, the Uai theme tokens, and
-the shared class-name utility. You can also install each smaller component on
-its own.
+Prompt Composer installs the Uai theme tokens and the shared class-name utility.
+Replace `prompt-composer` with another registry item name to install that component.
 
 Set `NEXT_PUBLIC_REGISTRY_URL` to the deployed `/r` URL before publishing the
 site. Update the `homepage` and dependency URLs in `registry.json` at the same
@@ -50,8 +49,8 @@ time. shadcn requires full URLs for custom registry dependencies.
 3. Add the component to `src/components/registry/catalog.ts` and its live preview.
 4. Run the validation suite.
 
-Keep public interfaces small. A composed block should own its workflow seam and
-delegate narrower behavior to focused components.
+Keep public interfaces small. A compound component should own its shared behavior
+and delegate replaceable content to named children.
 
 ## Validate a change
 

@@ -130,6 +130,56 @@ components:
     textColor: "{colors.surface-dark}"
     rounded: "{rounded.control}"
     height: "32px"
+  coupon-field:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.composer}"
+    height: "44px"
+  coupon-field-pill:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.pill}"
+    height: "44px"
+  coupon-field-compact:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.xl}"
+    height: "34px"
+  coupon-apply:
+    backgroundColor: "{colors.text-dark}"
+    textColor: "{colors.surface-dark}"
+    rounded: "{rounded.lg}"
+    height: "34px"
+  price-summary:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.composer}"
+    padding: "18px"
+  price-summary-plain:
+    backgroundColor: "transparent"
+    textColor: "{colors.text-dark}"
+    rounded: "0px"
+    padding: "0px"
+  price-summary-compact:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.xl}"
+    padding: "12px"
+  order-status:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.composer}"
+    padding: "18px"
+  order-status-plain:
+    backgroundColor: "transparent"
+    textColor: "{colors.text-dark}"
+    rounded: "0px"
+    padding: "0px"
+  order-status-compact:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.xl}"
+    padding: "12px"
   install-command:
     backgroundColor: "{colors.surface-dark}"
     textColor: "{colors.muted-dark}"
@@ -168,7 +218,7 @@ Graphite surfaces and dotted hairline dividers create workbench structure withou
 - Cobalt reserved for focus. Ink send on Prompt Composer.
 - User-controlled Thinking disclosure with chronological, observable activity evidence.
 - Semantic, evidence-led approval states with typed confirmation for critical actions.
-- Five real registry items, highlighted TSX, install commands, and accessibility notes in one workbench.
+- Seven real registry items, highlighted TSX, install commands, and accessibility notes in one workbench.
 
 ## Colors
 
@@ -255,7 +305,7 @@ Borders are one pixel. Workbench focused fields may add a cobalt inset line. Pro
 ### Catalog rail
 
 - **Width:** 312px on desktop.
-- **Inventory:** Show the five verified registry items; do not create placeholder rows to increase density.
+- **Inventory:** Show the seven verified registry items; do not create placeholder rows to increase density.
 - **Rows:** Category rows are 32px; component rows are 34px. Both use full pill corners.
 - **Active state:** Raised Graphite pill fill with Primary Ink text and muted icons. No cobalt border, no status dot.
 - **Hover:** Quieter Graphite Surface fill, gated to fine-pointer hover media.
@@ -263,6 +313,8 @@ Borders are one pixel. Workbench focused fields may add a cobalt inset line. Pro
 
 ### Root navigation
 
+- **Brand:** Pair the mono `uai` wordmark with the three-part modular `u` mark. The
+  mark inherits Primary Ink in the header and keeps the same silhouette in the favicon.
 - **Destination:** Show one Components link.
 - **Search:** Do not render global documentation search. The rail's component search remains available on desktop.
 - **Chrome:** Use a dotted bottom rule on the Fumadocs header. Press scale is `0.97` on links and theme controls.
@@ -345,6 +397,75 @@ before a person approves or rejects the action.
   preview stages grow with their content so evidence, actions, and the variant control
   are never clipped on mobile.
 
+### Coupon Field
+
+A checkout-safe discount control for applying, replacing, and removing one coupon
+without owning the surrounding checkout form or the commerce backend.
+
+- **Composition:** The root owns the draft value, action rules, and accessibility IDs.
+  Label, Control, Input, Apply, Feedback, Message, and Remove remain named replaceable regions.
+- **Control:** A 14px Graphite Surface with a one-pixel Hairline Border and 4px inset.
+  The text input and attached 34px action stay on one line and shrink without overflow.
+- **Variants:** Rounded is the 14px default for checkout summaries. Pill uses a full
+  capsule for promotional surfaces. Compact uses a 12px shell, 2px inset, and 28px
+  controls for cart drawers. All three keep the same behavior and accessibility contract.
+- **Actions:** Apply and Replace use Primary Ink on Graphite Surface with 10px corners.
+  Remove is a quiet text action beside feedback. Coupon actions never use cobalt.
+- **States:** Idle, Applying, Applied, and Error are consumer-controlled. Applying
+  exposes busy state and blocks duplicate work. Applied and Error keep the current
+  coupon removable while a replacement is attempted.
+- **Feedback:** Success uses a Success icon and polite status announcement. Error uses
+  Danger border, icon, text, `aria-invalid`, and an assertive alert. Meaning never
+  depends on color alone.
+- **Checkout safety:** The component does not render a form. Enter applies a valid
+  draft from the input, so the field can live inside an existing checkout form.
+- **Preview:** Show a live order summary with `WELCOME20` applied. `SAVE20` is also
+  accepted; other illustrative codes demonstrate recoverable error feedback. Switch
+  Rounded, Pill, and Compact in one specimen without resetting coupon state.
+
+### Price Summary
+
+A read-only order total that explains how subtotal, discounts, shipping, and taxes
+produce the final amount without owning cart calculations or currency formatting.
+
+- **Composition:** Header, Title, Description, List, Item, Total, and Note remain named
+  replaceable regions. Consumers supply already-formatted labels and values; the component
+  owns hierarchy, description-list semantics, and responsive alignment.
+- **Rows:** Supporting amounts use 12px-12.5px type, tabular numerals, muted labels, and
+  dotted leaders. The final amount sits after a stronger hairline and uses a larger,
+  semibold tabular value. Discounts may use Success, but their label and signed value
+  communicate meaning without color.
+- **Variants:** Card uses a 14px bordered surface with 18px inset for checkout sidebars.
+  Plain removes outer chrome for payment steps and existing panels. Compact uses a 12px
+  surface, 12px inset, and tighter rhythm for cart drawers. All variants preserve the
+  same content and semantic contract.
+- **Overflow:** Long labels and localized formatted values wrap inside their column.
+  Price rows never create page-level horizontal scrolling.
+- **Preview:** Demonstrate Card, Plain, and Compact against the same realistic order so
+  the switcher compares visual treatment rather than changing the data scenario.
+
+### Order Status
+
+A read-only fulfillment timeline that keeps order stages, carrier facts, and support
+destinations visible without owning logistics data or polling behavior.
+
+- **Composition:** Header, Title, Description, Badge, Progress, Step, Step Title, Step
+  Description, Details, Detail, Actions, and Action remain named replaceable regions.
+  Consumers compose fulfillment stages and supply links; the component owns hierarchy,
+  ordered progress semantics, and responsive containment.
+- **Progress:** Stages use a compact vertical track with 18px-22px outlined markers and
+  a one-pixel connector. Complete, Current, Upcoming, and Needs attention appear as
+  visible labels in addition to icon and color. Only Current exposes `aria-current="step"`.
+- **Variants:** Card uses a 14px bordered surface with 18px inset for account pages.
+  Plain removes outer chrome for confirmation layouts. Compact uses a 12px surface,
+  12px inset, 18px markers, and tighter rhythm for drawers. All variants preserve the
+  same content and semantic contract.
+- **Facts and actions:** Carrier and tracking values use description-list semantics and
+  wrap long identifiers. Primary and secondary links remain consumer-owned destinations
+  with visible focus and 34px controls, reduced to 32px in Compact.
+- **Preview:** Demonstrate Card, Plain, and Compact with the same in-transit order so the
+  switcher compares visual treatment without implying live carrier data.
+
 ### Install command
 
 - **Shape:** 8px radius with a one-pixel border.
@@ -376,7 +497,7 @@ before a person approves or rejects the action.
 ### Do:
 
 - **Do** preserve the 312px catalog and flexible workbench split on desktop.
-- **Do** keep the product focused on its single Components destination and verified five-item catalog.
+- **Do** keep the product focused on its single Components destination and verified seven-item catalog.
 - **Do** use dotted hairlines to create hierarchy.
 - **Do** present each component in one rounded preview stage with floating variant pills when needed.
 - **Do** keep Usage and Accessibility attached to the install dock as an accessible disclosure.
@@ -387,6 +508,10 @@ before a person approves or rejects the action.
 - **Do** keep Thinking disclosure user-controlled and preserve its chronological activity history across status changes.
 - **Do** keep Approval Card risk, content density, and async status as independent dimensions.
 - **Do** require typed confirmation before a critical action can be approved.
+- **Do** keep Coupon Field async state consumer-controlled and safe inside checkout forms.
+- **Do** keep Price Summary calculation-free: consumers supply formatted labels and values.
+- **Do** keep Order Status presentation-only: consumers supply fulfillment stages, facts, and links.
+- **Do** expose meaningful variants from the component root and demonstrate each one.
 
 ### Don't:
 
@@ -402,3 +527,7 @@ before a person approves or rejects the action.
 - **Don't** ship a square floating menu or a full-bleed slab over the preview.
 - **Don't** present private chain-of-thought as Thinking activity; show only user-safe summaries and observable evidence.
 - **Don't** hide approval risk in color alone or let a critical action bypass confirmation.
+- **Don't** nest a form inside Coupon Field or hide coupon errors in color alone.
+- **Don't** make Price Summary calculate taxes, discounts, currency, or cart state.
+- **Don't** make Order Status infer carrier events, poll logistics services, or hide stage meaning in color.
+- **Don't** treat async states or preview scenarios as substitutes for visual variants.

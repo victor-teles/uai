@@ -118,8 +118,23 @@ a {
   text-underline-offset: 0.22em;
 }
 
-.uai-wordmark {
+.uai-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
   color: var(--uai-text);
+}
+
+.uai-brand__mark {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: none;
+  background-color: currentColor;
+  -webkit-mask: url("/brand/uai-mark.png") center / contain no-repeat;
+  mask: url("/brand/uai-mark.png") center / contain no-repeat;
+}
+
+.uai-wordmark {
   font-family: "Geist Mono Variable", ui-monospace, monospace;
   font-size: 1.05rem;
   font-weight: 650;
@@ -666,10 +681,6 @@ a {
   width: min(100%, 420px);
 }
 
-.uai-preview-flow {
-  width: min(100%, 820px);
-}
-
 .uai-registry-source {
   position: relative;
   width: min(100%, 960px);
@@ -949,20 +960,6 @@ a {
   border-bottom-color: transparent;
   border-bottom-width: 0;
   box-shadow: none;
-}
-
-#nd-nav::after {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 1px;
-  background-image: var(--uai-dot);
-  background-size: 6px 6px;
-  background-position: left center;
-  background-repeat: repeat-x;
-  content: "";
-  pointer-events: none;
 }
 
 #nd-nav a,
