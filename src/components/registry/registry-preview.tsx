@@ -71,10 +71,12 @@ import {
   type PromptComposerVariant,
 } from "@/components/ui/uai/prompt-composer";
 import {
+  TASK_LIST_VARIANTS,
   TaskList,
   TaskListDescription,
   TaskListItem,
   TaskListTitle,
+  type TaskListVariant,
 } from "@/components/ui/uai/task-list";
 import {
   Thinking,
@@ -131,6 +133,43 @@ function RegistryTaskItems() {
         <TaskListDescription>Files and dependencies</TaskListDescription>
       </TaskListItem>
     </>
+  );
+}
+
+const taskListVariantCopy: Record<TaskListVariant, { label: string; scene: string }> = {
+  card: { label: "Card", scene: "Project checklist" },
+  timeline: { label: "Timeline", scene: "Workflow progress" },
+  compact: { label: "Compact", scene: "Sidebar queue" },
+};
+
+function TaskListPreview() {
+  const [variant, setVariant] = useState<TaskListVariant>("card");
+  const copy = taskListVariantCopy[variant];
+  const swapping = useSwapFlag(variant);
+
+  return (
+    <PreviewStage
+      contentClassName="uai-preview-medium"
+      label={copy.scene}
+      swapping={swapping}
+      switcher={
+        <SegmentedControl
+          ariaLabel="Task list variant"
+          value={variant}
+          onChange={(id) => setVariant(id as TaskListVariant)}
+          options={TASK_LIST_VARIANTS.map((option) => ({
+            id: option,
+            label: taskListVariantCopy[option].label,
+          }))}
+        />
+      }
+    >
+      <div className="w-full max-w-[420px]">
+        <TaskList variant={variant} aria-label="Release progress">
+          <RegistryTaskItems />
+        </TaskList>
+      </div>
+    </PreviewStage>
   );
 }
 
@@ -661,15 +700,10 @@ export function RegistryPreview({ itemId }: { itemId: RegistryItemId }) {
   if (itemId === "prompt-composer") return <PromptComposerPreview />;
   if (itemId === "thinking") return <ThinkingPreview />;
   if (itemId === "approval-card") return <ApprovalCardPreview />;
+  if (itemId === "task-list") return <TaskListPreview />;
   if (itemId === "coupon-field") return <CouponFieldPreview />;
   if (itemId === "price-summary") return <PriceSummaryPreview />;
   if (itemId === "order-status") return <OrderStatusPreview />;
 
-  return (
-    <PreviewStage contentClassName="uai-preview-medium" label="Mixed progress">
-      <TaskList>
-        <RegistryTaskItems />
-      </TaskList>
-    </PreviewStage>
-  );
+  return null;
 }

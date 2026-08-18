@@ -97,7 +97,7 @@
       "name": "task-list",
       "type": "registry:ui",
       "title": "Task List",
-      "description": "A composable ordered list for complete, active, and pending work.",
+      "description": "A composable progress list with card, timeline, and compact variants.",
       "dependencies": ["lucide-react"],
       "registryDependencies": [
         "http://localhost:3000/r/uai-theme.json",

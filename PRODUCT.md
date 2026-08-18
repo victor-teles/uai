@@ -67,6 +67,8 @@ developer's application.
 - Approval Card makes the risk and downstream impact of an AI-proposed action
   explicit before a person decides. Its evidence is composable, its async state
   is consumer-controlled, and critical actions require typed confirmation.
+- Task List keeps progress semantics and status copy visible while adapting the same
+  composed tasks across card, timeline, and compact contexts.
 - Coupon Field keeps apply, replace, remove, and feedback behavior composable while
   leaving discount validation and async state with the consuming checkout. It ships
   rounded, pill, and compact variants for checkout, promotion, and cart contexts.

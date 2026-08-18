@@ -94,8 +94,15 @@ describe("Uai registry", () => {
   test("task list exposes composition instead of data props", async () => {
     const taskList = await Bun.file("src/registry/uai/components/task-list.tsx").text();
 
+    expect(taskList).toStartWith('"use client";');
+    expect(taskList).toContain('["card", "timeline", "compact"]');
+    expect(taskList).toContain("export type TaskListVariant");
     expect(taskList).toContain("export function TaskListItem");
     expect(taskList).toContain("export function TaskListTitle");
+    expect(taskList).toContain("statusLabel?: ReactNode");
+    expect(taskList).toContain('aria-current={ariaCurrent ?? (status === "active" ? "step"');
+    expect(taskList).not.toContain("ChevronRight");
+    expect(taskList).not.toContain("truncate");
     expect(taskList).not.toContain("tasks:");
   });
 

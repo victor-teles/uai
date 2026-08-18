@@ -9,7 +9,7 @@ Components should solve one reusable interaction contract. Blocks should combine
 - [x] **Prompt Composer** — Compose prompts, attachments, model selection, and submission states.
 - [x] **Thinking** — Disclose live activity and completed evidence without exposing private reasoning.
 - [x] **Approval Card** — Present risk, evidence, impact, and typed confirmation before an action.
-- [x] **Task List** — Show complete, active, and pending work in an ordered list.
+- [x] **Task List** — Show complete, active, and pending work across card, timeline, and compact variants.
 - [x] **Coupon Field** — Apply, replace, and remove discount codes with clear feedback across rounded, pill, and compact variants.
 - [x] **Price Summary** — Explain subtotal, discounts, shipping, taxes, and total across card, plain, and compact variants.
 - [x] **Order Status** — Show fulfillment stages, dates, tracking, and support actions across card, plain, and compact variants.

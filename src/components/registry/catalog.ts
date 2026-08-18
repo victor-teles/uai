@@ -161,8 +161,7 @@ export function PolicyDecision() {
     id: "task-list",
     name: "Task List",
     category: "Data Display",
-    description:
-      "An ordered view of complete, active, and pending work with visible status labels.",
+    description: "A composable progress list with card, timeline, and compact variants.",
     icon: ListChecks,
     usage: `import {
   TaskList,
@@ -173,13 +172,17 @@ export function PolicyDecision() {
 
 export function Progress() {
   return (
-    <TaskList>
+    <TaskList variant="timeline" aria-label="Release progress">
       <TaskListItem status="complete">
         <TaskListTitle>Review interface</TaskListTitle>
         <TaskListDescription>Props and public behavior</TaskListDescription>
       </TaskListItem>
       <TaskListItem status="active">
         <TaskListTitle>Check keyboard paths</TaskListTitle>
+        <TaskListDescription>Focus and reduced-motion behavior</TaskListDescription>
+      </TaskListItem>
+      <TaskListItem status="pending">
+        <TaskListTitle>Publish the registry item</TaskListTitle>
       </TaskListItem>
     </TaskList>
   )
@@ -187,8 +190,10 @@ export function Progress() {
     accessibility: [
       "Tasks retain ordered-list semantics.",
       "Every state includes text in addition to color.",
+      "The active task exposes current-step semantics.",
       "Active animation respects reduced-motion preferences.",
-      "Stable task IDs preserve list identity.",
+      "Long titles and descriptions wrap instead of being truncated.",
+      "Card, timeline, and compact variants preserve the same semantic contract.",
     ],
   },
   {

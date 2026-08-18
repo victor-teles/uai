@@ -64,7 +64,7 @@ export function RegistryCompositionFixture() {
           <ApprovalCardApprove />
         </ApprovalCardActions>
       </ApprovalCard>
-      <TaskList>
+      <TaskList variant="timeline">
         <TaskListItem status="active">
           <TaskListTitle>Validate the registry</TaskListTitle>
         </TaskListItem>

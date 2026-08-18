@@ -130,6 +130,18 @@ components:
     textColor: "{colors.surface-dark}"
     rounded: "{rounded.control}"
     height: "32px"
+  task-list:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.composer}"
+  task-list-timeline:
+    backgroundColor: "transparent"
+    textColor: "{colors.text-dark}"
+    rounded: "0px"
+  task-list-compact:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.xl}"
   coupon-field:
     backgroundColor: "{colors.surface-dark}"
     textColor: "{colors.text-dark}"
@@ -397,6 +409,30 @@ before a person approves or rejects the action.
   preview stages grow with their content so evidence, actions, and the variant control
   are never clipped on mobile.
 
+### Task List
+
+An ordered progress surface for complete, active, and pending work without owning
+task execution, persistence, or navigation.
+
+- **Composition:** The root owns visual density and list chrome. Item, Title, and
+  Description remain named regions, while each item owns its status and optional
+  localized status label.
+- **States:** Complete, Active, and Pending always include visible text. Complete mixes
+  Success with Primary Ink for AA text contrast, Active uses Primary Ink, and Pending
+  uses Muted Ink; color never carries meaning alone. The active item also exposes
+  current-step semantics.
+- **Variants:** Card is the 14px bordered default for project checklists. Timeline
+  removes the container and connects circular markers for workflow progress. Compact
+  uses a 12px surface and denser rows for sidebars and drawers.
+- **Content:** Titles and descriptions wrap instead of truncating, so long or localized
+  task names remain available. Status badges remain short and aligned to the trailing edge.
+- **Motion:** Only the active marker spins, and reduced-motion preferences disable it.
+  Static states do not animate.
+- **Affordance:** Rows are read-only by default and do not show a chevron or imply an
+  unavailable action. Consumers can compose links or controls into task content when needed.
+- **Preview:** Demonstrate Card, Timeline, and Compact with the same release checklist
+  so density and structure can be compared without changing the underlying state.
+
 ### Coupon Field
 
 A checkout-safe discount control for applying, replacing, and removing one coupon
@@ -508,6 +544,7 @@ destinations visible without owning logistics data or polling behavior.
 - **Do** keep Thinking disclosure user-controlled and preserve its chronological activity history across status changes.
 - **Do** keep Approval Card risk, content density, and async status as independent dimensions.
 - **Do** require typed confirmation before a critical action can be approved.
+- **Do** keep Task List status visible in text and preserve ordered-list semantics across variants.
 - **Do** keep Coupon Field async state consumer-controlled and safe inside checkout forms.
 - **Do** keep Price Summary calculation-free: consumers supply formatted labels and values.
 - **Do** keep Order Status presentation-only: consumers supply fulfillment stages, facts, and links.
