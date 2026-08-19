@@ -1,11 +1,11 @@
-# Uai videos
+# Vídeos do Uai
 
-Remotion compositions for presenting Uai registry components.
+Composições em Remotion para a série **Componente em destaque**.
 
 ## Thinking
 
-The `Thinking` composition is a 14-second, 1920x1080 product video that follows
-the component from live work to completed, inspectable evidence.
+A composição `Thinking` é o episódio 01: um vídeo de 14 segundos, em 1920x1080,
+que acompanha o componente do progresso ao histórico concluído e inspecionável.
 
 ```sh
 bun run dev
@@ -13,4 +13,4 @@ bun run lint
 bun run render:thinking
 ```
 
-The rendered MP4 is written to `out/thinking-component.mp4`.
+O MP4 é gerado em `out/thinking-component.mp4`.

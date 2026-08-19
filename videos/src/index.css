@@ -1,5 +1,20 @@
+@import "tailwindcss";
 @import "@fontsource-variable/geist/wght.css";
 @import "@fontsource-variable/geist-mono/wght.css";
+
+@source "./ThinkingCard.tsx";
+
+:root {
+  color-scheme: dark;
+  --uai-canvas: oklch(0.12 0.006 255);
+  --uai-surface: oklch(0.175 0.007 255);
+  --uai-surface-raised: oklch(0.22 0.008 255);
+  --uai-border: oklch(0.29 0.01 255);
+  --uai-border-strong: oklch(0.4 0.012 255);
+  --uai-text: oklch(0.965 0.003 255);
+  --uai-muted: oklch(0.68 0.012 255);
+  --uai-success: oklch(0.72 0.18 145);
+}
 
 * {
   box-sizing: border-box;
@@ -8,5 +23,7 @@
 html,
 body {
   margin: 0;
-  background: #111317;
+  background: var(--uai-canvas);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  text-rendering: optimizeLegibility;
 }

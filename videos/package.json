@@ -1,7 +1,7 @@
 {
   "name": "videos",
   "version": "1.0.0",
-  "description": "Product videos for Uai components",
+  "description": "Vídeos da série Componente em destaque do Uai",
   "repository": {},
   "license": "UNLICENSED",
   "private": true,
@@ -10,6 +10,7 @@
     "@fontsource-variable/geist-mono": "5.2.8",
     "@remotion/cli": "4.0.513",
     "@remotion/tailwind-v4": "4.0.513",
+    "lucide-react": "1.28.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "remotion": "4.0.513",
