@@ -13,6 +13,7 @@
       "!.next",
       "!public/r",
       "!.source",
+      "!videos/.agents",
       "!.impeccable/mocks",
       "!.impeccable/questions"
     ]

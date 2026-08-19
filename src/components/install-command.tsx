@@ -36,7 +36,7 @@ export function InstallCommand({
       className={cn("uai-install-command", compact && "uai-install-command--compact", className)}
       {...props}
     >
-      <code>{command}</code>
+      <input aria-label="Install command" value={command} readOnly spellCheck={false} />
       <button type="button" onClick={copy} aria-label="Copy install command">
         {copyState === "copied" ? (
           <Check className="size-3.5" aria-hidden="true" />

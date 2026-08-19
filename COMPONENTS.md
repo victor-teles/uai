@@ -9,16 +9,22 @@ Components should solve one reusable interaction contract. Blocks should combine
 - [x] **Prompt Composer** — Compose prompts, attachments, model selection, and submission states.
 - [x] **Thinking** — Disclose live activity and completed evidence without exposing private reasoning.
 - [x] **Approval Card** — Present risk, evidence, impact, and typed confirmation before an action.
+- [x] **Empty State** — Explain a blank slate and present clear next actions across card, plain, compact, and full-page 404 variants.
 - [x] **Task List** — Show complete, active, and pending work across card, timeline, and compact variants.
+- [x] **Sign-in Card** — Combine providers, credentials, recovery, errors, and loading across card, split, and compact variants.
+- [x] **Sign-up Card** — Combine account fields, consent, password guidance, verification, and loading across card, split, and compact variants.
+- [x] **Password Recovery** — Cover request, email sent, reset, expired, and success across card, split, and compact variants.
 - [x] **Coupon Field** — Apply, replace, and remove discount codes with clear feedback across rounded, pill, and compact variants.
+- [x] **Quantity Picker** — Change quantities with limits, direct input, stock feedback, and rounded, pill, and compact variants.
+- [x] **Cart Item** — Combine product options, quantity, availability, price, and removal across card, plain, and compact variants.
 - [x] **Price Summary** — Explain subtotal, discounts, shipping, taxes, and total across card, plain, and compact variants.
 - [x] **Order Status** — Show fulfillment stages, dates, tracking, and support actions across card, plain, and compact variants.
+- [x] **App Header** — Combine navigation, account actions, search, and responsive overflow across bar, floating, and compact variants.
 
 ## Component ideas
 
 ### Navigation and layout
 
-- [ ] **App Header** — Combine navigation, account actions, search, and responsive overflow.
 - [ ] **App Sidebar** — Support nested navigation, collapsed mode, mobile disclosure, and active states.
 - [ ] **Breadcrumb Trail** — Show hierarchy with truncation and a compact mobile fallback.
 - [ ] **Page Tabs** — Combine primary tabs, counts, actions, and horizontal overflow.
@@ -38,7 +44,6 @@ Components should solve one reusable interaction contract. Blocks should combine
 
 ### Feedback and state
 
-- [ ] **Empty State** — Explain the situation and present one clear next action.
 - [ ] **Status Banner** — Present information, success, warning, and error states with optional actions.
 - [ ] **Progress Summary** — Combine progress, elapsed time, remaining work, and cancellation.
 - [ ] **Inline Feedback** — Confirm or reject a local action without interrupting the workflow.
@@ -66,9 +71,6 @@ Components should solve one reusable interaction contract. Blocks should combine
 - [ ] **Newsletter Form** — Handle consent, validation, submission, success, and duplicate-email states.
 
 ### Commerce components
-
-- [ ] **Quantity Picker** — Change quantities with limits, direct input, and stock feedback.
-- [ ] **Cart Item** — Combine product options, quantity, availability, price, and removal.
 
 ### Content and community components
 
@@ -102,9 +104,9 @@ Components should solve one reusable interaction contract. Blocks should combine
 
 ### Authentication and onboarding
 
-- [ ] **Sign-in Card** — Combine credentials, providers, recovery, errors, and loading states.
-- [ ] **Sign-up Card** — Combine account fields, consent, password guidance, and verification.
-- [ ] **Password Recovery** — Cover request, email sent, reset, expired, and success states.
+- [x] **Sign-in Card** — Combine credentials, providers, recovery, errors, and loading states.
+- [x] **Sign-up Card** — Combine account fields, consent, password guidance, and verification.
+- [x] **Password Recovery** — Cover request, email sent, reset, expired, and success states.
 - [ ] **Code Verification** — Support one-time codes, resend timing, errors, and alternate methods.
 - [ ] **Onboarding Wizard** — Guide setup through resumable steps with validation and progress.
 - [ ] **Workspace Setup** — Create a workspace, invite teammates, and choose initial settings.
@@ -156,7 +158,7 @@ Components should solve one reusable interaction contract. Blocks should combine
 
 ## Suggested first batch
 
-- [ ] Build **App Header**, **Empty State**, **Form Field**, and **Filter Bar** as general foundations.
+- [ ] Build **Form Field** and **Filter Bar** as the next general foundations.
 - [ ] Build **Hero Section**, **Pricing Section**, and **FAQ Section** for marketing sites.
 - [ ] Build **Dashboard Shell**, **Settings Page**, and **Team Management** for applications.
 - [ ] Build **Product Detail** and **Cart Drawer** for commerce.

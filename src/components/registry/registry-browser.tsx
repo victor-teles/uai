@@ -12,8 +12,16 @@ import {
   registryCatalog,
   registryCategories,
 } from "./catalog";
-import { SegmentedControl } from "./preview-chrome";
 import { RegistryPreview } from "./registry-preview";
+
+type RegistryDocument = {
+  files?: { content?: string; path?: string; target?: string }[];
+};
+
+type ManualSource = {
+  code: string;
+  path: string;
+};
 
 function formatCatalogIndex(id: RegistryItemId) {
   const index = registryCatalog.findIndex((item) => item.id === id);
@@ -24,8 +32,10 @@ export function RegistryBrowser() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<RegistryCategory>("All");
   const [selectedId, setSelectedId] = useState<RegistryItemId>("prompt-composer");
-  const [tab, setTab] = useState<"preview" | "code">("preview");
   const [codeCopied, setCodeCopied] = useState(false);
+  const [manualCodeCopied, setManualCodeCopied] = useState(false);
+  const [manualSource, setManualSource] = useState<ManualSource | null>(null);
+  const [manualSourceError, setManualSourceError] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -42,6 +52,40 @@ export function RegistryBrowser() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
+
+  useEffect(() => {
+    if (!detailsOpen) return;
+
+    const controller = new AbortController();
+    setManualSource(null);
+    setManualSourceError(false);
+    setManualCodeCopied(false);
+
+    const loadManualSource = async () => {
+      try {
+        const response = await fetch(`/r/${selectedId}.json`, { signal: controller.signal });
+        if (!response.ok) throw new Error(`Registry source request failed: ${response.status}`);
+
+        const document = (await response.json()) as RegistryDocument;
+        const sourceFile = document.files?.find((file) => file.content);
+        if (!sourceFile?.content) throw new Error("Registry source is missing its component file");
+
+        setManualSource({
+          code: sourceFile.content,
+          path:
+            sourceFile.target?.replace(/^@ui\//, "components/ui/") ??
+            sourceFile.path ??
+            `components/ui/uai/${selectedId}.tsx`,
+        });
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setManualSourceError(true);
+      }
+    };
+
+    void loadManualSource();
+    return () => controller.abort();
+  }, [detailsOpen, selectedId]);
 
   const filteredItems = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -64,6 +108,18 @@ export function RegistryBrowser() {
       window.setTimeout(() => setCodeCopied(false), 1800);
     } catch {
       setCodeCopied(false);
+    }
+  };
+
+  const copyManualSource = async () => {
+    if (!manualSource) return;
+
+    try {
+      await navigator.clipboard.writeText(manualSource.code);
+      setManualCodeCopied(true);
+      window.setTimeout(() => setManualCodeCopied(false), 1800);
+    } catch {
+      setManualCodeCopied(false);
     }
   };
 
@@ -122,7 +178,6 @@ export function RegistryBrowser() {
                       aria-current={selectedId === item.id ? "true" : undefined}
                       onClick={() => {
                         setSelectedId(item.id);
-                        setTab("preview");
                       }}
                     >
                       <Icon aria-hidden="true" />
@@ -168,39 +223,33 @@ export function RegistryBrowser() {
             </h1>
             <p>{selectedItem.description}</p>
           </div>
-          <SegmentedControl
-            ariaLabel="Component view"
-            role="tablist"
-            value={tab}
-            onChange={(id) => setTab(id as "preview" | "code")}
-            options={[
-              { id: "preview", label: "Preview" },
-              { id: "code", label: "Code" },
-            ]}
-          />
         </div>
 
-        <div className="uai-registry-preview" role="tabpanel">
-          {tab === "preview" ? (
-            <RegistryPreview itemId={selectedId} />
-          ) : (
-            <div className="uai-registry-source">
-              <button type="button" onClick={copyCode} aria-label="Copy usage code">
-                <span className="uai-copy-label">
-                  {codeCopied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
-                  {codeCopied ? "Copied" : "Copy"}
-                </span>
-              </button>
-              <DynamicCodeBlock
-                lang="tsx"
-                code={selectedItem.usage}
-                codeblock={{
-                  allowCopy: false,
-                  className: "uai-syntax-codeblock uai-syntax-codeblock--source",
-                }}
-              />
-            </div>
-          )}
+        <div className="uai-registry-preview">
+          <RegistryPreview
+            itemId={selectedId}
+            codeExample={
+              <div className="uai-registry-source">
+                <div className="uai-registry-source__header">
+                  <h2>Code example</h2>
+                  <button type="button" onClick={copyCode} aria-label="Copy code example">
+                    <span className="uai-copy-label">
+                      {codeCopied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
+                      {codeCopied ? "Copied" : "Copy"}
+                    </span>
+                  </button>
+                </div>
+                <DynamicCodeBlock
+                  lang="tsx"
+                  code={selectedItem.usage}
+                  codeblock={{
+                    allowCopy: false,
+                    className: "uai-syntax-codeblock uai-syntax-codeblock--source",
+                  }}
+                />
+              </div>
+            }
+          />
         </div>
 
         <div className="uai-registry-dock" data-open={detailsOpen}>
@@ -213,23 +262,49 @@ export function RegistryBrowser() {
             <div className="uai-registry-details">
               <section
                 className="uai-registry-details__section"
-                aria-labelledby="registry-usage-title"
+                aria-labelledby="registry-manual-install-title"
               >
                 <div className="uai-registry-details__heading">
-                  <h2 id="registry-usage-title">Usage</h2>
-                  <button type="button" onClick={copyCode} aria-label="Copy usage code">
-                    {codeCopied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
-                  </button>
+                  <div>
+                    <h2 id="registry-manual-install-title">Manual install</h2>
+                    <p>
+                      Create{" "}
+                      <code>{manualSource?.path ?? `components/ui/uai/${selectedId}.tsx`}</code>,
+                      then paste the component source.
+                    </p>
+                  </div>
+                  {manualSource ? (
+                    <button
+                      type="button"
+                      onClick={copyManualSource}
+                      aria-label="Copy component source"
+                    >
+                      {manualCodeCopied ? (
+                        <Check aria-hidden="true" />
+                      ) : (
+                        <Copy aria-hidden="true" />
+                      )}
+                    </button>
+                  ) : null}
                 </div>
-                <p>Import the component and keep its source inside your application.</p>
-                <DynamicCodeBlock
-                  lang="tsx"
-                  code={selectedItem.usage}
-                  codeblock={{
-                    allowCopy: false,
-                    className: "uai-syntax-codeblock uai-syntax-codeblock--details",
-                  }}
-                />
+                {manualSource ? (
+                  <DynamicCodeBlock
+                    lang="tsx"
+                    code={manualSource.code}
+                    codeblock={{
+                      allowCopy: false,
+                      className: "uai-syntax-codeblock uai-syntax-codeblock--details",
+                    }}
+                  />
+                ) : manualSourceError ? (
+                  <p className="uai-registry-manual-status" role="alert">
+                    The component source could not be loaded. Use the registry command below.
+                  </p>
+                ) : (
+                  <p className="uai-registry-manual-status" role="status">
+                    Loading component source…
+                  </p>
+                )}
               </section>
 
               <section
@@ -263,7 +338,7 @@ export function RegistryBrowser() {
                 Install
               </span>
               <span className="uai-registry-install-detail-label">
-                {detailsOpen ? "Hide details" : "Show details"}
+                {detailsOpen ? "Close" : "Manual install"}
                 <ChevronUp aria-hidden="true" />
               </span>
             </button>

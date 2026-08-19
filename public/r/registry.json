@@ -94,6 +94,24 @@
       "categories": ["ai", "feedback"]
     },
     {
+      "name": "empty-state",
+      "type": "registry:ui",
+      "title": "Empty State",
+      "description": "A compound blank-slate surface with card, plain, compact, and page variants.",
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/empty-state.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/empty-state.tsx"
+        }
+      ],
+      "categories": ["feedback", "data-display"]
+    },
+    {
       "name": "task-list",
       "type": "registry:ui",
       "title": "Task List",
@@ -132,6 +150,63 @@
       "categories": ["ai", "forms"]
     },
     {
+      "name": "sign-in-card",
+      "type": "registry:ui",
+      "title": "Sign-in Card",
+      "description": "A compound sign-in form with providers, credentials, recovery, and async feedback.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/sign-in-card.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/sign-in-card.tsx"
+        }
+      ],
+      "categories": ["authentication", "forms"]
+    },
+    {
+      "name": "sign-up-card",
+      "type": "registry:ui",
+      "title": "Sign-up Card",
+      "description": "A compound account creation form with consent, password guidance, and verification feedback.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/sign-up-card.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/sign-up-card.tsx"
+        }
+      ],
+      "categories": ["authentication", "forms"]
+    },
+    {
+      "name": "password-recovery",
+      "type": "registry:ui",
+      "title": "Password Recovery",
+      "description": "A compound account recovery workflow with request, sent, reset, expired, and success states.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/password-recovery.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/password-recovery.tsx"
+        }
+      ],
+      "categories": ["authentication", "forms"]
+    },
+    {
       "name": "coupon-field",
       "type": "registry:ui",
       "title": "Coupon Field",
@@ -149,6 +224,45 @@
         }
       ],
       "categories": ["commerce", "forms"]
+    },
+    {
+      "name": "quantity-picker",
+      "type": "registry:ui",
+      "title": "Quantity Picker",
+      "description": "A compound quantity control with limits, direct input, and stock feedback.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/quantity-picker.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/quantity-picker.tsx"
+        }
+      ],
+      "categories": ["commerce", "forms"]
+    },
+    {
+      "name": "cart-item",
+      "type": "registry:ui",
+      "title": "Cart Item",
+      "description": "A compound cart line with product details, availability, quantity, price, and removal.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json",
+        "http://localhost:3000/r/quantity-picker.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/cart-item.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/cart-item.tsx"
+        }
+      ],
+      "categories": ["commerce", "data-display"]
     },
     {
       "name": "price-summary",
@@ -186,6 +300,25 @@
         }
       ],
       "categories": ["commerce", "data-display"]
+    },
+    {
+      "name": "app-header",
+      "type": "registry:ui",
+      "title": "App Header",
+      "description": "A compound application header with navigation, search, account actions, and responsive overflow.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/app-header.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/app-header.tsx"
+        }
+      ],
+      "categories": ["navigation", "layout"]
     }
   ]
 }

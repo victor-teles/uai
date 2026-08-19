@@ -10,7 +10,7 @@ type SegmentedOption = {
 function useSegmentThumb(value: string) {
   const rootNode = useRef<HTMLElement | null>(null);
   const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
-  const [thumb, setThumb] = useState({ x: 0, width: 0 });
+  const [thumb, setThumb] = useState({ x: 0, y: 0, width: 0, height: 0 });
 
   const setRootRef = useCallback((node: HTMLElement | null) => {
     rootNode.current = node;
@@ -24,7 +24,9 @@ function useSegmentThumb(value: string) {
     const activeBox = active.getBoundingClientRect();
     setThumb({
       x: activeBox.left - rootBox.left,
+      y: activeBox.top - rootBox.top,
       width: activeBox.width,
+      height: activeBox.height,
     });
   }, [value]);
 
@@ -48,14 +50,25 @@ function useSegmentThumb(value: string) {
   return { setRootRef, thumb, setButtonRef };
 }
 
-function SegmentThumb({ x, width }: { x: number; width: number }) {
+function SegmentThumb({
+  x,
+  y,
+  width,
+  height,
+}: {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}) {
   return (
     <span
       className="uai-segmented__thumb"
       aria-hidden="true"
       style={{
         width: width || undefined,
-        transform: `translateX(${x}px)`,
+        height: height || undefined,
+        transform: `translate(${x}px, ${y}px)`,
       }}
     />
   );
@@ -66,43 +79,20 @@ export function SegmentedControl({
   value,
   onChange,
   ariaLabel,
-  role = "group",
+  orientation = "horizontal",
 }: {
   options: readonly SegmentedOption[];
   value: string;
   onChange: (id: string) => void;
   ariaLabel: string;
-  role?: "tablist" | "group";
+  orientation?: "horizontal" | "vertical";
 }) {
   const { setRootRef, thumb, setButtonRef } = useSegmentThumb(value);
 
-  if (role === "tablist") {
-    return (
-      <div ref={setRootRef} className="uai-segmented" role="tablist" aria-label={ariaLabel}>
-        <SegmentThumb x={thumb.x} width={thumb.width} />
-        {options.map((option) => {
-          const selected = value === option.id;
-          return (
-            <button
-              key={option.id}
-              ref={(node) => setButtonRef(option.id, node)}
-              type="button"
-              role="tab"
-              aria-selected={selected}
-              onClick={() => onChange(option.id)}
-            >
-              {option.label}
-            </button>
-          );
-        })}
-      </div>
-    );
-  }
-
   return (
-    <fieldset ref={setRootRef} className="uai-segmented">
+    <fieldset ref={setRootRef} className="uai-segmented" data-orientation={orientation}>
       <legend className="sr-only">{ariaLabel}</legend>
-      <SegmentThumb x={thumb.x} width={thumb.width} />
+      <SegmentThumb {...thumb} />
       {options.map((option) => {
         const selected = value === option.id;
         return (
@@ -123,7 +113,6 @@ export function SegmentedControl({
 
 export function PreviewStage({
   children,
-  switcher,
   label,
   status,
   className,
@@ -131,7 +120,6 @@ export function PreviewStage({
   swapping = false,
 }: {
   children: ReactNode;
-  switcher?: ReactNode;
   label?: string;
   status?: ReactNode;
   className?: string;
@@ -148,7 +136,6 @@ export function PreviewStage({
       >
         {children}
       </div>
-      {switcher}
     </div>
   );
 }

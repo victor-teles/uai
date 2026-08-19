@@ -142,6 +142,51 @@ components:
     backgroundColor: "{colors.surface-dark}"
     textColor: "{colors.text-dark}"
     rounded: "{rounded.xl}"
+  sign-in-card:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.composer}"
+    padding: "20px"
+  sign-in-card-split:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.composer}"
+    padding: "24px"
+  sign-in-card-compact:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.xl}"
+    padding: "14px"
+  sign-up-card:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.composer}"
+    padding: "20px"
+  sign-up-card-split:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.composer}"
+    padding: "24px"
+  sign-up-card-compact:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.xl}"
+    padding: "14px"
+  password-recovery:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.composer}"
+    padding: "20px"
+  password-recovery-split:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.composer}"
+    padding: "0px"
+  password-recovery-compact:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.xl}"
+    padding: "14px"
   coupon-field:
     backgroundColor: "{colors.surface-dark}"
     textColor: "{colors.text-dark}"
@@ -162,6 +207,36 @@ components:
     textColor: "{colors.surface-dark}"
     rounded: "{rounded.lg}"
     height: "34px"
+  quantity-picker:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.composer}"
+    height: "44px"
+  quantity-picker-pill:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.pill}"
+    height: "44px"
+  quantity-picker-compact:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.xl}"
+    height: "34px"
+  cart-item:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.composer}"
+    padding: "16px"
+  cart-item-plain:
+    backgroundColor: "transparent"
+    textColor: "{colors.text-dark}"
+    rounded: "0px"
+    padding: "0px 0px 18px"
+  cart-item-compact:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.xl}"
+    padding: "12px"
   price-summary:
     backgroundColor: "{colors.surface-dark}"
     textColor: "{colors.text-dark}"
@@ -192,6 +267,24 @@ components:
     textColor: "{colors.text-dark}"
     rounded: "{rounded.xl}"
     padding: "12px"
+  app-header-bar:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "0px"
+    height: "56px"
+    padding: "0px 16px"
+  app-header-floating:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.composer}"
+    height: "56px"
+    padding: "8px"
+  app-header-compact:
+    backgroundColor: "{colors.surface-dark}"
+    textColor: "{colors.text-dark}"
+    rounded: "{rounded.xl}"
+    height: "44px"
+    padding: "4px 6px"
   install-command:
     backgroundColor: "{colors.surface-dark}"
     textColor: "{colors.muted-dark}"
@@ -225,12 +318,12 @@ Graphite surfaces and dotted hairline dividers create workbench structure withou
 - Dense catalog navigation with a stable 312px desktop rail.
 - One Components destination with no global documentation search or parallel docs shell.
 - Flat graphite workbench surfaces separated by dotted hairlines.
-- Numbered titles, 16px preview stages, and floating inverted variant pills.
+- Numbered titles, stacked preview-and-code specimens, and a vertical variant rail.
 - Compact type with mono reserved for commands, shortcuts, and code.
 - Cobalt reserved for focus. Ink send on Prompt Composer.
 - User-controlled Thinking disclosure with chronological, observable activity evidence.
 - Semantic, evidence-led approval states with typed confirmation for critical actions.
-- Seven real registry items, highlighted TSX, install commands, and accessibility notes in one workbench.
+- Thirteen real registry items, highlighted examples, manual source, install commands, and accessibility notes in one workbench.
 
 ## Colors
 
@@ -270,6 +363,7 @@ The palette uses cool neutrals for structure and one cobalt signal for interacti
 ### Hierarchy
 
 - **Title** (590, `1.25rem`, 1.2, `-0.025em`): Names the selected component as `01 Prompt Composer` using the catalog index. Mobile may tighten to `1.2rem`.
+- **Diagnostic Code** (600, `clamp(3.5rem, 10vw, 6rem)`, 1, `-0.035em`): Gives full-page Empty State routes one restrained machine-facing identifier in mono.
 - **Body** (400, `0.8125rem`, `18px`): Describes components and interactive fields.
 - **Navigation** (400-520, `0.8125rem`, 1.4): Supports the Components destination, segmented pills, and dense catalog scanning.
 - **Label** (520-560, `0.66rem`-`0.72rem`, up to `0.055em` tracking): Names categories, dock controls, and stage captions.
@@ -285,9 +379,9 @@ The product exposes one Components destination. The root navigation contains onl
 
 The desktop shell uses a fixed 312px catalog rail and a flexible workbench. The global header spans both regions. The workbench scrolls independently when its content exceeds the viewport. A fixed install dock begins at `left: 312px`, while the workbench reserves 60px of bottom clearance so content is never covered.
 
-Preview and Code share a compact segmented pill beside the numbered title. Content starts with 28px-32px horizontal padding on desktop. Each registry item renders inside one 16px-radius preview stage on Graphite Surface. Prompt Composer stays within a 420px frame inside that stage so menus read at product scale. Compact uses a 280px frame. Ghost sits on a dock strip inside the stage. Variant switchers float at the bottom center of the stage as inverted pills.
+Each component uses one 16px specimen panel with the live preview first and the highlighted usage example directly below it. A 128px vertical variant rail sits to the right of the complete preview-and-code panel, so changing a variant never hides either form of evidence. Content starts with 28px-32px horizontal padding on desktop. Prompt Composer stays within a 420px frame inside the stage so menus read at product scale. Compact uses a 280px frame. Ghost sits on a dock strip inside the stage.
 
-At widths less than 900px, the catalog rail becomes a native component selector and the fixed dock moves to `left: 0`. The workbench reserves 112px of bottom clearance for the dock's stacked mobile footprint. At widths less than 640px, details form one column and horizontal padding becomes 16px. Commands and code scroll inside their own regions; the page never creates horizontal overflow.
+At widths less than 900px, the catalog rail becomes a native component selector and the fixed dock moves to `left: 0`. The workbench reserves 112px of bottom clearance for the dock's stacked mobile footprint. At widths less than 640px, the vertical variant rail becomes a horizontal row above the specimen, details form one column, and horizontal padding becomes 16px. Commands and code scroll inside their own regions; the page never creates horizontal overflow.
 
 Spacing follows a compact 4px foundation. Common gaps use 8px, 12px, 16px, 24px, and 32px.
 
@@ -317,7 +411,7 @@ Borders are one pixel. Workbench focused fields may add a cobalt inset line. Pro
 ### Catalog rail
 
 - **Width:** 312px on desktop.
-- **Inventory:** Show the seven verified registry items; do not create placeholder rows to increase density.
+- **Inventory:** Show the fourteen verified registry items; do not create placeholder rows to increase density.
 - **Rows:** Category rows are 32px; component rows are 34px. Both use full pill corners.
 - **Active state:** Raised Graphite pill fill with Primary Ink text and muted icons. No cobalt border, no status dot.
 - **Hover:** Quieter Graphite Surface fill, gated to fine-pointer hover media.
@@ -325,8 +419,9 @@ Borders are one pixel. Workbench focused fields may add a cobalt inset line. Pro
 
 ### Root navigation
 
-- **Brand:** Pair the mono `uai` wordmark with the three-part modular `u` mark. The
-  mark inherits Primary Ink in the header and keeps the same silhouette in the favicon.
+- **Brand:** The three-part modular mark is the visual `U`; pair it with the mono
+  wordmark `ai` so the complete lockup reads `Uai`. The mark inherits Primary Ink
+  in the header and keeps the same silhouette in the favicon.
 - **Destination:** Show one Components link.
 - **Search:** Do not render global documentation search. The rail's component search remains available on desktop.
 - **Chrome:** Use a dotted bottom rule on the Fumadocs header. Press scale is `0.97` on links and theme controls.
@@ -336,13 +431,15 @@ Borders are one pixel. Workbench focused fields may add a cobalt inset line. Pro
 - **Shape:** Full pill track with a 3px inset, hairline border, and sliding active thumb.
 - **Active state:** Inverted fill — near-white on dark, Primary Ink on light — with contrasting label color.
 - **Motion:** Thumb moves with `transform` and `width` in 180ms `cubic-bezier(0.23, 1, 0.32, 1)`. Press scale is `0.97`.
-- **Uses:** Preview/Code in the workbench header; Prompt Composer and Thinking variant switchers inside the preview stage.
+- **Uses:** Variant and scenario choices in the workbench rail. On narrow screens, the same control becomes a horizontal segmented row.
 
 ### Preview stage
 
-- **Shape:** One 16px-radius specimen well per registry item on Graphite Surface over Graphite Canvas. Min-height ≈480px.
-- **Content:** Center the component. Optional 12px captions sit in the corners. Do not stack multiple comparison grids as the default.
-- **Variants:** When a component has real variants, float a segmented pill at the bottom center of the stage. Crossfade the canvas with opacity (and optional 2px blur) for 160ms.
+- **Shape:** One 16px-radius specimen panel per registry item on Graphite Surface over Graphite Canvas. The preview has a min-height of about 480px and shares the panel with the code example below.
+- **Content:** Center the component. Optional 12px captions sit in the corners. Authentication
+  cards reserve 44px of top space on mobile so their dense specimens never cover the scene
+  or status labels. Do not stack multiple comparison grids as the default.
+- **Variants:** When a component has real variants, place a vertical segmented control in the right rail. Crossfade the canvas with opacity (and optional 2px blur) for 160ms.
 
 ### Prompt Composer
 
@@ -433,6 +530,96 @@ task execution, persistence, or navigation.
 - **Preview:** Demonstrate Card, Timeline, and Compact with the same release checklist
   so density and structure can be compared without changing the underlying state.
 
+### Sign-in Card
+
+A composed authentication form that keeps provider and credential paths coherent without
+owning identity APIs, session persistence, routing, or account recovery.
+
+- **Composition:** Header, Title, Description, Body, Providers, Provider, Divider, Fields,
+  Field, Label, Input, Field Message, Options, Error, Submit, and Footer remain named
+  replaceable regions. The root owns visual density, busy state, and accessibility IDs.
+- **Variants:** Card uses a 14px bordered surface with 20px inset for dialogs and centered
+  sign-in pages. Split uses the same surface with 24px inset and places providers beside
+  credentials on wider screens, then returns to one column on mobile. Its divider uses the
+  concise label `or` because both paths are already visible. Compact uses a 12px surface,
+  14px inset, and 34px controls for embedded account prompts.
+- **Providers and credentials:** Provider controls are native non-submit buttons. Email and
+  password remain native inputs with programmatic labels, browser autocomplete, and consumer-
+  owned validation. Password reveal exposes pressed state and never submits the form.
+- **States:** Idle, Submitting, and Error are consumer-controlled. Submitting exposes form
+  busy state and disables provider, field, reveal, and submit controls to prevent duplicate
+  authentication work. Successful routing remains the application's responsibility.
+- **Errors:** Global failures use an assertive alert and name recovery. Field errors use
+  visible Danger text, border, `aria-invalid`, and an associated message; meaning never
+  depends on color alone.
+- **Preview:** Demonstrate Card, Split, and Compact with the same provider and credential
+  content. The password `preview` completes the illustrative interaction; other values show
+  recoverable error feedback.
+
+### Sign-up Card
+
+A composed account-creation form that keeps providers, identity fields, password guidance,
+required consent, and verification handoff coherent without owning identity APIs, sessions,
+email delivery, routing, or navigation.
+
+- **Composition:** Header, Title, Description, Body, Providers, Provider, Divider, Fields,
+  Field, Label, Input, Field Message, Password Guide, Password Requirement, Consent,
+  Checkbox, Error, Submit, Verification, and Footer remain named replaceable regions. The
+  root owns visual density, form busy state, and shared title and error IDs.
+- **Variants:** Card uses a 14px bordered surface with 20px inset for account dialogs. Split
+  uses the same surface with 24px inset and keeps provider and email paths visible side by
+  side on wider screens, then returns to one column on mobile. Its divider uses the concise
+  label `or`. Compact uses a 12px surface, 14px inset, and 34px controls for invitations and
+  embedded onboarding.
+- **Providers and fields:** Providers are native non-submit buttons. Name, email, and password
+  remain native inputs with programmatic labels, browser autocomplete, and consumer-owned
+  validation. Password reveal exposes pressed state and never submits the form.
+- **Password guidance:** Requirements remain visible, state their met or unmet result in text
+  for assistive technology, and are explicitly associated with the password input through
+  `aria-describedby`. Error copy is associated separately so both references remain intact.
+- **Consent:** Consent composes a native checkbox with visible terms and privacy links. The
+  consuming application marks the checkbox required and owns the policy text and acceptance
+  record; the component only supplies layout, focus, and disabled-state behavior.
+- **States:** Idle, Submitting, Error, and Verification are consumer-controlled. Submitting
+  exposes form busy state and disables providers, fields, consent, reveal, and submit controls
+  to prevent duplicate account work. Verification replaces the form body with a polite status
+  handoff and a consumer-owned recovery action.
+- **Errors:** Global account-creation failures use an assertive alert. Field errors use visible
+  Danger text, border, `aria-invalid`, and an associated message; meaning never depends on
+  color alone.
+- **Preview:** Demonstrate Card, Split, and Compact with the same provider, field, consent,
+  and password-requirement content. A valid password advances to Verification; incomplete
+  guidance demonstrates recoverable field and form errors without implying a real account.
+
+### Password Recovery
+
+A composed account-recovery workflow that keeps account lookup, email handoff, password
+replacement, expired links, and completion feedback coherent without owning identity APIs,
+email delivery, token validation, password persistence, routing, or navigation.
+
+- **Composition:** Aside, Progress, Progress Item, Main, Header, Title, Description, Stage,
+  Fields, Field, Label, Input, Field Message, Password Guide, Password Requirement, Error,
+  Submit, Status, Actions, Action, and Footer remain named replaceable regions. The root owns
+  the controlled step, visual variant, busy state, and shared title and error IDs.
+- **Variants:** Card uses a 14px bordered surface with 20px inset for recovery dialogs. Split
+  uses a two-region 14px surface: a raised progress rail and a 24px action panel on wider
+  screens, returning to one column on mobile. Compact uses a 12px surface, 14px inset, and
+  34px controls for account drawers and support prompts.
+- **Workflow:** Request, Sent, Reset, Expired, and Success are consumer-controlled steps.
+  Only the matching composed Stage renders. Idle, Submitting, and Error remain independent
+  async states so the application can reflect backend work without changing the current step.
+- **Privacy:** Sent copy must not confirm whether the submitted email belongs to an account.
+  Email delivery, reset tokens, rate limits, account lookup, and navigation remain consumer-owned.
+- **Passwords:** New-password inputs use browser autocomplete, optional reveal controls with
+  pressed state, explicitly associated requirement guidance, and separately associated field
+  errors so validation remains understandable without color.
+- **Feedback:** Sent and Success use polite status announcements. Expired uses an assertive
+  alert with a clear recovery action. Backend failures use the independent Error region.
+  Submitting disables fields, reveal, action, and submit controls to prevent duplicate work.
+- **Preview:** Demonstrate Card, Split, and Compact with the same email and recovery progress.
+  The live specimen can request a link, open a reset form, preview expiry, validate the new
+  password, and reach success without implying that a real email was sent.
+
 ### Coupon Field
 
 A checkout-safe discount control for applying, replacing, and removing one coupon
@@ -458,6 +645,55 @@ without owning the surrounding checkout form or the commerce backend.
 - **Preview:** Show a live order summary with `WELCOME20` applied. `SAVE20` is also
   accepted; other illustrative codes demonstrate recoverable error feedback. Switch
   Rounded, Pill, and Compact in one specimen without resetting coupon state.
+
+### Quantity Picker
+
+A limit-aware commerce control for changing one line item's quantity without owning
+inventory checks, cart persistence, pricing, or the surrounding purchase form.
+
+- **Composition:** The root owns the current value, direct-edit draft, limits, step
+  behavior, and accessibility IDs. Label, Control, Decrease, Input, Increase, and
+  Message remain named replaceable regions.
+- **Control:** A 14px Graphite Surface with a one-pixel Hairline Border and 4px inset.
+  The two raised 34px actions flank a centered tabular input and remain one compact row.
+- **Variants:** Rounded is the 14px default for product details. Pill uses a full capsule
+  shell and circular actions for cart lines. Compact uses a 12px shell, 2px inset, and
+  28px actions for drawers. All three preserve the same behavior and keyboard contract.
+- **Limits:** Minimum and maximum bounds disable only the action that cannot proceed.
+  Direct input clamps to the configured range when it commits; invalid or empty drafts
+  restore the current value.
+- **Keyboard:** Enter commits direct input, Escape restores the current value, and native
+  focus moves through Decrease, Input, and Increase. Every icon-only action has an
+  explicit accessible name.
+- **Focus:** Direct-input focus suppresses inherited outlines and strengthens only the
+  Graphite shell border. Quantity Picker never uses workbench cobalt for focus.
+- **Feedback:** Consumer-authored stock copy is associated with the input. Muted, Warning,
+  and Danger tones reinforce meaning while the text and optional live-region role carry it.
+- **Preview:** Demonstrate Rounded, Pill, and Compact on the same tote line. Quantity
+  updates the canonical line total, while the stock message names the five-item limit.
+
+### Cart Item
+
+A composed commerce row that keeps product identity, selected options, availability,
+quantity, price, and removal together without owning cart calculations or persistence.
+
+- **Composition:** Media, Content, Header, Title, Description, Price, Options, Option,
+  Availability, Actions, and Remove remain named replaceable regions. Quantity Picker
+  is a registry dependency composed inside Actions instead of being reimplemented.
+- **Layout:** Product media anchors a two-column row at 72px-96px. The content column
+  keeps title and line price first, selected options and availability second, then
+  quantity and removal after a Hairline Border. Long names and localized values wrap.
+- **Variants:** Card uses a 14px bordered surface with 16px inset for full cart pages.
+  Plain removes outer chrome and ends with a hairline for checkout review lists. Compact
+  uses a 12px surface, 12px inset, 72px media, and tighter type for cart drawers. All
+  three preserve the same semantic and keyboard contract.
+- **Availability:** Available, Low, and Unavailable tones reinforce consumer-authored
+  text. Meaning remains explicit in words and the consumer may opt into a live region.
+- **Removal:** Remove is a native button and defaults to `type="button"`. Its controlled
+  removing state disables duplicate actions, exposes `aria-busy`, and names the work in
+  progress without removing the cart line before the application confirms persistence.
+- **Preview:** Demonstrate Card, Plain, and Compact with the same tote, options, price,
+  five-item limit, interactive quantity, and controlled removal feedback.
 
 ### Price Summary
 
@@ -502,6 +738,55 @@ destinations visible without owning logistics data or polling behavior.
 - **Preview:** Demonstrate Card, Plain, and Compact with the same in-transit order so the
   switcher compares visual treatment without implying live carrier data.
 
+### App Header
+
+A responsive application landmark that keeps product identity, primary navigation, search,
+account actions, and mobile overflow together without owning routing or application data.
+
+- **Composition:** Brand, Overflow, Nav, Nav Item, Search, Actions, Action, and Menu Button
+  remain named replaceable regions. Consumers supply destinations, search handling, icons,
+  and account-menu behavior; the root owns variant chrome and responsive disclosure state.
+- **Navigation:** Primary destinations retain list semantics and the active destination uses
+  `aria-current="page"`. Search uses a native search input with a persistent accessible label.
+  Account controls are native buttons with explicit accessible names.
+- **Responsive overflow:** At narrow widths, navigation and search move below the always-visible
+  brand and account actions. The menu button exposes controlled and expanded state, and its
+  action label changes between Open navigation and Close navigation.
+- **Variants:** Bar is a 56px edge-to-edge application boundary with a bottom hairline.
+  Floating is a 14px inset surface with restrained offset depth. Compact is a 44px, 12px
+  surface with 28px controls for dense operations consoles. All preserve the same semantic
+  and keyboard contract.
+- **Preview:** Demonstrate Bar, Floating, and Compact with the same Atlas workspace navigation.
+  The mobile preview keeps the overflow interactive so destinations and search remain reachable.
+
+### Empty State
+
+A composed blank-slate surface that explains why content is absent and offers a clear next
+step without owning data detection, navigation, dialogs, or persistence.
+
+- **Composition:** Media, Content, Header, Title, Description, Actions, Action, and Note remain
+  named replaceable regions. The root owns labelling, placement chrome, and responsive
+  containment; consumers own the empty condition, copy, icon meaning, and action behavior.
+- **Hierarchy:** One quiet media tile leads into a concise title and practical explanation.
+  Page may replace the tile with a large diagnostic code. The primary action follows
+  immediately; supporting guidance stays visually subordinate. Long localized copy wraps
+  inside a 52-character measure without truncation.
+- **Variants:** Card uses a centered 14px bordered surface with generous inset for blank pages.
+  Plain removes outer chrome for panels that already provide containment. Compact becomes a
+  left-aligned 12px surface with a smaller media tile and 32px actions for sidebars and dense
+  workspaces. Page becomes a transparent, wrapped full-page composition with 160px diagnostic
+  media and 36px actions; it stacks naturally in narrow viewports. All variants preserve the
+  same content and action contract.
+- **Actions:** Primary actions use Primary Ink on Graphite Surface. Secondary actions remain
+  outlined and quiet. Buttons default to `type="button"`; destinations retain native anchor
+  semantics. Empty State never invents navigation or async work.
+- **Announcements:** Static empty content is not a live region by default. Consumers may add a
+  status or alert role only when an empty state appears as the result of a user-triggered change.
+  Decorative icons stay hidden; meaningful media keeps consumer-authored accessible text.
+- **Preview:** Demonstrate Card, Plain, and Compact with the same project blank slate so the
+  switcher compares placement. Page demonstrates a complete 404 recovery route with primary
+  and secondary destinations.
+
 ### Install command
 
 - **Shape:** 8px radius with a one-pixel border.
@@ -517,14 +802,15 @@ destinations visible without owning logistics data or polling behavior.
 
 ### Details drawer
 
-- **Disclosure:** Reveal Usage and Accessibility before the install strip. Keep the drawer `aria-hidden` and inert while closed.
+- **Disclosure:** Reveal the selected component's distributable source and Accessibility notes before the install strip. Keep the drawer `aria-hidden` and inert while closed.
+- **Manual install:** Name the target file, load the actual source from the generated registry document, and provide a dedicated source-copy action. Usage examples belong below the preview, not in this drawer.
 - **Motion:** Transition max-height for 220ms and opacity for 160ms with ease-out timing. Remove both transitions when reduced motion is requested.
 - **Desktop:** Split Usage and Accessibility into equal columns and cap the open drawer to the viewport-safe region.
 - **Mobile:** Stack the panels, constrain code inside its own scroll area, and keep the drawer within the viewport.
 
 ### Highlighted code
 
-- **Renderer:** Use Fumadocs UI `DynamicCodeBlock` with Shiki TSX highlighting for both Code and Usage.
+- **Renderer:** Use Fumadocs UI `DynamicCodeBlock` with Shiki TSX highlighting for the usage example and manual component source.
 - **Type:** Use the code role (`0.74rem`, 1.7) and preserve token-level syntax color.
 - **Overflow:** Contain scrolling inside the code region. Never allow highlighted code to widen the page.
 
@@ -533,11 +819,11 @@ destinations visible without owning logistics data or polling behavior.
 ### Do:
 
 - **Do** preserve the 312px catalog and flexible workbench split on desktop.
-- **Do** keep the product focused on its single Components destination and verified seven-item catalog.
+- **Do** keep the product focused on its single Components destination and verified fourteen-item catalog.
 - **Do** use dotted hairlines to create hierarchy.
-- **Do** present each component in one rounded preview stage with floating variant pills when needed.
-- **Do** keep Usage and Accessibility attached to the install dock as an accessible disclosure.
-- **Do** use highlighted TSX for both source views and Usage examples.
+- **Do** present each component in one rounded preview-and-code specimen with a right-side variant rail when needed.
+- **Do** keep manual component source and Accessibility attached to the install dock as an accessible disclosure.
+- **Do** use highlighted TSX for both usage examples and manual source.
 - **Do** keep cobalt rare and limited to focus.
 - **Do** use ink send, 14px composer corners, and 28px ghost controls on Prompt Composer. Use ghost for docks and compact for sidebars.
 - **Do** give plus and model menus a visible rounded outline and a compact width.
@@ -545,9 +831,19 @@ destinations visible without owning logistics data or polling behavior.
 - **Do** keep Approval Card risk, content density, and async status as independent dimensions.
 - **Do** require typed confirmation before a critical action can be approved.
 - **Do** keep Task List status visible in text and preserve ordered-list semantics across variants.
+- **Do** keep Sign-in Card authentication state consumer-controlled and preserve native form semantics.
+- **Do** keep Sign-up Card account-creation and verification state consumer-controlled, preserve
+  native form semantics, and explicitly associate password guidance with its input.
+- **Do** keep Password Recovery steps and async state consumer-controlled, preserve native form
+  semantics, and avoid revealing whether a submitted email belongs to an account.
 - **Do** keep Coupon Field async state consumer-controlled and safe inside checkout forms.
+- **Do** keep Quantity Picker inventory and cart persistence consumer-controlled.
+- **Do** compose Quantity Picker inside Cart Item instead of duplicating its behavior.
+- **Do** keep Cart Item pricing, inventory, and removal persistence consumer-controlled.
 - **Do** keep Price Summary calculation-free: consumers supply formatted labels and values.
 - **Do** keep Order Status presentation-only: consumers supply fulfillment stages, facts, and links.
+- **Do** keep App Header routing, search results, notifications, and account menus consumer-owned.
+- **Do** keep Empty State detection, copy, destinations, and action behavior consumer-owned.
 - **Do** expose meaningful variants from the component root and demonstrate each one.
 
 ### Don't:
@@ -564,7 +860,15 @@ destinations visible without owning logistics data or polling behavior.
 - **Don't** ship a square floating menu or a full-bleed slab over the preview.
 - **Don't** present private chain-of-thought as Thinking activity; show only user-safe summaries and observable evidence.
 - **Don't** hide approval risk in color alone or let a critical action bypass confirmation.
+- **Don't** make Sign-in Card call an identity provider, store sessions, or navigate after success.
+- **Don't** make Sign-up Card create identities, persist sessions or consent, send verification,
+  or navigate after success.
+- **Don't** make Password Recovery look up accounts, send email, validate reset tokens, persist
+  passwords, or navigate after completion.
 - **Don't** nest a form inside Coupon Field or hide coupon errors in color alone.
+- **Don't** pass a product data object into Cart Item or let it calculate line totals.
 - **Don't** make Price Summary calculate taxes, discounts, currency, or cart state.
 - **Don't** make Order Status infer carrier events, poll logistics services, or hide stage meaning in color.
+- **Don't** hide App Header navigation without an expanded menu control or replace link semantics with click handlers.
+- **Don't** announce static Empty State content as a live region or make its media carry meaning without accessible text.
 - **Don't** treat async states or preview scenarios as substitutes for visual variants.

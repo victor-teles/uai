@@ -19,11 +19,18 @@ describe("Uai registry", () => {
       "uai-utils",
       "thinking",
       "approval-card",
+      "empty-state",
       "task-list",
       "prompt-composer",
+      "sign-in-card",
+      "sign-up-card",
+      "password-recovery",
       "coupon-field",
+      "quantity-picker",
+      "cart-item",
       "price-summary",
       "order-status",
+      "app-header",
     ]);
   });
 
@@ -40,6 +47,22 @@ describe("Uai registry", () => {
 
     expect(outputs.join("\n")).not.toContain("@/registry/");
     expect(outputs.join("\n")).toContain("@/lib/uai-utils");
+  });
+
+  test("keeps preview, example, variants, and manual installation in their own regions", async () => {
+    const browser = await Bun.file("src/components/registry/registry-browser.tsx").text();
+    const preview = await Bun.file("src/components/registry/registry-preview.tsx").text();
+    const installCommand = await Bun.file("src/components/install-command.tsx").text();
+    const sourceRequest = "fetch(`/r/$" + "{selectedId}.json`";
+
+    expect(browser).toContain("<h2>Code example</h2>");
+    expect(browser).toContain(sourceRequest);
+    expect(browser).toContain("code={manualSource.code}");
+    expect(browser).not.toContain("const [tab, setTab]");
+    expect(preview).toContain('orientation="vertical"');
+    expect(preview).toContain("{codeExample}");
+    expect(installCommand).toContain('aria-label="Install command"');
+    expect(installCommand).toContain("readOnly");
   });
 
   test("prompt composer ships chrome and density variants", async () => {
@@ -106,6 +129,23 @@ describe("Uai registry", () => {
     expect(taskList).not.toContain("tasks:");
   });
 
+  test("empty state composes blank-slate content across placement variants", async () => {
+    const source = await Bun.file("src/registry/uai/components/empty-state.tsx").text();
+
+    expect(source).toContain('["card", "plain", "compact", "page"]');
+    expect(source).toContain("export type EmptyStateVariant");
+    expect(source).toContain("export function EmptyStateMedia");
+    expect(source).toContain("export function EmptyStateContent");
+    expect(source).toContain("export function EmptyStateHeader");
+    expect(source).toContain("export function EmptyStateTitle");
+    expect(source).toContain("export function EmptyStateDescription");
+    expect(source).toContain("export function EmptyStateActions");
+    expect(source).toContain("export function EmptyStateAction");
+    expect(source).toContain("export function EmptyStateNote");
+    expect(source).toContain('type = "button"');
+    expect(source).not.toContain("items:");
+  });
+
   test("coupon field composes checkout-safe async behavior", async () => {
     const source = await Bun.file("src/registry/uai/components/coupon-field.tsx").text();
 
@@ -123,6 +163,71 @@ describe("Uai registry", () => {
     expect(source).toContain('role={isError ? "alert" : isStatus ? "status"');
     expect(source).not.toContain("<form");
     expect(source).not.toContain("messages:");
+  });
+
+  test("sign-in card composes authentication paths and controlled async states", async () => {
+    const source = await Bun.file("src/registry/uai/components/sign-in-card.tsx").text();
+
+    expect(source).toContain('["card", "split", "compact"]');
+    expect(source).toContain('["idle", "submitting", "error"]');
+    expect(source).toContain("export type SignInCardVariant");
+    expect(source).toContain("export function SignInCardHeader");
+    expect(source).toContain("export function SignInCardBody");
+    expect(source).toContain("export function SignInCardProviders");
+    expect(source).toContain("export function SignInCardProvider");
+    expect(source).toContain("export function SignInCardDivider");
+    expect(source).toContain("export function SignInCardField");
+    expect(source).toContain("export function SignInCardInput");
+    expect(source).toContain("export function SignInCardError");
+    expect(source).toContain("export function SignInCardSubmit");
+    expect(source).toContain("aria-busy={submitting || undefined}");
+    expect(source).toContain('type="button"');
+    expect(source).toContain('role="alert"');
+    expect(source).not.toContain("providers:");
+    expect(source).not.toContain("fields:");
+  });
+
+  test("sign-up card composes account creation, guidance, consent, and verification", async () => {
+    const source = await Bun.file("src/registry/uai/components/sign-up-card.tsx").text();
+
+    expect(source).toContain('["card", "split", "compact"]');
+    expect(source).toContain('["idle", "submitting", "error", "verification"]');
+    expect(source).toContain("export type SignUpCardVariant");
+    expect(source).toContain("export function SignUpCardProviders");
+    expect(source).toContain("export function SignUpCardField");
+    expect(source).toContain("export function SignUpCardInput");
+    expect(source).toContain("export function SignUpCardPasswordGuide");
+    expect(source).toContain("export function SignUpCardPasswordRequirement");
+    expect(source).toContain("export function SignUpCardConsent");
+    expect(source).toContain("export function SignUpCardCheckbox");
+    expect(source).toContain("export function SignUpCardVerification");
+    expect(source).toContain("aria-busy={submitting || undefined}");
+    expect(source).toContain('type="button"');
+    expect(source).toContain('role="alert"');
+    expect(source).toContain('role="status"');
+    expect(source).not.toContain("providers:");
+    expect(source).not.toContain("fields:");
+  });
+
+  test("password recovery composes controlled workflow steps and visual variants", async () => {
+    const source = await Bun.file("src/registry/uai/components/password-recovery.tsx").text();
+
+    expect(source).toContain('["card", "split", "compact"]');
+    expect(source).toContain('["request", "sent", "reset", "expired", "success"]');
+    expect(source).toContain('["idle", "submitting", "error"]');
+    expect(source).toContain("export type PasswordRecoveryVariant");
+    expect(source).toContain("export function PasswordRecoveryAside");
+    expect(source).toContain("export function PasswordRecoveryProgress");
+    expect(source).toContain("export function PasswordRecoveryStage");
+    expect(source).toContain("export function PasswordRecoveryField");
+    expect(source).toContain("export function PasswordRecoveryInput");
+    expect(source).toContain("export function PasswordRecoveryPasswordGuide");
+    expect(source).toContain("export function PasswordRecoveryStatus");
+    expect(source).toContain("aria-busy={submitting || undefined}");
+    expect(source).toContain('type="button"');
+    expect(source).toContain('role="alert"');
+    expect(source).not.toContain("steps:");
+    expect(source).not.toContain("fields:");
   });
 
   test("price summary composes semantic totals across visual variants", async () => {
@@ -143,6 +248,59 @@ describe("Uai registry", () => {
     expect(source).not.toContain("items:");
   });
 
+  test("quantity picker composes limits, direct input, and stock feedback", async () => {
+    const source = await Bun.file("src/registry/uai/components/quantity-picker.tsx").text();
+
+    expect(source).toContain('["rounded", "pill", "compact"]');
+    expect(source).toContain("export type QuantityPickerVariant");
+    expect(source).toContain("export function QuantityPickerLabel");
+    expect(source).toContain("export function QuantityPickerControl");
+    expect(source).toContain("export function QuantityPickerDecrease");
+    expect(source).toContain("export function QuantityPickerInput");
+    expect(source).toContain("export function QuantityPickerIncrease");
+    expect(source).toContain("export function QuantityPickerMessage");
+    expect(source).toContain('type="number"');
+    expect(source).toContain('type="button"');
+    expect(source).not.toContain("items:");
+  });
+
+  test("cart item composes cart-line content across visual variants", async () => {
+    const source = await Bun.file("src/registry/uai/components/cart-item.tsx").text();
+
+    expect(source).toContain('["card", "plain", "compact"]');
+    expect(source).toContain('["available", "low", "unavailable"]');
+    expect(source).toContain("export type CartItemVariant");
+    expect(source).toContain("export function CartItemMedia");
+    expect(source).toContain("export function CartItemContent");
+    expect(source).toContain("export function CartItemHeader");
+    expect(source).toContain("export function CartItemTitle");
+    expect(source).toContain("export function CartItemPrice");
+    expect(source).toContain("export function CartItemOptions");
+    expect(source).toContain("export function CartItemOption");
+    expect(source).toContain("export function CartItemAvailability");
+    expect(source).toContain("export function CartItemActions");
+    expect(source).toContain("export function CartItemRemove");
+    expect(source).toContain('type = "button"');
+    expect(source).toContain("aria-busy={removing || undefined}");
+    expect(source).not.toContain("product:");
+    expect(source).not.toContain("quantity:");
+  });
+
+  test("cart item usage derives the displayed price from its controlled quantity", async () => {
+    const catalog = await Bun.file("src/components/registry/catalog.ts").text();
+    const cartItemUsage = catalog.slice(
+      catalog.indexOf('id: "cart-item"'),
+      catalog.indexOf('id: "price-summary"'),
+    );
+
+    expect(cartItemUsage).toContain('usage: `import { useState } from "react"');
+    expect(cartItemUsage).toContain("const [quantity, setQuantity] = useState(2)");
+    expect(cartItemUsage).toContain("<CartItemPrice>{formatPrice(quantity * 48)}</CartItemPrice>");
+    expect(cartItemUsage).toContain(
+      "<QuantityPicker value={quantity} onValueChange={setQuantity} min={1} max={5}>",
+    );
+  });
+
   test("order status composes fulfillment evidence across visual variants", async () => {
     const source = await Bun.file("src/registry/uai/components/order-status.tsx").text();
 
@@ -161,6 +319,25 @@ describe("Uai registry", () => {
     expect(source).toContain("<dl");
     expect(source).not.toContain("steps:");
     expect(source).not.toContain("trackingUrl:");
+  });
+
+  test("app header composes navigation and responsive overflow across visual variants", async () => {
+    const source = await Bun.file("src/registry/uai/components/app-header.tsx").text();
+
+    expect(source).toContain('["bar", "floating", "compact"]');
+    expect(source).toContain("export type AppHeaderVariant");
+    expect(source).toContain("export function AppHeaderBrand");
+    expect(source).toContain("export function AppHeaderOverflow");
+    expect(source).toContain("export function AppHeaderNav");
+    expect(source).toContain("export function AppHeaderNavItem");
+    expect(source).toContain("export function AppHeaderSearch");
+    expect(source).toContain("export function AppHeaderActions");
+    expect(source).toContain("export function AppHeaderAction");
+    expect(source).toContain("export function AppHeaderMenuButton");
+    expect(source).toContain("aria-expanded={context.open}");
+    expect(source).toContain('aria-current={ariaCurrent ?? (active ? "page"');
+    expect(source).not.toContain("items:");
+    expect(source).not.toContain("links:");
   });
 
   test("publishes tokens for light and dark themes", async () => {

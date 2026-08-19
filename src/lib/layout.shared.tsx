@@ -4,9 +4,11 @@ export function baseOptions(): BaseLayoutProps {
   return {
     nav: {
       title: (
-        <span className="uai-brand">
+        <span className="uai-brand" role="img" aria-label="Uai">
           <span className="uai-brand__mark" aria-hidden="true" />
-          <span className="uai-wordmark">uai</span>
+          <span className="uai-wordmark" aria-hidden="true">
+            ai
+          </span>
         </span>
       ),
     },
