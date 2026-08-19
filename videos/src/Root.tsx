@@ -1,6 +1,6 @@
 import "./index.css";
-import { ThinkingComposition } from "./Composition";
+import { ThinkingCompositions } from "./Composition";
 
 export const RemotionRoot = () => {
-  return <ThinkingComposition />;
+  return <ThinkingCompositions />;
 };

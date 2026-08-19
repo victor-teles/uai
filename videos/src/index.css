@@ -3,6 +3,7 @@
 @import "@fontsource-variable/geist-mono/wght.css";
 
 @source "./ThinkingCard.tsx";
+@source "./thinking-v2/**/*.tsx";
 
 :root {
   color-scheme: dark;
