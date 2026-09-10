@@ -131,3 +131,9 @@ assets. Documentation and demonstrations must not invent those claims.
 
 Target WCAG 2.2 AA. Support keyboard navigation, visible focus, semantic HTML,
 screen readers, touch input, dark and light themes, and reduced-motion preferences.
+
+## Forms and usability
+
+The catalog includes Form Field, Search Field, Filter Bar, File Upload, Date Range Picker, Form Error Summary, Unsaved Changes Bar, and Step Indicator. Each ships three named visual variants with replaceable compound children, an interactive preview, installation source, usage code, accessibility notes, and behavior tests.
+
+These components own local interaction and accessibility. Applications own validation policy, remote search, upload transport, persistence, and navigation. File uploads in the workbench simulate progress locally. The date-range example uses fixed release dates and calendar dates without timezone conversion. The unsaved-changes preview disables page-exit warnings while exercising save, discard, and failure states; installed code enables the native warning while dirty, and applications supply SPA navigation blocking.

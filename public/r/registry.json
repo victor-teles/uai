@@ -319,6 +319,134 @@
         }
       ],
       "categories": ["navigation", "layout"]
+    },
+    {
+      "name": "form-field",
+      "type": "registry:ui",
+      "title": "Form Field",
+      "description": "Labels, descriptions, requirements, validation, and character counts.",
+      "dependencies": [],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/form-field.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/form-field.tsx"
+        }
+      ],
+      "categories": ["forms"]
+    },
+    {
+      "name": "search-field",
+      "type": "registry:ui",
+      "title": "Search Field",
+      "description": "Clearable search with recent queries, loading, empty, and error feedback.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/search-field.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/search-field.tsx"
+        }
+      ],
+      "categories": ["forms"]
+    },
+    {
+      "name": "filter-bar",
+      "type": "registry:ui",
+      "title": "Filter Bar",
+      "description": "Composable filters, removable chips, result counts, and reset actions.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/filter-bar.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/filter-bar.tsx"
+        }
+      ],
+      "categories": ["forms"]
+    },
+    {
+      "name": "file-upload",
+      "type": "registry:ui",
+      "title": "File Upload",
+      "description": "File selection and drag and drop with validation, progress, retry, and removal.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/file-upload.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/file-upload.tsx"
+        }
+      ],
+      "categories": ["forms"]
+    },
+    {
+      "name": "date-range-picker",
+      "type": "registry:ui",
+      "title": "Date Range Picker",
+      "description": "Presets, date inputs, and a keyboard-navigable calendar for local date ranges.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/date-range-picker.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/date-range-picker.tsx"
+        }
+      ],
+      "categories": ["forms"]
+    },
+    {
+      "name": "form-error-summary",
+      "type": "registry:ui",
+      "title": "Form Error Summary",
+      "description": "A submission error summary with links that focus the matching fields.",
+      "dependencies": [],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/form-error-summary.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/form-error-summary.tsx"
+        }
+      ],
+      "categories": ["forms"]
+    },
+    {
+      "name": "unsaved-changes-bar",
+      "type": "registry:ui",
+      "title": "Unsaved Changes Bar",
+      "description": "Persistent save and discard actions with busy, error, and page-exit warnings.",
+      "dependencies": [],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/unsaved-changes-bar.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/unsaved-changes-bar.tsx"
+        }
+      ],
+      "categories": ["forms"]
+    },
+    {
+      "name": "step-indicator",
+      "type": "registry:ui",
+      "title": "Step Indicator",
+      "description": "Current, complete, optional, blocked, and error steps with explicit status text.",
+      "dependencies": [],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/step-indicator.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/step-indicator.tsx"
+        }
+      ],
+      "categories": ["forms"]
     }
   ]
 }

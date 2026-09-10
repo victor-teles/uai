@@ -223,8 +223,8 @@ import {
   ThinkingContent,
   ThinkingTrigger,
 } from "@/components/ui/uai/thinking";
-
 import type { RegistryItemId } from "./catalog";
+import { FormsPreview, getFormsPreviewControl } from "./forms/preview";
 import { PreviewStage, SegmentedControl } from "./preview-chrome";
 
 const composerModels = [
@@ -1533,6 +1533,8 @@ type PreviewControl = {
 };
 
 function getPreviewControl(itemId: RegistryItemId): PreviewControl | undefined {
+  const formsControl = getFormsPreviewControl(itemId);
+  if (formsControl) return formsControl;
   if (itemId === "prompt-composer") {
     return {
       ariaLabel: "Composer variant",
@@ -1690,6 +1692,7 @@ function getPreviewControl(itemId: RegistryItemId): PreviewControl | undefined {
 }
 
 function renderPreview(itemId: RegistryItemId, selection: string) {
+  if (getFormsPreviewControl(itemId)) return <FormsPreview itemId={itemId} selection={selection} />;
   if (itemId === "prompt-composer") {
     return <PromptComposerPreview variant={selection as PromptComposerVariant} />;
   }

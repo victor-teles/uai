@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "step-indicator",
+  "title": "Step Indicator",
+  "description": "Current, complete, optional, blocked, and error steps with explicit status text.",
+  "dependencies": [],
+  "registryDependencies": [
+    "http://localhost:3000/r/uai-theme.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/step-indicator.tsx",
+      "content": "\"use client\";\n\nimport { type ComponentProps, createContext, useContext } from \"react\";\n\nexport const STEP_INDICATOR_VARIANTS = [\"horizontal\", \"vertical\", \"compact\"] as const;\nexport type StepIndicatorVariant = (typeof STEP_INDICATOR_VARIANTS)[number];\nexport type StepIndicatorStatus = \"upcoming\" | \"current\" | \"complete\" | \"blocked\" | \"error\";\nconst Context = createContext<StepIndicatorVariant | null>(null);\nexport function StepIndicator({\n  variant = \"horizontal\",\n  style,\n  ...props\n}: ComponentProps<\"ol\"> & { variant?: StepIndicatorVariant }) {\n  return (\n    <Context.Provider value={variant}>\n      <ol\n        aria-label=\"Form progress\"\n        {...props}\n        data-variant={variant}\n        style={{\n          display: \"flex\",\n          flexDirection: variant === \"vertical\" ? \"column\" : \"row\",\n          flexWrap: \"wrap\",\n          gap: variant === \"compact\" ? 6 : 12,\n          listStyle: \"none\",\n          margin: 0,\n          padding: 0,\n          color: \"var(--uai-text)\",\n          fontSize: 13,\n          ...style,\n        }}\n      />\n    </Context.Provider>\n  );\n}\nexport function StepIndicatorStep({\n  status = \"upcoming\",\n  optional = false,\n  children,\n  style,\n  ...props\n}: ComponentProps<\"li\"> & { status?: StepIndicatorStatus; optional?: boolean }) {\n  const variant = useContext(Context);\n  if (!variant) throw new Error(\"StepIndicatorStep must be used within StepIndicator\");\n  return (\n    <li\n      {...props}\n      aria-current={status === \"current\" ? \"step\" : undefined}\n      data-status={status}\n      style={{\n        display: \"grid\",\n        alignContent: \"start\",\n        gap: 6,\n        flex: variant === \"vertical\" ? undefined : \"1 1 110px\",\n        minWidth: 0,\n        border: `1px solid var(${status === \"current\" ? \"--uai-border-strong\" : \"--uai-border\"})`,\n        borderRadius: variant === \"compact\" ? 999 : 14,\n        padding: variant === \"compact\" ? \"8px 14px\" : 14,\n        background: status === \"current\" ? \"var(--uai-surface-raised)\" : \"var(--uai-surface)\",\n        ...style,\n      }}\n    >\n      {children}\n      <span\n        style={{\n          fontSize: 11,\n          color:\n            status === \"error\"\n              ? \"color-mix(in oklab, var(--uai-danger) 75%, var(--uai-text))\"\n              : \"var(--uai-muted)\",\n        }}\n      >\n        {status.charAt(0).toUpperCase() + status.slice(1)}\n        {optional ? \" · Optional\" : \"\"}\n      </span>\n    </li>\n  );\n}\nexport function StepIndicatorTitle({ style, ...props }: ComponentProps<\"span\">) {\n  return <span {...props} style={{ fontWeight: 550, overflowWrap: \"anywhere\", ...style }} />;\n}\nexport function StepIndicatorDescription({ style, ...props }: ComponentProps<\"p\">) {\n  return <p {...props} style={{ margin: 0, color: \"var(--uai-muted)\", fontSize: 12, ...style }} />;\n}\n",
+      "type": "registry:ui",
+      "target": "@ui/uai/step-indicator.tsx"
+    }
+  ],
+  "categories": [
+    "forms"
+  ],
+  "type": "registry:ui"
+}

@@ -323,7 +323,7 @@ Graphite surfaces and dotted hairline dividers create workbench structure withou
 - Cobalt reserved for focus. Ink send on Prompt Composer.
 - User-controlled Thinking disclosure with chronological, observable activity evidence.
 - Semantic, evidence-led approval states with typed confirmation for critical actions.
-- Thirteen real registry items, highlighted examples, manual source, install commands, and accessibility notes in one workbench.
+- Twenty-two real registry items, highlighted examples, manual source, install commands, and accessibility notes in one workbench.
 
 ## Colors
 
@@ -819,7 +819,7 @@ step without owning data detection, navigation, dialogs, or persistence.
 ### Do:
 
 - **Do** preserve the 312px catalog and flexible workbench split on desktop.
-- **Do** keep the product focused on its single Components destination and verified fourteen-item catalog.
+- **Do** keep the product focused on its single Components destination and verified twenty-two-item catalog.
 - **Do** use dotted hairlines to create hierarchy.
 - **Do** present each component in one rounded preview-and-code specimen with a right-side variant rail when needed.
 - **Do** keep manual component source and Accessibility attached to the install dock as an accessible disclosure.
@@ -872,3 +872,22 @@ step without owning data detection, navigation, dialogs, or persistence.
 - **Don't** hide App Header navigation without an expanded menu control or replace link semantics with click handlers.
 - **Don't** announce static Empty State content as a live region or make its media carry meaning without accessible text.
 - **Don't** treat async states or preview scenarios as substitutes for visual variants.
+
+## Forms and usability
+
+All eight form components use the existing graphite tokens in light and dark themes, 13px field type, visible native keyboard focus, and consumer-composed content. New visual values live in the distributed source as inline styles. They use no entrance animation, so reduced motion does not require a separate path.
+
+| Component | Visual variants | Interaction contract |
+| --- | --- | --- |
+| Form Field | outlined / filled / compact | Labels, descriptions, requirements, validation, and character counts. |
+| Search Field | rounded / pill / compact | Clearable search with recent queries, loading, empty, and error feedback. |
+| Filter Bar | toolbar / panel / compact | Composable filters, removable chips, result counts, and reset actions. |
+| File Upload | dropzone / inline / compact | File selection and drag and drop with validation, progress, retry, and removal. |
+| Date Range Picker | card / split / compact | Presets, date inputs, and a keyboard-navigable calendar for local date ranges. |
+| Form Error Summary | card / plain / compact | A submission error summary with links that focus the matching fields. |
+| Unsaved Changes Bar | bar / floating / compact | Persistent save and discard actions with busy, error, and page-exit warnings. |
+| Step Indicator | horizontal / vertical / compact | Current, complete, optional, blocked, and error steps with explicit status text. |
+
+Outlined fields have a 14px border; filled fields use the raised surface and compact fields reduce padding. Search uses a 14px shell, full pill, or 12px compact shell. Filter panels stack content over a raised surface; toolbars wrap controls in a horizontal row. Upload dropzones use a dashed 14px card with centered content; inline uses a horizontal row, and compact uses 12px corners. Date range Split places presets beside the calendar when space permits and wraps them above on narrow screens. Error text mixes 75% danger with primary ink to retain contrast in both themes. Error summaries use a danger border and textual errors; Plain removes the card fill. Unsaved bars remain in flow and stick to their containing scroll region; Floating adds an inset and shadow. Step indicators wrap horizontally, stack vertically, or use compact pills.
+
+Backend search, upload transport, saves, validation policy, routing, and wizard navigation remain consumer-owned. File validation covers file type, size, and count before handing files to the application. Date inputs, presets, and day buttons share local-date bounds. Calendar navigation supports arrows, Home/End, Page Up/Down, and Shift for year changes. Unsaved state enables native beforeunload warnings by default; app-router transitions require the consuming application’s blocker.

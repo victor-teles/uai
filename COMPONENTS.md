@@ -33,14 +33,14 @@ Components should solve one reusable interaction contract. Blocks should combine
 
 ### Forms and usability
 
-- [ ] **Form Field** — Combine labels, descriptions, requirements, validation, and character counts.
-- [ ] **Search Field** — Support clear, loading, recent, empty, and error states.
-- [ ] **Filter Bar** — Compose filters, active chips, result counts, and reset actions.
-- [ ] **File Upload** — Support drag and drop, progress, validation, retry, and removal.
-- [ ] **Date Range Picker** — Select presets and custom ranges with accessible calendar navigation.
-- [ ] **Form Error Summary** — Link submission errors to the matching fields.
-- [ ] **Unsaved Changes Bar** — Keep save, discard, and navigation-warning actions visible.
-- [ ] **Step Indicator** — Show current, complete, optional, blocked, and error steps.
+- [x] **Form Field** — Combine labels, descriptions, requirements, validation, and character counts.
+- [x] **Search Field** — Support clear, loading, recent, empty, and error states.
+- [x] **Filter Bar** — Compose filters, active chips, result counts, and reset actions.
+- [x] **File Upload** — Support drag and drop, progress, validation, retry, and removal.
+- [x] **Date Range Picker** — Select presets and custom ranges with accessible calendar navigation.
+- [x] **Form Error Summary** — Link submission errors to the matching fields.
+- [x] **Unsaved Changes Bar** — Keep save, discard, and navigation-warning actions visible.
+- [x] **Step Indicator** — Show current, complete, optional, blocked, and error steps.
 
 ### Feedback and state
 
@@ -158,7 +158,7 @@ Components should solve one reusable interaction contract. Blocks should combine
 
 ## Suggested first batch
 
-- [ ] Build **Form Field** and **Filter Bar** as the next general foundations.
+- [x] Build **Form Field** and **Filter Bar** as the next general foundations.
 - [ ] Build **Hero Section**, **Pricing Section**, and **FAQ Section** for marketing sites.
 - [ ] Build **Dashboard Shell**, **Settings Page**, and **Team Management** for applications.
 - [ ] Build **Product Detail** and **Cart Drawer** for commerce.

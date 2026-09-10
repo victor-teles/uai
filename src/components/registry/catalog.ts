@@ -16,7 +16,17 @@ import {
   UserPlus,
 } from "lucide-react";
 
+import { formsCatalog } from "./forms/catalog";
+
 export type RegistryItemId =
+  | "form-field"
+  | "search-field"
+  | "filter-bar"
+  | "file-upload"
+  | "date-range-picker"
+  | "form-error-summary"
+  | "unsaved-changes-bar"
+  | "step-indicator"
   | "prompt-composer"
   | "thinking"
   | "approval-card"
@@ -964,6 +974,7 @@ export function WorkspaceHeader() {
       "Bar, floating, and compact variants preserve the same navigation contract.",
     ],
   },
+  ...formsCatalog,
 ] as const;
 
 export const registryCategories: readonly RegistryCategory[] = [

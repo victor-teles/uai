@@ -31,6 +31,14 @@ describe("Uai registry", () => {
       "price-summary",
       "order-status",
       "app-header",
+      "form-field",
+      "search-field",
+      "filter-bar",
+      "file-upload",
+      "date-range-picker",
+      "form-error-summary",
+      "unsaved-changes-bar",
+      "step-indicator",
     ]);
   });
 
