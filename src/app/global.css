@@ -223,14 +223,12 @@ a {
 /* ---------- Site frame ---------- */
 :root {
   --uai-stage: color-mix(in oklab, var(--uai-canvas) 97%, var(--uai-text));
-  --uai-hatch: color-mix(in oklab, var(--uai-border) 70%, transparent);
   --uai-sidebar-width: 272px;
 }
 
 .uai-site {
   min-height: 100dvh;
   background-color: var(--uai-canvas);
-  background-image: repeating-linear-gradient(-45deg, var(--uai-hatch) 0 1px, transparent 1px 10px);
 }
 
 .uai-site__frame {
@@ -1280,10 +1278,6 @@ a {
 }
 
 @media (max-width: 900px) {
-  .uai-site {
-    background-image: none;
-  }
-
   .uai-site__frame {
     display: block;
     box-shadow: none;
