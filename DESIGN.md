@@ -330,7 +330,7 @@ Uai follows the Beautiful UI language (beautifului.dev): warm graphite, soft med
 
 **Key Characteristics:**
 
-- A centered 1280px frame on a diagonally hatched canvas, split by dashed hairlines.
+- A centered 1280px frame on a plain canvas, split by dashed hairlines.
 - A sidebar with brand, theme toggle, tagline, search, and navigation grouped by category.
 - One URL per registry item (`/components/<id>`), numbered in reading order with previous and next links.
 - Variants switch from a segmented pill inside the specimen, not from a side rail.
@@ -382,7 +382,7 @@ Warm graphite neutrals carry structure. One accent blue marks the primary action
 
 ## Layout
 
-The desktop frame is a 272px sticky sidebar and a flexible main column, centered at 1280px with 1px side rules over a hatched canvas. The main column holds one 960px document: header, specimen, then Code example, Installation, and Accessibility sections. Dashed hairlines separate the sections, and a previous/next pager ends the page. The overview page shows the intro, a live Prompt Composer specimen, and a grid of cards for every item, grouped by category.
+The desktop frame is a 272px sticky sidebar and a flexible main column, centered at 1280px with 1px side rules over the plain canvas. The main column holds one 960px document: header, specimen, then Code example, Installation, and Accessibility sections. Dashed hairlines separate the sections, and a previous/next pager ends the page. The overview page shows the intro, a live Prompt Composer specimen, and a grid of cards for every item, grouped by category.
 
 Below 900px, a sticky top bar holds the brand, search, and a menu button. The menu opens the same grouped navigation as a full-screen drawer. Below 640px, the pager stacks and the header metadata hides. The page never scrolls horizontally.
 

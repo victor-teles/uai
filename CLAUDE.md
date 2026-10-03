@@ -56,7 +56,7 @@ compose replaceable structure and content through exported children.
 Uai follows the Beautiful UI language (beautifului.dev) on both layers. Read `DESIGN.md`
 and `plans/beautiful-polish-brief.md` before changing either.
 
-1. **Site** — warm graphite frame on a hatched canvas, dashed hairlines, a grouped
+1. **Site** — warm graphite frame on a plain canvas, dashed hairlines, a grouped
    sidebar, ⌘K palette, and one `/components/<id>` page per item.
 2. **Distributed components** in `src/registry/uai` — product chrome that consumers
    install. Weight 500 for emphasis (600 for a single headline, never 700), tonal
