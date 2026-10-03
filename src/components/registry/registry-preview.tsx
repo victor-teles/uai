@@ -250,6 +250,7 @@ import {
   getOperationsBlocksPreviewControl,
   OperationsBlocksPreview,
 } from "./operations-blocks/preview";
+import { PannableCanvas } from "./pannable-canvas";
 import { type PreviewControl, PreviewStage, SegmentedControl } from "./preview-chrome";
 
 const composerModels = [
@@ -1792,10 +1793,9 @@ export function RegistryPreviewCanvas({
   selection: string;
 }) {
   return (
-    <div className="uai-registry-specimen">
-      <div className="uai-registry-specimen__marks" aria-hidden="true" />
+    <PannableCanvas resetKey={`${itemId}:${selection}`}>
       {renderPreview(itemId, selection)}
-    </div>
+    </PannableCanvas>
   );
 }
 

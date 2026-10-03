@@ -16,10 +16,21 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import {
+  type CSSProperties,
+  type MouseEvent,
+  type ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { findRegistryItem, getRegistryItemKind, registryCatalog, registryGroups } from "./catalog";
 import { CommandPalette } from "./command-palette";
+import { PaoDeQueijoBurst } from "./pao-de-queijo";
+import { ResizeHandle, usePersistentSize } from "./resize-handle";
+
+const sidebarBounds = { defaultValue: 248, min: 200, max: 420 };
 
 const blockCount = registryCatalog.filter(
   (item) => getRegistryItemKind(item.id) === "block",
@@ -54,9 +65,9 @@ function ThemeToggle() {
   );
 }
 
-function Brand() {
+function Brand({ onClick }: { onClick: (event: MouseEvent<HTMLAnchorElement>) => void }) {
   return (
-    <Link href="/" className="uai-brand" aria-label="Uai home">
+    <Link href="/" className="uai-brand" aria-label="Uai home" onClick={onClick}>
       <span className="uai-brand__tile" aria-hidden="true">
         <span className="uai-brand__mark" />
       </span>
@@ -207,6 +218,21 @@ export function SiteShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const sidebar = usePersistentSize("uai:sidebar-width", sidebarBounds);
+  const [pdq, setPdq] = useState<{ burst: number; origin: { x: number; y: number } | null }>({
+    burst: 0,
+    origin: null,
+  });
+
+  // Easter egg: a triple click on the logo serves pão de queijo.
+  const onBrandClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (event.detail !== 3) return;
+    const box = event.currentTarget.getBoundingClientRect();
+    setPdq((current) => ({
+      burst: current.burst + 1,
+      origin: { x: box.left + 11, y: box.top + box.height / 2 },
+    }));
+  };
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: close the mobile menu after navigation.
   useEffect(() => {
@@ -232,7 +258,10 @@ export function SiteShell({ children }: { children: ReactNode }) {
   const openPalette = () => setPaletteOpen(true);
 
   return (
-    <div className="uai-site">
+    <div
+      className="uai-site"
+      style={{ "--uai-sidebar-width": `${sidebar.size}px` } as CSSProperties}
+    >
       <header className="uai-site-topbar">
         <button
           type="button"
@@ -244,7 +273,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
         >
           {menuOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
         </button>
-        <Brand />
+        <Brand onClick={onBrandClick} />
         <Breadcrumbs pathname={pathname} />
         <div className="uai-site-topbar__actions">
           <SearchButton onOpen={openPalette} />
@@ -257,11 +286,22 @@ export function SiteShell({ children }: { children: ReactNode }) {
         <p className="uai-site-sidebar__footer">
           {registryCatalog.length - blockCount} components · {blockCount} blocks
         </p>
+        <ResizeHandle
+          label="Resize sidebar"
+          axis="x"
+          grow="forward"
+          size={sidebar.size}
+          bounds={sidebarBounds}
+          onResize={sidebar.setSize}
+          onReset={sidebar.reset}
+          className="uai-site-sidebar__handle"
+        />
       </aside>
 
       <main className="uai-site-main">{children}</main>
 
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      <PaoDeQueijoBurst burst={pdq.burst} origin={pdq.origin} />
     </div>
   );
 }

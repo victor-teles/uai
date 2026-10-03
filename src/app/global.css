@@ -531,6 +531,8 @@ a {
   min-height: 0;
   flex-direction: column;
   grid-area: side;
+  /* Above the main column, so the resize handle's outer half stays grabbable. */
+  z-index: 10;
   border-right: 1px solid var(--uai-border);
 }
 
@@ -773,76 +775,6 @@ a {
   border-radius: 14px;
   background: var(--uai-stage);
   box-shadow: inset 0 0 0 1px var(--uai-border);
-}
-
-.uai-manual {
-  margin-top: 12px;
-}
-
-.uai-manual__toggle {
-  display: inline-flex;
-  height: 30px;
-  align-items: center;
-  gap: 6px;
-  margin-left: -6px;
-  padding: 0 8px;
-  border-radius: 8px;
-  color: var(--uai-muted);
-  font-size: 0.78rem;
-  font-weight: 500;
-  transition:
-    background-color 120ms ease-out,
-    color 120ms ease-out;
-}
-
-.uai-manual__toggle svg {
-  width: 14px;
-  height: 14px;
-  transform: rotate(-90deg);
-  transition: transform 180ms var(--uai-ease-out);
-}
-
-.uai-manual[data-open] .uai-manual__toggle svg {
-  transform: rotate(0deg);
-}
-
-.uai-manual__body {
-  display: grid;
-  grid-template-rows: 0fr;
-  opacity: 0;
-  transition:
-    grid-template-rows 300ms var(--uai-ease-out),
-    opacity 240ms ease-out;
-}
-
-.uai-manual[data-open] .uai-manual__body {
-  grid-template-rows: 1fr;
-  opacity: 1;
-}
-
-.uai-manual__inner {
-  min-height: 0;
-  overflow: hidden;
-}
-
-.uai-manual__heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding-top: 10px;
-}
-
-.uai-manual__heading p,
-.uai-manual__status {
-  margin: 0;
-  color: var(--uai-muted);
-  font-size: 0.78rem;
-  line-height: 1.6;
-}
-
-.uai-manual__status {
-  padding-top: 12px;
 }
 
 .uai-doc code:not(pre code) {
@@ -1323,6 +1255,47 @@ a {
   text-align: center;
 }
 
+/* ---------- Pão de queijo ---------- */
+.uai-pdq {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.uai-pdq__defs {
+  position: absolute;
+}
+
+.uai-pdq__bread {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 40px;
+  will-change: transform, opacity;
+}
+
+.uai-pdq__caption {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 6px 12px 6px 8px;
+  border-radius: 999px;
+  background: var(--uai-surface);
+  box-shadow:
+    0 0 0 1px var(--uai-border-strong),
+    0 10px 28px color-mix(in oklab, black 28%, transparent);
+  color: var(--uai-text);
+  font-size: 0.78rem;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+}
+
 @keyframes uai-fade-up {
   from {
     opacity: 0;
@@ -1515,24 +1488,93 @@ a {
 }
 
 /* ---------- Specimen ---------- */
-/* The specimen is a ruled canvas with crop marks in each corner. */
+/* The specimen is a pannable, ruled canvas. The viewport clips; the world
+   inside it moves by --uai-pan-x/y, and the grid moves with it. Crop marks
+   frame the world, so they travel with the component. */
 .uai-registry-specimen {
   --uai-grid-line: color-mix(in oklab, var(--uai-border) 55%, transparent);
+  --uai-pan-x: 0px;
+  --uai-pan-y: 0px;
   position: relative;
-  display: flex;
   min-width: 0;
-  flex-direction: column;
-  overflow: auto;
+  min-height: 460px;
+  overflow: hidden;
   background-color: var(--uai-stage);
   background-image:
     linear-gradient(var(--uai-grid-line) 1px, transparent 1px),
     linear-gradient(90deg, var(--uai-grid-line) 1px, transparent 1px);
-  background-position: -1px -1px;
+  background-position: calc(var(--uai-pan-x) - 1px) calc(var(--uai-pan-y) - 1px);
   background-size: 24px 24px;
+  cursor: grab;
+  outline-offset: -2px;
+  /* Touch keeps vertical page scrolling on narrow layouts; desktop owns all axes. */
+  touch-action: pan-y pinch-zoom;
 }
 
-.uai-registry-specimen > .uai-preview-stage {
+.uai-registry-specimen[data-panning],
+.uai-registry-specimen[data-panning] * {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.uai-registry-specimen__world {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  width: 100%;
+  min-height: 100%;
+  flex-direction: column;
+  transform: translate3d(var(--uai-pan-x), var(--uai-pan-y), 0);
+}
+
+.uai-registry-specimen__world > .uai-preview-stage {
   flex: 1;
+  padding-top: 48px;
+}
+
+.uai-registry-specimen__recenter {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 3;
+  display: inline-flex;
+  height: 32px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px 0 10px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--uai-surface) 88%, transparent);
+  box-shadow:
+    0 0 0 1px var(--uai-border-strong),
+    0 10px 28px color-mix(in oklab, black 28%, transparent);
+  backdrop-filter: blur(12px);
+  color: var(--uai-muted);
+  font-family: var(--uai-mono);
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  animation: uai-pop-in 180ms var(--uai-ease-pop) both;
+  transition:
+    color 120ms ease-out,
+    transform 140ms var(--uai-ease-out);
+}
+
+.uai-registry-specimen__recenter svg {
+  width: 14px;
+  height: 14px;
+  color: var(--uai-signal-ink);
+}
+
+.uai-registry-specimen__recenter:active {
+  transform: scale(0.96);
+}
+
+/* Safe centering keeps the top of a specimen taller than the canvas reachable
+   by scrolling, instead of splitting the overflow above and below. */
+.uai-registry-specimen .uai-preview-stage,
+.uai-registry-specimen .uai-preview-stage__canvas {
+  justify-content: safe center;
 }
 
 .uai-registry-specimen .uai-preview-stage__label {
@@ -1571,20 +1613,14 @@ a {
   box-shadow: inset 0 0 0 1px var(--uai-border);
 }
 
-.uai-registry-showcase .uai-registry-specimen {
-  min-height: 460px;
-}
-
-/* The variant switch floats over the bottom of the canvas. It is sticky, so it
-   stays in reach while a tall specimen scrolls past. */
+/* The variant switch floats over the bottom of the canvas. */
 .uai-registry-showcase {
   display: flex;
   flex-direction: column;
 }
 
 .uai-registry-variants {
-  position: sticky;
-  bottom: 16px;
+  position: relative;
   z-index: 2;
   display: flex;
   justify-content: center;
@@ -1594,7 +1630,7 @@ a {
   pointer-events: none;
 }
 
-.uai-registry-specimen:has(+ .uai-registry-variants) {
+.uai-registry-specimen:has(+ .uai-registry-variants) .uai-registry-specimen__world {
   padding-bottom: 56px;
 }
 
@@ -1614,23 +1650,42 @@ a {
 }
 
 /* ---------- Workbench (component pages) ---------- */
+/* On desktop the workbench fills the viewport like an editor: the canvas and
+   the dock share the workspace column, and each pane scrolls on its own. */
 .uai-bench {
+  position: relative;
   display: grid;
-  min-height: calc(100dvh - var(--uai-topbar-height));
+  height: calc(100dvh - var(--uai-topbar-height));
   grid-template-areas: "workspace inspector";
   grid-template-columns: minmax(0, 1fr) var(--uai-inspector-width);
   animation: uai-fade-in 200ms ease-out both;
 }
 
 .uai-bench__workspace {
+  display: flex;
   min-width: 0;
+  min-height: 0;
+  flex-direction: column;
   grid-area: workspace;
 }
 
 .uai-bench__canvas {
   display: flex;
+  min-height: 160px;
+  flex: 1;
   flex-direction: column;
-  border-bottom: 1px solid var(--uai-border);
+}
+
+.uai-bench__dock {
+  height: clamp(120px, var(--uai-dock-height), calc(100% - 200px));
+  flex: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-top: 1px solid var(--uai-border);
+}
+
+.uai-bench__dock .uai-syntax-codeblock--source [role="region"] {
+  max-height: none;
 }
 
 .uai-bench__toolbar {
@@ -1654,20 +1709,26 @@ a {
 }
 
 .uai-bench .uai-registry-specimen {
-  min-height: max(480px, calc(100dvh - var(--uai-topbar-height) - 36px - 220px));
+  min-height: 0;
+  flex: 1;
+  touch-action: none;
 }
 
-.uai-bench__panel {
-  border-bottom: 1px solid var(--uai-border);
+.uai-bench__panel + .uai-bench__panel {
+  border-top: 1px solid var(--uai-border);
 }
 
 .uai-bench__panel-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   display: flex;
   height: 40px;
   align-items: center;
   gap: 12px;
   padding: 0 12px 0 16px;
   border-bottom: 1px solid var(--uai-border);
+  background: var(--uai-canvas);
 }
 
 .uai-bench__panel-head h2 {
@@ -1687,13 +1748,199 @@ a {
   margin-left: auto;
 }
 
-.uai-bench__panel .uai-manual {
+/* Manual installation steps */
+.uai-manual {
+  display: grid;
+  gap: 22px;
   margin: 0;
-  padding: 6px 12px 10px;
+  padding: 18px 16px 24px;
+  list-style: none;
+  counter-reset: uai-manual-step;
 }
 
-.uai-bench__panel .uai-manual__toggle {
-  margin-left: 0;
+.uai-manual > li {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  gap: 10px;
+  padding-left: 32px;
+  counter-increment: uai-manual-step;
+}
+
+.uai-manual > li::before {
+  content: counter(uai-manual-step);
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--uai-surface-raised);
+  color: var(--uai-text);
+  font-family: var(--uai-mono);
+  font-size: 0.68rem;
+}
+
+.uai-manual > li > p,
+.uai-manual__status {
+  margin: 0;
+  color: var(--uai-muted);
+  font-size: 0.8125rem;
+  line-height: 20px;
+}
+
+.uai-manual__status {
+  padding: 16px;
+}
+
+.uai-manual code:not(pre code) {
+  border-radius: 5px;
+  background: var(--uai-surface-raised);
+  padding: 1px 5px;
+  color: var(--uai-text);
+  font-family: var(--uai-mono);
+  font-size: 0.72rem;
+}
+
+.uai-manual__command {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 6px 6px 14px;
+  border-radius: 10px;
+  background: var(--uai-stage);
+  box-shadow: inset 0 0 0 1px var(--uai-border);
+}
+
+.uai-manual .uai-manual__command code {
+  overflow-x: auto;
+  flex: 1;
+  border-radius: 0;
+  background: none;
+  padding: 0;
+  color: var(--uai-muted);
+  font-family: var(--uai-mono);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.uai-manual__command .uai-copy-button {
+  flex: none;
+}
+
+.uai-manual__deps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.uai-manual__deps a {
+  display: inline-flex;
+  height: 26px;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--uai-surface-raised);
+  color: var(--uai-text);
+  font-family: var(--uai-mono);
+  font-size: 0.7rem;
+  text-decoration: none;
+  transition: background-color 120ms ease-out;
+}
+
+.uai-manual .uai-syntax-codeblock--details {
+  margin-top: 0;
+}
+
+/* ---------- Resize handles ---------- */
+.uai-resize-handle {
+  position: absolute;
+  z-index: 5;
+  touch-action: none;
+  outline: 0;
+}
+
+.uai-resize-handle::after {
+  content: "";
+  position: absolute;
+  background: transparent;
+  transition: background-color 120ms ease-out;
+}
+
+.uai-resize-handle[data-axis="x"] {
+  top: 0;
+  bottom: 0;
+  width: 9px;
+  cursor: col-resize;
+}
+
+.uai-resize-handle[data-axis="x"]::after {
+  top: 0;
+  bottom: 0;
+  left: 4px;
+  width: 1px;
+}
+
+.uai-resize-handle[data-axis="y"] {
+  right: 0;
+  left: 0;
+  height: 9px;
+  cursor: row-resize;
+}
+
+.uai-resize-handle[data-axis="y"]::after {
+  right: 0;
+  left: 0;
+  top: 4px;
+  height: 1px;
+}
+
+.uai-resize-handle:active::after,
+.uai-resize-handle:focus-visible::after {
+  background: var(--uai-signal-ink);
+}
+
+.uai-resize-handle[data-axis="x"]:focus-visible::after {
+  left: 3px;
+  width: 3px;
+}
+
+.uai-resize-handle[data-axis="y"]:focus-visible::after {
+  top: 3px;
+  height: 3px;
+}
+
+html[data-uai-resizing] {
+  user-select: none;
+}
+
+html[data-uai-resizing="x"] * {
+  cursor: col-resize;
+}
+
+html[data-uai-resizing="y"] * {
+  cursor: row-resize;
+}
+
+.uai-site-sidebar__handle {
+  right: -5px;
+}
+
+.uai-bench__inspector-handle {
+  right: calc(var(--uai-inspector-width) - 5px);
+}
+
+/* The dock handle sits in flow between the canvas and the dock. */
+.uai-bench__dock-handle {
+  position: relative;
+  flex: none;
+  margin: -4px 0 -5px;
 }
 
 .uai-inspector {
@@ -1754,6 +2001,22 @@ a {
   gap: 12px;
   padding: 16px 18px 18px;
   border-bottom: 1px solid var(--uai-border);
+}
+
+.uai-inspector__link {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 6px;
+  color: var(--uai-muted);
+  font-size: 0.75rem;
+  text-decoration: none;
+  transition: color 120ms ease-out;
+}
+
+.uai-inspector__link svg {
+  width: 13px;
+  height: 13px;
 }
 
 .uai-inspector .uai-install-command {
@@ -1851,9 +2114,24 @@ a {
   .uai-site-nav__link:hover:not([aria-current="page"]),
   .uai-site-nav__folder:hover,
   .uai-inspector__pager a:hover,
-  .uai-icon-button:hover,
-  .uai-manual__toggle:hover {
+  .uai-icon-button:hover {
     background: color-mix(in oklab, var(--uai-surface-raised) 60%, transparent);
+    color: var(--uai-text);
+  }
+
+  .uai-manual__deps a:hover {
+    background: color-mix(in oklab, var(--uai-surface-raised) 80%, var(--uai-text));
+  }
+
+  .uai-inspector__link:hover {
+    color: var(--uai-text);
+  }
+
+  .uai-resize-handle:hover::after {
+    background: var(--uai-border-strong);
+  }
+
+  .uai-registry-specimen__recenter:hover {
     color: var(--uai-text);
   }
 
@@ -1938,8 +2216,28 @@ a {
     order: 7;
   }
 
+  .uai-bench {
+    height: auto;
+  }
+
+  .uai-bench__workspace {
+    display: block;
+  }
+
   .uai-bench .uai-registry-specimen {
-    min-height: 460px;
+    flex: none;
+    height: 460px;
+    touch-action: pan-y pinch-zoom;
+  }
+
+  .uai-bench__dock {
+    height: auto;
+    overflow: visible;
+  }
+
+  .uai-bench__inspector-handle,
+  .uai-bench__dock-handle {
+    display: none;
   }
 }
 
@@ -1958,6 +2256,10 @@ a {
 
   .uai-icon-button.uai-site-topbar__menu {
     display: grid;
+  }
+
+  .uai-site-sidebar__handle {
+    display: none;
   }
 
   .uai-site-crumbs,
@@ -2044,11 +2346,6 @@ a {
   .uai-doc__pager {
     grid-template-columns: 1fr;
   }
-
-  .uai-manual__heading {
-    align-items: flex-start;
-    flex-direction: column;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2058,6 +2355,7 @@ a {
 
   .uai-doc,
   .uai-bench,
+  .uai-registry-specimen__recenter,
   .uai-prompt-pop,
   .uai-palette__panel,
   .uai-palette::backdrop {
@@ -2077,8 +2375,9 @@ a {
   .uai-theme-toggle button,
   .uai-install-command button,
   .uai-copy-button,
-  .uai-manual__toggle svg,
-  .uai-manual__body,
+  .uai-manual__deps a,
+  .uai-inspector__link,
+  .uai-resize-handle::after,
   .uai-doc__pager-link,
   .uai-doc__pager-link svg,
   .uai-overview__card,

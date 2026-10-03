@@ -65,10 +65,12 @@ with the shadcn CLI or by copying the distributable source manually. Installed c
 - The site is easy to navigate: a top bar with breadcrumb and ⌘K search, a file-tree
   sidebar with one folder per category, one numbered URL per item, and previous and
   next links in reading order.
-- Each item page is a workbench: a ruled canvas with the live specimen and a floating
-  variant switch, the usage example, and manual installation on the left; an
-  inspector with the title, install command, anatomy, and accessibility checks on the
-  right.
+- Each item page is a workbench: a pannable, ruled canvas with the live specimen and a
+  floating variant switch above a dock with the usage example and step-by-step manual
+  installation; an inspector with the title, install command, anatomy, and
+  accessibility checks on the right. The sidebar, inspector, and dock resize, and the
+  sizes persist.
+- Uai is from Minas Gerais. A triple click on the logo serves pão de queijo.
 - A Theming page, right after Overview, covers installing the theme with the CLI or by
   hand, the token reference, and how to customize tokens and instances.
 - Distributed components use 14px surfaces, 28px ghost controls, pill buttons, and

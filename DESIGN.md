@@ -423,14 +423,15 @@ The theme also ships `ease-out-quint`, the `shimmer-text` utility for live label
 
 The desktop shell is full width. A sticky 48px top bar holds the brand tile, a mono breadcrumb (`forms / prompt-composer.tsx`), the ⌘K search pill, and the theme toggle. Below it, a 248px sticky sidebar holds the file tree, and the page fills the rest.
 
-Component pages are a workbench: the workspace column on the left, and a 316px sticky inspector on the right with its own scroll.
+Component pages are a workbench that fills the viewport like an editor: the workspace column on the left and a 316px inspector on the right. Each pane scrolls on its own; the page itself does not scroll on desktop.
 
-- **Workspace:** A 36px mono toolbar (`canvas`, the current `variant="…"` in Signal Ink, the category), the ruled specimen sized to fill the first viewport with the floating variant switch, then the Code example panel and the Manual installation panel. Solid hairlines separate the panels.
-- **Inspector:** The header (eyebrow, title, description), then Install, Anatomy (Composes for blocks), and Accessibility sections, and the previous/next pager at the bottom.
+- **Workspace:** A 36px mono toolbar (`canvas`, the current `variant="…"` in Signal Ink, the category), the ruled specimen with the floating variant switch, and a 320px bottom dock. The dock scrolls and holds the Code example panel, then the Manual installation panel. Panel heads stick to the top of the dock.
+- **Inspector:** The header (eyebrow, title, description), then Install (with an "Install manually" link that jumps to the dock panel), Anatomy (Composes for blocks), and Accessibility sections, and the previous/next pager at the bottom.
+- **Resizing:** The sidebar (200–420px), the inspector (260–560px), and the dock (120–960px, always leaving 200px of canvas) resize from handles on their edges. Sizes persist per browser.
 
 The overview and Theming pages use a 1040px document column with 48px top padding: the overview intro, a live Prompt Composer showcase, and a grid of cards for every item, grouped by category.
 
-Below 1180px, the inspector dissolves into the page flow: title and Install come first, then the workspace, then Anatomy, Accessibility, and the pager. Below 900px, the sidebar becomes a full-screen drawer opened from a menu button in the top bar, and the breadcrumb and search label hide. The page never scrolls horizontally.
+Below 1180px, the page scrolls as one document again and the inspector and dock handles hide. The inspector dissolves into the flow: title and Install come first, then the canvas, code, and manual installation, then Anatomy, Accessibility, and the pager. Below 900px, the sidebar becomes a full-screen drawer opened from a menu button in the top bar, its handle hides, and the breadcrumb and search label hide. The page never scrolls horizontally.
 
 Navigation: ⌘K or `/` opens the command palette from anywhere. It searches by name, category, and description, supports arrow keys and Enter, and routes to the item's URL.
 
@@ -477,8 +478,28 @@ Depth comes from tone. Cards are Surface on Canvas, and specimens are a 3% tint 
 
 ### Specimen
 
-- **Canvas:** A 3% tint of Canvas ruled with a 24px grid of 55% Border lines. Signal Ink crop marks (12px) sit 14px inside each corner. The stage inside is transparent.
-- **Content:** The component centered. An optional mono Subtle scene caption sits top-left, inside the crop marks. The floating variant switch sits bottom-center.
+- **Canvas:** A 3% tint of Canvas ruled with a 24px grid of 55% Border lines. Signal Ink crop marks (12px) sit 14px inside each corner of the artboard. The stage inside is transparent.
+- **Content:** The component centered on the artboard. An optional mono Subtle scene caption sits top-left, inside the crop marks. The floating variant switch sits bottom-center.
+- **Panning:** The canvas is a viewport over the artboard, like a design tool. Drag any empty or non-interactive area (cursor `grab`, `grabbing` while moving), scroll with a wheel or trackpad, or focus the canvas and use the arrow keys (40px, 160px with Shift; Home recenters). Drags under 4px stay clicks, and pointer-downs on controls never pan. Scroll areas inside a component scroll first until they reach their edge. The grid, crop marks, and caption move with the artboard, which can pan until 40% of the viewport still overlaps it.
+- **Recenter:** Once moved, a floating pill bottom-right shows the offset in mono with a Signal Ink locate icon; clicking it, double-clicking empty canvas, or switching variants recenters.
+- **Focus:** Tabbing to an offscreen control pans it into view; native scrolling of the viewport is converted into pan offset, so find-in-page and focus never leave the canvas scrolled out of sync.
+
+### Resize handles
+
+- **Shape:** A 9px hit area centered on the pane's 1px hairline, with a col-resize or row-resize cursor. The hairline turns Border Strong on hover and Signal Ink while dragging or focused (3px when focused).
+- **Input:** Drag with a pointer, or focus the handle and use the arrow keys (16px, 64px with Shift), Home and End for the limits, and Enter or a double-click to reset.
+- **Semantics:** A focusable `separator` with an accessible name, orientation, and current, minimum, and maximum values.
+- **Behavior:** While dragging, the whole page keeps the resize cursor and text selection is off. Sizes are saved to `localStorage` and load after mount, so the server render always uses the defaults.
+
+### Manual installation
+
+- **Panel:** A dock panel with the target path (`components/ui/uai/<id>.tsx`, or `components/uai/<id>.tsx` for blocks) and a copy-source button in its sticky head.
+- **Steps:** Numbered: install the npm packages (a copyable `bun add` command), add the Uai items it builds on (mono chips linking to each item's page, or Theming for `uai-theme` and `uai-utils`), then create the file and paste the highlighted source.
+- **Loading:** The registry JSON loads when the panel nears the viewport, or right away when "Install manually" is used; the dock then aligns the panel to its top.
+
+### Pão de queijo
+
+A triple click on the brand serves pão de queijo: sixteen golden cheese breads arc out of the logo under gravity, spinning, and fall off-screen over about two seconds, while a caption pill reads "Pão de queijo quentinho, sô!". The layer never takes pointer input. Reduced motion keeps only the caption.
 
 ### Inspector
 
