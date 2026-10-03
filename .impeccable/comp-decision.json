@@ -10,7 +10,7 @@
       "thesis": "The documentation page itself behaves like a focused product workbench.",
       "palette": ["#0b0c0e", "#181a1d", "#2a2d32", "#f4f4f5", "#3478f6"],
       "materials": ["graphite panels", "fine interface hairlines", "compact code strips"],
-      "viewport": "A narrow documentation rail opens into one dominant live Task Flow demonstration and its install command.",
+      "viewport": "A narrow documentation rail opens into one dominant live component demonstration and its install command.",
       "risk": "The deep sidebar makes the homepage feel closer to a reference page than a welcoming registry entrance.",
       "sketch": ".impeccable/mocks/uai-docs-workbench.png"
     },

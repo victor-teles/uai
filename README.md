@@ -1,8 +1,8 @@
 # Uai
 
-Uai is an open-code React component library for AI interfaces. It works as a
-shadcn registry: the CLI copies each component and its dependencies into the
-consumer's application, where the team can inspect and change every line.
+Uai is an open-code React component library for websites and web applications.
+It works as a shadcn registry: the CLI copies each component and its dependencies
+into the consumer's application, where the team can inspect and change every line.
 
 The repository includes a component browser built with Next.js, Fumadocs UI,
 Tailwind CSS, and Bun.
@@ -16,20 +16,20 @@ bun install
 bun run dev
 ```
 
-Open `http://localhost:3000` to browse the components. Generated registry
-documents are available under `/r`.
+Open `http://localhost:3000` for the overview. Every registry item has its own page
+at `/components/<name>`. Press ⌘K or `/` to search. Generated registry documents are
+available under `/r`.
 
 ## Install a registry item locally
 
 Keep the Uai development server running. In a shadcn project, run:
 
 ```bash
-bunx shadcn@latest add http://localhost:3000/r/task-flow.json
+bunx shadcn@latest add http://localhost:3000/r/prompt-composer.json
 ```
 
-Task Flow installs the four supporting components, the Uai theme tokens, and
-the shared class-name utility. You can also install each smaller component on
-its own.
+Prompt Composer installs the Uai theme tokens and the shared class-name utility.
+Replace `prompt-composer` with another registry item name to install that component.
 
 Set `NEXT_PUBLIC_REGISTRY_URL` to the deployed `/r` URL before publishing the
 site. Update the `homepage` and dependency URLs in `registry.json` at the same
@@ -38,20 +38,25 @@ time. shadcn requires full URLs for custom registry dependencies.
 ## Repository layout
 
 - `src/registry/uai`: source files distributed through the registry.
-- `src/components/registry`: component catalog, previews, and install workflow.
+- `src/components/registry`: site shell, command palette, catalog, previews, and
+  install workflow.
+- `src/app/(home)/components/[id]`: the statically generated page for each item.
 - `src/components/ui/uai`: local component copies used by the browser.
+- `src/components/uai`: local block copies used by the browser.
 - `registry.json`: the registry catalog and dependency graph.
 - `public/r`: generated registry documents.
 
 ## Add a component
 
-1. Add the source file under `src/registry/uai`.
+1. Add the source file under `src/registry/uai/components` or `src/registry/uai/blocks`, and copy it
+   byte-for-byte to `src/components/ui/uai` or `src/components/uai`.
 2. Define the public item, target path, and dependencies in `registry.json`.
-3. Add the component to `src/components/registry/catalog.ts` and its live preview.
+3. Add the catalog entry and live preview in the matching group folder under
+   `src/components/registry/<group>`. The entry's `usage` must equal the preview file.
 4. Run the validation suite.
 
-Keep public interfaces small. A composed block should own its workflow seam and
-delegate narrower behavior to focused components.
+Keep public interfaces small. A compound component should own its shared behavior
+and delegate replaceable content to named children.
 
 ## Validate a change
 

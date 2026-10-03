@@ -7,35 +7,37 @@
       "name": "uai-theme",
       "type": "registry:theme",
       "title": "Uai Theme",
-      "description": "The graphite surface and state-color tokens used by Uai components.",
+      "description": "The warm graphite surface, accent, and state-color tokens used by Uai components.",
       "cssVars": {
         "light": {
-          "uai-canvas": "oklch(0.975 0.002 255)",
+          "uai-canvas": "oklch(0.975 0.001 260)",
           "uai-surface": "oklch(1 0 0)",
-          "uai-surface-raised": "oklch(0.955 0.003 255)",
-          "uai-border": "oklch(0.88 0.006 255)",
-          "uai-border-strong": "oklch(0.76 0.01 255)",
-          "uai-text": "oklch(0.19 0.008 255)",
-          "uai-muted": "oklch(0.48 0.012 255)",
-          "uai-accent": "oklch(0.56 0.19 257)",
-          "uai-accent-foreground": "oklch(0.99 0 0)",
-          "uai-success": "oklch(0.65 0.18 145)",
-          "uai-warning": "oklch(0.69 0.15 83)",
-          "uai-danger": "oklch(0.64 0.21 27)"
+          "uai-surface-raised": "oklch(0.94 0.003 260)",
+          "uai-border": "oklch(0.915 0.003 260)",
+          "uai-border-strong": "oklch(0.84 0.005 260)",
+          "uai-text": "oklch(0.247 0.006 258)",
+          "uai-muted": "oklch(0.47 0.01 260)",
+          "uai-subtle": "oklch(0.55 0.01 260)",
+          "uai-accent": "oklch(0.57 0.185 257)",
+          "uai-accent-foreground": "oklch(1 0 0)",
+          "uai-success": "oklch(0.6 0.15 153)",
+          "uai-warning": "oklch(0.66 0.16 55)",
+          "uai-danger": "oklch(0.58 0.2 23)"
         },
         "dark": {
-          "uai-canvas": "oklch(0.145 0.006 255)",
-          "uai-surface": "oklch(0.19 0.007 255)",
-          "uai-surface-raised": "oklch(0.225 0.008 255)",
-          "uai-border": "oklch(0.29 0.01 255)",
-          "uai-border-strong": "oklch(0.4 0.012 255)",
-          "uai-text": "oklch(0.965 0.003 255)",
-          "uai-muted": "oklch(0.68 0.012 255)",
-          "uai-accent": "oklch(0.64 0.19 257)",
-          "uai-accent-foreground": "oklch(0.99 0 0)",
-          "uai-success": "oklch(0.72 0.18 145)",
-          "uai-warning": "oklch(0.77 0.15 83)",
-          "uai-danger": "oklch(0.7 0.19 27)"
+          "uai-canvas": "oklch(0.226 0.004 264)",
+          "uai-surface": "oklch(0.26 0.006 271)",
+          "uai-surface-raised": "oklch(0.293 0.006 271)",
+          "uai-border": "oklch(0.315 0.006 268)",
+          "uai-border-strong": "oklch(0.39 0.007 268)",
+          "uai-text": "oklch(0.964 0.002 248)",
+          "uai-muted": "oklch(0.731 0.008 261)",
+          "uai-subtle": "oklch(0.62 0.01 264)",
+          "uai-accent": "oklch(0.57 0.185 257)",
+          "uai-accent-foreground": "oklch(1 0 0)",
+          "uai-success": "oklch(0.705 0.154 154)",
+          "uai-warning": "oklch(0.746 0.156 56)",
+          "uai-danger": "oklch(0.666 0.18 21)"
         }
       },
       "categories": ["theme"]
@@ -94,10 +96,28 @@
       "categories": ["ai", "feedback"]
     },
     {
+      "name": "empty-state",
+      "type": "registry:ui",
+      "title": "Empty State",
+      "description": "A compound blank-slate surface with card, plain, compact, and page variants.",
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/empty-state.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/empty-state.tsx"
+        }
+      ],
+      "categories": ["feedback", "data-display"]
+    },
+    {
       "name": "task-list",
       "type": "registry:ui",
       "title": "Task List",
-      "description": "A composable ordered list for complete, active, and pending work.",
+      "description": "A composable progress list with card, timeline, and compact variants.",
       "dependencies": ["lucide-react"],
       "registryDependencies": [
         "http://localhost:3000/r/uai-theme.json",
@@ -132,27 +152,1696 @@
       "categories": ["ai", "forms"]
     },
     {
-      "name": "task-flow",
-      "type": "registry:block",
-      "title": "Task Flow",
-      "description": "A compound workflow layout for composing arbitrary AI task stages.",
+      "name": "sign-in-card",
+      "type": "registry:ui",
+      "title": "Sign-in Card",
+      "description": "A compound sign-in form with providers, credentials, recovery, and async feedback.",
       "dependencies": ["lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/thinking.json",
-        "http://localhost:3000/r/approval-card.json",
-        "http://localhost:3000/r/task-list.json",
-        "http://localhost:3000/r/prompt-composer.json",
         "http://localhost:3000/r/uai-theme.json",
         "http://localhost:3000/r/uai-utils.json"
       ],
       "files": [
         {
-          "path": "src/registry/uai/blocks/task-flow.tsx",
-          "type": "registry:component",
-          "target": "@components/uai/task-flow.tsx"
+          "path": "src/registry/uai/components/sign-in-card.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/sign-in-card.tsx"
         }
       ],
-      "categories": ["ai", "workflow"]
+      "categories": ["authentication", "forms"]
+    },
+    {
+      "name": "sign-up-card",
+      "type": "registry:ui",
+      "title": "Sign-up Card",
+      "description": "A compound account creation form with consent, password guidance, and verification feedback.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/sign-up-card.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/sign-up-card.tsx"
+        }
+      ],
+      "categories": ["authentication", "forms"]
+    },
+    {
+      "name": "password-recovery",
+      "type": "registry:ui",
+      "title": "Password Recovery",
+      "description": "A compound account recovery workflow with request, sent, reset, expired, and success states.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/password-recovery.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/password-recovery.tsx"
+        }
+      ],
+      "categories": ["authentication", "forms"]
+    },
+    {
+      "name": "coupon-field",
+      "type": "registry:ui",
+      "title": "Coupon Field",
+      "description": "A compound discount field with rounded, pill, and compact variants.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/coupon-field.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/coupon-field.tsx"
+        }
+      ],
+      "categories": ["commerce", "forms"]
+    },
+    {
+      "name": "quantity-picker",
+      "type": "registry:ui",
+      "title": "Quantity Picker",
+      "description": "A compound quantity control with limits, direct input, and stock feedback.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/quantity-picker.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/quantity-picker.tsx"
+        }
+      ],
+      "categories": ["commerce", "forms"]
+    },
+    {
+      "name": "cart-item",
+      "type": "registry:ui",
+      "title": "Cart Item",
+      "description": "A compound cart line with product details, availability, quantity, price, and removal.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json",
+        "http://localhost:3000/r/quantity-picker.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/cart-item.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/cart-item.tsx"
+        }
+      ],
+      "categories": ["commerce", "data-display"]
+    },
+    {
+      "name": "price-summary",
+      "type": "registry:ui",
+      "title": "Price Summary",
+      "description": "A compound order total with card, plain, and compact variants.",
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/price-summary.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/price-summary.tsx"
+        }
+      ],
+      "categories": ["commerce", "data-display"]
+    },
+    {
+      "name": "order-status",
+      "type": "registry:ui",
+      "title": "Order Status",
+      "description": "A compound fulfillment timeline with card, plain, and compact variants.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/order-status.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/order-status.tsx"
+        }
+      ],
+      "categories": ["commerce", "data-display"]
+    },
+    {
+      "name": "app-header",
+      "type": "registry:ui",
+      "title": "App Header",
+      "description": "A compound application header with navigation, search, account actions, and responsive overflow.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/app-header.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/app-header.tsx"
+        }
+      ],
+      "categories": ["navigation", "layout"]
+    },
+    {
+      "name": "form-field",
+      "type": "registry:ui",
+      "title": "Form Field",
+      "description": "Labels, descriptions, requirements, validation, and character counts.",
+      "dependencies": [],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/form-field.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/form-field.tsx"
+        }
+      ],
+      "categories": ["forms"]
+    },
+    {
+      "name": "search-field",
+      "type": "registry:ui",
+      "title": "Search Field",
+      "description": "Clearable search with recent queries, loading, empty, and error feedback.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/search-field.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/search-field.tsx"
+        }
+      ],
+      "categories": ["forms"]
+    },
+    {
+      "name": "filter-bar",
+      "type": "registry:ui",
+      "title": "Filter Bar",
+      "description": "Composable filters, removable chips, result counts, and reset actions.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/filter-bar.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/filter-bar.tsx"
+        }
+      ],
+      "categories": ["forms"]
+    },
+    {
+      "name": "file-upload",
+      "type": "registry:ui",
+      "title": "File Upload",
+      "description": "File selection and drag and drop with validation, progress, retry, and removal.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/file-upload.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/file-upload.tsx"
+        }
+      ],
+      "categories": ["forms"]
+    },
+    {
+      "name": "date-range-picker",
+      "type": "registry:ui",
+      "title": "Date Range Picker",
+      "description": "Presets, date inputs, and a keyboard-navigable calendar for local date ranges.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/date-range-picker.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/date-range-picker.tsx"
+        }
+      ],
+      "categories": ["forms"]
+    },
+    {
+      "name": "form-error-summary",
+      "type": "registry:ui",
+      "title": "Form Error Summary",
+      "description": "A submission error summary with links that focus the matching fields.",
+      "dependencies": [],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/form-error-summary.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/form-error-summary.tsx"
+        }
+      ],
+      "categories": ["forms"]
+    },
+    {
+      "name": "unsaved-changes-bar",
+      "type": "registry:ui",
+      "title": "Unsaved Changes Bar",
+      "description": "Persistent save and discard actions with busy, error, and page-exit warnings.",
+      "dependencies": [],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/unsaved-changes-bar.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/unsaved-changes-bar.tsx"
+        }
+      ],
+      "categories": ["forms"]
+    },
+    {
+      "name": "step-indicator",
+      "type": "registry:ui",
+      "title": "Step Indicator",
+      "description": "Current, complete, optional, blocked, and error steps with explicit status text.",
+      "dependencies": [],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/step-indicator.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/step-indicator.tsx"
+        }
+      ],
+      "categories": ["forms"]
+    },
+    {
+      "name": "app-sidebar",
+      "type": "registry:ui",
+      "title": "App Sidebar",
+      "description": "Nested navigation with collapsed mode, a mobile disclosure, and active states.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/app-sidebar.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/app-sidebar.tsx"
+        }
+      ],
+      "categories": ["navigation"]
+    },
+    {
+      "name": "breadcrumb-trail",
+      "type": "registry:ui",
+      "title": "Breadcrumb Trail",
+      "description": "Hierarchy with label truncation, collapsed levels, and a compact mobile fallback.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/breadcrumb-trail.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/breadcrumb-trail.tsx"
+        }
+      ],
+      "categories": ["navigation"]
+    },
+    {
+      "name": "page-tabs",
+      "type": "registry:ui",
+      "title": "Page Tabs",
+      "description": "Primary tabs with counts, page actions, and horizontal overflow.",
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/page-tabs.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/page-tabs.tsx"
+        }
+      ],
+      "categories": ["navigation"]
+    },
+    {
+      "name": "command-menu",
+      "type": "registry:ui",
+      "title": "Command Menu",
+      "description": "Search and run grouped actions with full keyboard navigation.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/command-menu.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/command-menu.tsx"
+        }
+      ],
+      "categories": ["navigation"]
+    },
+    {
+      "name": "split-pane",
+      "type": "registry:ui",
+      "title": "Split Pane",
+      "description": "Two resizable regions with keyboard controls and saved proportions.",
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/split-pane.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/split-pane.tsx"
+        }
+      ],
+      "categories": ["navigation"]
+    },
+    {
+      "name": "status-banner",
+      "type": "registry:ui",
+      "title": "Status Banner",
+      "description": "Information, success, warning, and error banners with optional actions and dismissal.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/status-banner.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/status-banner.tsx"
+        }
+      ],
+      "categories": ["feedback", "status"]
+    },
+    {
+      "name": "progress-summary",
+      "type": "registry:ui",
+      "title": "Progress Summary",
+      "description": "Progress, elapsed time, remaining work, and cancellation in one composable summary.",
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/progress-summary.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/progress-summary.tsx"
+        }
+      ],
+      "categories": ["feedback", "progress"]
+    },
+    {
+      "name": "inline-feedback",
+      "type": "registry:ui",
+      "title": "Inline Feedback",
+      "description": "Confirm or reject a local action in a polite live region without interrupting the workflow.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/inline-feedback.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/inline-feedback.tsx"
+        }
+      ],
+      "categories": ["feedback", "status"]
+    },
+    {
+      "name": "confirmation-dialog",
+      "type": "registry:ui",
+      "title": "Confirmation Dialog",
+      "description": "A native modal that explains impact before destructive actions, with optional typed confirmation.",
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/confirmation-dialog.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/confirmation-dialog.tsx"
+        }
+      ],
+      "categories": ["feedback", "dialog"]
+    },
+    {
+      "name": "activity-timeline",
+      "type": "registry:ui",
+      "title": "Activity Timeline",
+      "description": "Events, actors, timestamps, metadata, and grouped dates in an ordered timeline.",
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/activity-timeline.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/activity-timeline.tsx"
+        }
+      ],
+      "categories": ["feedback", "data-display"]
+    },
+    {
+      "name": "skeleton-group",
+      "type": "registry:ui",
+      "title": "Skeleton Group",
+      "description": "Composable loading placeholders that match page structure without layout shift.",
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/skeleton-group.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/skeleton-group.tsx"
+        }
+      ],
+      "categories": ["feedback", "loading"]
+    },
+    {
+      "name": "data-table-toolbar",
+      "type": "registry:ui",
+      "title": "Data Table Toolbar",
+      "description": "Search, filters, column visibility, export, and bulk actions for selected rows.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/data-table-toolbar.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/data-table-toolbar.tsx"
+        }
+      ],
+      "categories": ["data-display"]
+    },
+    {
+      "name": "metric-card",
+      "type": "registry:ui",
+      "title": "Metric Card",
+      "description": "A value with comparison, trend, and supporting context.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/metric-card.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/metric-card.tsx"
+        }
+      ],
+      "categories": ["data-display"]
+    },
+    {
+      "name": "description-list",
+      "type": "registry:ui",
+      "title": "Description List",
+      "description": "Labeled facts with responsive alignment and optional actions.",
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/description-list.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/description-list.tsx"
+        }
+      ],
+      "categories": ["data-display"]
+    },
+    {
+      "name": "comparison-table",
+      "type": "registry:ui",
+      "title": "Comparison Table",
+      "description": "Compare plans or products with sticky labels and highlighted differences.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/comparison-table.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/comparison-table.tsx"
+        }
+      ],
+      "categories": ["data-display"]
+    },
+    {
+      "name": "kanban-board",
+      "type": "registry:ui",
+      "title": "Kanban Board",
+      "description": "Columns, cards, keyboard movement, and empty states.",
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/kanban-board.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/kanban-board.tsx"
+        }
+      ],
+      "categories": ["data-display"]
+    },
+    {
+      "name": "calendar-view",
+      "type": "registry:ui",
+      "title": "Calendar View",
+      "description": "Day, week, and month layouts with event overflow.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/calendar-view.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/calendar-view.tsx"
+        }
+      ],
+      "categories": ["data-display"]
+    },
+    {
+      "name": "audit-log",
+      "type": "registry:ui",
+      "title": "Audit Log",
+      "description": "Actors, actions, resources, timestamps, filters, and event details.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/audit-log.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/audit-log.tsx"
+        }
+      ],
+      "categories": ["data-display"]
+    },
+    {
+      "name": "author-card",
+      "type": "registry:ui",
+      "title": "Author Card",
+      "description": "Author identity with an initials fallback, biography, profile links, and a follow toggle.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/author-card.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/author-card.tsx"
+        }
+      ],
+      "categories": ["content", "community"]
+    },
+    {
+      "name": "comment",
+      "type": "registry:ui",
+      "title": "Comment",
+      "description": "Comments with nested replies, reactions, inline editing, moderation states, and timestamps.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/comment.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/comment.tsx"
+        }
+      ],
+      "categories": ["content", "community"]
+    },
+    {
+      "name": "reaction-bar",
+      "type": "registry:ui",
+      "title": "Reaction Bar",
+      "description": "Reaction counts and selected states with accessible names and an add-reaction menu.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/reaction-bar.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/reaction-bar.tsx"
+        }
+      ],
+      "categories": ["content", "community"]
+    },
+    {
+      "name": "share-menu",
+      "type": "registry:ui",
+      "title": "Share Menu",
+      "description": "A share menu with native sharing, copy-link feedback, and channel links.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/share-menu.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/share-menu.tsx"
+        }
+      ],
+      "categories": ["content", "community"]
+    },
+    {
+      "name": "changelog-entry",
+      "type": "registry:ui",
+      "title": "Changelog Entry",
+      "description": "A release entry with date, version, categories, and linked changes.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/changelog-entry.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/changelog-entry.tsx"
+        }
+      ],
+      "categories": ["content", "changelog"]
+    },
+    {
+      "name": "announcement-bar",
+      "type": "registry:ui",
+      "title": "Announcement Bar",
+      "description": "A campaign message with actions, dismissal, and remembered dismissal.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/announcement-bar.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/announcement-bar.tsx"
+        }
+      ],
+      "categories": ["marketing", "banner"]
+    },
+    {
+      "name": "pricing-toggle",
+      "type": "registry:ui",
+      "title": "Pricing Toggle",
+      "description": "Switch billing periods while keeping prices, billing context, and savings labels in sync.",
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/pricing-toggle.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/pricing-toggle.tsx"
+        }
+      ],
+      "categories": ["marketing", "pricing"]
+    },
+    {
+      "name": "testimonial-card",
+      "type": "registry:ui",
+      "title": "Testimonial Card",
+      "description": "A quote with the person, role, organization, and an optional proof link.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/testimonial-card.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/testimonial-card.tsx"
+        }
+      ],
+      "categories": ["marketing", "social-proof"]
+    },
+    {
+      "name": "product-gallery",
+      "type": "registry:ui",
+      "title": "Product Gallery",
+      "description": "Media selection with thumbnails, zoom, fullscreen viewing, and required alt text.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/product-gallery.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/product-gallery.tsx"
+        }
+      ],
+      "categories": ["marketing", "media"]
+    },
+    {
+      "name": "trust-panel",
+      "type": "registry:ui",
+      "title": "Trust Panel",
+      "description": "Customer logos, ratings, certifications, and security evidence in one section.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/trust-panel.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/trust-panel.tsx"
+        }
+      ],
+      "categories": ["marketing", "social-proof"]
+    },
+    {
+      "name": "newsletter-form",
+      "type": "registry:ui",
+      "title": "Newsletter Form",
+      "description": "Email signup with consent, validation, submission, success, and duplicate-email states.",
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/newsletter-form.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/newsletter-form.tsx"
+        }
+      ],
+      "categories": ["marketing", "forms"]
+    },
+    {
+      "name": "message",
+      "type": "registry:ui",
+      "title": "Message",
+      "description": "User, assistant, system, and tool messages with avatar, header, content, actions, and streaming state.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/message.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/message.tsx"
+        }
+      ],
+      "categories": ["ai", "chat"]
+    },
+    {
+      "name": "citation",
+      "type": "registry:ui",
+      "title": "Citation",
+      "description": "An inline claim marker with a source preview card and destination link.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/citation.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/citation.tsx"
+        }
+      ],
+      "categories": ["ai", "sources"]
+    },
+    {
+      "name": "attachment",
+      "type": "registry:ui",
+      "title": "Attachment",
+      "description": "A file with type icon or thumbnail, upload progress, failure and retry, and removal.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/attachment.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/attachment.tsx"
+        }
+      ],
+      "categories": ["ai", "files"]
+    },
+    {
+      "name": "tool-call",
+      "type": "registry:ui",
+      "title": "Tool Call",
+      "description": "Queued, running, successful, and failed tool activity with a disclosure for input and output.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/tool-call.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/tool-call.tsx"
+        }
+      ],
+      "categories": ["ai", "agents"]
+    },
+    {
+      "name": "response-status",
+      "type": "registry:ui",
+      "title": "Response Status",
+      "description": "Queued, streaming, stopped, complete, and failed response states with stop and retry actions.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/response-status.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/response-status.tsx"
+        }
+      ],
+      "categories": ["ai", "status"]
+    },
+    {
+      "name": "run-summary",
+      "type": "registry:ui",
+      "title": "Run Summary",
+      "description": "A summary of completed agent work with stats, changed artifacts, warnings, and next actions.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/components/run-summary.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/run-summary.tsx"
+        }
+      ],
+      "categories": ["ai", "agents"]
+    },
+    {
+      "name": "hero-section",
+      "type": "registry:block",
+      "title": "Hero Section",
+      "description": "Positioning, a primary action, supporting proof, and product media.",
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/trust-panel.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/hero-section.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/hero-section.tsx"
+        }
+      ],
+      "categories": ["marketing", "hero"]
+    },
+    {
+      "name": "feature-showcase",
+      "type": "registry:block",
+      "title": "Feature Showcase",
+      "description": "Benefits through alternating copy, media, and supporting details.",
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/description-list.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/feature-showcase.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/feature-showcase.tsx"
+        }
+      ],
+      "categories": ["marketing", "features"]
+    },
+    {
+      "name": "pricing-section",
+      "type": "registry:block",
+      "title": "Pricing Section",
+      "description": "Plans, billing periods, limits, and purchase actions.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/pricing-toggle.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/pricing-section.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/pricing-section.tsx"
+        }
+      ],
+      "categories": ["marketing", "pricing"]
+    },
+    {
+      "name": "testimonials-section",
+      "type": "registry:block",
+      "title": "Testimonials Section",
+      "description": "Customer stories with people, roles, organizations, and a rating summary.",
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/testimonial-card.json",
+        "http://localhost:3000/r/trust-panel.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/testimonials-section.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/testimonials-section.tsx"
+        }
+      ],
+      "categories": ["marketing", "social-proof"]
+    },
+    {
+      "name": "faq-section",
+      "type": "registry:block",
+      "title": "FAQ Section",
+      "description": "Searchable questions with accessible disclosure answers.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/search-field.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/faq-section.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/faq-section.tsx"
+        }
+      ],
+      "categories": ["marketing", "faq"]
+    },
+    {
+      "name": "call-to-action",
+      "type": "registry:block",
+      "title": "Call to Action",
+      "description": "A closing section with one goal, supporting copy, and reassurance.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/trust-panel.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/call-to-action.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/call-to-action.tsx"
+        }
+      ],
+      "categories": ["marketing", "conversion"]
+    },
+    {
+      "name": "waitlist-section",
+      "type": "registry:block",
+      "title": "Waitlist Section",
+      "description": "Collect interest with qualification fields, consent, and confirmation.",
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/newsletter-form.json",
+        "http://localhost:3000/r/form-field.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/waitlist-section.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/waitlist-section.tsx"
+        }
+      ],
+      "categories": ["marketing", "conversion", "forms"]
+    },
+    {
+      "name": "contact-section",
+      "type": "registry:block",
+      "title": "Contact Section",
+      "description": "Contact options, availability, a message form with its states, and expectations.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/status-banner.json",
+        "http://localhost:3000/r/form-field.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/contact-section.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/contact-section.tsx"
+        }
+      ],
+      "categories": ["marketing", "forms", "support"]
+    },
+    {
+      "name": "dashboard-shell",
+      "type": "registry:block",
+      "title": "Dashboard Shell",
+      "description": "Global navigation, page hierarchy, actions, key metrics, and a layout that stacks on narrow screens.",
+      "dependencies": [],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/app-sidebar.json",
+        "http://localhost:3000/r/breadcrumb-trail.json",
+        "http://localhost:3000/r/metric-card.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/dashboard-shell.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/dashboard-shell.tsx"
+        }
+      ],
+      "categories": ["application"]
+    },
+    {
+      "name": "settings-page",
+      "type": "registry:block",
+      "title": "Settings Page",
+      "description": "Grouped settings with field validation, a sticky save state, and a guarded danger zone.",
+      "dependencies": [],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/confirmation-dialog.json",
+        "http://localhost:3000/r/form-field.json",
+        "http://localhost:3000/r/unsaved-changes-bar.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/settings-page.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/settings-page.tsx"
+        }
+      ],
+      "categories": ["application"]
+    },
+    {
+      "name": "profile-page",
+      "type": "registry:block",
+      "title": "Profile Page",
+      "description": "Identity, account actions, contact details, and recent activity in a sidebar or stacked layout.",
+      "dependencies": [],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/activity-timeline.json",
+        "http://localhost:3000/r/author-card.json",
+        "http://localhost:3000/r/description-list.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/profile-page.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/profile-page.tsx"
+        }
+      ],
+      "categories": ["application"]
+    },
+    {
+      "name": "team-management",
+      "type": "registry:block",
+      "title": "Team Management",
+      "description": "Members, roles, invitations, access status, search, and confirmed removal.",
+      "dependencies": [],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/confirmation-dialog.json",
+        "http://localhost:3000/r/data-table-toolbar.json",
+        "http://localhost:3000/r/empty-state.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/team-management.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/team-management.tsx"
+        }
+      ],
+      "categories": ["application"]
+    },
+    {
+      "name": "notification-center",
+      "type": "registry:block",
+      "title": "Notification Center",
+      "description": "Updates grouped by date with unread state, filters, per-item toggles, and bulk actions.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/empty-state.json",
+        "http://localhost:3000/r/page-tabs.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/notification-center.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/notification-center.tsx"
+        }
+      ],
+      "categories": ["application"]
+    },
+    {
+      "name": "billing-portal",
+      "type": "registry:block",
+      "title": "Billing Portal",
+      "description": "Plan, usage, payment method, invoice history, billing alerts, and confirmed cancellation.",
+      "dependencies": [],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/confirmation-dialog.json",
+        "http://localhost:3000/r/description-list.json",
+        "http://localhost:3000/r/progress-summary.json",
+        "http://localhost:3000/r/status-banner.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/billing-portal.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/billing-portal.tsx"
+        }
+      ],
+      "categories": ["application"]
+    },
+    {
+      "name": "search-results",
+      "type": "registry:block",
+      "title": "Search Results",
+      "description": "Query controls, filters, ranked results with highlighted terms, empty states, and pagination.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/empty-state.json",
+        "http://localhost:3000/r/filter-bar.json",
+        "http://localhost:3000/r/search-field.json",
+        "http://localhost:3000/r/skeleton-group.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/search-results.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/search-results.tsx"
+        }
+      ],
+      "categories": ["application"]
+    },
+    {
+      "name": "resource-manager",
+      "type": "registry:block",
+      "title": "Resource Manager",
+      "description": "List, create, inspect, edit, archive, and delete domain records.",
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json",
+        "http://localhost:3000/r/confirmation-dialog.json",
+        "http://localhost:3000/r/data-table-toolbar.json",
+        "http://localhost:3000/r/description-list.json",
+        "http://localhost:3000/r/empty-state.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/resource-manager.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/resource-manager.tsx"
+        }
+      ],
+      "categories": ["operations", "data", "crud"]
+    },
+    {
+      "name": "data-explorer",
+      "type": "registry:block",
+      "title": "Data Explorer",
+      "description": "Query surface, results, saved views, and export actions.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json",
+        "http://localhost:3000/r/data-table-toolbar.json",
+        "http://localhost:3000/r/empty-state.json",
+        "http://localhost:3000/r/page-tabs.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/data-explorer.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/data-explorer.tsx"
+        }
+      ],
+      "categories": ["operations", "data", "query"]
+    },
+    {
+      "name": "import-workflow",
+      "type": "registry:block",
+      "title": "Import Workflow",
+      "description": "File selection, column mapping, validation, preview, and completion.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json",
+        "http://localhost:3000/r/file-upload.json",
+        "http://localhost:3000/r/progress-summary.json",
+        "http://localhost:3000/r/status-banner.json",
+        "http://localhost:3000/r/step-indicator.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/import-workflow.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/import-workflow.tsx"
+        }
+      ],
+      "categories": ["operations", "data", "import"]
+    },
+    {
+      "name": "approval-queue",
+      "type": "registry:block",
+      "title": "Approval Queue",
+      "description": "Pending decisions grouped by risk, age, owner, and impact.",
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json",
+        "http://localhost:3000/r/approval-card.json",
+        "http://localhost:3000/r/empty-state.json",
+        "http://localhost:3000/r/filter-bar.json",
+        "http://localhost:3000/r/metric-card.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/approval-queue.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/approval-queue.tsx"
+        }
+      ],
+      "categories": ["operations", "approvals", "review"]
+    },
+    {
+      "name": "audit-log-viewer",
+      "type": "registry:block",
+      "title": "Audit Log Viewer",
+      "description": "Filters, events, details, and export controls.",
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json",
+        "http://localhost:3000/r/audit-log.json",
+        "http://localhost:3000/r/date-range-picker.json",
+        "http://localhost:3000/r/filter-bar.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/audit-log-viewer.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/audit-log-viewer.tsx"
+        }
+      ],
+      "categories": ["operations", "audit", "security"]
+    },
+    {
+      "name": "incident-dashboard",
+      "type": "registry:block",
+      "title": "Incident Dashboard",
+      "description": "Status, impact, timeline, responders, and updates.",
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json",
+        "http://localhost:3000/r/activity-timeline.json",
+        "http://localhost:3000/r/description-list.json",
+        "http://localhost:3000/r/metric-card.json",
+        "http://localhost:3000/r/status-banner.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/incident-dashboard.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/incident-dashboard.tsx"
+        }
+      ],
+      "categories": ["operations", "incidents", "monitoring"]
+    },
+    {
+      "name": "report-builder",
+      "type": "registry:block",
+      "title": "Report Builder",
+      "description": "Select metrics, dimensions, filters, visualization, and export format.",
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json",
+        "http://localhost:3000/r/filter-bar.json",
+        "http://localhost:3000/r/metric-card.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/report-builder.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/report-builder.tsx"
+        }
+      ],
+      "categories": ["operations", "reporting", "charts"]
+    },
+    {
+      "name": "product-detail",
+      "type": "registry:block",
+      "title": "Product Detail",
+      "description": "Gallery, options, availability, price, delivery, and purchase actions.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/product-gallery.json",
+        "http://localhost:3000/r/quantity-picker.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/product-detail.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/product-detail.tsx"
+        }
+      ],
+      "categories": ["commerce", "product"]
+    },
+    {
+      "name": "product-listing",
+      "type": "registry:block",
+      "title": "Product Listing",
+      "description": "Categories, filters, sorting, result counts, and pagination.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/filter-bar.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/product-listing.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/product-listing.tsx"
+        }
+      ],
+      "categories": ["commerce", "catalog"]
+    },
+    {
+      "name": "cart-drawer",
+      "type": "registry:block",
+      "title": "Cart Drawer",
+      "description": "Review items, quantities, discounts, totals, and checkout actions.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/cart-item.json",
+        "http://localhost:3000/r/coupon-field.json",
+        "http://localhost:3000/r/price-summary.json",
+        "http://localhost:3000/r/quantity-picker.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/cart-drawer.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/cart-drawer.tsx"
+        }
+      ],
+      "categories": ["commerce", "cart"]
+    },
+    {
+      "name": "checkout",
+      "type": "registry:block",
+      "title": "Checkout",
+      "description": "Guide contact, delivery, payment, review, and confirmation.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/price-summary.json",
+        "http://localhost:3000/r/status-banner.json",
+        "http://localhost:3000/r/step-indicator.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/checkout.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/checkout.tsx"
+        }
+      ],
+      "categories": ["commerce", "checkout"]
+    },
+    {
+      "name": "order-tracking",
+      "type": "registry:block",
+      "title": "Order Tracking",
+      "description": "Status, shipment events, delivery estimates, and support.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/description-list.json",
+        "http://localhost:3000/r/order-status.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/order-tracking.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/order-tracking.tsx"
+        }
+      ],
+      "categories": ["commerce", "orders"]
+    },
+    {
+      "name": "subscription-management",
+      "type": "registry:block",
+      "title": "Subscription Management",
+      "description": "Change plans, usage limits, payment, renewal, and cancellation.",
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/confirmation-dialog.json",
+        "http://localhost:3000/r/description-list.json",
+        "http://localhost:3000/r/pricing-toggle.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/subscription-management.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/subscription-management.tsx"
+        }
+      ],
+      "categories": ["commerce", "billing"]
+    },
+    {
+      "name": "code-verification",
+      "type": "registry:block",
+      "title": "Code Verification",
+      "description": "One-time code entry with paste, resend timing, errors, and alternate methods.",
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/inline-feedback.json",
+        "http://localhost:3000/r/status-banner.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/code-verification.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/code-verification.tsx"
+        }
+      ],
+      "categories": ["authentication", "onboarding", "forms"]
+    },
+    {
+      "name": "onboarding-wizard",
+      "type": "registry:block",
+      "title": "Onboarding Wizard",
+      "description": "Resumable setup steps with validation, progress, optional steps, and completion.",
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/step-indicator.json",
+        "http://localhost:3000/r/status-banner.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/onboarding-wizard.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/onboarding-wizard.tsx"
+        }
+      ],
+      "categories": ["authentication", "onboarding", "forms"]
+    },
+    {
+      "name": "workspace-setup",
+      "type": "registry:block",
+      "title": "Workspace Setup",
+      "description": "Create a workspace, invite teammates, and choose initial settings.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/form-field.json",
+        "http://localhost:3000/r/status-banner.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/workspace-setup.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/workspace-setup.tsx"
+        }
+      ],
+      "categories": ["authentication", "onboarding", "forms"]
+    },
+    {
+      "name": "article-page",
+      "type": "registry:block",
+      "title": "Article Page",
+      "description": "Long-form reading with metadata, text size controls, sharing, and related articles.",
+      "dependencies": [],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/author-card.json",
+        "http://localhost:3000/r/share-menu.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/article-page.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/article-page.tsx"
+        }
+      ],
+      "categories": ["content", "community"]
+    },
+    {
+      "name": "documentation-page",
+      "type": "registry:block",
+      "title": "Documentation Page",
+      "description": "Navigation, an in-page table of contents with the current section, content, and page actions.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/app-sidebar.json",
+        "http://localhost:3000/r/breadcrumb-trail.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/documentation-page.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/documentation-page.tsx"
+        }
+      ],
+      "categories": ["content", "navigation"]
+    },
+    {
+      "name": "changelog-page",
+      "type": "registry:block",
+      "title": "Changelog Page",
+      "description": "Releases grouped by date with version, category, and product area filters.",
+      "dependencies": [],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/changelog-entry.json",
+        "http://localhost:3000/r/empty-state.json",
+        "http://localhost:3000/r/filter-bar.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/changelog-page.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/changelog-page.tsx"
+        }
+      ],
+      "categories": ["content", "changelog"]
+    },
+    {
+      "name": "comment-thread",
+      "type": "registry:block",
+      "title": "Comment Thread",
+      "description": "Nested replies, reactions, sorting, moderation states, and a comment composer.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/comment.json",
+        "http://localhost:3000/r/reaction-bar.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/comment-thread.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/comment-thread.tsx"
+        }
+      ],
+      "categories": ["content", "community"]
+    },
+    {
+      "name": "community-feed",
+      "type": "registry:block",
+      "title": "Community Feed",
+      "description": "Posts with authors, tags, reactions, filters, and numbered pagination.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/author-card.json",
+        "http://localhost:3000/r/empty-state.json",
+        "http://localhost:3000/r/reaction-bar.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/community-feed.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/community-feed.tsx"
+        }
+      ],
+      "categories": ["content", "community"]
+    },
+    {
+      "name": "public-profile",
+      "type": "registry:block",
+      "title": "Public Profile",
+      "description": "Identity, links, follower counts, pinned work, and recent activity.",
+      "dependencies": [],
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/activity-timeline.json",
+        "http://localhost:3000/r/author-card.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/public-profile.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/public-profile.tsx"
+        }
+      ],
+      "categories": ["content", "community"]
+    },
+    {
+      "name": "conversation-thread",
+      "type": "registry:block",
+      "title": "Conversation Thread",
+      "description": "Messages, cited sources, response states, and a prompt composer in one thread.",
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json",
+        "http://localhost:3000/r/citation.json",
+        "http://localhost:3000/r/message.json",
+        "http://localhost:3000/r/prompt-composer.json",
+        "http://localhost:3000/r/response-status.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/conversation-thread.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/conversation-thread.tsx"
+        }
+      ],
+      "categories": ["ai", "chat", "conversation"]
+    },
+    {
+      "name": "research-session",
+      "type": "registry:block",
+      "title": "Research Session",
+      "description": "A research plan, live search activity, sources, and a cited synthesis.",
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json",
+        "http://localhost:3000/r/citation.json",
+        "http://localhost:3000/r/progress-summary.json",
+        "http://localhost:3000/r/response-status.json",
+        "http://localhost:3000/r/task-list.json",
+        "http://localhost:3000/r/thinking.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/research-session.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/research-session.tsx"
+        }
+      ],
+      "categories": ["ai", "research", "sources"]
+    },
+    {
+      "name": "file-analysis",
+      "type": "registry:block",
+      "title": "File Analysis",
+      "description": "Attached files, extraction status, and findings that cite the page or cell they came from.",
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json",
+        "http://localhost:3000/r/attachment.json",
+        "http://localhost:3000/r/citation.json",
+        "http://localhost:3000/r/progress-summary.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/file-analysis.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/file-analysis.tsx"
+        }
+      ],
+      "categories": ["ai", "files", "analysis"]
+    },
+    {
+      "name": "agent-run",
+      "type": "registry:block",
+      "title": "Agent Run",
+      "description": "Agent thinking and tool calls, task progress, approvals, and a final run summary.",
+      "registryDependencies": [
+        "http://localhost:3000/r/uai-theme.json",
+        "http://localhost:3000/r/uai-utils.json",
+        "http://localhost:3000/r/approval-card.json",
+        "http://localhost:3000/r/response-status.json",
+        "http://localhost:3000/r/run-summary.json",
+        "http://localhost:3000/r/task-list.json",
+        "http://localhost:3000/r/thinking.json",
+        "http://localhost:3000/r/tool-call.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/blocks/agent-run.tsx",
+          "type": "registry:component",
+          "target": "@components/uai/agent-run.tsx"
+        }
+      ],
+      "categories": ["ai", "agents", "automation"]
     }
   ]
 }

@@ -63,6 +63,21 @@ type ThinkingContextValue = {
   contentId: string;
 };
 
+const thinkingCss = `
+@keyframes uai-thinking-shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
+@keyframes uai-thinking-reveal{from{opacity:0;transform:translateY(-4px)}}
+@keyframes uai-thinking-enter{from{opacity:0;transform:translateY(4px)}}
+[data-uai-thinking] [data-shimmer]{background-image:linear-gradient(90deg,var(--uai-subtle) 0%,var(--uai-subtle) 35%,var(--uai-text) 50%,var(--uai-subtle) 65%,var(--uai-subtle) 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:uai-thinking-shimmer 2s linear infinite}
+[data-uai-thinking] [data-reveal]{animation:uai-thinking-reveal 240ms cubic-bezier(0.23,1,0.32,1)}
+[data-uai-thinking] [role="log"] li{animation:uai-thinking-enter 240ms cubic-bezier(0.23,1,0.32,1) backwards}
+[data-uai-thinking] [role="log"] li:nth-child(2){animation-delay:40ms}
+[data-uai-thinking] [role="log"] li:nth-child(3){animation-delay:80ms}
+[data-uai-thinking] [role="log"] li:nth-child(4){animation-delay:120ms}
+[data-uai-thinking] [role="log"] li:nth-child(5){animation-delay:160ms}
+[data-uai-thinking] [role="log"] li:nth-child(6){animation-delay:200ms}
+@media (prefers-reduced-motion:reduce){[data-uai-thinking] [data-shimmer]{animation:none;background:none;color:var(--uai-text)}[data-uai-thinking] [data-reveal],[data-uai-thinking] [role="log"] li{animation:none}}
+`;
+
 const ThinkingContext = createContext<ThinkingContextValue | null>(null);
 
 function useThinking(name: string) {
@@ -86,13 +101,16 @@ export function Thinking({
       <section
         {...props}
         className={cn(
-          "overflow-hidden rounded-[14px] border border-[var(--uai-border)] bg-[var(--uai-surface)] text-[var(--uai-text)] transition-colors duration-150",
-          status === "error" && "border-[var(--uai-danger)]",
+          "overflow-hidden rounded-[14px] border border-[var(--uai-border)] bg-[var(--uai-surface)] text-[var(--uai-text)] transition-colors duration-150 motion-reduce:transition-none",
+          status === "error" &&
+            "border-[color-mix(in_oklab,var(--uai-danger)_40%,var(--uai-border))]",
           className,
         )}
         data-status={status}
+        data-uai-thinking=""
         aria-busy={status === "thinking"}
       >
+        <style>{thinkingCss}</style>
         {children}
       </section>
     </ThinkingContext.Provider>
@@ -122,7 +140,7 @@ export function ThinkingTrigger({
       {...props}
       type="button"
       className={cn(
-        "flex min-h-[66px] w-full items-center gap-3 px-3.5 text-left outline-none transition-colors duration-150 hover:bg-[var(--uai-surface-raised)] focus-visible:ring-2 focus-visible:ring-[var(--uai-accent)] focus-visible:ring-inset",
+        "group/trigger flex w-full items-center gap-3 px-3.5 py-3 text-left outline-none transition-colors duration-[120ms] ease-out hover:bg-[color-mix(in_oklab,var(--uai-surface-raised)_60%,transparent)] focus-visible:ring-2 focus-visible:ring-[var(--uai-accent)] focus-visible:ring-inset motion-reduce:transition-none",
         className,
       )}
       aria-controls={context.contentId}
@@ -132,12 +150,21 @@ export function ThinkingTrigger({
         if (!event.defaultPrevented) context.setOpen(!context.open);
       }}
     >
-      <span className="grid size-7 shrink-0 place-items-center rounded-lg border border-[var(--uai-border)] bg-[var(--uai-surface-raised)]">
+      <span
+        className={cn(
+          "grid size-7 shrink-0 place-items-center rounded-lg bg-[var(--uai-surface-raised)]",
+          context.status === "complete" &&
+            "bg-[color-mix(in_oklab,var(--uai-success)_14%,transparent)]",
+          context.status === "error" &&
+            "bg-[color-mix(in_oklab,var(--uai-danger)_14%,transparent)]",
+        )}
+      >
         <StatusIcon
+          strokeWidth={2}
           className={cn(
             "size-3.5",
             context.status === "thinking" &&
-              "text-[var(--uai-text)] motion-safe:animate-spin motion-reduce:animate-none",
+              "text-[var(--uai-muted)] motion-safe:animate-spin motion-reduce:animate-none",
             context.status === "complete" && "text-[var(--uai-success)]",
             context.status === "error" && "text-[var(--uai-danger)]",
           )}
@@ -146,21 +173,28 @@ export function ThinkingTrigger({
       </span>
       <span className="min-w-0 flex-1">
         <span className="flex min-w-0 items-center gap-2">
-          <span className="truncate text-[13px] leading-[18px] font-medium">
+          <span
+            className="truncate text-[13px] leading-[18px] font-medium"
+            data-shimmer={context.status === "thinking" ? "" : undefined}
+          >
             {title ?? copy.title}
           </span>
           <span
             className={cn(
-              "shrink-0 text-[0.66rem] leading-4 font-medium uppercase tracking-[0.055em] text-[var(--uai-muted)]",
-              context.status === "complete" && "text-[var(--uai-success)]",
-              context.status === "error" && "text-[var(--uai-danger)]",
+              "shrink-0 rounded-full px-2 py-px text-[11.5px] leading-4 font-medium",
+              context.status === "thinking" &&
+                "bg-[var(--uai-surface-raised)] text-[var(--uai-muted)]",
+              context.status === "complete" &&
+                "bg-[color-mix(in_oklab,var(--uai-success)_14%,transparent)] text-[var(--uai-success)]",
+              context.status === "error" &&
+                "bg-[color-mix(in_oklab,var(--uai-danger)_14%,transparent)] text-[var(--uai-danger)]",
             )}
           >
             {copy.label}
           </span>
         </span>
         <span
-          className="block truncate text-xs leading-[18px] text-[var(--uai-muted)]"
+          className="mt-0.5 block truncate text-[12.5px] leading-[18px] text-[var(--uai-muted)]"
           role="status"
           aria-live="polite"
           aria-atomic="true"
@@ -169,13 +203,13 @@ export function ThinkingTrigger({
         </span>
       </span>
       {duration ? (
-        <span className="shrink-0 font-mono text-[0.72rem] leading-4 tabular-nums text-[var(--uai-muted)]">
+        <span className="shrink-0 font-mono text-[11.5px] leading-4 tabular-nums text-[var(--uai-subtle)]">
           {duration}
         </span>
       ) : null}
       <ChevronDown
         className={cn(
-          "size-4 shrink-0 text-[var(--uai-muted)] transition-transform duration-180 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none",
+          "size-4 shrink-0 text-[var(--uai-subtle)] transition-[transform,color] duration-180 group-hover/trigger:text-[var(--uai-muted)] ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none",
           context.open && "rotate-180",
         )}
         aria-hidden="true"
@@ -209,14 +243,15 @@ export function ThinkingContent({
     <div
       {...props}
       id={context.contentId}
-      className={cn("border-t border-[var(--uai-border)] px-3.5 py-1.5", className)}
+      data-reveal=""
+      className={cn("border-t border-[var(--uai-border)] px-3.5 pt-1 pb-1.5", className)}
     >
       {hasActivity ? (
         <div role="log" aria-live="polite" aria-relevant="additions text">
           <ol>{children}</ol>
         </div>
       ) : (
-        <p className="py-3 text-[13px] leading-[18px] text-[var(--uai-muted)]">
+        <p className="py-3 text-[13px] leading-[18px] text-[var(--uai-subtle)]">
           {emptyLabel ?? getEmptyLabel(context.status)}
         </p>
       )}
@@ -267,26 +302,26 @@ export function ThinkingActivity(props: ThinkingActivityProps) {
       )}
       {...domProps}
     >
-      <span className="relative grid size-6 place-items-center text-[var(--uai-muted)] after:absolute after:top-6 after:bottom-[-10px] after:left-1/2 after:w-px after:-translate-x-1/2 after:bg-[var(--uai-border)] group-last:after:hidden">
-        <ActivityIcon className="size-3.5" aria-hidden="true" />
+      <span className="relative grid size-6 place-items-center text-[var(--uai-subtle)] after:absolute after:top-6 after:bottom-[-10px] after:left-1/2 after:w-px after:-translate-x-1/2 after:bg-[var(--uai-border)] group-last:after:hidden">
+        <ActivityIcon className="size-3.5" strokeWidth={1.75} aria-hidden="true" />
       </span>
       <span className="min-w-0">
-        <span className="flex min-w-0 items-baseline gap-2">
-          <span className="shrink-0 text-[0.66rem] leading-4 font-medium uppercase tracking-[0.055em] text-[var(--uai-muted)]">
-            {details.label}
-          </span>
-          <span className="min-w-0 text-[13px] leading-[18px] text-[var(--uai-text)]">
+        <span className="flex min-w-0 items-baseline gap-2 pt-[3px]">
+          <span className="min-w-0 text-[13px] leading-[18px] font-medium text-[var(--uai-text)]">
             {children}
+          </span>
+          <span className="shrink-0 text-[11.5px] leading-4 text-[var(--uai-subtle)]">
+            {details.label}
           </span>
         </span>
         {evidence ? (
-          <span className="mt-0.5 block break-all font-mono text-[0.72rem] leading-4 text-[var(--uai-muted)]">
+          <span className="mt-1.5 inline-block max-w-full rounded-md bg-[var(--uai-surface-raised)] px-1.5 py-0.5 font-mono text-[11.5px] leading-4 break-all text-[var(--uai-muted)]">
             {evidence}
           </span>
         ) : null}
       </span>
       {elapsed ? (
-        <span className="pl-2 font-mono text-[0.72rem] leading-4 tabular-nums text-[var(--uai-muted)]">
+        <span className="pt-[4px] pl-2 font-mono text-[11.5px] leading-4 tabular-nums text-[var(--uai-subtle)]">
           {elapsed}
         </span>
       ) : null}

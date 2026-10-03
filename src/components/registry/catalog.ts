@@ -1,20 +1,85 @@
 import {
   BrainCircuit,
+  Inbox,
+  KeyRound,
   ListChecks,
+  LogIn,
   type LucideIcon,
   MessageSquareText,
+  PackageCheck,
+  PackagePlus,
+  PanelTop,
+  ReceiptText,
   ShieldCheck,
-  Workflow,
+  ShoppingCart,
+  TicketPercent,
+  UserPlus,
 } from "lucide-react";
+import { type AiItemId, aiCatalog } from "./ai/catalog";
+import { type AiBlocksItemId, aiBlocksCatalog } from "./ai-blocks/catalog";
+import { type AppBlocksItemId, appBlocksCatalog } from "./app-blocks/catalog";
+import { type CommerceBlocksItemId, commerceBlocksCatalog } from "./commerce-blocks/catalog";
+import { type CommunityItemId, communityCatalog } from "./community/catalog";
+import { type CommunityBlocksItemId, communityBlocksCatalog } from "./community-blocks/catalog";
+import { type DataDisplayItemId, dataDisplayCatalog } from "./data-display/catalog";
+import { type FeedbackItemId, feedbackCatalog } from "./feedback/catalog";
+import { formsCatalog } from "./forms/catalog";
+import { type MarketingItemId, marketingCatalog } from "./marketing/catalog";
+import { type MarketingBlocksItemId, marketingBlocksCatalog } from "./marketing-blocks/catalog";
+import { type NavigationItemId, navigationCatalog } from "./navigation/catalog";
+import { type OnboardingBlocksItemId, onboardingBlocksCatalog } from "./onboarding-blocks/catalog";
+import { type OperationsBlocksItemId, operationsBlocksCatalog } from "./operations-blocks/catalog";
 
 export type RegistryItemId =
+  | "form-field"
+  | "search-field"
+  | "filter-bar"
+  | "file-upload"
+  | "date-range-picker"
+  | "form-error-summary"
+  | "unsaved-changes-bar"
+  | "step-indicator"
   | "prompt-composer"
   | "thinking"
   | "approval-card"
+  | "empty-state"
   | "task-list"
-  | "task-flow";
+  | "sign-in-card"
+  | "sign-up-card"
+  | "password-recovery"
+  | "coupon-field"
+  | "quantity-picker"
+  | "cart-item"
+  | "price-summary"
+  | "order-status"
+  | "app-header"
+  | NavigationItemId
+  | FeedbackItemId
+  | DataDisplayItemId
+  | MarketingItemId
+  | CommunityItemId
+  | AiItemId
+  | MarketingBlocksItemId
+  | OnboardingBlocksItemId
+  | AppBlocksItemId
+  | OperationsBlocksItemId
+  | CommerceBlocksItemId
+  | CommunityBlocksItemId
+  | AiBlocksItemId;
 
-export type RegistryCategory = "All" | "AI" | "Feedback" | "Forms" | "Data Display" | "Workflow";
+export type RegistryCategory =
+  | "All"
+  | "AI"
+  | "Feedback"
+  | "Forms"
+  | "Data Display"
+  | "Navigation"
+  | "Authentication"
+  | "Commerce"
+  | "Marketing"
+  | "Content"
+  | "Application"
+  | "Operations";
 
 export type RegistryCatalogItem = {
   id: RegistryItemId;
@@ -154,11 +219,64 @@ export function PolicyDecision() {
     ],
   },
   {
+    id: "empty-state",
+    name: "Empty State",
+    category: "Feedback",
+    description: "A composable blank-slate surface with card, plain, compact, and page variants.",
+    icon: Inbox,
+    usage: `import { ArrowLeft } from "lucide-react"
+
+import {
+  EmptyState,
+  EmptyStateAction,
+  EmptyStateActions,
+  EmptyStateContent,
+  EmptyStateDescription,
+  EmptyStateHeader,
+  EmptyStateMedia,
+  EmptyStateNote,
+  EmptyStateTitle,
+} from "@/components/ui/uai/empty-state"
+
+export function NotFoundPage() {
+  return (
+    <EmptyState variant="page">
+      <EmptyStateMedia aria-hidden="true">404</EmptyStateMedia>
+      <EmptyStateContent>
+        <EmptyStateHeader>
+          <EmptyStateTitle>Page not found</EmptyStateTitle>
+          <EmptyStateDescription>
+            The page you’re looking for may have moved or no longer exists.
+          </EmptyStateDescription>
+        </EmptyStateHeader>
+        <EmptyStateActions>
+          <EmptyStateAction href="/">
+            <ArrowLeft aria-hidden="true" />
+            Back to home
+          </EmptyStateAction>
+          <EmptyStateAction emphasis="secondary" href="/components">
+            Browse components
+          </EmptyStateAction>
+        </EmptyStateActions>
+        <EmptyStateNote>Error code 404 · Check the address and try again.</EmptyStateNote>
+      </EmptyStateContent>
+    </EmptyState>
+  )
+}`,
+    accessibility: [
+      "The root is labelled by the composed empty-state title.",
+      "Static empty content does not announce itself as a live region by default.",
+      "Button actions default to type button and links retain native anchor semantics.",
+      "Media meaning remains consumer-authored; decorative icons stay hidden from assistive technology.",
+      "Long titles and localized descriptions wrap without truncation or horizontal overflow.",
+      "Card, plain, compact, and page variants preserve the same content and action contract.",
+    ],
+  },
+  {
     id: "task-list",
     name: "Task List",
     category: "Data Display",
-    description:
-      "An ordered view of complete, active, and pending work with visible status labels.",
+    description: "A composable progress list with card, timeline, and compact variants.",
     icon: ListChecks,
     usage: `import {
   TaskList,
@@ -169,13 +287,17 @@ export function PolicyDecision() {
 
 export function Progress() {
   return (
-    <TaskList>
+    <TaskList variant="timeline" aria-label="Release progress">
       <TaskListItem status="complete">
         <TaskListTitle>Review interface</TaskListTitle>
         <TaskListDescription>Props and public behavior</TaskListDescription>
       </TaskListItem>
       <TaskListItem status="active">
         <TaskListTitle>Check keyboard paths</TaskListTitle>
+        <TaskListDescription>Focus and reduced-motion behavior</TaskListDescription>
+      </TaskListItem>
+      <TaskListItem status="pending">
+        <TaskListTitle>Publish the registry item</TaskListTitle>
       </TaskListItem>
     </TaskList>
   )
@@ -183,38 +305,718 @@ export function Progress() {
     accessibility: [
       "Tasks retain ordered-list semantics.",
       "Every state includes text in addition to color.",
+      "The active task exposes current-step semantics.",
       "Active animation respects reduced-motion preferences.",
-      "Stable task IDs preserve list identity.",
+      "Long titles and descriptions wrap instead of being truncated.",
+      "Card, timeline, and compact variants preserve the same semantic contract.",
     ],
   },
   {
-    id: "task-flow",
-    name: "Task Flow",
-    category: "Workflow",
-    description: "The complete reasoning, approval, work, and prompt sequence behind an AI task.",
-    icon: Workflow,
-    usage: `import { MessageSquare, Sparkles } from "lucide-react"
-import { TaskFlow, TaskFlowStep } from "@/components/uai/task-flow"
+    id: "sign-in-card",
+    name: "Sign-in Card",
+    category: "Authentication",
+    description: "A composable sign-in form with card, split, and compact variants.",
+    icon: LogIn,
+    usage: `import { type FormEvent, useState } from "react"
 
-export function ReviewFlow() {
+import {
+  SignInCard,
+  SignInCardBody,
+  SignInCardDescription,
+  SignInCardDivider,
+  SignInCardError,
+  SignInCardField,
+  SignInCardFieldMessage,
+  SignInCardFields,
+  SignInCardFooter,
+  SignInCardHeader,
+  SignInCardInput,
+  SignInCardLabel,
+  SignInCardOptions,
+  SignInCardProvider,
+  SignInCardProviders,
+  SignInCardSubmit,
+  SignInCardTitle,
+  type SignInCardStatus,
+} from "@/components/ui/uai/sign-in-card"
+
+export function WorkspaceSignIn() {
+  const [status, setStatus] = useState<SignInCardStatus>("idle")
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setStatus("submitting")
+
+    try {
+      await authenticate(new FormData(event.currentTarget))
+    } catch {
+      setStatus("error")
+    }
+  }
+
   return (
-    <TaskFlow>
-      <TaskFlowStep label="Thinking" icon={<Sparkles aria-hidden="true" />} active>
-        {thinkingDisclosure}
-      </TaskFlowStep>
-      <TaskFlowStep label="Prompt" icon={<MessageSquare aria-hidden="true" />}>
-        {promptComposer}
-      </TaskFlowStep>
-    </TaskFlow>
+    <SignInCard variant="card" status={status} onSubmit={handleSubmit}>
+      <SignInCardHeader>
+        <SignInCardTitle>Welcome back</SignInCardTitle>
+        <SignInCardDescription>Sign in to continue to your workspace.</SignInCardDescription>
+      </SignInCardHeader>
+      <SignInCardBody>
+        <SignInCardProviders>
+          <SignInCardProvider onClick={() => signInWithSso()}>Continue with SSO</SignInCardProvider>
+          <SignInCardProvider onClick={() => signInWithGitHub()}>
+            Continue with GitHub
+          </SignInCardProvider>
+        </SignInCardProviders>
+        <SignInCardDivider />
+        <SignInCardFields>
+          <SignInCardField>
+            <SignInCardLabel>Email</SignInCardLabel>
+            <SignInCardInput name="email" type="email" autoComplete="email" required />
+          </SignInCardField>
+          <SignInCardField invalid={status === "error"}>
+            <SignInCardLabel>Password</SignInCardLabel>
+            <SignInCardInput name="password" revealable autoComplete="current-password" required />
+            {status === "error" ? (
+              <SignInCardFieldMessage>Check your password and try again.</SignInCardFieldMessage>
+            ) : null}
+          </SignInCardField>
+          <SignInCardOptions>
+            <label><input type="checkbox" name="remember" /> Remember me</label>
+            <a href="/forgot-password">Forgot password?</a>
+          </SignInCardOptions>
+          <SignInCardError>We could not sign you in. Check your details and try again.</SignInCardError>
+          <SignInCardSubmit>{status === "error" ? "Try again" : "Sign in"}</SignInCardSubmit>
+        </SignInCardFields>
+      </SignInCardBody>
+      <SignInCardFooter>New here? <a href="/sign-up">Create an account</a></SignInCardFooter>
+    </SignInCard>
   )
 }`,
     accessibility: [
-      "The workflow keeps an ordered stage sequence.",
-      "Each stage preserves its native component semantics.",
-      "Decision and prompt feedback use live regions.",
-      "The composition shrinks without horizontal overflow.",
+      "The form is labelled by its composed heading and uses native submit behavior.",
+      "Every field label is programmatically associated with its input.",
+      "The password reveal control exposes its pressed state and never submits the form.",
+      "Submitting exposes busy state and disables providers, fields, and duplicate submission.",
+      "Credential failures use an assertive alert and associate invalid field feedback.",
+      "Card, split, and compact variants preserve the same form and keyboard contract.",
     ],
   },
+  {
+    id: "sign-up-card",
+    name: "Sign-up Card",
+    category: "Authentication",
+    description: "A composable account creation form with consent, guidance, and verification.",
+    icon: UserPlus,
+    usage: `import { type FormEvent, useState } from "react"
+
+import {
+  SignUpCard,
+  SignUpCardBody,
+  SignUpCardCheckbox,
+  SignUpCardConsent,
+  SignUpCardDescription,
+  SignUpCardDivider,
+  SignUpCardError,
+  SignUpCardField,
+  SignUpCardFieldMessage,
+  SignUpCardFields,
+  SignUpCardFooter,
+  SignUpCardHeader,
+  SignUpCardInput,
+  SignUpCardLabel,
+  SignUpCardPasswordGuide,
+  SignUpCardPasswordRequirement,
+  SignUpCardProvider,
+  SignUpCardProviders,
+  type SignUpCardStatus,
+  SignUpCardSubmit,
+  SignUpCardTitle,
+  SignUpCardVerification,
+} from "@/components/ui/uai/sign-up-card"
+
+export function WorkspaceSignUp() {
+  const [status, setStatus] = useState<SignUpCardStatus>("idle")
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setStatus("submitting")
+
+    try {
+      await createAccount(new FormData(event.currentTarget))
+      setStatus("verification")
+    } catch {
+      setStatus("error")
+    }
+  }
+
+  return (
+    <SignUpCard variant="card" status={status} onSubmit={handleSubmit}>
+      <SignUpCardHeader>
+        <SignUpCardTitle>{status === "verification" ? "Check your inbox" : "Create your account"}</SignUpCardTitle>
+        <SignUpCardDescription>
+          {status === "verification"
+            ? "We sent a verification link to hello@acme.co."
+            : "Start with SSO or use your work email."}
+        </SignUpCardDescription>
+      </SignUpCardHeader>
+
+      {status === "verification" ? (
+        <SignUpCardVerification>Open the link to finish creating your account.</SignUpCardVerification>
+      ) : (
+        <SignUpCardBody>
+          <SignUpCardProviders>
+            <SignUpCardProvider onClick={() => signUpWithSso()}>Continue with SSO</SignUpCardProvider>
+          </SignUpCardProviders>
+          <SignUpCardDivider />
+          <SignUpCardFields>
+            <SignUpCardField>
+              <SignUpCardLabel>Name</SignUpCardLabel>
+              <SignUpCardInput name="name" autoComplete="name" required />
+            </SignUpCardField>
+            <SignUpCardField>
+              <SignUpCardLabel>Work email</SignUpCardLabel>
+              <SignUpCardInput name="email" type="email" autoComplete="email" required />
+            </SignUpCardField>
+            <SignUpCardField invalid={status === "error"}>
+              <SignUpCardLabel>Password</SignUpCardLabel>
+              <SignUpCardInput
+                name="password"
+                revealable
+                autoComplete="new-password"
+                aria-describedby="password-requirements"
+                required
+              />
+              <SignUpCardPasswordGuide id="password-requirements">
+                <SignUpCardPasswordRequirement met>At least 8 characters</SignUpCardPasswordRequirement>
+                <SignUpCardPasswordRequirement met>One number or symbol</SignUpCardPasswordRequirement>
+              </SignUpCardPasswordGuide>
+              {status === "error" ? (
+                <SignUpCardFieldMessage>Choose a stronger password and try again.</SignUpCardFieldMessage>
+              ) : null}
+            </SignUpCardField>
+            <SignUpCardConsent>
+              <SignUpCardCheckbox name="terms" required />
+              <span>I agree to the <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</span>
+            </SignUpCardConsent>
+            <SignUpCardError>We could not create your account. Review the fields and try again.</SignUpCardError>
+            <SignUpCardSubmit>{status === "error" ? "Try again" : "Create account"}</SignUpCardSubmit>
+          </SignUpCardFields>
+        </SignUpCardBody>
+      )}
+
+      <SignUpCardFooter>Already have an account? <a href="/sign-in">Sign in</a></SignUpCardFooter>
+    </SignUpCard>
+  )
+}`,
+    accessibility: [
+      "The form is labelled by its composed heading and keeps native submit behavior.",
+      "Every account field has a programmatic label and browser autocomplete purpose.",
+      "Password requirements include visible met and not-met text in addition to icons.",
+      "Terms consent uses a native required checkbox and remains consumer-authored.",
+      "Submitting disables duplicate provider, field, consent, and submit actions.",
+      "Verification feedback uses a polite status while errors use assertive alerts.",
+      "Card, split, and compact variants preserve the same form and keyboard contract.",
+    ],
+  },
+  {
+    id: "password-recovery",
+    name: "Password Recovery",
+    category: "Authentication",
+    description: "A controlled recovery workflow with card, split, and compact variants.",
+    icon: KeyRound,
+    usage: `import { type FormEvent, useState } from "react"
+
+import {
+  PasswordRecovery,
+  PasswordRecoveryAction,
+  PasswordRecoveryActions,
+  PasswordRecoveryAside,
+  PasswordRecoveryDescription,
+  PasswordRecoveryError,
+  PasswordRecoveryField,
+  PasswordRecoveryFields,
+  PasswordRecoveryFooter,
+  PasswordRecoveryHeader,
+  PasswordRecoveryInput,
+  PasswordRecoveryLabel,
+  PasswordRecoveryMain,
+  PasswordRecoveryProgress,
+  PasswordRecoveryProgressItem,
+  type PasswordRecoveryStatus,
+  PasswordRecoveryStage,
+  type PasswordRecoveryStep,
+  PasswordRecoveryStatus as PasswordRecoveryStatusMessage,
+  PasswordRecoverySubmit,
+  PasswordRecoveryTitle,
+} from "@/components/ui/uai/password-recovery"
+
+export function WorkspacePasswordRecovery() {
+  const [step, setStep] = useState<PasswordRecoveryStep>("request")
+  const [status, setStatus] = useState<PasswordRecoveryStatus>("idle")
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setStatus("submitting")
+
+    try {
+      if (step === "reset") {
+        await updatePassword(new FormData(event.currentTarget))
+        setStep("success")
+      } else {
+        await sendPasswordReset(new FormData(event.currentTarget))
+        setStep("sent")
+      }
+      setStatus("idle")
+    } catch {
+      setStatus("error")
+    }
+  }
+
+  return (
+    <PasswordRecovery variant="split" step={step} status={status} onSubmit={handleSubmit}>
+      <PasswordRecoveryAside>
+        <strong>Reset securely</strong>
+        <PasswordRecoveryProgress aria-label="Recovery progress">
+          <PasswordRecoveryProgressItem state={step === "request" ? "current" : "complete"}>
+            Find account
+          </PasswordRecoveryProgressItem>
+          <PasswordRecoveryProgressItem state={step === "sent" ? "current" : step === "request" ? "upcoming" : "complete"}>
+            Check email
+          </PasswordRecoveryProgressItem>
+          <PasswordRecoveryProgressItem state={step === "reset" ? "current" : step === "success" ? "complete" : "upcoming"}>
+            New password
+          </PasswordRecoveryProgressItem>
+        </PasswordRecoveryProgress>
+      </PasswordRecoveryAside>
+
+      <PasswordRecoveryMain>
+        <PasswordRecoveryHeader>
+          <PasswordRecoveryTitle>Recover your account</PasswordRecoveryTitle>
+          <PasswordRecoveryDescription>
+            We only use your email to continue this recovery attempt.
+          </PasswordRecoveryDescription>
+        </PasswordRecoveryHeader>
+
+        <PasswordRecoveryStage when="request">
+          <PasswordRecoveryFields>
+            <PasswordRecoveryField>
+              <PasswordRecoveryLabel>Work email</PasswordRecoveryLabel>
+              <PasswordRecoveryInput name="email" type="email" autoComplete="email" required />
+            </PasswordRecoveryField>
+            <PasswordRecoveryError>We could not send a reset link. Try again.</PasswordRecoveryError>
+            <PasswordRecoverySubmit />
+          </PasswordRecoveryFields>
+        </PasswordRecoveryStage>
+
+        <PasswordRecoveryStage when="sent">
+          <PasswordRecoveryStatusMessage tone="sent">
+            If an account matches that email, its reset link is on the way.
+          </PasswordRecoveryStatusMessage>
+          <PasswordRecoveryActions>
+            <PasswordRecoveryAction onClick={() => setStep("request")}>
+              Use another email
+            </PasswordRecoveryAction>
+          </PasswordRecoveryActions>
+        </PasswordRecoveryStage>
+
+        <PasswordRecoveryStage when="reset">
+          <PasswordRecoveryFields>
+            <PasswordRecoveryField>
+              <PasswordRecoveryLabel>New password</PasswordRecoveryLabel>
+              <PasswordRecoveryInput name="password" revealable autoComplete="new-password" required />
+            </PasswordRecoveryField>
+            <PasswordRecoveryError>We could not update your password. Try again.</PasswordRecoveryError>
+            <PasswordRecoverySubmit />
+          </PasswordRecoveryFields>
+        </PasswordRecoveryStage>
+
+        <PasswordRecoveryStage when="expired">
+          <PasswordRecoveryStatusMessage tone="expired">
+            This reset link has expired. Request a new one to continue.
+          </PasswordRecoveryStatusMessage>
+          <PasswordRecoverySubmit />
+        </PasswordRecoveryStage>
+
+        <PasswordRecoveryStage when="success">
+          <PasswordRecoveryStatusMessage tone="success">
+            Your password has been updated. You can sign in now.
+          </PasswordRecoveryStatusMessage>
+        </PasswordRecoveryStage>
+
+        <PasswordRecoveryFooter>
+          Remembered it? <a href="/sign-in">Back to sign in</a>
+        </PasswordRecoveryFooter>
+      </PasswordRecoveryMain>
+    </PasswordRecovery>
+  )
+}`,
+    accessibility: [
+      "The controlled step renders only the active recovery stage.",
+      "Request feedback avoids revealing whether an account exists for the submitted email.",
+      "Submitting exposes busy state and disables fields, actions, and duplicate submission.",
+      "New-password guidance and validation remain programmatically associated with the field.",
+      "Expired links use an assertive alert; sent and success states use polite status messages.",
+      "Recovery progress includes complete, current, and upcoming text in addition to icons.",
+      "Card, split, and compact variants preserve the same form and keyboard contract.",
+    ],
+  },
+  {
+    id: "coupon-field",
+    name: "Coupon Field",
+    category: "Commerce",
+    description: "A checkout-safe discount field with rounded, pill, and compact variants.",
+    icon: TicketPercent,
+    usage: `import {
+  CouponField,
+  CouponFieldApply,
+  CouponFieldControl,
+  CouponFieldFeedback,
+  CouponFieldInput,
+  CouponFieldLabel,
+  CouponFieldMessage,
+  CouponFieldRemove,
+} from "@/components/ui/uai/coupon-field"
+
+export function DiscountCode() {
+  return (
+    <CouponField
+      variant="rounded"
+      status="applied"
+      appliedCode="WELCOME20"
+      onApply={(code) => validateCoupon(code)}
+    >
+      <CouponFieldLabel>Discount code</CouponFieldLabel>
+      <CouponFieldControl>
+        <CouponFieldInput />
+        <CouponFieldApply />
+      </CouponFieldControl>
+      <CouponFieldFeedback>
+        <CouponFieldMessage>20% off this order</CouponFieldMessage>
+        <CouponFieldRemove onClick={() => removeCoupon()} />
+      </CouponFieldFeedback>
+    </CouponField>
+  )
+}`,
+    accessibility: [
+      "The visible label is programmatically associated with the input.",
+      "Enter applies a valid draft without introducing a nested form.",
+      "Applying disables duplicate submissions and exposes busy state.",
+      "Success and error feedback use the matching live-region urgency.",
+      "Invalid state is communicated through text, icon, border, and aria-invalid.",
+      "Apply, Replace, and Remove name the action that will happen.",
+    ],
+  },
+  {
+    id: "quantity-picker",
+    name: "Quantity Picker",
+    category: "Commerce",
+    description: "A limit-aware stepper with direct input and rounded, pill, and compact variants.",
+    icon: PackagePlus,
+    usage: `import {
+  QuantityPicker,
+  QuantityPickerControl,
+  QuantityPickerDecrease,
+  QuantityPickerIncrease,
+  QuantityPickerInput,
+  QuantityPickerLabel,
+  QuantityPickerMessage,
+} from "@/components/ui/uai/quantity-picker"
+
+export function CartQuantity() {
+  return (
+    <QuantityPicker
+      variant="rounded"
+      defaultValue={2}
+      min={1}
+      max={5}
+      onValueChange={(quantity) => updateCart(quantity)}
+    >
+      <QuantityPickerLabel>Quantity for Everyday Tote</QuantityPickerLabel>
+      <QuantityPickerControl>
+        <QuantityPickerDecrease />
+        <QuantityPickerInput />
+        <QuantityPickerIncrease />
+      </QuantityPickerControl>
+      <QuantityPickerMessage>5 available</QuantityPickerMessage>
+    </QuantityPicker>
+  )
+}`,
+    accessibility: [
+      "The visible product-specific label is associated with the numeric input.",
+      "Increase and Decrease use native buttons with explicit accessible names.",
+      "Minimum and maximum values disable the action that cannot proceed.",
+      "Direct input commits on blur or Enter, while Escape restores the current value.",
+      "Stock feedback is referenced by the input and can be announced by the consumer.",
+      "Rounded, pill, and compact variants preserve the same keyboard contract.",
+    ],
+  },
+  {
+    id: "cart-item",
+    name: "Cart Item",
+    category: "Commerce",
+    description: "A composable cart line with card, plain, and compact variants.",
+    icon: ShoppingCart,
+    usage: `import { useState } from "react"
+
+import {
+  CartItem,
+  CartItemActions,
+  CartItemAvailability,
+  CartItemContent,
+  CartItemDescription,
+  CartItemHeader,
+  CartItemMedia,
+  CartItemOption,
+  CartItemOptions,
+  CartItemPrice,
+  CartItemRemove,
+  CartItemTitle,
+} from "@/components/ui/uai/cart-item"
+import {
+  QuantityPicker,
+  QuantityPickerControl,
+  QuantityPickerDecrease,
+  QuantityPickerIncrease,
+  QuantityPickerInput,
+  QuantityPickerLabel,
+  QuantityPickerMessage,
+} from "@/components/ui/uai/quantity-picker"
+
+const formatPrice = (value: number) =>
+  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value)
+
+export function ShoppingCartLine() {
+  const [quantity, setQuantity] = useState(2)
+
+  return (
+    <CartItem variant="card">
+      <CartItemMedia>{productImage}</CartItemMedia>
+      <CartItemContent>
+        <CartItemHeader>
+          <div>
+            <CartItemTitle>Everyday Tote</CartItemTitle>
+            <CartItemDescription>Natural canvas</CartItemDescription>
+          </div>
+          <CartItemPrice>{formatPrice(quantity * 48)}</CartItemPrice>
+        </CartItemHeader>
+        <CartItemOptions>
+          <CartItemOption label="Color">Natural</CartItemOption>
+          <CartItemOption label="Size">One size</CartItemOption>
+        </CartItemOptions>
+        <CartItemAvailability>In stock · ships in 1–2 days</CartItemAvailability>
+        <CartItemActions>
+          <QuantityPicker value={quantity} onValueChange={setQuantity} min={1} max={5}>
+            <QuantityPickerLabel>Quantity for Everyday Tote</QuantityPickerLabel>
+            <QuantityPickerControl>
+              <QuantityPickerDecrease />
+              <QuantityPickerInput />
+              <QuantityPickerIncrease />
+            </QuantityPickerControl>
+            <QuantityPickerMessage className="sr-only">Maximum 5 per order</QuantityPickerMessage>
+          </QuantityPicker>
+          <CartItemRemove onClick={() => removeItem()} />
+        </CartItemActions>
+      </CartItemContent>
+    </CartItem>
+  )
+}`,
+    accessibility: [
+      "The cart line is labelled by its composed product title.",
+      "Product options retain description-list semantics.",
+      "Availability is written in text and may be announced as a live status.",
+      "Quantity keeps its product-specific label and limit behavior.",
+      "Remove is a native button with controlled busy and disabled states.",
+      "Card, plain, and compact variants preserve the same semantic contract.",
+    ],
+  },
+  {
+    id: "price-summary",
+    name: "Price Summary",
+    category: "Commerce",
+    description: "A composable order total with card, plain, and compact variants.",
+    icon: ReceiptText,
+    usage: `import {
+  PriceSummary,
+  PriceSummaryDescription,
+  PriceSummaryHeader,
+  PriceSummaryItem,
+  PriceSummaryList,
+  PriceSummaryNote,
+  PriceSummaryTitle,
+  PriceSummaryTotal,
+} from "@/components/ui/uai/price-summary"
+
+export function CheckoutTotal() {
+  return (
+    <PriceSummary variant="card">
+      <PriceSummaryHeader>
+        <PriceSummaryTitle>Order summary</PriceSummaryTitle>
+        <PriceSummaryDescription>3 items · USD</PriceSummaryDescription>
+      </PriceSummaryHeader>
+      <PriceSummaryList>
+        <PriceSummaryItem label="Subtotal">$128.00</PriceSummaryItem>
+        <PriceSummaryItem label="WELCOME20" tone="success">−$20.00</PriceSummaryItem>
+        <PriceSummaryItem label="Shipping" tone="success">Free</PriceSummaryItem>
+        <PriceSummaryItem label="Estimated tax">$9.72</PriceSummaryItem>
+        <PriceSummaryTotal hint="Includes estimated tax">$117.72</PriceSummaryTotal>
+      </PriceSummaryList>
+      <PriceSummaryNote>The final amount is confirmed at payment.</PriceSummaryNote>
+    </PriceSummary>
+  )
+}`,
+    accessibility: [
+      "The root is labelled by the composed summary title.",
+      "Line items and totals retain description-list semantics.",
+      "Discounts and free shipping use explicit text in addition to color.",
+      "Tabular numerals keep changing amounts aligned and scannable.",
+      "Long labels and localized currency values wrap without horizontal overflow.",
+      "Card, plain, and compact variants preserve the same semantic structure.",
+    ],
+  },
+  {
+    id: "order-status",
+    name: "Order Status",
+    category: "Commerce",
+    description: "A composable fulfillment timeline with card, plain, and compact variants.",
+    icon: PackageCheck,
+    usage: `import {
+  OrderStatus,
+  OrderStatusAction,
+  OrderStatusActions,
+  OrderStatusBadge,
+  OrderStatusDescription,
+  OrderStatusDetail,
+  OrderStatusDetails,
+  OrderStatusHeader,
+  OrderStatusProgress,
+  OrderStatusStep,
+  OrderStatusStepDescription,
+  OrderStatusStepTitle,
+  OrderStatusTitle,
+} from "@/components/ui/uai/order-status"
+
+export function ShipmentProgress() {
+  return (
+    <OrderStatus variant="card">
+      <OrderStatusHeader>
+        <div>
+          <OrderStatusTitle>Arriving Friday</OrderStatusTitle>
+          <OrderStatusDescription>Order #UAI-2048 · 2 items</OrderStatusDescription>
+        </div>
+        <OrderStatusBadge tone="progress">In transit</OrderStatusBadge>
+      </OrderStatusHeader>
+      <OrderStatusProgress>
+        <OrderStatusStep status="complete">
+          <OrderStatusStepTitle>Order confirmed</OrderStatusStepTitle>
+          <OrderStatusStepDescription>Aug 15 · 9:42 AM</OrderStatusStepDescription>
+        </OrderStatusStep>
+        <OrderStatusStep status="current">
+          <OrderStatusStepTitle>In transit</OrderStatusStepTitle>
+          <OrderStatusStepDescription>Departed the regional facility</OrderStatusStepDescription>
+        </OrderStatusStep>
+        <OrderStatusStep>
+          <OrderStatusStepTitle>Delivered</OrderStatusStepTitle>
+          <OrderStatusStepDescription>Expected Aug 21</OrderStatusStepDescription>
+        </OrderStatusStep>
+      </OrderStatusProgress>
+      <OrderStatusDetails>
+        <OrderStatusDetail label="Carrier">Northstar Parcel</OrderStatusDetail>
+        <OrderStatusDetail label="Tracking">NSP-2048-1182</OrderStatusDetail>
+      </OrderStatusDetails>
+      <OrderStatusActions>
+        <OrderStatusAction href={trackingUrl} emphasis="primary">Track package</OrderStatusAction>
+        <OrderStatusAction href={supportUrl}>Get help</OrderStatusAction>
+      </OrderStatusActions>
+    </OrderStatus>
+  )
+}`,
+    accessibility: [
+      "The root is labelled by the composed order status title.",
+      "Fulfillment stages retain ordered-list semantics.",
+      "The current stage exposes aria-current without relying on color.",
+      "Complete, current, upcoming, and issue states include visible text labels.",
+      "Tracking facts retain description-list semantics and wrap long values.",
+      "Card, plain, and compact variants preserve the same semantic structure.",
+    ],
+  },
+  {
+    id: "app-header",
+    name: "App Header",
+    category: "Navigation",
+    description: "A responsive app bar with bar, floating, and compact variants.",
+    icon: PanelTop,
+    usage: `import { useState } from "react"
+import { Bell, Boxes } from "lucide-react"
+
+import {
+  AppHeader,
+  AppHeaderAction,
+  AppHeaderActions,
+  AppHeaderBrand,
+  AppHeaderMenuButton,
+  AppHeaderNav,
+  AppHeaderNavItem,
+  AppHeaderOverflow,
+  AppHeaderSearch,
+} from "@/components/ui/uai/app-header"
+
+export function WorkspaceHeader() {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <AppHeader variant="bar" open={open} onOpenChange={setOpen}>
+      <AppHeaderBrand href="/">
+        <Boxes aria-hidden="true" />
+        Atlas
+      </AppHeaderBrand>
+
+      <AppHeaderOverflow>
+        <AppHeaderNav>
+          <AppHeaderNavItem href="/overview" active>Overview</AppHeaderNavItem>
+          <AppHeaderNavItem href="/projects">Projects</AppHeaderNavItem>
+          <AppHeaderNavItem href="/reports">Reports</AppHeaderNavItem>
+        </AppHeaderNav>
+        <AppHeaderSearch
+          placeholder="Search workspace"
+          onChange={(event) => searchWorkspace(event.currentTarget.value)}
+        />
+      </AppHeaderOverflow>
+
+      <AppHeaderActions>
+        <AppHeaderAction aria-label="Notifications">
+          <Bell aria-hidden="true" />
+        </AppHeaderAction>
+        <AppHeaderAction aria-label="Open account menu" emphasis="primary">
+          AC
+        </AppHeaderAction>
+      </AppHeaderActions>
+      <AppHeaderMenuButton />
+    </AppHeader>
+  )
+}`,
+    accessibility: [
+      "The root uses the native banner landmark and navigation keeps list semantics.",
+      "The active destination exposes aria-current without relying on color.",
+      "Search has a persistent accessible label and remains consumer-controlled.",
+      "The mobile menu button names its action and exposes expanded and controlled state.",
+      "Account actions are native buttons with explicit accessible names.",
+      "Bar, floating, and compact variants preserve the same navigation contract.",
+    ],
+  },
+  ...formsCatalog,
+  ...navigationCatalog,
+  ...feedbackCatalog,
+  ...dataDisplayCatalog,
+  ...marketingCatalog,
+  ...communityCatalog,
+  ...aiCatalog,
+  ...marketingBlocksCatalog,
+  ...onboardingBlocksCatalog,
+  ...appBlocksCatalog,
+  ...operationsBlocksCatalog,
+  ...commerceBlocksCatalog,
+  ...communityBlocksCatalog,
+  ...aiBlocksCatalog,
 ] as const;
 
 export const registryCategories: readonly RegistryCategory[] = [
@@ -223,14 +1025,76 @@ export const registryCategories: readonly RegistryCategory[] = [
   "Feedback",
   "Forms",
   "Data Display",
-  "Workflow",
+  "Navigation",
+  "Authentication",
+  "Commerce",
+  "Marketing",
+  "Content",
+  "Application",
+  "Operations",
 ] as const;
 
+const registryBlockIds: ReadonlySet<RegistryItemId> = new Set(
+  [
+    ...marketingBlocksCatalog,
+    ...onboardingBlocksCatalog,
+    ...appBlocksCatalog,
+    ...operationsBlocksCatalog,
+    ...commerceBlocksCatalog,
+    ...communityBlocksCatalog,
+    ...aiBlocksCatalog,
+  ].map((item) => item.id),
+);
+
+export type RegistryItemKind = "component" | "block";
+
+export function getRegistryItemKind(id: RegistryItemId): RegistryItemKind {
+  return registryBlockIds.has(id) ? "block" : "component";
+}
+
+export type RegistryGroup = {
+  category: Exclude<RegistryCategory, "All">;
+  items: readonly RegistryCatalogItem[];
+};
+
+/** Catalog grouped by category; components precede blocks inside each group. */
+export const registryGroups: readonly RegistryGroup[] = registryCategories
+  .filter((category): category is RegistryGroup["category"] => category !== "All")
+  .map((category) => {
+    const items = registryCatalog.filter((item) => item.category === category);
+    return {
+      category,
+      items: [
+        ...items.filter((item) => getRegistryItemKind(item.id) === "component"),
+        ...items.filter((item) => getRegistryItemKind(item.id) === "block"),
+      ],
+    };
+  })
+  .filter((group) => group.items.length > 0);
+
+/** Reading order used for numbering and previous/next navigation. */
+export const registryReadingOrder: readonly RegistryCatalogItem[] = registryGroups.flatMap(
+  (group) => group.items,
+);
+
+export function findRegistryItem(id: string) {
+  return registryCatalog.find((entry) => entry.id === id);
+}
+
 export function getRegistryItem(id: RegistryItemId) {
-  const item = registryCatalog.find((entry) => entry.id === id);
+  const item = findRegistryItem(id);
   if (item) return item;
 
   const fallback = registryCatalog.at(0);
   if (!fallback) throw new Error("The Uai registry catalog is empty.");
   return fallback;
+}
+
+export function getRegistryPosition(id: RegistryItemId) {
+  const index = registryReadingOrder.findIndex((item) => item.id === id);
+  return {
+    number: String(index + 1).padStart(2, "0"),
+    previous: index > 0 ? registryReadingOrder[index - 1] : undefined,
+    next: index >= 0 ? registryReadingOrder[index + 1] : undefined,
+  };
 }

@@ -1,5 +1,5 @@
-import { RegistryBrowser } from "@/components/registry/registry-browser";
+import { RegistryOverview } from "@/components/registry/registry-overview";
 
 export default function HomePage() {
-  return <RegistryBrowser />;
+  return <RegistryOverview />;
 }

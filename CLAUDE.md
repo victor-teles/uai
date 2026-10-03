@@ -46,15 +46,23 @@ compose replaceable structure and content through exported children.
   compound layout. Use private context when regions share state.
 - Context-dependent children must throw a clear error when rendered outside their
   matching root. Do not add context to purely structural components.
+- Every distributed component must ship meaningful named variants. Export the
+  supported names as a source-owned readonly constant and type, keep `variant` on
+  the root, and demonstrate every variant in the live preview. States and scenarios
+  do not count as visual variants.
 
 ## Visual direction
 
-Uai has two visual layers. Read `DESIGN.md` before changing either.
+Uai follows the Beautiful UI language (beautifului.dev) on both layers. Read `DESIGN.md`
+and `plans/beautiful-polish-brief.md` before changing either.
 
-1. **Registry workbench** — graphite catalog, dotted hairlines, graphite pill
-   selection, cobalt for focus only.
-2. **Distributed components** in `src/registry/uai` — Beautiful UI product
-   chrome that consumers install.
+1. **Site** — warm graphite frame on a hatched canvas, dashed hairlines, a grouped
+   sidebar, ⌘K palette, and one `/components/<id>` page per item.
+2. **Distributed components** in `src/registry/uai` — product chrome that consumers
+   install. Weight 500 for emphasis (600 for a single headline, never 700), tonal
+   surfaces before borders, pill buttons. Accent fills one primary action per surface;
+   secondary actions use `--uai-surface-raised` without a border. Use `--uai-subtle`
+   for tertiary metadata only.
 
 For Prompt Composer and other installed AI chrome:
 
@@ -62,7 +70,7 @@ For Prompt Composer and other installed AI chrome:
 - Ghost has no card chrome. Compact uses a 12px card and 24px controls.
 - Controls are 28×28 by default. The plus control is ghost. Send uses `--uai-text` on
   `--uai-surface` when it can submit, and `--uai-border-strong` when idle.
-- Do not use cobalt for send.
+- Do not use the accent for send.
 - Floating menus use 14px corners, 4px padding, a visible outline
   (`0 0 0 1px var(--uai-border-strong)`), an offset shadow, and a pop-in from
   `scale(0.96)` in 180ms `cubic-bezier(0.23, 1, 0.32, 1)`.
