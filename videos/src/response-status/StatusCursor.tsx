@@ -8,12 +8,14 @@ type StatusCursorProps = {
   // Frame ranges where the cursor shows the pointing hand.
   pointer: readonly (readonly [number, number])[];
   visible: readonly [number, number];
+  // Matches the cursor to the stage zoom of the component it points at.
+  size?: number;
 };
 
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 const ease = Easing.bezier(0.16, 1, 0.3, 1);
 
-export const StatusCursor = ({ path, clicks, pointer, visible }: StatusCursorProps) => {
+export const StatusCursor = ({ path, clicks, pointer, visible, size = 1 }: StatusCursorProps) => {
   const frame = useCurrentFrame();
   const move = { ...clamp, easing: Easing.bezier(0.77, 0, 0.175, 1) };
   const x = interpolate(
@@ -53,7 +55,7 @@ export const StatusCursor = ({ path, clicks, pointer, visible }: StatusCursorPro
         width: 44,
         height: 44,
         translate: `${x}px ${y}px`,
-        scale: String(press),
+        scale: String(press * size),
         transformOrigin: "0px 0px",
         opacity: interpolate(
           frame,

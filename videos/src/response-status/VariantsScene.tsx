@@ -1,7 +1,8 @@
+import type { ResponseStatusVariant } from "@uai/components/response-status";
 import type { ReactNode } from "react";
 import { Easing, interpolate, useCurrentFrame } from "remotion";
-import type { ResponseStatusVariant } from "@uai/components/response-status";
-import { lightTokens, StatusDemo } from "./StatusDemo";
+import { lightTokens } from "./StatusDemo";
+import { StatusSequence } from "./StatusSequence";
 
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 const ease = Easing.bezier(0.23, 1, 0.32, 1);
@@ -17,10 +18,18 @@ const Row = ({ label, enterAt, children }: RowProps) => {
   const enter = interpolate(frame, [enterAt, enterAt + 16], [0, 1], { ...clamp, easing: ease });
 
   return (
-    <div style={{ opacity: enter, translate: `0px ${(1 - enter) * 14}px` }}>
+    <div
+      style={{
+        display: "grid",
+        justifyItems: "center",
+        gap: 18,
+        opacity: enter,
+        translate: `0px ${(1 - enter) * 16}px`,
+      }}
+    >
       <div
         style={{
-          fontSize: 17,
+          fontSize: 20,
           lineHeight: "24px",
           fontWeight: 500,
           letterSpacing: "0.08em",
@@ -30,61 +39,58 @@ const Row = ({ label, enterAt, children }: RowProps) => {
       >
         {label}
       </div>
-      <div style={{ marginTop: 14, width: 600, scale: "2", transformOrigin: "0 0" }}>
-        {children}
-      </div>
+      <div style={{ zoom: 2.4 }}>{children}</div>
     </div>
   );
 };
 
 export const VariantsScene = () => {
   const frame = useCurrentFrame();
-  const pillDone = 60;
-  const barFailed = 76;
 
   return (
     <div
       style={{
         position: "absolute",
         inset: 0,
+        display: "grid",
+        alignContent: "center",
+        justifyItems: "center",
+        rowGap: 56,
         overflow: "hidden",
         background: "#fbfbfa",
         ...lightTokens,
-        opacity: interpolate(frame, [0, 14, 132, 152], [0, 1, 1, 0], clamp),
+        opacity: interpolate(frame, [0, 10, 108, 122], [0, 1, 1, 0], clamp),
       }}
     >
-      <div
-        style={{
-          position: "absolute",
-          left: 360,
-          top: 331,
-          display: "grid",
-          gridTemplateRows: "94px 102px 126px",
-          rowGap: 48,
-        }}
-      >
-        <Row label="inline" enterAt={4}>
-          <StatusDemo
-            variant="inline"
-            status="streaming"
-            detail={`${96 + Math.round(frame * 2.6)} tokens`}
-          />
-        </Row>
-        <Row label="pill" enterAt={12}>
-          <StatusDemo
-            variant="pill"
-            status={frame < pillDone ? "streaming" : "complete"}
-            detail={`${Math.min(212 + Math.round(frame * 3.3), 412)} tokens`}
-          />
-        </Row>
-        <Row label="bar" enterAt={20}>
-          <StatusDemo
+      <Row label="inline" enterAt={2}>
+        <StatusSequence
+          variant="inline"
+          steps={[{ at: 0, status: "streaming" }]}
+          detail={(_, at) => `${96 + Math.round(at * 2.6)} tokens`}
+        />
+      </Row>
+      <Row label="pill" enterAt={8}>
+        {/* The pill changes width between states, so it holds one state. */}
+        <StatusSequence
+          variant="pill"
+          steps={[{ at: 0, status: "complete" }]}
+          detail={() => "412 tokens · 2,6 s"}
+        />
+      </Row>
+      <Row label="bar" enterAt={14}>
+        <div style={{ width: 520 }}>
+          <StatusSequence
             variant="bar"
-            status={frame < barFailed ? "streaming" : "failed"}
-            detail={frame < barFailed ? `${48 + Math.round(frame * 1.8)} tokens` : "Tempo esgotado"}
+            steps={[
+              { at: 0, status: "streaming" },
+              { at: 62, status: "failed" },
+            ]}
+            detail={(status, at) =>
+              status === "failed" ? "Tempo esgotado" : `${48 + Math.round(at * 1.8)} tokens`
+            }
           />
-        </Row>
-      </div>
+        </div>
+      </Row>
     </div>
   );
 };

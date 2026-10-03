@@ -16,13 +16,13 @@ export const ResponseStatusVideo = () => {
         fontFamily: '"Geist Variable", ui-sans-serif, system-ui, sans-serif',
       }}
     >
-      <Sequence durationInFrames={410} name="Ciclo de vida">
+      <Sequence durationInFrames={270} name="Ciclo de vida">
         <LifecycleScene />
       </Sequence>
-      <Sequence from={396} durationInFrames={156} name="Variantes">
+      <Sequence from={258} durationInFrames={124} name="Variantes">
         <VariantsScene />
       </Sequence>
-      <Sequence from={538} durationInFrames={210} name="Assinatura Uai">
+      <Sequence from={372} durationInFrames={84} name="Assinatura Uai">
         <LogoScene />
       </Sequence>
     </AbsoluteFill>

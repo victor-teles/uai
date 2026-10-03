@@ -26,7 +26,7 @@ export const ThinkingCompositions = () => {
       <Composition
         id="ResponseStatus"
         component={ResponseStatusVideo}
-        durationInFrames={748}
+        durationInFrames={456}
         fps={30}
         width={1920}
         height={1080}

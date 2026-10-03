@@ -27,6 +27,10 @@ export const lightTokens = {
   "--uai-danger": "oklch(0.58 0.2 23)",
 } as CSSProperties;
 
+// Disables a transition rather than adding one.
+// eslint-disable-next-line @remotion/non-pure-animation
+const noTransition: CSSProperties = { transition: "none" };
+
 const labels: Record<ResponseStatusValue, string> = {
   queued: "Aguardando início…",
   streaming: "Gerando resposta…",
@@ -61,8 +65,10 @@ export const StatusDemo = ({ variant, status, detail, hovered, pressed }: Status
 
   return (
     <ResponseStatus variant={variant} status={status}>
-      <ResponseStatusIndicator />
-      <ResponseStatusLabel>{labels[status]}</ResponseStatusLabel>
+      {/* The 200 ms color fade starts from the transparent shimmer text, which reads
+          as a blank label at video scale. StatusSequence crossfades instead. */}
+      <ResponseStatusIndicator style={noTransition} />
+      <ResponseStatusLabel style={noTransition}>{labels[status]}</ResponseStatusLabel>
       <ResponseStatusDetail>{detail}</ResponseStatusDetail>
       <ResponseStatusActions>
         <ResponseStatusStop style={actionStyle}>
