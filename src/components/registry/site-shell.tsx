@@ -173,9 +173,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
               <Brand />
               <ThemeToggle />
             </div>
-            <p className="uai-site-sidebar__tagline">
-              Source-owned UI for modern products.
-            </p>
+            <p className="uai-site-sidebar__tagline">Source-owned UI for modern products.</p>
             <SearchButton onOpen={openPalette} />
           </div>
           <SidebarNav pathname={pathname} />
