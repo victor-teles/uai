@@ -106,7 +106,7 @@ function ManualInstall({ selectedId }: { selectedId: RegistryItemId }) {
             <p>
               Create <code>{manualSource?.path ?? `components/ui/uai/${selectedId}.tsx`}</code> and
               paste the source. Install the <code>uai-theme</code> and <code>uai-utils</code> items
-              first.
+              and the <code>class-variance-authority</code> package first.
             </p>
             {manualSource ? (
               <CopyButton text={manualSource.code} label="Copy component source" />
