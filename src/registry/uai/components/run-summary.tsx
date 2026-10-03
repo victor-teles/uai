@@ -293,7 +293,7 @@ export function RunSummaryArtifactName({ className, ...props }: ComponentProps<"
   return (
     <span
       data-slot="run-summary-artifact-name"
-      className={cn("min-w-0 truncate font-mono text-xs", className)}
+      className={cn("min-w-0 truncate font-mono text-[12px]", className)}
       {...props}
     />
   );

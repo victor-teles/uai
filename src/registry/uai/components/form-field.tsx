@@ -122,7 +122,7 @@ export function FormFieldLabel({ className, children, ...props }: ComponentProps
     >
       {children}
       {context.required && (
-        <span className="text-xs font-normal text-subtle-foreground"> (required)</span>
+        <span className="text-[12px] font-normal text-subtle-foreground"> (required)</span>
       )}
     </label>
   );

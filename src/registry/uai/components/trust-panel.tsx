@@ -140,7 +140,7 @@ export function TrustPanelRating({
         <strong className="font-medium">{value.toFixed(1)}</strong>
         <span className="text-muted-foreground"> out of {max}</span>
       </span>
-      {children ? <span className="text-xs text-subtle-foreground">{children}</span> : null}
+      {children ? <span className="text-[12px] text-subtle-foreground">{children}</span> : null}
     </p>
   );
 }

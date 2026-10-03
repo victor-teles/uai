@@ -131,7 +131,7 @@ export function MetricCardComparison({ className, ...props }: ComponentProps<"p"
   return (
     <p
       data-slot="metric-card-comparison"
-      className={cn("m-0 text-xs text-subtle-foreground tabular-nums", className)}
+      className={cn("m-0 text-[12px] text-subtle-foreground tabular-nums", className)}
       {...props}
     />
   );
