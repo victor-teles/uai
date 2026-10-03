@@ -16,8 +16,9 @@ bun install
 bun run dev
 ```
 
-Open `http://localhost:3000` to browse the components. Generated registry
-documents are available under `/r`.
+Open `http://localhost:3000` for the overview. Every registry item has its own page
+at `/components/<name>`. Press ⌘K or `/` to search. Generated registry documents are
+available under `/r`.
 
 ## Install a registry item locally
 
@@ -37,16 +38,21 @@ time. shadcn requires full URLs for custom registry dependencies.
 ## Repository layout
 
 - `src/registry/uai`: source files distributed through the registry.
-- `src/components/registry`: component catalog, previews, and install workflow.
+- `src/components/registry`: site shell, command palette, catalog, previews, and
+  install workflow.
+- `src/app/(home)/components/[id]`: the statically generated page for each item.
 - `src/components/ui/uai`: local component copies used by the browser.
+- `src/components/uai`: local block copies used by the browser.
 - `registry.json`: the registry catalog and dependency graph.
 - `public/r`: generated registry documents.
 
 ## Add a component
 
-1. Add the source file under `src/registry/uai`.
+1. Add the source file under `src/registry/uai/components` or `src/registry/uai/blocks`, and copy it
+   byte-for-byte to `src/components/ui/uai` or `src/components/uai`.
 2. Define the public item, target path, and dependencies in `registry.json`.
-3. Add the component to `src/components/registry/catalog.ts` and its live preview.
+3. Add the catalog entry and live preview in the matching group folder under
+   `src/components/registry/<group>`. The entry's `usage` must equal the preview file.
 4. Run the validation suite.
 
 Keep public interfaces small. A compound component should own its shared behavior

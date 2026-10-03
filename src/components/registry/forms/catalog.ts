@@ -31,7 +31,9 @@ import {
 } from "@/components/ui/uai/form-field";
 
 export function FormFieldPreview({ variant = "outlined" }: { variant?: FormFieldVariant }) {
-  const [value, setValue] = useState("A shared space for product decisions.");
+  const [value, setValue] = useState(
+    "Where the growth team plans launches and tracks pricing experiments.",
+  );
   const [touched, setTouched] = useState(false);
   return (
     <FormField
@@ -101,13 +103,14 @@ export function SearchFieldPreview({ variant = "rounded" }: { variant?: SearchFi
       >
         <SearchFieldLabel>Search workspace</SearchFieldLabel>
         <SearchFieldControl>
-          <SearchFieldInput placeholder="Find a document…" />
+          <SearchFieldInput placeholder="Search docs, issues, people…" />
           <SearchFieldClear />
         </SearchFieldControl>
         <SearchFieldMessage>{status === "idle" ? "Recent searches" : undefined}</SearchFieldMessage>
         <SearchFieldRecent>
-          <SearchFieldRecentItem value="Design guidelines" />
-          <SearchFieldRecentItem value="Release notes" />
+          <SearchFieldRecentItem value="Q3 roadmap" />
+          <SearchFieldRecentItem value="Billing migration" />
+          <SearchFieldRecentItem value="Onboarding v2" />
         </SearchFieldRecent>
       </SearchField>
       <label
@@ -121,6 +124,15 @@ export function SearchFieldPreview({ variant = "rounded" }: { variant?: SearchFi
       >
         Preview response
         <select
+          style={{
+            height: 26,
+            padding: "0 8px",
+            border: 0,
+            borderRadius: 999,
+            background: "var(--uai-surface-raised)",
+            color: "var(--uai-text)",
+            font: "inherit",
+          }}
           value={status}
           onChange={(event) => setStatus(event.target.value as SearchFieldStatus)}
         >
@@ -172,17 +184,32 @@ export function FilterBarPreview({ variant = "toolbar" }: { variant?: FilterBarV
       }}
     >
       <FilterBarControls>
-        <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <label style={{ display: "flex", gap: 8, alignItems: "center", color: "var(--uai-muted)" }}>
           Status
-          <select value={status} onChange={(event) => setStatus(event.target.value)}>
+          <select
+            value={status}
+            onChange={(event) => setStatus(event.target.value)}
+            style={{
+              height: 28,
+              padding: "0 10px",
+              border: 0,
+              borderRadius: 999,
+              background: "var(--uai-surface-raised)",
+              color: "var(--uai-text)",
+              font: "inherit",
+              fontSize: 12.5,
+              fontWeight: 500,
+            }}
+          >
             <option value="">All statuses</option>
             <option>Open</option>
             <option>Closed</option>
           </select>
         </label>
-        <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+        <label style={{ display: "flex", gap: 6, alignItems: "center", color: "var(--uai-muted)" }}>
           <input
             type="checkbox"
+            style={{ accentColor: "var(--uai-accent)" }}
             checked={mine}
             onChange={(event) => setMine(event.target.checked)}
           />
@@ -235,7 +262,8 @@ type DemoFile = {
 };
 export function FileUploadPreview({ variant = "dropzone" }: { variant?: FileUploadVariant }) {
   const [files, setFiles] = useState<DemoFile[]>([
-    { id: "sample", name: "Project brief.pdf", progress: 0, status: "error" },
+    { id: "brief", name: "Q3 launch brief.pdf", progress: 100, status: "complete" },
+    { id: "deck", name: "pricing-review-deck.pdf", progress: 0, status: "error" },
   ]);
   const uploading = files.some((file) => file.status === "uploading");
   useEffect(() => {
@@ -262,7 +290,7 @@ export function FileUploadPreview({ variant = "dropzone" }: { variant?: FileUplo
       variant={variant}
       accept=".pdf,image/*"
       maxSize={5 * 1024 * 1024}
-      maxFiles={3}
+      maxFiles={5}
       fileCount={files.length}
       onFilesAccepted={(accepted) =>
         setFiles((current) => [
@@ -283,9 +311,9 @@ export function FileUploadPreview({ variant = "dropzone" }: { variant?: FileUplo
             flex: variant === "dropzone" ? undefined : 1,
           }}
         >
-          <strong>Add project files</strong>
-          <p style={{ margin: "4px 0 0", fontSize: 12, color: "var(--uai-muted)" }}>
-            Drop PDFs or images · up to 5 MB each · 3 files
+          <strong style={{ fontWeight: 500 }}>Add project files</strong>
+          <p style={{ margin: "2px 0 0", fontSize: 12, color: "var(--uai-subtle)" }}>
+            Drop PDFs or images · up to 5 MB each · 5 files
           </p>
         </div>
         <FileUploadInput />
@@ -296,7 +324,7 @@ export function FileUploadPreview({ variant = "dropzone" }: { variant?: FileUplo
           <FileUploadItem key={file.id} status={file.status} progress={file.progress}>
             <strong style={{ fontWeight: 500 }}>{file.name}</strong>
             <FileUploadProgress aria-label={\`Uploading \${file.name}\`} />
-            <div style={{ display: "flex", gap: 8 }}>
+            <div style={{ display: "flex", gap: 4 }}>
               <FileUploadRetry
                 onClick={() =>
                   setFiles((current) =>
@@ -314,7 +342,7 @@ export function FileUploadPreview({ variant = "dropzone" }: { variant?: FileUplo
           </FileUploadItem>
         ))}
       </FileUploadList>
-      <p style={{ margin: 0, fontSize: 12, color: "var(--uai-muted)" }}>
+      <p style={{ margin: 0, fontSize: 11.5, color: "var(--uai-subtle)" }}>
         Local demo: progress is simulated. Files are not sent to a server.
       </p>
     </FileUpload>
@@ -454,7 +482,7 @@ export function FormErrorSummaryPreview({
           name="email"
           type="email"
           autoComplete="email"
-          placeholder="you@example.com"
+          placeholder="maya@northwind.studio"
         />
         <FormFieldError>Enter a valid email address.</FormFieldError>
       </FormField>
@@ -466,19 +494,27 @@ export function FormErrorSummaryPreview({
         required
       >
         <FormFieldLabel>Full name</FormFieldLabel>
-        <FormFieldInput name="name" autoComplete="name" placeholder="Your name" />
+        <FormFieldInput name="name" autoComplete="name" placeholder="Maya Chen" />
         <FormFieldError>Enter your full name.</FormFieldError>
       </FormField>
-      {!invalidEmail && !invalidName && <p role="status">Contact details are ready.</p>}
+      {!invalidEmail && !invalidName && (
+        <p role="status" style={{ margin: 0, fontSize: 12, color: "var(--uai-success)" }}>
+          Contact details are ready.
+        </p>
+      )}
       <button
         type="submit"
         style={{
           justifySelf: "start",
+          height: 30,
+          padding: "0 14px",
           border: 0,
-          borderRadius: 8,
-          padding: "8px 12px",
-          background: "var(--uai-text)",
-          color: "var(--uai-surface)",
+          borderRadius: 999,
+          background: "var(--uai-accent)",
+          color: "var(--uai-accent-foreground)",
+          font: "inherit",
+          fontSize: 12.5,
+          fontWeight: 500,
         }}
       >
         Validate details
@@ -550,6 +586,7 @@ export function UnsavedChangesBarPreview({
       >
         <input
           type="checkbox"
+          style={{ accentColor: "var(--uai-accent)" }}
           checked={fail}
           disabled={status === "saving"}
           onChange={(event) => setFail(event.target.checked)}
@@ -618,28 +655,28 @@ export function StepIndicatorPreview({
     <div style={{ display: "grid", gap: 20 }}>
       <StepIndicator variant={variant} aria-label="Workspace setup">
         <StepIndicatorStep status="complete">
-          <StepIndicatorTitle>1. Account</StepIndicatorTitle>
+          <StepIndicatorTitle>Account</StepIndicatorTitle>
           {variant !== "compact" && (
-            <StepIndicatorDescription>Contact verified</StepIndicatorDescription>
+            <StepIndicatorDescription>maya@northwind.studio</StepIndicatorDescription>
           )}
         </StepIndicatorStep>
         <StepIndicatorStep status={review ? "complete" : "current"}>
-          <StepIndicatorTitle>2. Details</StepIndicatorTitle>
+          <StepIndicatorTitle>Details</StepIndicatorTitle>
         </StepIndicatorStep>
         <StepIndicatorStep optional status="error">
-          <StepIndicatorTitle>3. Import</StepIndicatorTitle>
+          <StepIndicatorTitle>Import</StepIndicatorTitle>
           {variant !== "compact" && (
-            <StepIndicatorDescription>File needs review</StepIndicatorDescription>
+            <StepIndicatorDescription>contacts.csv · 3 rows failed</StepIndicatorDescription>
           )}
         </StepIndicatorStep>
         <StepIndicatorStep status="blocked">
-          <StepIndicatorTitle>4. Team</StepIndicatorTitle>
+          <StepIndicatorTitle>Team</StepIndicatorTitle>
           {variant !== "compact" && (
-            <StepIndicatorDescription>Requires an invitation</StepIndicatorDescription>
+            <StepIndicatorDescription>Waiting on admin invite</StepIndicatorDescription>
           )}
         </StepIndicatorStep>
         <StepIndicatorStep status={review ? "current" : "upcoming"}>
-          <StepIndicatorTitle>5. Review</StepIndicatorTitle>
+          <StepIndicatorTitle>Review</StepIndicatorTitle>
         </StepIndicatorStep>
       </StepIndicator>
       <button
@@ -647,11 +684,15 @@ export function StepIndicatorPreview({
         onClick={() => setReview(!review)}
         style={{
           justifySelf: "start",
-          padding: "8px 12px",
-          border: "1px solid var(--uai-border-strong)",
-          borderRadius: 8,
-          background: "transparent",
+          height: 30,
+          padding: "0 14px",
+          border: 0,
+          borderRadius: 999,
+          background: "var(--uai-surface-raised)",
           color: "var(--uai-text)",
+          font: "inherit",
+          fontSize: 12.5,
+          fontWeight: 500,
         }}
       >
         {review ? "Back to details" : "Continue to review"}

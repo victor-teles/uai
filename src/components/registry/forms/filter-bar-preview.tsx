@@ -24,17 +24,32 @@ export function FilterBarPreview({ variant = "toolbar" }: { variant?: FilterBarV
       }}
     >
       <FilterBarControls>
-        <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <label style={{ display: "flex", gap: 8, alignItems: "center", color: "var(--uai-muted)" }}>
           Status
-          <select value={status} onChange={(event) => setStatus(event.target.value)}>
+          <select
+            value={status}
+            onChange={(event) => setStatus(event.target.value)}
+            style={{
+              height: 28,
+              padding: "0 10px",
+              border: 0,
+              borderRadius: 999,
+              background: "var(--uai-surface-raised)",
+              color: "var(--uai-text)",
+              font: "inherit",
+              fontSize: 12.5,
+              fontWeight: 500,
+            }}
+          >
             <option value="">All statuses</option>
             <option>Open</option>
             <option>Closed</option>
           </select>
         </label>
-        <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+        <label style={{ display: "flex", gap: 6, alignItems: "center", color: "var(--uai-muted)" }}>
           <input
             type="checkbox"
+            style={{ accentColor: "var(--uai-accent)" }}
             checked={mine}
             onChange={(event) => setMine(event.target.checked)}
           />

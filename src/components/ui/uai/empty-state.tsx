@@ -37,7 +37,7 @@ function emptyStateChrome(variant: EmptyStateVariant) {
     } satisfies CSSProperties,
     mediaClass: page
       ? "border-transparent bg-transparent text-[var(--uai-text)]"
-      : "border-[var(--uai-border)] bg-[var(--uai-surface-raised)] text-[var(--uai-muted)] [&>svg]:size-[45%]",
+      : "border-transparent bg-[var(--uai-surface-raised)] text-[var(--uai-muted)] shadow-[inset_0_1px_0_color-mix(in_oklab,var(--uai-text)_6%,transparent)] [&>svg]:size-[42%] [&>svg]:stroke-[1.75]",
     mediaStyle: page
       ? ({
           width: 160,
@@ -52,9 +52,9 @@ function emptyStateChrome(variant: EmptyStateVariant) {
           lineHeight: 1,
         } satisfies CSSProperties)
       : ({
-          width: compact ? 36 : 48,
-          height: compact ? 36 : 48,
-          borderRadius: compact ? 10 : 14,
+          width: compact ? 36 : 44,
+          height: compact ? 36 : 44,
+          borderRadius: compact ? 10 : 12,
         } satisfies CSSProperties),
     contentClass: page || compact ? "items-start text-left" : "items-center text-center",
     contentStyle: page ? ({ minWidth: "min(100%, 260px)" } satisfies CSSProperties) : undefined,
@@ -62,18 +62,19 @@ function emptyStateChrome(variant: EmptyStateVariant) {
       ? "text-xl leading-7 font-semibold tracking-tight"
       : compact
         ? "text-[13px] leading-[18px]"
-        : "text-sm leading-5",
+        : "text-[15px] leading-5",
     descriptionClass: page
       ? "text-sm leading-5"
       : compact
-        ? "text-[0.72rem] leading-4"
-        : "text-[12px] leading-[18px]",
+        ? "text-[12px] leading-[17px]"
+        : "text-[13px] leading-[19px]",
     noteClass: page
-      ? "text-xs leading-4"
+      ? "text-[12px] leading-4"
       : compact
-        ? "text-[0.7rem] leading-4"
+        ? "text-[11px] leading-4"
         : "text-[11.5px] leading-4",
-    actionHeight: page ? 36 : compact ? 32 : 34,
+    actionHeight: page ? 34 : compact ? 28 : 32,
+    actionTextClass: compact ? "px-3 text-[12.5px]" : "px-3.5 text-[13px]",
   };
 }
 
@@ -151,7 +152,7 @@ export function EmptyStateContent({
   return (
     <div
       className={cn(
-        "flex min-w-0 max-w-[52ch] flex-1 flex-col gap-4",
+        "flex min-w-0 max-w-[48ch] flex-1 flex-col gap-4",
         context.chrome.contentClass,
         className,
       )}
@@ -205,7 +206,7 @@ export function EmptyStateDescription({
   return (
     <p
       className={cn(
-        "text-pretty text-[color-mix(in_oklab,var(--uai-muted)_60%,var(--uai-text))] [overflow-wrap:anywhere]",
+        "text-pretty text-[var(--uai-muted)] [overflow-wrap:anywhere]",
         context.chrome.descriptionClass,
         className,
       )}
@@ -252,9 +253,9 @@ type EmptyStateLinkActionProps = ComponentProps<"a"> &
 export type EmptyStateActionProps = EmptyStateButtonActionProps | EmptyStateLinkActionProps;
 
 const emptyStateActionClass: Record<EmptyStateActionEmphasis, string> = {
-  primary: "border-[var(--uai-text)] bg-[var(--uai-text)] text-[var(--uai-surface)]",
+  primary: "bg-[var(--uai-accent)] text-[var(--uai-accent-foreground)] hover:brightness-[1.08]",
   secondary:
-    "border-[var(--uai-border)] bg-transparent text-[var(--uai-text)] hover:bg-[var(--uai-surface-raised)]",
+    "bg-[var(--uai-surface-raised)] text-[var(--uai-text)] hover:bg-[color-mix(in_oklab,var(--uai-surface-raised)_85%,var(--uai-text))]",
 };
 
 export function EmptyStateAction({
@@ -265,13 +266,14 @@ export function EmptyStateAction({
 }: EmptyStateActionProps) {
   const context = useEmptyState("EmptyStateAction");
   const actionClassName = cn(
-    "inline-flex items-center justify-center gap-2 border px-3 text-[12px] leading-4 font-medium underline-offset-4 transition-[transform,background-color,border-color,opacity] duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uai-border-strong)] active:scale-[0.97] disabled:pointer-events-none disabled:opacity-55 motion-reduce:transition-none motion-reduce:active:scale-100",
+    "inline-flex items-center justify-center gap-1.5 leading-4 font-medium whitespace-nowrap no-underline transition-[transform,background-color,filter,opacity] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uai-accent)] active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100 [&>svg]:size-3.5 [&>svg]:shrink-0",
+    context.chrome.actionTextClass,
     emptyStateActionClass[emphasis],
     className,
   );
   const actionStyle = {
     minHeight: context.chrome.actionHeight,
-    borderRadius: 8,
+    borderRadius: 999,
     ...style,
   };
 
@@ -291,7 +293,7 @@ export function EmptyStateNote({ children, className, ...props }: EmptyStateNote
   return (
     <p
       className={cn(
-        "max-w-[50ch] text-[color-mix(in_oklab,var(--uai-muted)_60%,var(--uai-text))] [overflow-wrap:anywhere]",
+        "max-w-[50ch] text-[var(--uai-subtle)] [overflow-wrap:anywhere]",
         context.chrome.noteClass,
         className,
       )}

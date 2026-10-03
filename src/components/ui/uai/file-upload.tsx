@@ -1,7 +1,15 @@
 "use client";
 
 import { Upload } from "lucide-react";
-import { type ComponentProps, createContext, useContext, useId, useRef, useState } from "react";
+import {
+  type ComponentProps,
+  type CSSProperties,
+  createContext,
+  useContext,
+  useId,
+  useRef,
+  useState,
+} from "react";
 
 export const FILE_UPLOAD_VARIANTS = ["dropzone", "inline", "compact"] as const;
 export type FileUploadVariant = (typeof FILE_UPLOAD_VARIANTS)[number];
@@ -27,6 +35,44 @@ type UploadContext = {
   receive: (files: File[]) => void;
 };
 const Context = createContext<UploadContext | null>(null);
+const uploadCss = `
+.uai-file-upload-zone{border:1px var(--uai-upload-line) var(--uai-border-strong);background:var(--uai-upload-fill);transition:border-color 120ms ease-out,background-color 120ms ease-out}
+.uai-file-upload-zone:not(:disabled):hover{border-color:color-mix(in oklab,var(--uai-border-strong) 60%,var(--uai-text))}
+.uai-file-upload-zone[data-dragging]{border-color:var(--uai-accent);background:color-mix(in oklab,var(--uai-accent) 8%,var(--uai-surface))}
+.uai-file-upload-zone[data-dragging] .uai-file-upload-icon{color:var(--uai-accent);transform:translateY(-2px)}
+.uai-file-upload-icon{transition:color 120ms ease-out,transform 180ms cubic-bezier(0.23,1,0.32,1)}
+.uai-file-upload-trigger,.uai-file-upload-retry{background:var(--uai-surface-raised);color:var(--uai-text)}
+.uai-file-upload-remove{background:transparent;color:var(--uai-muted)}
+.uai-file-upload-trigger,.uai-file-upload-retry,.uai-file-upload-remove{transition:background-color 120ms ease-out,color 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
+.uai-file-upload-trigger:hover:not(:disabled),.uai-file-upload-retry:hover:not(:disabled){background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text))}
+.uai-file-upload-remove:hover:not(:disabled){background:var(--uai-surface-raised);color:var(--uai-text)}
+.uai-file-upload-trigger:active:not(:disabled),.uai-file-upload-retry:active:not(:disabled),.uai-file-upload-remove:active:not(:disabled){transform:scale(0.97)}
+.uai-file-upload-trigger:focus-visible,.uai-file-upload-retry:focus-visible,.uai-file-upload-remove:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
+.uai-file-upload-trigger:disabled,.uai-file-upload-retry:disabled,.uai-file-upload-remove:disabled{cursor:not-allowed;opacity:0.5}
+.uai-file-upload-item{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;animation:uai-file-upload-in 240ms cubic-bezier(0.23,1,0.32,1) both}
+.uai-file-upload-item>:first-child{order:-1;flex:1 1 auto;min-width:0}
+.uai-file-upload-item>[role="status"]{order:-1}
+.uai-file-upload-item>.uai-file-upload-progress{order:10;flex-basis:100%}
+.uai-file-upload-progress{appearance:none;-webkit-appearance:none;border:0;overflow:hidden;border-radius:999px;background:color-mix(in oklab,var(--uai-text) 10%,transparent)}
+.uai-file-upload-progress::-webkit-progress-bar{background:transparent}
+.uai-file-upload-progress::-webkit-progress-value{background:var(--uai-text);border-radius:999px;transition:width 240ms cubic-bezier(0.23,1,0.32,1)}
+.uai-file-upload-progress::-moz-progress-bar{background:var(--uai-text);border-radius:999px}
+.uai-file-upload-shimmer{color:transparent;background:linear-gradient(90deg,var(--uai-subtle) 0%,var(--uai-subtle) 35%,var(--uai-text) 50%,var(--uai-subtle) 65%,var(--uai-subtle) 100%) 0 0/200% 100%;-webkit-background-clip:text;background-clip:text;animation:uai-file-upload-shimmer 2s linear infinite}
+@keyframes uai-file-upload-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes uai-file-upload-shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
+@media (prefers-reduced-motion: reduce){.uai-file-upload-zone,.uai-file-upload-icon,.uai-file-upload-trigger,.uai-file-upload-retry,.uai-file-upload-remove{transition:none}.uai-file-upload-item{animation:none}.uai-file-upload-progress::-webkit-progress-value{transition:none}.uai-file-upload-shimmer{animation:none;color:var(--uai-subtle);background:none}}
+`;
+const actionStyle = {
+  justifySelf: "start",
+  height: 26,
+  padding: "0 10px",
+  border: 0,
+  borderRadius: 999,
+  font: "inherit",
+  fontSize: 12,
+  fontWeight: 500,
+  cursor: "pointer",
+} as const;
 function useUpload() {
   const context = useContext(Context);
   if (!context) throw new Error("FileUpload children must be used within FileUpload");
@@ -85,18 +131,21 @@ export function FileUpload({
           gap: 10,
           color: "var(--uai-text)",
           fontSize: 13,
+          lineHeight: "18px",
           minWidth: 0,
           ...style,
         }}
       >
+        <style>{uploadCss}</style>
         {children}
-        <div role="alert" id={`${id}-errors`}>
+        <div role="alert" id={`${id}-errors`} style={{ display: "grid", gap: 4 }}>
           {errors.map((error) => (
             <p
               key={`${error.file.name}-${error.file.size}-${error.file.lastModified}`}
               style={{
-                margin: "4px 0",
+                margin: 0,
                 fontSize: 12,
+                lineHeight: "16px",
                 color: "color-mix(in oklab, var(--uai-danger) 75%, var(--uai-text))",
                 overflowWrap: "anywhere",
               }}
@@ -111,6 +160,7 @@ export function FileUpload({
 }
 export function FileUploadDropzone({
   children,
+  className,
   style,
   onDragOver,
   onDragLeave,
@@ -140,25 +190,48 @@ export function FileUploadDropzone({
         setDragging(false);
         if (!cancelled) context.receive(Array.from(event.dataTransfer.files));
       }}
-      style={{
-        margin: 0,
-        minWidth: 0,
-        display: "flex",
-        flexDirection: context.variant === "dropzone" ? "column" : "row",
-        flexWrap: "wrap",
-        alignItems: "center",
-        justifyContent: context.variant === "dropzone" ? "center" : "flex-start",
-        gap: 12,
-        padding:
-          context.variant === "dropzone" ? "32px 16px" : context.variant === "compact" ? 10 : 16,
-        border: `1px ${context.variant === "dropzone" ? "dashed" : "solid"} var(--uai-border-strong)`,
-        borderRadius: context.variant === "compact" ? 12 : 14,
-        background: dragging ? "var(--uai-surface-raised)" : "var(--uai-surface)",
-        opacity: context.disabled ? 0.55 : 1,
-        ...style,
-      }}
+      className={className ? `uai-file-upload-zone ${className}` : "uai-file-upload-zone"}
+      style={
+        {
+          "--uai-upload-line": context.variant === "dropzone" ? "dashed" : "solid",
+          "--uai-upload-fill":
+            context.variant === "compact" ? "var(--uai-canvas)" : "var(--uai-surface)",
+          margin: 0,
+          minWidth: 0,
+          display: "flex",
+          flexDirection: context.variant === "dropzone" ? "column" : "row",
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: context.variant === "dropzone" ? "center" : "flex-start",
+          gap: context.variant === "dropzone" ? 10 : 12,
+          padding:
+            context.variant === "dropzone"
+              ? "28px 16px"
+              : context.variant === "compact"
+                ? "8px 8px 8px 10px"
+                : "12px 12px 12px 14px",
+          borderRadius: context.variant === "compact" ? 12 : 14,
+          opacity: context.disabled ? 0.55 : 1,
+          ...style,
+        } as CSSProperties
+      }
     >
-      <Upload size={20} aria-hidden="true" />
+      <span
+        aria-hidden="true"
+        className="uai-file-upload-icon"
+        style={{
+          display: "grid",
+          placeItems: "center",
+          flexShrink: 0,
+          width: context.variant === "compact" ? 28 : 36,
+          height: context.variant === "compact" ? 28 : 36,
+          borderRadius: 999,
+          background: "var(--uai-surface-raised)",
+          color: "var(--uai-muted)",
+        }}
+      >
+        <Upload size={context.variant === "compact" ? 14 : 16} strokeWidth={1.75} />
+      </span>
       {children}
     </fieldset>
   );
@@ -192,6 +265,7 @@ export function FileUploadInput({
 export function FileUploadTrigger({
   children = "Choose files",
   onClick,
+  className,
   style,
   ...props
 }: ComponentProps<"button">) {
@@ -201,12 +275,17 @@ export function FileUploadTrigger({
       {...props}
       type="button"
       disabled={context.disabled || props.disabled}
+      className={className ? `uai-file-upload-trigger ${className}` : "uai-file-upload-trigger"}
       style={{
-        padding: "8px 12px",
-        border: "1px solid var(--uai-border-strong)",
-        borderRadius: 8,
-        background: "var(--uai-text)",
-        color: "var(--uai-surface)",
+        flexShrink: 0,
+        height: context.variant === "compact" ? 28 : 30,
+        padding: "0 14px",
+        border: 0,
+        borderRadius: 999,
+        font: "inherit",
+        fontSize: 12.5,
+        fontWeight: 500,
+        cursor: "pointer",
         ...style,
       }}
       onClick={(event) => {
@@ -222,7 +301,7 @@ export function FileUploadList({ style, ...props }: ComponentProps<"ul">) {
   return (
     <ul
       {...props}
-      style={{ display: "grid", gap: 8, padding: 0, margin: 0, listStyle: "none", ...style }}
+      style={{ display: "grid", gap: 6, padding: 0, margin: 0, listStyle: "none", ...style }}
     />
   );
 }
@@ -241,6 +320,7 @@ export function FileUploadItem({
   status = "uploading",
   progress = 0,
   children,
+  className,
   style,
   ...props
 }: ComponentProps<"li"> & { status?: FileItemContext["status"]; progress?: number }) {
@@ -256,12 +336,19 @@ export function FileUploadItem({
       <li
         {...props}
         aria-busy={status === "uploading"}
+        data-status={status}
+        className={className ? `uai-file-upload-item ${className}` : "uai-file-upload-item"}
         style={{
-          display: "grid",
-          gap: 8,
-          padding: 12,
-          border: "1px solid var(--uai-border)",
-          borderRadius: 12,
+          padding: context.variant === "compact" ? "6px 6px 6px 12px" : "8px 8px 8px 12px",
+          borderRadius: 10,
+          background:
+            status === "error"
+              ? "color-mix(in oklab, var(--uai-danger) 8%, var(--uai-surface))"
+              : "var(--uai-surface)",
+          boxShadow:
+            status === "error"
+              ? "inset 0 0 0 1px color-mix(in oklab, var(--uai-danger) 28%, transparent)"
+              : "inset 0 0 0 1px var(--uai-border)",
           overflowWrap: "anywhere",
           ...style,
         }}
@@ -269,12 +356,16 @@ export function FileUploadItem({
         {children}
         <span
           role="status"
+          className={status === "uploading" ? "uai-file-upload-shimmer" : undefined}
           style={{
-            fontSize: 12,
+            fontSize: 11.5,
+            lineHeight: "16px",
             color:
               status === "error"
                 ? "color-mix(in oklab, var(--uai-danger) 75%, var(--uai-text))"
-                : "var(--uai-muted)",
+                : status === "complete"
+                  ? "var(--uai-success)"
+                  : "var(--uai-subtle)",
           }}
         >
           {status === "uploading"
@@ -287,7 +378,7 @@ export function FileUploadItem({
     </ItemContext.Provider>
   );
 }
-export function FileUploadProgress({ style, ...props }: ComponentProps<"progress">) {
+export function FileUploadProgress({ className, style, ...props }: ComponentProps<"progress">) {
   const context = useItem();
   if (context.status !== "uploading") return null;
   return (
@@ -296,12 +387,14 @@ export function FileUploadProgress({ style, ...props }: ComponentProps<"progress
       {...props}
       max={100}
       value={context.progress}
-      style={{ width: "100%", height: 6, accentColor: "var(--uai-text)", ...style }}
+      className={className ? `uai-file-upload-progress ${className}` : "uai-file-upload-progress"}
+      style={{ display: "block", width: "100%", height: 4, ...style }}
     />
   );
 }
 export function FileUploadRetry({
   children = "Retry upload",
+  className,
   style,
   ...props
 }: ComponentProps<"button">) {
@@ -312,15 +405,8 @@ export function FileUploadRetry({
       {...props}
       type="button"
       disabled={context.disabled || props.disabled}
-      style={{
-        justifySelf: "start",
-        padding: "5px 8px",
-        background: "transparent",
-        color: "inherit",
-        border: "1px solid var(--uai-border-strong)",
-        borderRadius: 6,
-        ...style,
-      }}
+      className={className ? `uai-file-upload-retry ${className}` : "uai-file-upload-retry"}
+      style={{ ...actionStyle, ...style }}
     >
       {children}
     </button>
@@ -328,6 +414,7 @@ export function FileUploadRetry({
 }
 export function FileUploadRemove({
   children = "Remove file",
+  className,
   style,
   ...props
 }: ComponentProps<"button">) {
@@ -337,15 +424,8 @@ export function FileUploadRemove({
       {...props}
       type="button"
       disabled={context.disabled || props.disabled}
-      style={{
-        justifySelf: "start",
-        padding: "5px 8px",
-        background: "transparent",
-        color: "inherit",
-        border: 0,
-        textDecoration: "underline",
-        ...style,
-      }}
+      className={className ? `uai-file-upload-remove ${className}` : "uai-file-upload-remove"}
+      style={{ ...actionStyle, ...style }}
     >
       {children}
     </button>

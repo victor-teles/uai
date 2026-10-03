@@ -3,6 +3,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   type ComponentProps,
+  type CSSProperties,
   createContext,
   useContext,
   useEffect,
@@ -66,6 +67,25 @@ type RangeContext = {
   disabled: boolean;
 };
 const Context = createContext<RangeContext | null>(null);
+const rangeCss = `
+.uai-date-range-input{border:1px solid var(--uai-border);background:var(--uai-canvas);transition:border-color 120ms ease-out,box-shadow 120ms ease-out}
+.uai-date-range-input:hover:not(:disabled):not(:focus){border-color:var(--uai-border-strong)}
+.uai-date-range-input:focus{outline:none;border-color:var(--uai-border-strong);box-shadow:0 0 0 3px color-mix(in oklab,var(--uai-accent) 24%,transparent)}
+.uai-date-range-input::-webkit-calendar-picker-indicator{opacity:0.55;cursor:pointer}
+.uai-date-range-preset,.uai-date-range-nav,.uai-date-range-clear{transition:background-color 120ms ease-out,color 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
+.uai-date-range-preset{background:transparent;color:var(--uai-muted)}
+.uai-date-range-preset:hover:not(:disabled){background:var(--uai-surface-raised);color:var(--uai-text)}
+.uai-date-range-preset[aria-pressed="true"]{background:var(--uai-surface-raised);color:var(--uai-text)}
+.uai-date-range-nav,.uai-date-range-clear{background:transparent;color:var(--uai-muted)}
+.uai-date-range-nav:hover:not(:disabled),.uai-date-range-clear:hover:not(:disabled){background:var(--uai-surface-raised);color:var(--uai-text)}
+.uai-date-range-preset:active:not(:disabled),.uai-date-range-nav:active:not(:disabled),.uai-date-range-clear:active:not(:disabled){transform:scale(0.97)}
+.uai-date-range-day{background:var(--uai-day-fill);color:var(--uai-day-ink);transition:background-color 120ms ease-out,color 120ms ease-out}
+.uai-date-range-day:hover:not(:disabled):not([data-endpoint]){background:var(--uai-day-hover)}
+.uai-date-range-day[aria-current="date"]:not([data-endpoint]){font-weight:600;color:var(--uai-accent)}
+.uai-date-range-day:disabled,.uai-date-range-preset:disabled,.uai-date-range-nav:disabled,.uai-date-range-clear:disabled{cursor:not-allowed;opacity:0.35}
+.uai-date-range-day:focus-visible,.uai-date-range-preset:focus-visible,.uai-date-range-nav:focus-visible,.uai-date-range-clear:focus-visible{outline:2px solid var(--uai-accent);outline-offset:1px;position:relative;z-index:1}
+@media (prefers-reduced-motion: reduce){.uai-date-range-input,.uai-date-range-preset,.uai-date-range-nav,.uai-date-range-clear,.uai-date-range-day{transition:none}}
+`;
 function useRange() {
   const context = useContext(Context);
   if (!context) throw new Error("DateRangePicker children must be used within DateRangePicker");
@@ -105,28 +125,31 @@ export function DateRangePicker({
         data-variant={variant}
         style={{
           display: "grid",
-          gap: variant === "compact" ? 10 : 16,
-          padding: variant === "compact" ? 12 : 18,
+          gap: variant === "compact" ? 10 : 14,
+          padding: variant === "compact" ? 12 : 16,
           border: "1px solid var(--uai-border)",
           borderRadius: variant === "compact" ? 12 : 14,
           background: "var(--uai-surface)",
           color: "var(--uai-text)",
           fontSize: 13,
+          lineHeight: "18px",
           minWidth: 0,
           ...style,
         }}
       >
+        <style>{rangeCss}</style>
         {children}
       </div>
     </Context.Provider>
   );
 }
 export function DateRangePickerInputs({ style, ...props }: ComponentProps<"div">) {
-  return <div {...props} style={{ display: "flex", flexWrap: "wrap", gap: 10, ...style }} />;
+  return <div {...props} style={{ display: "flex", flexWrap: "wrap", gap: 8, ...style }} />;
 }
 export function DateRangePickerInput({
   boundary,
   children,
+  className,
   style,
   onChange,
   ...props
@@ -136,7 +159,19 @@ export function DateRangePickerInput({
   const context = useRange();
   const id = `${context.id}-${boundary}`;
   return (
-    <label htmlFor={id} style={{ display: "grid", flex: "1 1 120px", gap: 6, minWidth: 0 }}>
+    <label
+      htmlFor={id}
+      style={{
+        display: "grid",
+        flex: "1 1 120px",
+        gap: 6,
+        minWidth: 0,
+        fontSize: 12,
+        lineHeight: "16px",
+        fontWeight: 500,
+        color: "var(--uai-muted)",
+      }}
+    >
       {children ?? (boundary === "start" ? "Start date" : "End date")}
       <input
         {...props}
@@ -146,16 +181,19 @@ export function DateRangePickerInput({
         disabled={context.disabled || props.disabled}
         min={boundary === "end" ? context.value.start || context.min : context.min}
         max={context.max}
+        className={className ? `uai-date-range-input ${className}` : "uai-date-range-input"}
         style={{
           width: "100%",
           minWidth: 0,
           boxSizing: "border-box",
-          padding: 8,
-          border: "1px solid var(--uai-border-strong)",
-          borderRadius: 8,
-          background: "transparent",
-          color: "inherit",
+          height: context.variant === "compact" ? 30 : 34,
+          padding: "0 10px",
+          borderRadius: context.variant === "compact" ? 8 : 10,
+          color: "var(--uai-text)",
           font: "inherit",
+          fontSize: context.variant === "compact" ? 12.5 : 13,
+          fontWeight: 400,
+          fontVariantNumeric: "tabular-nums",
           ...style,
         }}
         onChange={(event) => {
@@ -182,7 +220,7 @@ export function DateRangePickerBody({ style, ...props }: ComponentProps<"div">) 
         display: "flex",
         flexDirection: context.variant === "split" ? "row" : "column",
         flexWrap: "wrap",
-        gap: 16,
+        gap: context.variant === "compact" ? 10 : 14,
         ...style,
       }}
     />
@@ -197,7 +235,14 @@ export function DateRangePickerPresets({ style, ...props }: ComponentProps<"div"
         display: "flex",
         flexDirection: context.variant === "split" ? "column" : "row",
         flexWrap: "wrap",
-        gap: 6,
+        gap: context.variant === "split" ? 2 : 4,
+        ...(context.variant === "split"
+          ? {
+              minWidth: 120,
+              paddingRight: 12,
+              borderRight: "1px solid var(--uai-border)",
+            }
+          : {}),
         ...style,
       }}
     />
@@ -206,6 +251,7 @@ export function DateRangePickerPresets({ style, ...props }: ComponentProps<"div"
 export function DateRangePickerPreset({
   value,
   onClick,
+  className,
   style,
   ...props
 }: Omit<ComponentProps<"button">, "value"> & { value: DateRange }) {
@@ -221,13 +267,18 @@ export function DateRangePickerPreset({
       type="button"
       aria-pressed={selected}
       disabled={context.disabled || !allowed || props.disabled}
+      className={className ? `uai-date-range-preset ${className}` : "uai-date-range-preset"}
       style={{
-        padding: "6px 10px",
-        border: "1px solid var(--uai-border)",
-        borderRadius: 8,
-        background: selected ? "var(--uai-text)" : "transparent",
-        color: selected ? "var(--uai-surface)" : "inherit",
-        fontSize: 12,
+        height: 28,
+        padding: "0 12px",
+        border: 0,
+        borderRadius: context.variant === "split" ? 8 : 999,
+        textAlign: "left",
+        font: "inherit",
+        fontSize: 12.5,
+        fontWeight: 500,
+        whiteSpace: "nowrap",
+        cursor: "pointer",
         ...style,
       }}
       onClick={(event) => {
@@ -279,7 +330,7 @@ export function DateRangePickerCalendar({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: 10,
+          marginBottom: 8,
         }}
       >
         <button
@@ -287,11 +338,12 @@ export function DateRangePickerCalendar({
           aria-label="Previous month"
           disabled={context.disabled || Boolean(context.min && month <= context.min.slice(0, 7))}
           onClick={() => navigate(moveMonth(`${month}-01`, -1), false)}
+          className="uai-date-range-nav"
           style={monthButton}
         >
-          <ChevronLeft size={14} aria-hidden="true" />
+          <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" />
         </button>
-        <span id={titleId} aria-live="polite" style={{ fontWeight: 550 }}>
+        <span id={titleId} aria-live="polite" style={{ fontWeight: 500 }}>
           {new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }).format(first)}
         </span>
         <button
@@ -299,9 +351,10 @@ export function DateRangePickerCalendar({
           aria-label="Next month"
           disabled={context.disabled || Boolean(context.max && month >= context.max.slice(0, 7))}
           onClick={() => navigate(moveMonth(`${month}-01`, 1), false)}
+          className="uai-date-range-nav"
           style={monthButton}
         >
-          <ChevronRight size={14} aria-hidden="true" />
+          <ChevronRight size={16} strokeWidth={1.75} aria-hidden="true" />
         </button>
       </div>
       <table
@@ -309,7 +362,7 @@ export function DateRangePickerCalendar({
         style={{
           width: "100%",
           borderCollapse: "separate",
-          borderSpacing: 2,
+          borderSpacing: "0 2px",
           tableLayout: "fixed",
         }}
       >
@@ -322,8 +375,8 @@ export function DateRangePickerCalendar({
                 style={{
                   fontSize: 11,
                   fontWeight: 400,
-                  color: "var(--uai-muted)",
-                  paddingBottom: 6,
+                  color: "var(--uai-subtle)",
+                  paddingBottom: 4,
                 }}
               >
                 {new Intl.DateTimeFormat(locale, { weekday: "short" }).format(
@@ -344,6 +397,13 @@ export function DateRangePickerCalendar({
                     date <= (context.value.end || context.value.start),
                 );
                 const endpoint = date === context.value.start || date === context.value.end;
+                const ranged = Boolean(
+                  context.value.end && context.value.end !== context.value.start,
+                );
+                const isStart = date === context.value.start;
+                const isEnd = date === (context.value.end || context.value.start);
+                const roundStart = !selected || (ranged ? isStart || day === 0 : true);
+                const roundEnd = !selected || (ranged ? isEnd || day === 6 : true);
                 const unavailable = context.disabled || !inBounds(date, context.min, context.max);
                 return (
                   <td key={date} style={{ padding: 0 }}>
@@ -351,6 +411,8 @@ export function DateRangePickerCalendar({
                       type="button"
                       aria-pressed={selected}
                       data-date={date}
+                      data-endpoint={endpoint || undefined}
+                      className="uai-date-range-day"
                       aria-label={formatter.format(parseDate(date))}
                       aria-current={date === dateKey(new Date()) ? "date" : undefined}
                       tabIndex={date === focused ? 0 : -1}
@@ -377,25 +439,34 @@ export function DateRangePickerCalendar({
                         event.preventDefault();
                         navigate(next, true);
                       }}
-                      style={{
-                        width: "100%",
-                        minHeight: context.variant === "compact" ? 28 : 32,
-                        padding: 0,
-                        border: 0,
-                        borderRadius: endpoint ? 8 : 4,
-                        background: endpoint
-                          ? "var(--uai-text)"
-                          : selected
-                            ? "var(--uai-surface-raised)"
-                            : "transparent",
-                        color: endpoint
-                          ? "var(--uai-surface)"
-                          : date.slice(0, 7) !== month
-                            ? "var(--uai-muted)"
-                            : "var(--uai-text)",
-                        opacity: unavailable ? 0.3 : 1,
-                        fontSize: 12,
-                      }}
+                      style={
+                        {
+                          "--uai-day-fill": endpoint
+                            ? "var(--uai-accent)"
+                            : selected
+                              ? "color-mix(in oklab, var(--uai-accent) 16%, transparent)"
+                              : "transparent",
+                          "--uai-day-hover": selected
+                            ? "color-mix(in oklab, var(--uai-accent) 26%, transparent)"
+                            : "var(--uai-surface-raised)",
+                          "--uai-day-ink": endpoint
+                            ? "var(--uai-accent-foreground)"
+                            : date.slice(0, 7) !== month
+                              ? "var(--uai-subtle)"
+                              : "var(--uai-text)",
+                          display: "block",
+                          width: "100%",
+                          minHeight: context.variant === "compact" ? 28 : 32,
+                          padding: 0,
+                          border: 0,
+                          borderRadius: `${roundStart ? 8 : 0}px ${roundEnd ? 8 : 0}px ${roundEnd ? 8 : 0}px ${roundStart ? 8 : 0}px`,
+                          font: "inherit",
+                          fontSize: 12.5,
+                          fontWeight: endpoint ? 500 : 400,
+                          fontVariantNumeric: "tabular-nums",
+                          cursor: unavailable ? "not-allowed" : "pointer",
+                        } as CSSProperties
+                      }
                     >
                       {parseDate(date).getDate()}
                     </button>
@@ -414,18 +485,25 @@ const monthButton = {
   placeItems: "center",
   width: 28,
   height: 28,
-  border: "1px solid var(--uai-border)",
+  padding: 0,
+  border: 0,
   borderRadius: 8,
-  background: "transparent",
-  color: "inherit",
-};
+  cursor: "pointer",
+} as const;
 export function DateRangePickerSummary({ style, ...props }: ComponentProps<"p">) {
   const context = useRange();
   return (
     <p
       role="status"
       {...props}
-      style={{ margin: 0, color: "var(--uai-muted)", fontSize: 12, ...style }}
+      style={{
+        margin: 0,
+        color: "var(--uai-subtle)",
+        fontSize: 12,
+        lineHeight: "16px",
+        fontVariantNumeric: "tabular-nums",
+        ...style,
+      }}
     >
       {!context.value.start
         ? "Choose a start date."
@@ -438,6 +516,7 @@ export function DateRangePickerSummary({ style, ...props }: ComponentProps<"p">)
 export function DateRangePickerClear({
   children = "Clear dates",
   onClick,
+  className,
   style,
   ...props
 }: ComponentProps<"button">) {
@@ -447,13 +526,18 @@ export function DateRangePickerClear({
       {...props}
       type="button"
       disabled={context.disabled || !context.value.start || props.disabled}
+      className={className ? `uai-date-range-clear ${className}` : "uai-date-range-clear"}
       style={{
         justifySelf: "start",
+        height: 28,
+        padding: "0 12px",
+        marginLeft: -12,
         border: 0,
-        background: "transparent",
-        color: "inherit",
-        padding: "6px 0",
-        textDecoration: "underline",
+        borderRadius: 999,
+        font: "inherit",
+        fontSize: 12.5,
+        fontWeight: 500,
+        cursor: "pointer",
         ...style,
       }}
       onClick={(event) => {

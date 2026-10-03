@@ -49,6 +49,7 @@ export function UnsavedChangesBarPreview({
       >
         <input
           type="checkbox"
+          style={{ accentColor: "var(--uai-accent)" }}
           checked={fail}
           disabled={status === "saving"}
           onChange={(event) => setFail(event.target.checked)}

@@ -63,7 +63,7 @@ export function FormErrorSummaryPreview({
           name="email"
           type="email"
           autoComplete="email"
-          placeholder="you@example.com"
+          placeholder="maya@northwind.studio"
         />
         <FormFieldError>Enter a valid email address.</FormFieldError>
       </FormField>
@@ -75,19 +75,27 @@ export function FormErrorSummaryPreview({
         required
       >
         <FormFieldLabel>Full name</FormFieldLabel>
-        <FormFieldInput name="name" autoComplete="name" placeholder="Your name" />
+        <FormFieldInput name="name" autoComplete="name" placeholder="Maya Chen" />
         <FormFieldError>Enter your full name.</FormFieldError>
       </FormField>
-      {!invalidEmail && !invalidName && <p role="status">Contact details are ready.</p>}
+      {!invalidEmail && !invalidName && (
+        <p role="status" style={{ margin: 0, fontSize: 12, color: "var(--uai-success)" }}>
+          Contact details are ready.
+        </p>
+      )}
       <button
         type="submit"
         style={{
           justifySelf: "start",
+          height: 30,
+          padding: "0 14px",
           border: 0,
-          borderRadius: 8,
-          padding: "8px 12px",
-          background: "var(--uai-text)",
-          color: "var(--uai-surface)",
+          borderRadius: 999,
+          background: "var(--uai-accent)",
+          color: "var(--uai-accent-foreground)",
+          font: "inherit",
+          fontSize: 12.5,
+          fontWeight: 500,
         }}
       >
         Validate details

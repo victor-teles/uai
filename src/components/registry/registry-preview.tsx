@@ -223,9 +223,34 @@ import {
   ThinkingContent,
   ThinkingTrigger,
 } from "@/components/ui/uai/thinking";
+import { AiPreview, getAiPreviewControl } from "./ai/preview";
+import { AiBlocksPreview, getAiBlocksPreviewControl } from "./ai-blocks/preview";
+import { AppBlocksPreview, getAppBlocksPreviewControl } from "./app-blocks/preview";
 import type { RegistryItemId } from "./catalog";
+import { CommerceBlocksPreview, getCommerceBlocksPreviewControl } from "./commerce-blocks/preview";
+import { CommunityPreview, getCommunityPreviewControl } from "./community/preview";
+import {
+  CommunityBlocksPreview,
+  getCommunityBlocksPreviewControl,
+} from "./community-blocks/preview";
+import { DataDisplayPreview, getDataDisplayPreviewControl } from "./data-display/preview";
+import { FeedbackPreview, getFeedbackPreviewControl } from "./feedback/preview";
 import { FormsPreview, getFormsPreviewControl } from "./forms/preview";
-import { PreviewStage, SegmentedControl } from "./preview-chrome";
+import { getMarketingPreviewControl, MarketingPreview } from "./marketing/preview";
+import {
+  getMarketingBlocksPreviewControl,
+  MarketingBlocksPreview,
+} from "./marketing-blocks/preview";
+import { getNavigationPreviewControl, NavigationPreview } from "./navigation/preview";
+import {
+  getOnboardingBlocksPreviewControl,
+  OnboardingBlocksPreview,
+} from "./onboarding-blocks/preview";
+import {
+  getOperationsBlocksPreviewControl,
+  OperationsBlocksPreview,
+} from "./operations-blocks/preview";
+import { type PreviewControl, PreviewStage, SegmentedControl } from "./preview-chrome";
 
 const composerModels = [
   { id: "your-model", label: "Your model" },
@@ -270,6 +295,10 @@ function RegistryTaskItems() {
       <TaskListItem status="pending">
         <TaskListTitle>Build the registry item</TaskListTitle>
         <TaskListDescription>Files and dependencies</TaskListDescription>
+      </TaskListItem>
+      <TaskListItem status="pending">
+        <TaskListTitle>Publish to the registry</TaskListTitle>
+        <TaskListDescription>Tag v0.4.0 and update the changelog</TaskListDescription>
       </TaskListItem>
     </>
   );
@@ -795,7 +824,7 @@ function SignUpCardPreview({ variant }: { variant: SignUpCardVariant }) {
               <span>Open the link to finish creating your account.</span>
               <button
                 type="button"
-                className="font-medium text-[var(--uai-text)] underline underline-offset-4"
+                className="inline-flex h-7 items-center rounded-full px-3 text-[12.5px] font-medium text-[var(--uai-muted)] transition-colors hover:bg-[var(--uai-surface-raised)] hover:text-[var(--uai-text)]"
                 onClick={() => setStatus("idle")}
               >
                 Use another email
@@ -1030,9 +1059,8 @@ function PasswordRecoveryPreview({ variant }: { variant: PasswordRecoveryVariant
             <PasswordRecoveryStage when="sent">
               <PasswordRecoveryStatusMessage tone="sent">
                 <span>
-                  If an account matches{" "}
-                  <strong className="text-[var(--uai-text)]">hello@acme.co</strong>, its reset link
-                  is on the way.
+                  If an account matches <strong>hello@acme.co</strong>, its reset link is on the
+                  way.
                 </span>
               </PasswordRecoveryStatusMessage>
               <PasswordRecoveryActions>
@@ -1183,7 +1211,7 @@ function CouponFieldPreview({ variant }: { variant: CouponFieldVariant }) {
   return (
     <PreviewStage contentClassName="uai-preview-medium" label={copy.scene} swapping={swapping}>
       <div className={variant === "compact" ? "w-full max-w-[320px]" : "w-full max-w-[380px]"}>
-        <div className="mb-5 flex items-baseline justify-between border-b border-[var(--uai-border)] pb-3">
+        <div className="mb-5 flex items-baseline justify-between border-b border-[color-mix(in_oklab,var(--uai-border)_60%,transparent)] pb-3">
           <h2 className="text-sm leading-5 font-medium">Order summary</h2>
           <span className="text-[12px] text-[var(--uai-muted)]">2 items</span>
         </div>
@@ -1207,7 +1235,7 @@ function CouponFieldPreview({ variant }: { variant: CouponFieldVariant }) {
           </CouponFieldFeedback>
         </CouponField>
 
-        <dl className="mt-5 space-y-2 border-t border-[var(--uai-border)] pt-4 text-[12px] leading-4 tabular-nums">
+        <dl className="mt-5 space-y-2 border-t border-[color-mix(in_oklab,var(--uai-border)_60%,transparent)] pt-4 text-[12px] leading-4 tabular-nums">
           <div className="flex justify-between text-[var(--uai-muted)]">
             <dt>Subtotal</dt>
             <dd>$90.00</dd>
@@ -1243,7 +1271,7 @@ function QuantityPickerPreview({ variant }: { variant: QuantityPickerVariant }) 
   return (
     <PreviewStage contentClassName="uai-preview-medium" label={copy.scene} swapping={swapping}>
       <article className="w-full max-w-[380px]">
-        <div className="border-b border-[var(--uai-border)] pb-4">
+        <div className="border-b border-[color-mix(in_oklab,var(--uai-border)_60%,transparent)] pb-4">
           <div className="flex items-start justify-between gap-6">
             <div className="min-w-0">
               <h2 className="text-sm leading-5 font-medium">Everyday Tote</h2>
@@ -1526,15 +1554,29 @@ function AppHeaderPreview({ variant }: { variant: AppHeaderVariant }) {
   );
 }
 
-type PreviewControl = {
-  ariaLabel: string;
-  defaultValue: string;
-  options: readonly { id: string; label: string }[];
-};
+const groupPreviews = [
+  { getControl: getNavigationPreviewControl, Preview: NavigationPreview },
+  { getControl: getFeedbackPreviewControl, Preview: FeedbackPreview },
+  { getControl: getDataDisplayPreviewControl, Preview: DataDisplayPreview },
+  { getControl: getMarketingPreviewControl, Preview: MarketingPreview },
+  { getControl: getCommunityPreviewControl, Preview: CommunityPreview },
+  { getControl: getAiPreviewControl, Preview: AiPreview },
+  { getControl: getMarketingBlocksPreviewControl, Preview: MarketingBlocksPreview },
+  { getControl: getOnboardingBlocksPreviewControl, Preview: OnboardingBlocksPreview },
+  { getControl: getAppBlocksPreviewControl, Preview: AppBlocksPreview },
+  { getControl: getOperationsBlocksPreviewControl, Preview: OperationsBlocksPreview },
+  { getControl: getCommerceBlocksPreviewControl, Preview: CommerceBlocksPreview },
+  { getControl: getCommunityBlocksPreviewControl, Preview: CommunityBlocksPreview },
+  { getControl: getAiBlocksPreviewControl, Preview: AiBlocksPreview },
+] as const;
 
 function getPreviewControl(itemId: RegistryItemId): PreviewControl | undefined {
   const formsControl = getFormsPreviewControl(itemId);
   if (formsControl) return formsControl;
+  for (const group of groupPreviews) {
+    const control = group.getControl(itemId);
+    if (control) return control;
+  }
   if (itemId === "prompt-composer") {
     return {
       ariaLabel: "Composer variant",
@@ -1693,6 +1735,9 @@ function getPreviewControl(itemId: RegistryItemId): PreviewControl | undefined {
 
 function renderPreview(itemId: RegistryItemId, selection: string) {
   if (getFormsPreviewControl(itemId)) return <FormsPreview itemId={itemId} selection={selection} />;
+  for (const { getControl, Preview } of groupPreviews) {
+    if (getControl(itemId)) return <Preview itemId={itemId} selection={selection} />;
+  }
   if (itemId === "prompt-composer") {
     return <PromptComposerPreview variant={selection as PromptComposerVariant} />;
   }
@@ -1739,35 +1784,23 @@ function renderPreview(itemId: RegistryItemId, selection: string) {
   return null;
 }
 
-export function RegistryPreview({
-  itemId,
-  codeExample,
-}: {
-  itemId: RegistryItemId;
-  codeExample: ReactNode;
-}) {
+export function RegistryPreview({ itemId }: { itemId: RegistryItemId }) {
   const control = getPreviewControl(itemId);
-  const [selections, setSelections] = useState<Partial<Record<RegistryItemId, string>>>({});
-  const selection = selections[itemId] ?? control?.defaultValue ?? "";
+  const [selection, setSelection] = useState(control?.defaultValue ?? "");
 
   return (
-    <div className="uai-registry-showcase" data-has-variants={control ? "true" : undefined}>
-      <div className="uai-registry-specimen">
-        {renderPreview(itemId, selection)}
-        {codeExample}
-      </div>
+    <div className="uai-registry-specimen" data-has-variants={control ? "true" : undefined}>
+      {renderPreview(itemId, selection)}
 
       {control ? (
-        <aside className="uai-registry-variant-rail" aria-label="Preview variants">
-          <span>Variants</span>
+        <div className="uai-registry-variants">
           <SegmentedControl
             ariaLabel={control.ariaLabel}
-            orientation="vertical"
             value={selection}
-            onChange={(value) => setSelections((current) => ({ ...current, [itemId]: value }))}
+            onChange={setSelection}
             options={control.options}
           />
-        </aside>
+        </div>
       ) : null}
     </div>
   );

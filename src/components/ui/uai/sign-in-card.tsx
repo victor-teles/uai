@@ -46,14 +46,16 @@ function signInCardChrome(variant: SignInCardVariant): SignInCardChrome {
       padding: compact ? 14 : variant === "split" ? 24 : 20,
     },
     headerClass: compact ? "mb-4" : "mb-5",
-    titleClass: compact ? "text-base leading-5" : "text-lg leading-6",
-    descriptionClass: compact ? "mt-1 text-[12px] leading-4" : "mt-1.5 text-[13px] leading-[18px]",
+    titleClass: compact ? "text-[15px] leading-5" : "text-[17px] leading-6",
+    descriptionClass: compact
+      ? "mt-1 text-[12.5px] leading-[18px]"
+      : "mt-1.5 text-[13px] leading-[18px]",
     bodyClass:
       variant === "split"
         ? "grid gap-5 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-stretch sm:gap-6"
         : "grid gap-4",
     groupGapClass: compact ? "gap-2.5" : "gap-3",
-    controlClass: compact ? "h-[34px] text-[12px]" : "h-[42px] text-[13px]",
+    controlClass: compact ? "h-[34px] text-[12.5px]" : "h-[38px] text-[13px]",
     controlStyle: { borderRadius: compact ? 8 : 10 },
     footerClass: compact ? "mt-4 pt-3.5" : "mt-5 pt-4",
   };
@@ -136,7 +138,7 @@ export function SignInCardTitle({ children, className, ...props }: SignInCardTit
   return (
     <h2
       id={titleId}
-      className={cn("font-semibold tracking-[-0.025em] text-balance", chrome.titleClass, className)}
+      className={cn("font-semibold tracking-[-0.015em] text-balance", chrome.titleClass, className)}
       {...props}
     >
       {children}
@@ -218,11 +220,11 @@ export function SignInCardProvider({
       type={type}
       disabled={disabled || submitting}
       className={cn(
-        "inline-flex w-full items-center justify-center gap-2 border border-[var(--uai-border)] bg-[var(--uai-surface-raised)] px-3 font-medium transition-[background-color,border-color] duration-150 hover:border-[var(--uai-border-strong)] hover:bg-[color-mix(in_oklab,var(--uai-surface-raised)_76%,var(--uai-text)_4%)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uai-text)] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none [&_svg]:size-4 [&_svg]:shrink-0",
+        "inline-flex w-full items-center justify-center gap-2 rounded-full border-0 bg-[var(--uai-surface-raised)] px-3.5 font-medium text-[var(--uai-text)] transition-[background-color,transform] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-[color-mix(in_oklab,var(--uai-surface-raised)_85%,var(--uai-text))] active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uai-accent)] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 motion-reduce:transform-none motion-reduce:transition-none [&_svg]:size-4 [&_svg]:shrink-0",
         chrome.controlClass,
         className,
       )}
-      style={{ ...chrome.controlStyle, ...style }}
+      style={style}
     >
       {children}
     </button>
@@ -238,7 +240,7 @@ export function SignInCardDivider({ children, className, ...props }: SignInCardD
   return (
     <div
       className={cn(
-        "flex items-center gap-3 text-center text-[0.72rem] leading-4 text-[var(--uai-muted)]",
+        "flex items-center gap-3 text-center text-[11.5px] leading-4 text-[var(--uai-subtle)]",
         variant === "split" && "sm:flex-col sm:gap-2",
         className,
       )}
@@ -321,7 +323,7 @@ export function SignInCardLabel({ children, className, htmlFor, ...props }: Sign
   return (
     <label
       htmlFor={htmlFor ?? controlId}
-      className={cn("text-[0.72rem] leading-4 font-medium", className)}
+      className={cn("text-[12.5px] leading-4 font-medium", className)}
       {...props}
     >
       {children}
@@ -355,10 +357,12 @@ export function SignInCardInput({
       type={inputType}
       disabled={disabled || submitting}
       className={cn(
-        "min-w-0 w-full bg-transparent px-3 text-[var(--uai-text)] outline-none placeholder:text-[var(--uai-muted)] disabled:cursor-not-allowed disabled:opacity-50",
+        "min-w-0 w-full bg-transparent px-3 text-[var(--uai-text)] outline-none placeholder:text-[var(--uai-subtle)] disabled:cursor-not-allowed disabled:opacity-50",
         !revealable &&
-          "border border-[var(--uai-border)] focus:border-[var(--uai-border-strong)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uai-text)]",
-        !revealable && invalid && "border-[var(--uai-danger)]",
+          "border border-[var(--uai-border)] bg-[var(--uai-canvas)] transition-[border-color,box-shadow] duration-[120ms] ease-out hover:border-[var(--uai-border-strong)] focus:border-[var(--uai-border-strong)] focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--uai-accent)_24%,transparent)] motion-reduce:transition-none",
+        !revealable &&
+          invalid &&
+          "border-[color-mix(in_oklab,var(--uai-danger)_70%,transparent)] hover:border-[var(--uai-danger)] focus:border-[var(--uai-danger)] focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--uai-danger)_22%,transparent)]",
         revealable && "pr-10",
         chrome.controlClass,
         className,
@@ -374,15 +378,16 @@ export function SignInCardInput({
   return (
     <div
       className={cn(
-        "relative border border-[var(--uai-border)] focus-within:border-[var(--uai-border-strong)] focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--uai-text)]",
-        invalid && "border-[var(--uai-danger)]",
+        "relative border border-[var(--uai-border)] bg-[var(--uai-canvas)] transition-[border-color,box-shadow] duration-[120ms] ease-out hover:border-[var(--uai-border-strong)] focus-within:border-[var(--uai-border-strong)] focus-within:shadow-[0_0_0_3px_color-mix(in_oklab,var(--uai-accent)_24%,transparent)] motion-reduce:transition-none",
+        invalid &&
+          "border-[color-mix(in_oklab,var(--uai-danger)_70%,transparent)] hover:border-[var(--uai-danger)] focus-within:border-[var(--uai-danger)] focus-within:shadow-[0_0_0_3px_color-mix(in_oklab,var(--uai-danger)_22%,transparent)]",
       )}
       style={chrome.controlStyle}
     >
       {input}
       <button
         type="button"
-        className="absolute inset-y-0 right-0 inline-flex w-10 items-center justify-center rounded-[inherit] text-[var(--uai-muted)] transition-colors duration-150 hover:text-[var(--uai-text)] focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-[var(--uai-text)] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
+        className="absolute inset-y-0 right-0 inline-flex w-10 items-center justify-center rounded-[inherit] text-[var(--uai-subtle)] transition-colors duration-[120ms] ease-out hover:text-[var(--uai-text)] focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-[var(--uai-accent)] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none [&_svg]:size-4 [&_svg]:stroke-[1.75]"
         disabled={disabled || submitting}
         aria-label={revealed ? "Hide password" : "Show password"}
         aria-pressed={revealed}
@@ -414,8 +419,10 @@ export function SignInCardFieldMessage({
     <p
       id={id ?? messageId}
       className={cn(
-        "text-[0.7rem] leading-4 [overflow-wrap:anywhere]",
-        invalid ? "text-[var(--uai-danger)]" : "text-[var(--uai-muted)]",
+        "text-[11.5px] leading-4 [overflow-wrap:anywhere]",
+        invalid
+          ? "text-[color-mix(in_oklab,var(--uai-danger)_80%,var(--uai-text))]"
+          : "text-[var(--uai-subtle)]",
         className,
       )}
       role={role ?? (invalid ? "alert" : undefined)}
@@ -434,7 +441,7 @@ export function SignInCardOptions({ children, className, ...props }: SignInCardO
   return (
     <div
       className={cn(
-        "flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[0.72rem] leading-4 text-[var(--uai-muted)] [&_a]:font-medium [&_a]:text-[var(--uai-text)] [&_a]:underline-offset-4 [&_a:hover]:underline [&_input]:accent-[var(--uai-text)] [&_label]:inline-flex [&_label]:items-center [&_label]:gap-2",
+        "flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[12px] leading-4 text-[var(--uai-muted)] [&_a]:font-medium [&_a]:text-[var(--uai-accent)] [&_a]:underline-offset-4 [&_a:hover]:underline [&_input]:size-3.5 [&_input]:accent-[var(--uai-accent)] [&_label]:inline-flex [&_label]:items-center [&_label]:gap-2",
         className,
       )}
       {...props}
@@ -454,7 +461,7 @@ export function SignInCardError({ children, className, id, ...props }: SignInCar
     <div
       id={id ?? errorId}
       className={cn(
-        "border border-[color-mix(in_oklab,var(--uai-danger)_48%,var(--uai-border))] bg-[color-mix(in_oklab,var(--uai-danger)_9%,var(--uai-surface))] px-3 py-2.5 text-[0.72rem] leading-4 text-[var(--uai-danger)] [overflow-wrap:anywhere]",
+        "bg-[color-mix(in_oklab,var(--uai-danger)_10%,transparent)] px-3 py-2.5 text-[12px] leading-4 text-[color-mix(in_oklab,var(--uai-danger)_80%,var(--uai-text))] shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--uai-danger)_24%,transparent)] [overflow-wrap:anywhere]",
         className,
       )}
       style={{ borderRadius: 10 }}
@@ -484,11 +491,11 @@ export function SignInCardSubmit({
       type={type}
       disabled={disabled || submitting}
       className={cn(
-        "inline-flex w-full items-center justify-center gap-2 bg-[var(--uai-text)] px-4 font-semibold text-[var(--uai-surface)] transition-[opacity,transform] duration-150 hover:opacity-90 active:translate-y-px focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uai-text)] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transform-none motion-reduce:transition-none",
+        "inline-flex w-full items-center justify-center gap-2 rounded-full border-0 bg-[var(--uai-accent)] px-4 font-medium text-[var(--uai-accent-foreground)] transition-[filter,transform] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:brightness-[1.08] active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uai-accent)] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100 motion-reduce:transform-none motion-reduce:transition-none",
         chrome.controlClass,
         className,
       )}
-      style={{ ...chrome.controlStyle, ...style }}
+      style={style}
       aria-busy={submitting || undefined}
     >
       {submitting ? (
@@ -510,7 +517,7 @@ export function SignInCardFooter({ children, className, ...props }: SignInCardFo
   return (
     <footer
       className={cn(
-        "border-t border-[var(--uai-border)] text-center text-[0.72rem] leading-4 text-[var(--uai-muted)] [&_a]:font-medium [&_a]:text-[var(--uai-text)] [&_a]:underline-offset-4 [&_a:hover]:underline",
+        "border-t border-[var(--uai-border)] text-center text-[12px] leading-4 text-[var(--uai-muted)] [&_a]:font-medium [&_a]:text-[var(--uai-accent)] [&_a]:underline-offset-4 [&_a:hover]:underline",
         chrome.footerClass,
         className,
       )}

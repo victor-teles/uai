@@ -30,23 +30,25 @@ function appHeaderChrome(variant: AppHeaderVariant) {
     rootClass:
       variant === "bar"
         ? "border-b border-[var(--uai-border)] bg-[var(--uai-surface)]"
-        : "border border-[var(--uai-border)] bg-[var(--uai-surface)]",
+        : variant === "floating"
+          ? "bg-[var(--uai-surface)]"
+          : "border border-[var(--uai-border)] bg-[var(--uai-surface)]",
     rootStyle: {
       minHeight: compact ? 44 : 56,
       borderRadius: variant === "bar" ? 0 : compact ? 12 : 14,
       padding: compact ? "4px 6px" : variant === "floating" ? 8 : "0 16px",
       boxShadow:
         variant === "floating"
-          ? "0 14px 32px -26px color-mix(in oklab, var(--uai-text) 55%, transparent)"
+          ? "0 0 0 1px var(--uai-border), 0 1px 2px oklch(0 0 0 / 0.06), 0 12px 28px -20px oklch(0 0 0 / 0.4)"
           : undefined,
     },
     gapClass: compact ? "gap-1.5" : "gap-2.5",
-    brandClass: compact ? "h-7 gap-1.5 text-[12px]" : "h-[34px] gap-2 text-[13px]",
+    brandClass: compact ? "h-7 gap-1.5 px-1 text-[12.5px]" : "h-8 gap-2 px-1 text-[13px]",
     overflowClass: compact ? "gap-2 md:gap-3" : "gap-3 md:gap-5",
     navClass: compact ? "gap-0.5" : "gap-1",
-    navItemClass: compact ? "h-7 px-2 text-[0.72rem]" : "h-[34px] px-2.5 text-[12px]",
-    searchClass: compact ? "h-7 md:w-36" : "h-[34px] md:w-48 lg:w-56",
-    actionClass: compact ? "size-7 text-[0.72rem]" : "size-[34px] text-[12px]",
+    navItemClass: compact ? "h-7 px-2.5 text-[12px]" : "h-8 px-3 text-[12.5px]",
+    searchClass: compact ? "h-7 md:w-36" : "h-8 md:w-48 lg:w-56",
+    actionClass: compact ? "size-7 text-[11px]" : "size-8 text-[11.5px]",
   };
 }
 
@@ -113,7 +115,7 @@ export function AppHeaderBrand({ children, className, ...props }: AppHeaderBrand
   return (
     <a
       className={cn(
-        "inline-flex min-w-0 shrink-0 items-center rounded-[8px] font-medium tracking-[-0.015em] outline-none focus-visible:ring-2 focus-visible:ring-[var(--uai-border-strong)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uai-surface)]",
+        "inline-flex min-w-0 shrink-0 items-center rounded-[8px] font-medium tracking-[-0.01em] outline-none focus-visible:ring-2 focus-visible:ring-[var(--uai-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uai-surface)]",
         context.chrome.brandClass,
         className,
       )}
@@ -183,10 +185,10 @@ export function AppHeaderNavItem({
       <a
         aria-current={ariaCurrent ?? (active ? "page" : undefined)}
         className={cn(
-          "flex min-w-0 items-center rounded-[8px] font-medium whitespace-nowrap outline-none transition-[background-color,color,transform] duration-150 focus-visible:ring-2 focus-visible:ring-[var(--uai-border-strong)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uai-surface)] active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100",
+          "flex min-w-0 items-center rounded-full font-medium whitespace-nowrap outline-none transition-[background-color,color,transform] duration-[120ms] ease-out focus-visible:ring-2 focus-visible:ring-[var(--uai-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uai-surface)] active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100",
           active
             ? "bg-[var(--uai-surface-raised)] text-[var(--uai-text)]"
-            : "text-[var(--uai-muted)] hover:bg-[var(--uai-surface-raised)] hover:text-[var(--uai-text)]",
+            : "text-[var(--uai-muted)] hover:bg-[color-mix(in_oklab,var(--uai-surface-raised)_60%,transparent)] hover:text-[var(--uai-text)]",
           context.chrome.navItemClass,
           className,
         )}
@@ -213,7 +215,7 @@ export function AppHeaderSearch({
   return (
     <label
       className={cn(
-        "flex w-full min-w-0 items-center gap-2 rounded-[8px] border border-[var(--uai-border)] bg-[var(--uai-canvas)] px-2.5 text-[var(--uai-muted)] transition-[border-color,background-color] duration-150 focus-within:border-[var(--uai-border-strong)] focus-within:bg-[var(--uai-surface)] md:ml-auto motion-reduce:transition-none",
+        "flex w-full min-w-0 items-center gap-2 rounded-full border border-transparent bg-[var(--uai-surface-raised)] px-3 text-[var(--uai-subtle)] transition-[border-color,background-color,color] duration-[120ms] ease-out hover:text-[var(--uai-muted)] focus-within:border-[var(--uai-border-strong)] focus-within:bg-[var(--uai-surface)] focus-within:text-[var(--uai-muted)] md:ml-auto motion-reduce:transition-none",
         context.chrome.searchClass,
       )}
     >
@@ -222,7 +224,7 @@ export function AppHeaderSearch({
       <input
         type="search"
         className={cn(
-          "min-w-0 flex-1 bg-transparent text-[12px] text-[var(--uai-text)] outline-none placeholder:text-[var(--uai-muted)] [&::-webkit-search-cancel-button]:hidden",
+          "min-w-0 flex-1 bg-transparent text-[12.5px] text-[var(--uai-text)] outline-none placeholder:text-[var(--uai-subtle)] [&::-webkit-search-cancel-button]:hidden",
           className,
         )}
         placeholder={placeholder}
@@ -264,10 +266,10 @@ export function AppHeaderAction({
     <button
       type={type}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center rounded-[8px] border font-medium outline-none transition-[background-color,border-color,color,transform] duration-150 focus-visible:ring-2 focus-visible:ring-[var(--uai-border-strong)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uai-surface)] active:scale-[0.96] disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100",
+        "inline-flex shrink-0 items-center justify-center font-medium tabular-nums outline-none transition-[background-color,color,filter,transform] duration-[120ms] ease-out focus-visible:ring-2 focus-visible:ring-[var(--uai-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uai-surface)] active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100",
         emphasis === "primary"
-          ? "border-[var(--uai-text)] bg-[var(--uai-text)] text-[var(--uai-surface)]"
-          : "border-[var(--uai-border)] bg-transparent text-[var(--uai-muted)] hover:bg-[var(--uai-surface-raised)] hover:text-[var(--uai-text)]",
+          ? "rounded-full bg-[var(--uai-accent)] text-[var(--uai-accent-foreground)] shadow-[0_0_0_1px_oklch(1_0_0_/_0.08)] hover:brightness-[1.08]"
+          : "rounded-[8px] bg-transparent text-[var(--uai-muted)] hover:bg-[var(--uai-surface-raised)] hover:text-[var(--uai-text)]",
         context.chrome.actionClass,
         className,
       )}
@@ -301,7 +303,7 @@ export function AppHeaderMenuButton({
       aria-controls={context.overflowId}
       aria-expanded={context.open}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center rounded-[8px] border border-[var(--uai-border)] text-[var(--uai-muted)] outline-none transition-[background-color,color,transform] duration-150 hover:bg-[var(--uai-surface-raised)] hover:text-[var(--uai-text)] focus-visible:ring-2 focus-visible:ring-[var(--uai-border-strong)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uai-surface)] active:scale-[0.96] md:hidden motion-reduce:transition-none motion-reduce:active:scale-100",
+        "inline-flex shrink-0 items-center justify-center rounded-[8px] text-[var(--uai-muted)] outline-none transition-[background-color,color,transform] duration-[120ms] ease-out hover:bg-[var(--uai-surface-raised)] hover:text-[var(--uai-text)] focus-visible:ring-2 focus-visible:ring-[var(--uai-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uai-surface)] active:scale-[0.97] md:hidden motion-reduce:transition-none motion-reduce:active:scale-100",
         context.chrome.actionClass,
         className,
       )}

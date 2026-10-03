@@ -2,6 +2,12 @@
 
 import { type ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
+export type PreviewControl = {
+  ariaLabel: string;
+  defaultValue: string;
+  options: readonly { id: string; label: string }[];
+};
+
 type SegmentedOption = {
   id: string;
   label: string;
@@ -32,6 +38,14 @@ function useSegmentThumb(value: string) {
 
   useLayoutEffect(() => {
     measure();
+    // Label widths change once the web font loads; remeasure so the thumb fits.
+    let active = true;
+    void document.fonts?.ready.then(() => {
+      if (active) measure();
+    });
+    return () => {
+      active = false;
+    };
   }, [measure]);
 
   useEffect(() => {

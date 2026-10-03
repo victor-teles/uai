@@ -142,7 +142,7 @@ function FloatingMenu({
       className={cn(
         "absolute bottom-full z-10 mb-2 rounded-[14px] bg-[var(--uai-surface)] shadow-[0_0_0_1px_var(--uai-border-strong),0_10px_28px_color-mix(in_oklab,black_42%,transparent)] transition-[opacity,transform] duration-180 ease-[cubic-bezier(0.23,1,0.32,1)] starting:scale-[0.96] starting:opacity-0 motion-reduce:transition-none",
         kind === "sources"
-          ? "left-0 w-[min(280px,calc(100vw-32px))] origin-bottom-left"
+          ? "left-0 w-[min(340px,calc(100vw-32px))] origin-bottom-left"
           : "right-0 w-44 origin-bottom-right",
       )}
     >
@@ -433,21 +433,21 @@ export function PromptComposerAddItem({
         context.inputRef.current?.focus();
       }}
       className={cn(
-        "relative flex min-h-11 w-full cursor-pointer items-center gap-2.5 rounded-lg border-0 bg-transparent px-2 py-1 text-left font-[inherit] text-[inherit] transition-colors duration-150 hover:bg-[var(--uai-surface-raised)] focus-visible:bg-[var(--uai-surface-raised)]",
+        "group/item relative flex min-h-9 w-full cursor-pointer items-center gap-2.5 rounded-[10px] border-0 bg-transparent px-2 py-1.5 text-left font-[inherit] text-[inherit] outline-none transition-colors duration-[120ms] ease-out hover:bg-[var(--uai-surface-raised)] focus-visible:bg-[var(--uai-surface-raised)] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none",
         className,
       )}
     >
       {icon ? (
-        <span className="grid size-[22px] shrink-0 place-items-center text-[var(--uai-muted)]">
+        <span className="grid size-5 shrink-0 place-items-center text-[var(--uai-muted)] transition-colors duration-[120ms] group-hover/item:text-[var(--uai-text)] [&>svg]:size-4">
           {icon}
         </span>
       ) : null}
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-[12.5px] leading-4 font-medium text-[var(--uai-text)]">
+      <span className="flex min-w-0 flex-1 items-baseline gap-2">
+        <span className="shrink-0 truncate text-[13px] leading-[18px] font-medium text-[var(--uai-text)]">
           {children}
         </span>
         {description ? (
-          <span className="block truncate text-[11.5px] leading-[15px] text-[var(--uai-muted)]">
+          <span className="min-w-0 truncate text-[12.5px] leading-[18px] text-[var(--uai-subtle)]">
             {description}
           </span>
         ) : null}
@@ -550,7 +550,7 @@ export function PromptComposerInput({
       }}
       onKeyDown={handleKeyDown}
       className={cn(
-        "resize-none overflow-y-auto bg-transparent px-1 text-[var(--uai-text)] caret-[var(--uai-text)] outline-none! [field-sizing:content] selection:bg-[color-mix(in_oklab,var(--uai-text)_18%,transparent)] placeholder:text-[var(--uai-muted)] disabled:cursor-not-allowed",
+        "resize-none overflow-y-auto bg-transparent px-1 text-[var(--uai-text)] caret-[var(--uai-text)] outline-none! [field-sizing:content] selection:bg-[color-mix(in_oklab,var(--uai-text)_18%,transparent)] placeholder:text-[var(--uai-subtle)] disabled:cursor-not-allowed",
         context.chrome.fieldClass,
         context.chrome.maxFieldHeightClass,
         context.expanded
@@ -622,14 +622,22 @@ export function PromptComposerModelSelect({
           disabled={context.locked}
           onClick={() => context.setOpenMenu(open ? null : "model")}
           className={cn(
-            "flex shrink-0 items-center gap-1 px-1.5 font-medium text-[var(--uai-muted)] transition-colors duration-150 hover:bg-[var(--uai-surface-raised)] hover:text-[var(--uai-text)] focus-visible:bg-[var(--uai-surface-raised)] disabled:cursor-not-allowed",
+            "flex shrink-0 items-center gap-1 px-2 font-medium text-[var(--uai-muted)] transition-colors duration-[120ms] ease-out hover:bg-[var(--uai-surface-raised)] hover:text-[var(--uai-text)] focus-visible:bg-[var(--uai-surface-raised)] disabled:cursor-not-allowed motion-reduce:transition-none",
             context.chrome.controlHeightClass,
             context.chrome.controlRadiusClass,
             context.chrome.modelClass,
+            open && "bg-[var(--uai-surface-raised)] text-[var(--uai-text)]",
           )}
         >
           {selected.label}
-          <ChevronDown className="size-3" strokeWidth={2.4} aria-hidden="true" />
+          <ChevronDown
+            className={cn(
+              "size-3 transition-transform duration-180 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none",
+              open && "rotate-180",
+            )}
+            strokeWidth={2.4}
+            aria-hidden="true"
+          />
         </button>
       ) : (
         <span
@@ -656,7 +664,7 @@ export function PromptComposerModelSelect({
                 context.setOpenMenu(null);
                 context.inputRef.current?.focus();
               }}
-              className="relative flex h-8 w-full cursor-pointer items-center gap-2 rounded-lg border-0 bg-transparent px-2 text-left font-[inherit] text-[inherit] transition-colors duration-150 hover:bg-[var(--uai-surface-raised)] focus-visible:bg-[var(--uai-surface-raised)]"
+              className="relative flex h-8 w-full cursor-pointer items-center gap-2 rounded-[10px] border-0 bg-transparent px-2 text-left font-[inherit] text-[inherit] transition-colors duration-150 hover:bg-[var(--uai-surface-raised)] focus-visible:bg-[var(--uai-surface-raised)]"
             >
               <span className="min-w-0 flex-1 truncate text-[12.5px] font-medium text-[var(--uai-text)]">
                 {model.label}
@@ -695,7 +703,7 @@ export function PromptComposerSubmit({
       aria-label={ariaLabel ?? (context.busy ? "Sending prompt" : "Send")}
       disabled={!context.canSend || disabled}
       className={cn(
-        "flex shrink-0 items-center justify-center transition-[background-color,color,transform] duration-200 enabled:active:scale-[0.94] disabled:cursor-not-allowed",
+        "flex shrink-0 items-center justify-center transition-[background-color,color,opacity,transform] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] enabled:hover:opacity-90 enabled:active:scale-[0.94] disabled:cursor-not-allowed motion-reduce:transition-none",
         context.chrome.controlClass,
         context.chrome.controlRadiusClass,
         context.canSend || context.busy

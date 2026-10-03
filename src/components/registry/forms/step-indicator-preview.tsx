@@ -19,28 +19,28 @@ export function StepIndicatorPreview({
     <div style={{ display: "grid", gap: 20 }}>
       <StepIndicator variant={variant} aria-label="Workspace setup">
         <StepIndicatorStep status="complete">
-          <StepIndicatorTitle>1. Account</StepIndicatorTitle>
+          <StepIndicatorTitle>Account</StepIndicatorTitle>
           {variant !== "compact" && (
-            <StepIndicatorDescription>Contact verified</StepIndicatorDescription>
+            <StepIndicatorDescription>maya@northwind.studio</StepIndicatorDescription>
           )}
         </StepIndicatorStep>
         <StepIndicatorStep status={review ? "complete" : "current"}>
-          <StepIndicatorTitle>2. Details</StepIndicatorTitle>
+          <StepIndicatorTitle>Details</StepIndicatorTitle>
         </StepIndicatorStep>
         <StepIndicatorStep optional status="error">
-          <StepIndicatorTitle>3. Import</StepIndicatorTitle>
+          <StepIndicatorTitle>Import</StepIndicatorTitle>
           {variant !== "compact" && (
-            <StepIndicatorDescription>File needs review</StepIndicatorDescription>
+            <StepIndicatorDescription>contacts.csv · 3 rows failed</StepIndicatorDescription>
           )}
         </StepIndicatorStep>
         <StepIndicatorStep status="blocked">
-          <StepIndicatorTitle>4. Team</StepIndicatorTitle>
+          <StepIndicatorTitle>Team</StepIndicatorTitle>
           {variant !== "compact" && (
-            <StepIndicatorDescription>Requires an invitation</StepIndicatorDescription>
+            <StepIndicatorDescription>Waiting on admin invite</StepIndicatorDescription>
           )}
         </StepIndicatorStep>
         <StepIndicatorStep status={review ? "current" : "upcoming"}>
-          <StepIndicatorTitle>5. Review</StepIndicatorTitle>
+          <StepIndicatorTitle>Review</StepIndicatorTitle>
         </StepIndicatorStep>
       </StepIndicator>
       <button
@@ -48,11 +48,15 @@ export function StepIndicatorPreview({
         onClick={() => setReview(!review)}
         style={{
           justifySelf: "start",
-          padding: "8px 12px",
-          border: "1px solid var(--uai-border-strong)",
-          borderRadius: 8,
-          background: "transparent",
+          height: 30,
+          padding: "0 14px",
+          border: 0,
+          borderRadius: 999,
+          background: "var(--uai-surface-raised)",
           color: "var(--uai-text)",
+          font: "inherit",
+          fontSize: 12.5,
+          fontWeight: 500,
         }}
       >
         {review ? "Back to details" : "Continue to review"}

@@ -23,20 +23,20 @@ const statusChrome: Record<
 > = {
   complete: {
     markerClass:
-      "border-[color-mix(in_oklab,var(--uai-success)_46%,var(--uai-border))] bg-[color-mix(in_oklab,var(--uai-success)_10%,var(--uai-surface))] text-[color-mix(in_oklab,var(--uai-success)_65%,var(--uai-text))]",
+      "border-transparent bg-[color-mix(in_oklab,var(--uai-success)_16%,transparent)] text-[color-mix(in_oklab,var(--uai-success)_85%,var(--uai-text))]",
     statusClass:
-      "border-[color-mix(in_oklab,var(--uai-success)_40%,var(--uai-border))] text-[color-mix(in_oklab,var(--uai-success)_65%,var(--uai-text))]",
+      "bg-[color-mix(in_oklab,var(--uai-success)_14%,transparent)] text-[color-mix(in_oklab,var(--uai-success)_85%,var(--uai-text))]",
     icon: Check,
   },
   active: {
-    markerClass:
-      "border-[var(--uai-border-strong)] bg-[var(--uai-surface-raised)] text-[var(--uai-text)]",
-    statusClass: "border-[var(--uai-border-strong)] text-[var(--uai-text)]",
+    markerClass: "border-transparent bg-[var(--uai-surface-raised)] text-[var(--uai-text)]",
+    statusClass: "bg-[var(--uai-surface-raised)] text-[var(--uai-text)]",
     icon: LoaderCircle,
   },
   pending: {
-    markerClass: "border-[var(--uai-border)] bg-[var(--uai-surface)] text-[var(--uai-muted)]",
-    statusClass: "border-[var(--uai-border)] text-[var(--uai-muted)]",
+    markerClass:
+      "border-dashed border-[color-mix(in_oklab,var(--uai-subtle)_70%,transparent)] bg-transparent text-transparent",
+    statusClass: "bg-transparent text-[var(--uai-subtle)]",
     icon: Circle,
   },
 };
@@ -48,28 +48,26 @@ function taskListChrome(variant: TaskListVariant) {
   return {
     rootClass: timeline
       ? "grid bg-transparent"
-      : "divide-y divide-[var(--uai-border)] overflow-hidden border border-[var(--uai-border)] bg-[var(--uai-surface)]",
+      : "divide-y divide-[var(--uai-border)] overflow-hidden border border-[var(--uai-border)] bg-[var(--uai-surface)] [&>li]:transition-[background-color,opacity,translate] [&>li:hover]:bg-[color-mix(in_oklab,var(--uai-surface-raised)_45%,transparent)]",
     rootStyle: { borderRadius: compact ? 12 : variant === "card" ? 14 : 0 },
     itemClass: timeline
       ? "relative grid grid-cols-[24px_minmax(0,1fr)_auto] items-start gap-x-3 pb-6 last:pb-0"
       : compact
-        ? "grid min-h-12 grid-cols-[24px_minmax(0,1fr)_auto] items-center gap-2.5 px-3 py-2"
-        : "grid min-h-16 grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-3 px-4 py-2.5",
-    markerClass: timeline
-      ? "size-6 rounded-full"
-      : compact
-        ? "size-6 rounded-lg"
-        : "size-7 rounded-lg",
-    iconClass: compact || timeline ? "size-3.5" : "size-4",
+        ? "grid min-h-12 grid-cols-[20px_minmax(0,1fr)_auto] items-center gap-2.5 px-3 py-2"
+        : "grid min-h-16 grid-cols-[24px_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3",
+    markerClass: compact ? "size-5 rounded-full" : "size-6 rounded-full",
+    iconClass: compact ? "size-3" : "size-3.5",
     connectorClass: timeline
-      ? "absolute top-7 bottom-0 left-[11.5px] block w-px bg-[var(--uai-border)]"
+      ? "absolute top-8 bottom-1 left-[11.5px] block w-px bg-[var(--uai-border)]"
       : "hidden",
-    contentClass: timeline ? "min-w-0 pt-0.5" : "min-w-0",
-    titleClass: compact ? "text-[12px] leading-4" : "text-[13px] leading-[18px]",
-    descriptionClass: compact ? "mt-0.5 text-[0.7rem] leading-4" : "mt-0.5 text-[11.5px] leading-4",
+    contentClass: timeline ? "min-w-0 pt-[3px]" : "min-w-0",
+    titleClass: compact ? "text-[12.5px] leading-[17px]" : "text-[13px] leading-[18px]",
+    descriptionClass: compact
+      ? "mt-px text-[11.5px] leading-4"
+      : "mt-0.5 text-[12px] leading-[17px]",
     statusClass: compact
-      ? "min-h-5 px-1.5 text-[0.72rem] leading-4"
-      : "min-h-6 px-2 text-[0.72rem] leading-4",
+      ? "min-h-5 px-1.5 text-[11px] leading-4"
+      : "min-h-[22px] px-2 text-[11.5px] leading-4",
   };
 }
 
@@ -135,7 +133,12 @@ export function TaskListItem({
 
   return (
     <li
-      className={cn("[&:last-child>span:first-child]:hidden", context.chrome.itemClass, className)}
+      className={cn(
+        "[&:last-child>span:first-child]:hidden",
+        "transition-[opacity,translate,background-color] duration-[240ms] ease-[cubic-bezier(0.23,1,0.32,1)] starting:translate-y-1 starting:opacity-0 nth-2:delay-[40ms] nth-3:delay-[80ms] nth-4:delay-[120ms] nth-5:delay-[160ms] nth-6:delay-[200ms] motion-reduce:transition-none",
+        context.chrome.itemClass,
+        className,
+      )}
       data-status={status}
       aria-current={ariaCurrent ?? (status === "active" ? "step" : undefined)}
       {...props}
@@ -143,13 +146,14 @@ export function TaskListItem({
       <span className={context.chrome.connectorClass} aria-hidden="true" />
       <span
         className={cn(
-          "relative z-10 inline-flex shrink-0 items-center justify-center border",
+          "relative z-10 inline-flex shrink-0 items-center justify-center border transition-colors duration-200",
           context.chrome.markerClass,
           state.markerClass,
         )}
         aria-hidden="true"
       >
         <StatusIcon
+          strokeWidth={status === "complete" ? 2.5 : 2}
           className={cn(
             context.chrome.iconClass,
             status === "active" && "motion-safe:animate-spin",
@@ -159,7 +163,7 @@ export function TaskListItem({
       <span className={context.chrome.contentClass}>{children}</span>
       <span
         className={cn(
-          "inline-flex shrink-0 items-center rounded-full border font-medium whitespace-nowrap",
+          "inline-flex shrink-0 items-center rounded-full font-medium whitespace-nowrap tabular-nums",
           context.chrome.statusClass,
           state.statusClass,
         )}
@@ -178,7 +182,7 @@ export function TaskListTitle({ className, children, ...props }: TaskListTitlePr
   return (
     <span
       className={cn(
-        "block font-medium [overflow-wrap:anywhere]",
+        "block font-medium [overflow-wrap:anywhere] in-data-[status=pending]:text-[var(--uai-muted)]",
         context.chrome.titleClass,
         className,
       )}
@@ -197,7 +201,7 @@ export function TaskListDescription({ className, children, ...props }: TaskListD
   return (
     <span
       className={cn(
-        "block text-[var(--uai-muted)] [overflow-wrap:anywhere]",
+        "block text-[var(--uai-subtle)] [overflow-wrap:anywhere]",
         context.chrome.descriptionClass,
         className,
       )}

@@ -33,15 +33,15 @@ function quantityPickerChrome(variant: QuantityPickerVariant) {
   const pill = variant === "pill";
 
   return {
-    labelClass: compact ? "mb-1 text-[0.72rem] leading-4" : "mb-1.5 text-[12px] leading-4",
+    labelClass: compact ? "mb-1 text-[11.5px] leading-4" : "mb-1.5 text-[12px] leading-4",
     controlClass: compact ? "gap-0.5 p-0.5" : "gap-1 p-1",
     controlRadius: pill ? 999 : compact ? 12 : 14,
-    buttonClass: compact ? "size-7" : "size-[34px]",
+    buttonClass: compact ? "size-7" : "size-8",
     buttonRadius: pill ? 999 : compact ? 8 : 10,
     inputClass: compact
       ? "h-7 w-10 text-[12.5px] leading-4"
-      : "h-[34px] w-12 text-[13px] leading-[18px]",
-    messageClass: compact ? "mt-1.5 text-[0.72rem] leading-4" : "mt-2 text-[12px] leading-4",
+      : "h-8 w-12 text-[13px] leading-[18px]",
+    messageClass: compact ? "mt-1.5 text-[11px] leading-4" : "mt-2 text-[11.5px] leading-4",
     iconClass: compact ? "size-3" : "size-3.5",
   };
 }
@@ -193,7 +193,11 @@ export function QuantityPickerLabel({
       {...props}
       id={context.labelId}
       htmlFor={context.inputId}
-      className={cn("block font-medium", context.chrome.labelClass, className)}
+      className={cn(
+        "block font-medium text-[var(--uai-muted)]",
+        context.chrome.labelClass,
+        className,
+      )}
     >
       {children}
     </label>
@@ -214,7 +218,7 @@ export function QuantityPickerControl({
     <div
       {...props}
       className={cn(
-        "grid grid-cols-[auto_minmax(40px,1fr)_auto] items-center border border-[var(--uai-border)] bg-[var(--uai-surface)] transition-colors duration-150 focus-within:border-[var(--uai-border-strong)] motion-reduce:transition-none",
+        "grid grid-cols-[auto_minmax(40px,1fr)_auto] items-center bg-[var(--uai-surface-raised)] transition-[background-color,box-shadow] duration-[120ms] ease-out focus-within:shadow-[0_0_0_3px_color-mix(in_oklab,var(--uai-accent)_18%,transparent)] motion-reduce:transition-none",
         context.chrome.controlClass,
         className,
       )}
@@ -255,7 +259,7 @@ function QuantityPickerStepButton({
       {...props}
       type="button"
       className={cn(
-        "inline-flex shrink-0 items-center justify-center bg-[var(--uai-surface-raised)] text-[var(--uai-text)] transition-[transform,background-color,color] duration-150 hover:bg-[color-mix(in_oklab,var(--uai-border)_54%,var(--uai-surface-raised))] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uai-border-strong)] active:scale-[0.94] disabled:cursor-not-allowed disabled:text-[var(--uai-muted)] disabled:active:scale-100 motion-reduce:transition-none",
+        "inline-flex shrink-0 items-center justify-center bg-transparent text-[var(--uai-muted)] transition-[transform,background-color,color] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-[color-mix(in_oklab,var(--uai-text)_8%,transparent)] hover:text-[var(--uai-text)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uai-accent)] active:scale-[0.94] disabled:cursor-not-allowed disabled:bg-transparent disabled:text-[color-mix(in_oklab,var(--uai-subtle)_55%,transparent)] disabled:active:scale-100 motion-reduce:transition-none motion-reduce:active:scale-100",
         context.chrome.buttonClass,
         className,
       )}
@@ -267,7 +271,9 @@ function QuantityPickerStepButton({
         if (!event.defaultPrevented) changeQuantity();
       }}
     >
-      {children ?? <Icon className={context.chrome.iconClass} strokeWidth={2} aria-hidden="true" />}
+      {children ?? (
+        <Icon className={context.chrome.iconClass} strokeWidth={1.75} aria-hidden="true" />
+      )}
     </button>
   );
 }
@@ -313,7 +319,7 @@ export function QuantityPickerInput({
       id={context.inputId}
       type="number"
       className={cn(
-        "min-w-0 appearance-none bg-transparent text-center font-medium tabular-nums outline-none selection:bg-[var(--uai-text)] selection:text-[var(--uai-surface)] focus-visible:outline-none disabled:cursor-not-allowed [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
+        "min-w-0 appearance-none bg-transparent text-center font-medium tabular-nums outline-none selection:bg-[color-mix(in_oklab,var(--uai-accent)_32%,transparent)] selection:text-[var(--uai-text)] focus-visible:outline-none disabled:cursor-not-allowed [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
         context.chrome.inputClass,
         className,
       )}
@@ -354,7 +360,7 @@ export type QuantityPickerMessageProps = ComponentProps<"p"> & {
 };
 
 const quantityPickerMessageToneClass: Record<QuantityPickerMessageTone, string> = {
-  muted: "text-[var(--uai-muted)]",
+  muted: "text-[var(--uai-subtle)]",
   warning: "text-[var(--uai-warning)]",
   danger: "text-[var(--uai-danger)]",
 };

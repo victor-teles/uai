@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { registryCatalog } from "@/components/registry/catalog";
 
 type RegistryItem = {
   name: string;
@@ -13,33 +14,11 @@ const registry = (await Bun.file("registry.json").json()) as Registry;
 const itemNames = registry.items.map((item) => item.name);
 
 describe("Uai registry", () => {
-  test("publishes the complete starter collection", () => {
-    expect(itemNames).toEqual([
-      "uai-theme",
-      "uai-utils",
-      "thinking",
-      "approval-card",
-      "empty-state",
-      "task-list",
-      "prompt-composer",
-      "sign-in-card",
-      "sign-up-card",
-      "password-recovery",
-      "coupon-field",
-      "quantity-picker",
-      "cart-item",
-      "price-summary",
-      "order-status",
-      "app-header",
-      "form-field",
-      "search-field",
-      "filter-bar",
-      "file-upload",
-      "date-range-picker",
-      "form-error-summary",
-      "unsaved-changes-bar",
-      "step-indicator",
-    ]);
+  test("publishes the theme, utilities, and every catalog item", () => {
+    expect(itemNames.slice(0, 2)).toEqual(["uai-theme", "uai-utils"]);
+    expect([...itemNames].sort()).toEqual(
+      ["uai-theme", "uai-utils", ...registryCatalog.map((item) => item.id)].sort(),
+    );
   });
 
   test("builds a public JSON document for every item", async () => {
@@ -58,19 +37,36 @@ describe("Uai registry", () => {
   });
 
   test("keeps preview, example, variants, and manual installation in their own regions", async () => {
-    const browser = await Bun.file("src/components/registry/registry-browser.tsx").text();
+    const page = await Bun.file("src/components/registry/registry-item.tsx").text();
     const preview = await Bun.file("src/components/registry/registry-preview.tsx").text();
     const installCommand = await Bun.file("src/components/install-command.tsx").text();
     const sourceRequest = "fetch(`/r/$" + "{selectedId}.json`";
 
-    expect(browser).toContain("<h2>Code example</h2>");
-    expect(browser).toContain(sourceRequest);
-    expect(browser).toContain("code={manualSource.code}");
-    expect(browser).not.toContain("const [tab, setTab]");
-    expect(preview).toContain('orientation="vertical"');
-    expect(preview).toContain("{codeExample}");
+    expect(page).toContain(">Code example</h2>");
+    expect(page).toContain(sourceRequest);
+    expect(page).toContain("code={manualSource.code}");
+    expect(page).not.toContain("const [tab, setTab]");
+    expect(preview).toContain('className="uai-registry-variants"');
     expect(installCommand).toContain('aria-label="Install command"');
     expect(installCommand).toContain("readOnly");
+  });
+
+  test("gives every catalog item a static, numbered route with neighbors", async () => {
+    const { registryCatalog, registryReadingOrder, getRegistryPosition } = await import(
+      "../src/components/registry/catalog"
+    );
+    const route = await Bun.file("src/app/(home)/components/[id]/page.tsx").text();
+
+    expect(route).toContain("generateStaticParams");
+    expect(route).toContain("dynamicParams = false");
+    expect(registryReadingOrder).toHaveLength(registryCatalog.length);
+    expect(new Set(registryReadingOrder.map((item) => item.id)).size).toBe(registryCatalog.length);
+
+    const first = registryReadingOrder[0];
+    const last = registryReadingOrder.at(-1);
+    if (!first || !last) throw new Error("The reading order is empty.");
+    expect(getRegistryPosition(first.id)).toMatchObject({ number: "01", previous: undefined });
+    expect(getRegistryPosition(last.id).next).toBeUndefined();
   });
 
   test("prompt composer ships chrome and density variants", async () => {

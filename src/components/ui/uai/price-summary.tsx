@@ -19,19 +19,20 @@ function priceSummaryChrome(variant: PriceSummaryVariant) {
     rootClass:
       variant === "plain"
         ? "bg-transparent"
-        : "border border-[var(--uai-border)] bg-[var(--uai-surface)]",
+        : "border border-[color-mix(in_oklab,var(--uai-border)_60%,transparent)] bg-[var(--uai-surface)]",
     rootStyle: {
       borderRadius: compact ? 12 : variant === "card" ? 14 : 0,
       padding: compact ? 12 : variant === "card" ? 18 : 0,
     },
-    headerClass: compact ? "mb-3.5" : "mb-5",
-    titleClass: compact ? "text-[13px] leading-[18px]" : "text-sm leading-5",
-    descriptionClass: compact ? "mt-0.5 text-[0.72rem] leading-4" : "mt-1 text-[12px] leading-4",
-    listClass: compact ? "gap-2" : "gap-2.5",
-    itemClass: compact ? "text-[12px] leading-4" : "text-[12.5px] leading-[18px]",
+    headerClass: compact ? "mb-3" : "mb-4",
+    titleClass: compact ? "text-[13px] leading-[18px]" : "text-[14px] leading-5",
+    descriptionClass: compact ? "mt-0.5 text-[11.5px] leading-4" : "mt-0.5 text-[12px] leading-4",
+    listClass: compact ? "gap-1.5" : "gap-2",
+    itemClass: compact ? "text-[12px] leading-4" : "text-[13px] leading-[18px]",
     totalClass: compact ? "mt-3 pt-3" : "mt-4 pt-4",
-    totalValueClass: compact ? "text-base leading-5" : "text-lg leading-6",
-    noteClass: compact ? "mt-2.5 text-[0.72rem] leading-4" : "mt-3 text-[11.5px] leading-4",
+    totalLabelClass: compact ? "text-[12.5px] leading-[18px]" : "text-[13px] leading-[18px]",
+    totalValueClass: compact ? "text-[16px] leading-5" : "text-[20px] leading-6",
+    noteClass: compact ? "mt-2.5 text-[11px] leading-4" : "mt-3 text-[11.5px] leading-4",
   };
 }
 
@@ -113,7 +114,7 @@ export function PriceSummaryDescription({
 
   return (
     <p
-      className={cn("text-[var(--uai-muted)]", context.chrome.descriptionClass, className)}
+      className={cn("text-[var(--uai-subtle)]", context.chrome.descriptionClass, className)}
       {...props}
     >
       {children}
@@ -159,10 +160,7 @@ export function PriceSummaryItem({
       {...props}
     >
       <dt className="min-w-0 text-[var(--uai-muted)] [overflow-wrap:anywhere]">{label}</dt>
-      <span
-        className="mx-2 min-w-4 flex-1 border-b border-dotted border-[color-mix(in_oklab,var(--uai-border)_72%,transparent)]"
-        aria-hidden="true"
-      />
+      <span className="min-w-4 flex-1" aria-hidden="true" />
       <dd
         className={cn(
           "max-w-[58%] shrink-0 break-words text-right font-medium tabular-nums",
@@ -192,23 +190,23 @@ export function PriceSummaryTotal({
   return (
     <div
       className={cn(
-        "flex items-end justify-between gap-4 border-t border-[var(--uai-border-strong)]",
+        "flex items-end justify-between gap-4 border-t border-[color-mix(in_oklab,var(--uai-border)_60%,transparent)]",
         context.chrome.totalClass,
         className,
       )}
       {...props}
     >
       <dt className="min-w-0 [overflow-wrap:anywhere]">
-        <span className="block text-sm leading-5 font-medium">{label}</span>
+        <span className={cn("block font-medium", context.chrome.totalLabelClass)}>{label}</span>
         {hint ? (
-          <span className="mt-0.5 block text-[0.72rem] leading-4 text-[var(--uai-muted)]">
+          <span className="mt-0.5 block text-[11.5px] leading-4 text-[var(--uai-subtle)]">
             {hint}
           </span>
         ) : null}
       </dt>
       <dd
         className={cn(
-          "ml-auto min-w-0 max-w-[58%] text-right font-semibold tracking-[-0.02em] tabular-nums [overflow-wrap:anywhere]",
+          "ml-auto min-w-0 max-w-[58%] text-right font-semibold tracking-[-0.025em] tabular-nums [overflow-wrap:anywhere]",
           context.chrome.totalValueClass,
         )}
       >
@@ -224,7 +222,7 @@ export function PriceSummaryNote({ children, className, ...props }: PriceSummary
   const context = usePriceSummary("PriceSummaryNote");
 
   return (
-    <p className={cn("text-[var(--uai-muted)]", context.chrome.noteClass, className)} {...props}>
+    <p className={cn("text-[var(--uai-subtle)]", context.chrome.noteClass, className)} {...props}>
       {children}
     </p>
   );

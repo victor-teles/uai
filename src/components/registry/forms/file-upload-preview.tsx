@@ -22,7 +22,8 @@ type DemoFile = {
 };
 export function FileUploadPreview({ variant = "dropzone" }: { variant?: FileUploadVariant }) {
   const [files, setFiles] = useState<DemoFile[]>([
-    { id: "sample", name: "Project brief.pdf", progress: 0, status: "error" },
+    { id: "brief", name: "Q3 launch brief.pdf", progress: 100, status: "complete" },
+    { id: "deck", name: "pricing-review-deck.pdf", progress: 0, status: "error" },
   ]);
   const uploading = files.some((file) => file.status === "uploading");
   useEffect(() => {
@@ -49,7 +50,7 @@ export function FileUploadPreview({ variant = "dropzone" }: { variant?: FileUplo
       variant={variant}
       accept=".pdf,image/*"
       maxSize={5 * 1024 * 1024}
-      maxFiles={3}
+      maxFiles={5}
       fileCount={files.length}
       onFilesAccepted={(accepted) =>
         setFiles((current) => [
@@ -70,9 +71,9 @@ export function FileUploadPreview({ variant = "dropzone" }: { variant?: FileUplo
             flex: variant === "dropzone" ? undefined : 1,
           }}
         >
-          <strong>Add project files</strong>
-          <p style={{ margin: "4px 0 0", fontSize: 12, color: "var(--uai-muted)" }}>
-            Drop PDFs or images · up to 5 MB each · 3 files
+          <strong style={{ fontWeight: 500 }}>Add project files</strong>
+          <p style={{ margin: "2px 0 0", fontSize: 12, color: "var(--uai-subtle)" }}>
+            Drop PDFs or images · up to 5 MB each · 5 files
           </p>
         </div>
         <FileUploadInput />
@@ -83,7 +84,7 @@ export function FileUploadPreview({ variant = "dropzone" }: { variant?: FileUplo
           <FileUploadItem key={file.id} status={file.status} progress={file.progress}>
             <strong style={{ fontWeight: 500 }}>{file.name}</strong>
             <FileUploadProgress aria-label={`Uploading ${file.name}`} />
-            <div style={{ display: "flex", gap: 8 }}>
+            <div style={{ display: "flex", gap: 4 }}>
               <FileUploadRetry
                 onClick={() =>
                   setFiles((current) =>
@@ -101,7 +102,7 @@ export function FileUploadPreview({ variant = "dropzone" }: { variant?: FileUplo
           </FileUploadItem>
         ))}
       </FileUploadList>
-      <p style={{ margin: 0, fontSize: 12, color: "var(--uai-muted)" }}>
+      <p style={{ margin: 0, fontSize: 11.5, color: "var(--uai-subtle)" }}>
         Local demo: progress is simulated. Files are not sent to a server.
       </p>
     </FileUpload>

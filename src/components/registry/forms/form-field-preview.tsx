@@ -12,7 +12,9 @@ import {
 } from "@/components/ui/uai/form-field";
 
 export function FormFieldPreview({ variant = "outlined" }: { variant?: FormFieldVariant }) {
-  const [value, setValue] = useState("A shared space for product decisions.");
+  const [value, setValue] = useState(
+    "Where the growth team plans launches and tracks pricing experiments.",
+  );
   const [touched, setTouched] = useState(false);
   return (
     <FormField

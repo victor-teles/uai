@@ -1,6 +1,13 @@
 "use client";
 
-import { type ComponentProps, createContext, useContext, useId, useState } from "react";
+import {
+  type ComponentProps,
+  type CSSProperties,
+  createContext,
+  useContext,
+  useId,
+  useState,
+} from "react";
 
 export const FORM_FIELD_VARIANTS = ["outlined", "filled", "compact"] as const;
 export type FormFieldVariant = (typeof FORM_FIELD_VARIANTS)[number];
@@ -26,6 +33,16 @@ type FieldContext = {
   change: (value: string) => void;
 };
 const Context = createContext<FieldContext | null>(null);
+const fieldCss = `
+.uai-form-field-control{border:1px solid var(--uai-field-border);background:var(--uai-field-fill);transition:border-color 120ms ease-out,background-color 120ms ease-out,box-shadow 120ms ease-out}
+.uai-form-field-control::placeholder{color:var(--uai-subtle)}
+.uai-form-field-control:hover:not(:disabled):not(:focus){border-color:var(--uai-border-strong)}
+.uai-form-field-control:focus{outline:none;border-color:var(--uai-border-strong);box-shadow:0 0 0 3px color-mix(in oklab,var(--uai-accent) 24%,transparent)}
+.uai-form-field-control[aria-invalid="true"]{border-color:color-mix(in oklab,var(--uai-danger) 70%,transparent)}
+.uai-form-field-control[aria-invalid="true"]:focus{border-color:var(--uai-danger);box-shadow:0 0 0 3px color-mix(in oklab,var(--uai-danger) 22%,transparent)}
+.uai-form-field-control:disabled{opacity:0.55;cursor:not-allowed}
+@media (prefers-reduced-motion: reduce){.uai-form-field-control{border:1px solid var(--uai-field-border);background:var(--uai-field-fill);transition:none}}
+`;
 function useField() {
   const context = useContext(Context);
   if (!context) throw new Error("FormField children must be used within FormField");
@@ -67,13 +84,15 @@ export function FormField({
         data-variant={variant}
         style={{
           display: "grid",
-          gap: 6,
+          gap: variant === "compact" ? 4 : 6,
           minWidth: 0,
           color: "var(--uai-text)",
           fontSize: 13,
+          lineHeight: "18px",
           ...style,
         }}
       >
+        <style>{fieldCss}</style>
         {children}
       </div>
     </Context.Provider>
@@ -82,10 +101,17 @@ export function FormField({
 export function FormFieldLabel({ children, style, ...props }: ComponentProps<"label">) {
   const context = useField();
   return (
-    <label {...props} htmlFor={context.id} style={{ fontWeight: 550, ...style }}>
+    <label
+      {...props}
+      htmlFor={context.id}
+      style={{ fontSize: context.variant === "compact" ? 12.5 : 13, fontWeight: 500, ...style }}
+    >
       {children}
       {context.required && (
-        <span style={{ color: "var(--uai-muted)", fontWeight: 400 }}> (required)</span>
+        <span style={{ color: "var(--uai-subtle)", fontWeight: 400, fontSize: 12 }}>
+          {" "}
+          (required)
+        </span>
       )}
     </label>
   );
@@ -99,22 +125,27 @@ function fieldControl(context: FieldContext) {
     maxLength: context.maxLength,
     "aria-invalid": context.invalid || undefined,
     "aria-describedby": `${context.id}-description ${context.id}-error ${context.id}-count`,
+    className: "uai-form-field-control",
     style: {
+      display: "block",
       width: "100%",
       minWidth: 0,
       boxSizing: "border-box" as const,
-      border: `1px solid var(${context.invalid ? "--uai-danger" : "--uai-border-strong"})`,
-      borderRadius: context.variant === "compact" ? 8 : 14,
-      padding: context.variant === "compact" ? "7px 10px" : "12px",
-      background: context.variant === "filled" ? "var(--uai-surface-raised)" : "var(--uai-surface)",
+      "--uai-field-border": context.variant === "filled" ? "transparent" : "var(--uai-border)",
+      "--uai-field-fill":
+        context.variant === "filled" ? "var(--uai-surface-raised)" : "var(--uai-canvas)",
+      borderRadius: context.variant === "compact" ? 8 : 10,
+      padding: context.variant === "compact" ? "6px 10px" : "9px 12px",
       color: "var(--uai-text)",
-      fontSize: 13,
+      font: "inherit",
+      fontSize: context.variant === "compact" ? 12.5 : 13,
       lineHeight: "18px",
-    },
+    } as CSSProperties,
   };
 }
 export function FormFieldInput({
   onChange,
+  className,
   style,
   ...props
 }: Omit<
@@ -127,6 +158,7 @@ export function FormFieldInput({
     <input
       {...props}
       {...control}
+      className={className ? `${control.className} ${className}` : control.className}
       style={{ ...control.style, ...style }}
       onChange={(event) => {
         onChange?.(event);
@@ -137,6 +169,7 @@ export function FormFieldInput({
 }
 export function FormFieldTextarea({
   onChange,
+  className,
   style,
   ...props
 }: Omit<
@@ -150,7 +183,13 @@ export function FormFieldTextarea({
       rows={3}
       {...props}
       {...control}
-      style={{ ...control.style, resize: "vertical", ...style }}
+      className={className ? `${control.className} ${className}` : control.className}
+      style={{
+        ...control.style,
+        resize: "vertical",
+        minHeight: context.variant === "compact" ? 56 : 76,
+        ...style,
+      }}
       onChange={(event) => {
         onChange?.(event);
         if (!event.defaultPrevented) context.change(event.target.value);
@@ -164,7 +203,7 @@ export function FormFieldDescription({ style, ...props }: ComponentProps<"p">) {
     <p
       {...props}
       id={`${context.id}-description`}
-      style={{ margin: 0, fontSize: 12, color: "var(--uai-muted)", ...style }}
+      style={{ margin: 0, fontSize: 12, lineHeight: "16px", color: "var(--uai-muted)", ...style }}
     />
   );
 }
@@ -179,6 +218,7 @@ export function FormFieldError({ style, ...props }: ComponentProps<"p">) {
       style={{
         margin: 0,
         fontSize: 12,
+        lineHeight: "16px",
         color: "color-mix(in oklab, var(--uai-danger) 75%, var(--uai-text))",
         ...style,
       }}
@@ -191,7 +231,13 @@ export function FormFieldCount({ style, ...props }: ComponentProps<"span">) {
     <span
       {...props}
       id={`${context.id}-count`}
-      style={{ fontSize: 12, color: "var(--uai-muted)", textAlign: "right", ...style }}
+      style={{
+        fontSize: 11.5,
+        color: "var(--uai-subtle)",
+        textAlign: "right",
+        fontVariantNumeric: "tabular-nums",
+        ...style,
+      }}
     >
       {context.value.length}
       {context.maxLength === undefined ? " characters" : ` / ${context.maxLength} characters`}

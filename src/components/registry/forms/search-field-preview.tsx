@@ -30,13 +30,14 @@ export function SearchFieldPreview({ variant = "rounded" }: { variant?: SearchFi
       >
         <SearchFieldLabel>Search workspace</SearchFieldLabel>
         <SearchFieldControl>
-          <SearchFieldInput placeholder="Find a document…" />
+          <SearchFieldInput placeholder="Search docs, issues, people…" />
           <SearchFieldClear />
         </SearchFieldControl>
         <SearchFieldMessage>{status === "idle" ? "Recent searches" : undefined}</SearchFieldMessage>
         <SearchFieldRecent>
-          <SearchFieldRecentItem value="Design guidelines" />
-          <SearchFieldRecentItem value="Release notes" />
+          <SearchFieldRecentItem value="Q3 roadmap" />
+          <SearchFieldRecentItem value="Billing migration" />
+          <SearchFieldRecentItem value="Onboarding v2" />
         </SearchFieldRecent>
       </SearchField>
       <label
@@ -50,6 +51,15 @@ export function SearchFieldPreview({ variant = "rounded" }: { variant?: SearchFi
       >
         Preview response
         <select
+          style={{
+            height: 26,
+            padding: "0 8px",
+            border: 0,
+            borderRadius: 999,
+            background: "var(--uai-surface-raised)",
+            color: "var(--uai-text)",
+            font: "inherit",
+          }}
           value={status}
           onChange={(event) => setStatus(event.target.value as SearchFieldStatus)}
         >
