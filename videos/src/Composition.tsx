@@ -1,5 +1,6 @@
 import { Composition } from "remotion";
 
+import { ResponseStatusVideo } from "./ResponseStatusVideo";
 import { ThinkingReferenceVideo } from "./ThinkingReferenceVideo";
 import { ThinkingVideo } from "./ThinkingVideo";
 
@@ -18,6 +19,14 @@ export const ThinkingCompositions = () => {
         id="ThinkingV2"
         component={ThinkingReferenceVideo}
         durationInFrames={600}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="ResponseStatus"
+        component={ResponseStatusVideo}
+        durationInFrames={748}
         fps={30}
         width={1920}
         height={1080}
