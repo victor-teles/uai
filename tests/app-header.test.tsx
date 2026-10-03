@@ -59,19 +59,19 @@ test("renders bar, floating, and compact visual contexts from the root", () => {
   const header = screen.getByRole("banner");
 
   expect(APP_HEADER_VARIANTS).toEqual(["bar", "floating", "compact"]);
-  expect(header.style.borderRadius).toBe("0px");
-  expect(header.style.minHeight).toBe("56px");
+  expect(header.className).toContain("rounded-none");
+  expect(header.className).toContain("min-h-14");
 
   rerender(<AppHeaderFixture variant="floating" />);
   expect(header.dataset.variant).toBe("floating");
-  expect(header.style.borderRadius).toBe("14px");
-  expect(header.style.padding).toBe("8px");
-  expect(header.style.boxShadow).not.toBe("");
+  expect(header.className).toContain("rounded-[14px]");
+  expect(header.className).toContain("p-2");
+  expect(header.className).toContain("shadow-[");
 
   rerender(<AppHeaderFixture variant="compact" />);
   expect(header.dataset.variant).toBe("compact");
-  expect(header.style.borderRadius).toBe("12px");
-  expect(header.style.minHeight).toBe("44px");
+  expect(header.className).toContain("rounded-xl");
+  expect(header.className).toContain("min-h-11");
   expect(screen.getByRole("button", { name: "Notifications" }).className).toContain("size-7");
 });
 

@@ -80,18 +80,18 @@ test("renders card, plain, and compact chrome from the root variant", () => {
 
   expect(ORDER_STATUS_VARIANTS).toEqual(["card", "plain", "compact"]);
   expect(section?.dataset.variant).toBe("card");
-  expect(section?.style.borderRadius).toBe("14px");
-  expect(section?.style.padding).toBe("18px");
+  expect(section?.className).toContain("rounded-[14px]");
+  expect(section?.className).toContain("p-[18px]");
 
   rerender(<OrderStatusFixture variant="plain" />);
   expect(section?.dataset.variant).toBe("plain");
-  expect(section?.style.borderRadius).toBe("0px");
+  expect(section?.className).toContain("rounded-none");
   expect(section?.className).toContain("bg-transparent");
 
   rerender(<OrderStatusFixture variant="compact" />);
   expect(section?.dataset.variant).toBe("compact");
-  expect(section?.style.borderRadius).toBe("12px");
-  expect(section?.style.padding).toBe("12px");
+  expect(section?.className).toContain("rounded-xl");
+  expect(section?.className).toContain("p-3");
   expect(screen.getByRole("heading", { name: "Arriving Friday" }).className).toContain(
     "text-[13px]",
   );
@@ -115,14 +115,14 @@ test("communicates every stage with visible text and current-step semantics", ()
     </OrderStatus>,
   );
 
-  expect(screen.getByText("Needs attention").className).toContain("text-[var(--uai-danger)]");
+  expect(screen.getByText("Needs attention").className).toContain("text-destructive");
   expect(screen.getByRole("listitem").getAttribute("aria-current")).toBeNull();
 });
 
 test("contains long tracking values and preserves action destinations", () => {
   render(<OrderStatusFixture variant="compact" />);
 
-  expect(screen.getByText("NSP-2048-1182").className).toContain("[overflow-wrap:anywhere]");
+  expect(screen.getByText("NSP-2048-1182").className).toContain("wrap-anywhere");
   expect(screen.getByRole("link", { name: "Track package" }).getAttribute("href")).toBe("/track");
   expect(screen.getByRole("link", { name: "Get help" }).getAttribute("href")).toBe("/help");
 });

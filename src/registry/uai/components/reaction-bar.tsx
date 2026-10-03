@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { SmilePlus } from "lucide-react";
 import {
   type ComponentProps,
@@ -11,6 +12,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const REACTION_BAR_VARIANTS = ["pill", "outlined", "compact"] as const;
 export type ReactionBarVariant = (typeof REACTION_BAR_VARIANTS)[number];
@@ -42,36 +44,28 @@ function usePicker(part: string) {
   if (!context) throw new Error(`${part} must be used within ReactionBarPicker`);
   return context;
 }
-const floatingShadow =
-  "0 0 0 1px var(--uai-border-strong), 0 12px 28px -10px oklch(0 0 0 / 0.32), 0 2px 6px -2px oklch(0 0 0 / 0.12)";
-const reactionCss = `
-.uai-reaction-item{background:var(--uai-surface-raised);box-shadow:none;color:var(--uai-muted);transition:background-color 120ms ease-out,color 120ms ease-out,box-shadow 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-reaction-item:hover:not(:disabled){background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text));color:var(--uai-text)}
-.uai-reaction-bar[data-variant=outlined] .uai-reaction-item{background:transparent;box-shadow:inset 0 0 0 1px var(--uai-border)}
-.uai-reaction-bar[data-variant=outlined] .uai-reaction-item:hover:not(:disabled){background:var(--uai-surface-raised);box-shadow:inset 0 0 0 1px var(--uai-border-strong)}
-.uai-reaction-item[aria-pressed=true],.uai-reaction-bar[data-variant] .uai-reaction-item[aria-pressed=true]{background:color-mix(in oklab,var(--uai-accent) 14%,transparent);box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--uai-accent) 42%,transparent);color:color-mix(in oklab,var(--uai-accent) 55%,var(--uai-text))}
-.uai-reaction-item[aria-pressed=true]:hover:not(:disabled),.uai-reaction-bar[data-variant] .uai-reaction-item[aria-pressed=true]:hover:not(:disabled){background:color-mix(in oklab,var(--uai-accent) 20%,transparent);box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--uai-accent) 55%,transparent)}
-.uai-reaction-item[aria-pressed=true] .uai-reaction-emoji{animation:uai-reaction-pop 260ms cubic-bezier(0.16,1,0.3,1)}
-.uai-reaction-item:disabled{opacity:0.5;cursor:not-allowed}
-.uai-reaction-trigger{background:transparent;color:var(--uai-muted);transition:background-color 120ms ease-out,color 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-reaction-trigger:hover:not(:disabled),.uai-reaction-trigger[aria-expanded=true]{background:var(--uai-surface-raised);color:var(--uai-text)}
-.uai-reaction-option{background:transparent;transition:background-color 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-reaction-option:hover,.uai-reaction-option:focus-visible{background:var(--uai-surface-raised);outline:none}
-.uai-reaction-option[aria-checked=true]{background:color-mix(in oklab,var(--uai-accent) 16%,transparent)}
-.uai-reaction-option span{transition:transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-reaction-option:hover span{transform:scale(1.12)}
-:is(.uai-reaction-item,.uai-reaction-trigger,.uai-reaction-option):active:not(:disabled){transform:scale(0.94)}
-:is(.uai-reaction-item,.uai-reaction-trigger):focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-@keyframes uai-reaction-pop{from{transform:scale(0.7)}to{transform:none}}
-@media (prefers-reduced-motion: reduce){
-.uai-reaction-item,.uai-reaction-trigger,.uai-reaction-option,.uai-reaction-option span{transition:none}
-.uai-reaction-item[aria-pressed=true] .uai-reaction-emoji{animation:none}
-.uai-reaction-option:hover span,:is(.uai-reaction-item,.uai-reaction-trigger,.uai-reaction-option):active:not(:disabled){transform:none}
-}
-`;
-function cx(...names: (string | undefined)[]) {
-  return names.filter(Boolean).join(" ");
-}
+const transitionChip =
+  "[transition:background-color_120ms_ease-out,color_120ms_ease-out,box-shadow_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none";
+
+const reactionBarVariants = cva(
+  "flex min-w-0 flex-wrap items-center text-[13px]/[18px] text-foreground",
+  { variants: { variant: { pill: "gap-1.5", outlined: "gap-1.5", compact: "gap-1" } } },
+);
+
+const reactionBarItemVariants = cva(
+  `group/reaction-item inline-flex cursor-pointer items-center rounded-full border-0 bg-secondary font-medium text-muted-foreground tabular-nums shadow-none ${transitionChip} enabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] enabled:hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.94] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:enabled:active:scale-100 aria-pressed:bg-primary/14 aria-pressed:text-[color-mix(in_oklab,var(--primary)_55%,var(--foreground))] aria-pressed:shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_42%,transparent)] aria-pressed:enabled:hover:bg-primary/20 aria-pressed:enabled:hover:text-[color-mix(in_oklab,var(--primary)_55%,var(--foreground))] aria-pressed:enabled:hover:shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_55%,transparent)]`,
+  {
+    variants: {
+      variant: {
+        pill: "h-7 gap-1.5 px-2.5 text-[12.5px]",
+        outlined:
+          "h-7 gap-1.5 bg-transparent px-2.5 text-[12.5px] shadow-[inset_0_0_0_1px_var(--border)] enabled:hover:bg-accent enabled:hover:shadow-[inset_0_0_0_1px_var(--border-strong)]",
+        compact: "h-5.5 gap-1 px-[7px] text-[11.5px]",
+      },
+    },
+  },
+);
+
 function reducedMotion() {
   return (
     typeof window.matchMedia === "function" &&
@@ -87,7 +81,6 @@ export function ReactionBar({
   disabled = false,
   "aria-label": label = "Reactions",
   className,
-  style,
   children,
   ...props
 }: ReactionBarProps) {
@@ -106,24 +99,13 @@ export function ReactionBar({
     <Context.Provider value={{ id, variant, selected, disabled, toggle }}>
       {/* biome-ignore lint/a11y/useSemanticElements: a labelled group of toggle buttons, not a fieldset. */}
       <div
+        data-slot="reaction-bar"
         role="group"
         aria-label={label}
+        className={cn(reactionBarVariants({ variant }), className)}
         {...props}
         data-variant={variant}
-        className={cx("uai-reaction-bar", className)}
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          gap: variant === "compact" ? 4 : 6,
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
       >
-        <style>{reactionCss}</style>
         {children}
       </div>
     </Context.Provider>
@@ -146,7 +128,6 @@ export function ReactionBarItem({
   count,
   onClick,
   className,
-  style,
   ...props
 }: ReactionBarItemProps) {
   const context = useReactions("ReactionBarItem");
@@ -154,8 +135,10 @@ export function ReactionBarItem({
   const compact = context.variant === "compact";
   return (
     <button
-      {...props}
+      data-slot="reaction-bar-item"
       type="button"
+      className={cn(reactionBarItemVariants({ variant: context.variant }), className)}
+      {...props}
       aria-pressed={pressed}
       aria-label={`${label}, ${count} ${count === 1 ? "reaction" : "reactions"}`}
       disabled={context.disabled || props.disabled}
@@ -163,26 +146,13 @@ export function ReactionBarItem({
         onClick?.(event);
         if (!event.defaultPrevented) context.toggle(value);
       }}
-      className={cx("uai-reaction-item", className)}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: compact ? 4 : 6,
-        height: compact ? 22 : 28,
-        padding: compact ? "0 7px" : "0 10px",
-        border: 0,
-        borderRadius: 999,
-        fontSize: compact ? 11.5 : 12.5,
-        fontWeight: 500,
-        fontVariantNumeric: "tabular-nums",
-        cursor: "pointer",
-        ...style,
-      }}
     >
       <span
         aria-hidden="true"
-        className="uai-reaction-emoji"
-        style={{ display: "inline-block", fontSize: compact ? 12 : 14, lineHeight: 1 }}
+        className={cn(
+          "inline-block group-aria-pressed/reaction-item:animate-in group-aria-pressed/reaction-item:zoom-in-70 group-aria-pressed/reaction-item:duration-260 group-aria-pressed/reaction-item:ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:animate-none!",
+          compact ? "text-[12px]/none" : "text-[14px]/none",
+        )}
       >
         {emoji}
       </span>
@@ -200,7 +170,7 @@ function menuItems(menu: HTMLElement | null) {
 export function ReactionBarPicker({
   "aria-label": label = "Add reaction",
   children,
-  style,
+  className,
   ...props
 }: ComponentProps<"div">) {
   const context = useReactions("ReactionBarPicker");
@@ -256,8 +226,9 @@ export function ReactionBarPicker({
     <PickerContextValue.Provider value={{ close }}>
       <div
         ref={rootRef}
+        data-slot="reaction-bar-picker"
+        className={cn("relative inline-flex", className)}
         {...props}
-        style={{ position: "relative", display: "inline-flex", ...style }}
       >
         <button
           ref={triggerRef}
@@ -274,17 +245,10 @@ export function ReactionBarPicker({
               openMenu(event.key === "ArrowUp" ? "last" : "first");
             }
           }}
-          className="uai-reaction-trigger"
-          style={{
-            display: "grid",
-            placeItems: "center",
-            width: compact ? 22 : 28,
-            height: compact ? 22 : 28,
-            padding: 0,
-            border: 0,
-            borderRadius: 999,
-            cursor: "pointer",
-          }}
+          className={cn(
+            "grid cursor-pointer place-items-center rounded-full border-0 bg-transparent p-0 text-muted-foreground [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] enabled:hover:bg-accent enabled:hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.94] aria-expanded:bg-accent aria-expanded:text-accent-foreground motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
+            compact ? "size-5.5" : "size-7",
+          )}
         >
           <SmilePlus size={compact ? 13 : 15} strokeWidth={1.75} aria-hidden="true" />
         </button>
@@ -296,19 +260,7 @@ export function ReactionBarPicker({
             aria-label={label}
             tabIndex={-1}
             onKeyDown={onMenuKeyDown}
-            style={{
-              position: "absolute",
-              top: "calc(100% + 6px)",
-              insetInlineStart: 0,
-              zIndex: 20,
-              display: "flex",
-              gap: 2,
-              padding: 4,
-              borderRadius: 14,
-              background: "var(--uai-surface)",
-              boxShadow: floatingShadow,
-              transformOrigin: "top left",
-            }}
+            className="absolute start-0 top-[calc(100%+6px)] z-20 flex origin-top-left gap-0.5 rounded-[14px] bg-popover p-1 text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_12px_28px_-10px_oklch(0_0_0/0.32),0_2px_6px_-2px_oklch(0_0_0/0.12)]"
           >
             {children}
           </div>
@@ -329,7 +281,6 @@ export function ReactionBarPickerOption({
   label,
   onClick,
   className,
-  style,
   ...props
 }: ReactionBarPickerOptionProps) {
   const context = useReactions("ReactionBarPickerOption");
@@ -337,8 +288,13 @@ export function ReactionBarPickerOption({
   const checked = context.selected.includes(value);
   return (
     <button
-      {...props}
+      data-slot="reaction-bar-picker-option"
       type="button"
+      className={cn(
+        "group/reaction-option grid size-8 cursor-pointer place-items-center rounded-[10px] border-0 bg-transparent p-0 text-[16px]/none [transition:background-color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-accent focus-visible:bg-accent focus-visible:outline-none enabled:active:scale-[0.94] aria-checked:bg-primary/16 motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
+        className,
+      )}
+      {...props}
       role="menuitemcheckbox"
       aria-checked={checked}
       aria-label={label}
@@ -349,22 +305,11 @@ export function ReactionBarPickerOption({
         context.toggle(value);
         picker.close(true);
       }}
-      className={cx("uai-reaction-option", className)}
-      style={{
-        display: "grid",
-        placeItems: "center",
-        width: 32,
-        height: 32,
-        padding: 0,
-        border: 0,
-        borderRadius: 10,
-        fontSize: 16,
-        lineHeight: 1,
-        cursor: "pointer",
-        ...style,
-      }}
     >
-      <span aria-hidden="true" style={{ display: "inline-block" }}>
+      <span
+        aria-hidden="true"
+        className="inline-block transition-[scale] duration-140 ease-out-quint group-hover/reaction-option:scale-[1.12] motion-reduce:transition-none motion-reduce:group-hover/reaction-option:scale-100"
+      >
         {emoji}
       </span>
     </button>

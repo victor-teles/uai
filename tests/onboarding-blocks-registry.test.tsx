@@ -18,7 +18,7 @@ test("publishes every onboarding block without drift and keeps examples executab
     ).text();
     expect(item.category).toBe("Authentication");
     expect(output.type).toBe("registry:block");
-    expect(mirror).toBe(source);
+    expect(mirror).toBe(`export * from "@/registry/uai/blocks/${item.id}";\n`);
     expect(output.files[0].content).toBe(source);
     expect(item.usage).toBe(preview);
     expect(item.accessibility.length).toBeGreaterThanOrEqual(3);

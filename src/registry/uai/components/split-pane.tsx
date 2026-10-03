@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import {
   type ComponentProps,
   createContext,
@@ -11,6 +12,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const SPLIT_PANE_VARIANTS = ["card", "flush", "inset"] as const;
 export type SplitPaneVariant = (typeof SPLIT_PANE_VARIANTS)[number];
@@ -45,6 +47,29 @@ function useSplit(part: string) {
   if (!context) throw new Error(`${part} must be used within SplitPane`);
   return context;
 }
+const splitPaneVariants = cva(
+  "flex min-h-0 min-w-0 overflow-hidden text-[13px]/[18px] text-foreground",
+  {
+    variants: {
+      variant: {
+        card: "gap-0 rounded-[14px] border bg-card p-0",
+        flush: "gap-0 rounded-none border-0 bg-card p-0",
+        inset: "gap-1 rounded-[14px] border-0 bg-muted p-1",
+      },
+      orientation: { horizontal: "flex-row", vertical: "flex-col" },
+    },
+  },
+);
+const splitPanePaneVariants = cva("min-h-0 min-w-0 overflow-auto bg-card", {
+  variants: {
+    variant: {
+      card: "rounded-none",
+      flush: "rounded-none",
+      inset: "rounded-[10px] shadow-[0_1px_2px_oklch(0_0_0/0.06)]",
+    },
+  },
+});
+
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, Math.round(value * 10) / 10));
 }
@@ -60,7 +85,7 @@ export function SplitPane({
   step = 5,
   storageKey,
   children,
-  style,
+  className,
   ...props
 }: SplitPaneProps) {
   const id = useId();
@@ -104,26 +129,12 @@ export function SplitPane({
       value={{ id, value: current, min, max, step, orientation, variant, rootRef, change }}
     >
       <div
+        data-slot="split-pane"
+        className={cn(splitPaneVariants({ variant, orientation }), className)}
         {...props}
         ref={rootRef}
         data-variant={variant}
         data-orientation={orientation}
-        style={{
-          display: "flex",
-          flexDirection: orientation === "horizontal" ? "row" : "column",
-          gap: variant === "inset" ? 4 : 0,
-          minWidth: 0,
-          minHeight: 0,
-          overflow: "hidden",
-          padding: variant === "inset" ? 4 : 0,
-          border: variant === "card" ? "1px solid var(--uai-border)" : 0,
-          borderRadius: variant === "flush" ? 0 : 14,
-          background: variant === "inset" ? "var(--uai-surface-raised)" : "var(--uai-surface)",
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
       >
         {children}
       </div>
@@ -131,42 +142,33 @@ export function SplitPane({
   );
 }
 
-function paneStyle(variant: SplitPaneVariant): React.CSSProperties {
-  return {
-    minWidth: 0,
-    minHeight: 0,
-    overflow: "auto",
-    background: "var(--uai-surface)",
-    borderRadius: variant === "inset" ? 10 : 0,
-    boxShadow: variant === "inset" ? "0 1px 2px oklch(0 0 0 / 0.06)" : undefined,
-  };
-}
-
-export function SplitPanePrimary({ style, ...props }: ComponentProps<"div">) {
+export function SplitPanePrimary({ className, style, ...props }: ComponentProps<"div">) {
   const context = useSplit("SplitPanePrimary");
   return (
     <div
+      data-slot="split-pane-primary"
+      className={cn(splitPanePaneVariants({ variant: context.variant }), className)}
       {...props}
       id={`${context.id}-primary`}
       data-split-pane-region="primary"
-      style={{ ...paneStyle(context.variant), flex: `0 0 ${context.value}%`, ...style }}
+      style={{ flex: `0 0 ${context.value}%`, ...style }}
     />
   );
 }
 
-export function SplitPaneSecondary({ style, ...props }: ComponentProps<"div">) {
+export function SplitPaneSecondary({ className, ...props }: ComponentProps<"div">) {
   const context = useSplit("SplitPaneSecondary");
   return (
     <div
+      data-slot="split-pane-secondary"
+      className={cn(splitPanePaneVariants({ variant: context.variant }), "flex-[1_1_0]", className)}
       {...props}
       data-split-pane-region="secondary"
-      style={{ ...paneStyle(context.variant), flex: "1 1 0", ...style }}
     />
   );
 }
 
 export function SplitPaneHandle({
-  style,
   onKeyDown,
   onPointerDown,
   onPointerMove,
@@ -214,7 +216,13 @@ export function SplitPaneHandle({
       aria-valuemax={context.max}
       aria-controls={`${context.id}-primary`}
       data-dragging={dragging || undefined}
-      className={["group/split-handle", className].filter(Boolean).join(" ")}
+      data-slot="split-pane-handle"
+      className={cn(
+        "group/split-handle relative z-1 grid flex-none touch-none place-items-center outline-none",
+        horizontal ? "h-full w-3 cursor-col-resize" : "h-3 w-full cursor-row-resize",
+        context.variant === "inset" ? "m-0" : horizontal ? "-mx-1.5" : "-my-1.5",
+        className,
+      )}
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}
       onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
@@ -242,55 +250,35 @@ export function SplitPaneHandle({
         event.currentTarget.releasePointerCapture?.(event.pointerId);
         setDragging(false);
       }}
-      style={{
-        position: "relative",
-        flex: "0 0 auto",
-        display: "grid",
-        placeItems: "center",
-        width: horizontal ? 12 : "100%",
-        height: horizontal ? "100%" : 12,
-        margin: context.variant === "inset" ? 0 : horizontal ? "0 -6px" : "-6px 0",
-        zIndex: 1,
-        cursor: horizontal ? "col-resize" : "row-resize",
-        touchAction: "none",
-        outline: "none",
-        ...style,
-      }}
     >
       <span
         aria-hidden="true"
-        style={{
-          width: horizontal ? 1 : "100%",
-          height: horizontal ? "100%" : 1,
-          background: focused
-            ? "var(--uai-accent)"
+        data-slot="split-pane-handle-line"
+        className={cn(
+          "[transition:background-color_120ms_ease-out,transform_140ms_ease-out] motion-reduce:transition-none",
+          horizontal ? "h-full w-px" : "h-px w-full",
+          focused
+            ? "bg-ring"
             : dragging
-              ? "var(--uai-border-strong)"
+              ? "bg-border-strong"
               : context.variant === "inset"
-                ? "transparent"
-                : "var(--uai-border)",
-          transform: active ? (horizontal ? "scaleX(2)" : "scaleY(2)") : "none",
-          transition: "background-color 120ms ease-out, transform 140ms ease-out",
-        }}
+                ? "bg-transparent"
+                : "bg-border",
+          active && (horizontal ? "[transform:scaleX(2)]" : "[transform:scaleY(2)]"),
+        )}
       />
       <span
         aria-hidden="true"
-        className={
+        data-slot="split-pane-handle-grip"
+        className={cn(
+          "absolute rounded-full [transition:background-color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)]",
+          horizontal ? "h-7 w-1" : "h-1 w-7",
           active
-            ? undefined
-            : "bg-[var(--uai-border-strong)] group-hover/split-handle:bg-[var(--uai-muted)] motion-safe:group-hover/split-handle:scale-110"
-        }
-        style={{
-          position: "absolute",
-          width: horizontal ? 4 : 28,
-          height: horizontal ? 28 : 4,
-          borderRadius: 999,
-          background: active ? "var(--uai-text)" : undefined,
-          boxShadow: context.variant === "inset" ? undefined : "0 0 0 2px var(--uai-surface)",
-          transform: dragging ? "scale(1.1)" : undefined,
-          transition:
-            "background-color 120ms ease-out, transform 140ms cubic-bezier(0.23, 1, 0.32, 1)",
-        }}
+            ? "bg-foreground"
+            : "bg-border-strong group-hover/split-handle:bg-muted-foreground motion-safe:group-hover/split-handle:scale-110",
+          context.variant !== "inset" && "shadow-[0_0_0_2px_var(--card)]",
+          dragging && "[transform:scale(1.1)]",
+        )}
       />
     </div>
   );

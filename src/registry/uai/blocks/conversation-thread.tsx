@@ -21,6 +21,7 @@ import {
   type ResponseStatusProps,
   type ResponseStatusVariant,
 } from "@/components/ui/uai/response-status";
+import { cn } from "@/lib/uai-utils";
 
 export const CONVERSATION_THREAD_VARIANTS = ["chat", "document", "compact"] as const;
 export type ConversationThreadVariant = (typeof CONVERSATION_THREAD_VARIANTS)[number];
@@ -58,26 +59,11 @@ const composerVariants: Record<ConversationThreadVariant, PromptComposerVariant>
   compact: "compact",
 };
 
-const layoutCss = `
-[data-uai-thread-layout]{display:grid;gap:16px;align-items:start;min-width:0}
-[data-uai-thread="compact"]>[data-uai-thread-layout]{gap:12px}
-@container (min-width: 760px){
-  [data-uai-thread="chat"]>[data-uai-thread-layout],
-  [data-uai-thread="document"]>[data-uai-thread-layout]{grid-template-columns:minmax(0,1fr) minmax(220px,260px);gap:24px}
-  [data-uai-thread-layout]>[data-uai-thread-region="header"]{grid-column:1/-1}
-}
-[data-uai-thread-source]{transition:background-color 120ms ease-out}
-[data-uai-thread-source]:hover{background:var(--uai-surface-raised)}
-[data-uai-thread-link]{text-decoration-line:none;text-decoration-color:var(--uai-border-strong);text-underline-offset:3px}
-[data-uai-thread-link]:hover{text-decoration-line:underline}
-[data-uai-thread-link]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px;border-radius:4px}
-@media (prefers-reduced-motion: reduce){[data-uai-thread-source]{transition:none}}`;
-
 /** A conversation with messages, sources, response state, and a composer. Sources move beside the thread at 760px. */
 export function ConversationThread({
   variant = "chat",
   children,
-  style,
+  className,
   ...props
 }: ConversationThreadProps) {
   const id = useId();
@@ -85,82 +71,84 @@ export function ConversationThread({
     <Context.Provider value={{ id, variant }}>
       <section
         aria-labelledby={`${id}-title`}
-        {...props}
+        data-slot="conversation-thread"
         data-variant={variant}
-        data-uai-thread={variant}
-        style={{
-          boxSizing: "border-box",
-          containerType: "inline-size",
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
+        className={cn(
+          "box-border @container min-w-0 text-[13px]/[18px] text-foreground",
+          className,
+        )}
+        {...props}
       >
-        <style>{layoutCss}</style>
-        <div data-uai-thread-layout="">{children}</div>
+        <div
+          className={cn(
+            "grid min-w-0 items-start",
+            variant === "compact"
+              ? "gap-3"
+              : "gap-4 @min-[760px]:grid-cols-[minmax(0,1fr)_minmax(220px,260px)] @min-[760px]:gap-6",
+          )}
+        >
+          {children}
+        </div>
       </section>
     </Context.Provider>
   );
 }
 
-export function ConversationThreadHeader({ style, ...props }: ComponentProps<"header">) {
+export function ConversationThreadHeader({ className, ...props }: ComponentProps<"header">) {
   useThread("ConversationThreadHeader");
   return (
     <header
+      data-slot="conversation-thread-header"
+      className={cn("grid min-w-0 gap-1 @min-[760px]:col-span-full", className)}
       {...props}
-      data-uai-thread-region="header"
-      style={{ display: "grid", gap: 4, minWidth: 0, ...style }}
     />
   );
 }
 
-export function ConversationThreadTitle({ style, ...props }: ComponentProps<"h2">) {
+export function ConversationThreadTitle({ className, ...props }: ComponentProps<"h2">) {
   const { id, variant } = useThread("ConversationThreadTitle");
-  const compact = variant === "compact";
   return (
     <h2
+      data-slot="conversation-thread-title"
+      className={cn(
+        "m-0 font-semibold tracking-[-0.01em] wrap-anywhere",
+        variant === "compact" ? "text-[15px]/5" : "text-lg/6",
+        className,
+      )}
       {...props}
       id={`${id}-title`}
-      style={{
-        margin: 0,
-        fontSize: compact ? 15 : 18,
-        lineHeight: compact ? "20px" : "24px",
-        fontWeight: 600,
-        letterSpacing: "-0.01em",
-        overflowWrap: "anywhere",
-        ...style,
-      }}
     />
   );
 }
 
-export function ConversationThreadDescription({ style, ...props }: ComponentProps<"p">) {
+export function ConversationThreadDescription({ className, ...props }: ComponentProps<"p">) {
   return (
-    <p {...props} style={{ margin: 0, color: "var(--uai-muted)", textWrap: "pretty", ...style }} />
+    <p
+      data-slot="conversation-thread-description"
+      className={cn("m-0 text-pretty text-muted-foreground", className)}
+      {...props}
+    />
   );
 }
 
 /** The conversation column: the log, the response status, and the composer. */
-export function ConversationThreadMain({ style, ...props }: ComponentProps<"div">) {
+export function ConversationThreadMain({ className, ...props }: ComponentProps<"div">) {
   const { variant } = useThread("ConversationThreadMain");
   return (
     <div
+      data-slot="conversation-thread-main"
+      className={cn(
+        "grid min-w-0 content-start",
+        variant === "compact" ? "gap-2" : "gap-3",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        alignContent: "start",
-        gap: variant === "compact" ? 8 : 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
 /** A scrollable `role="log"` region. It stays pinned to the newest message unless the reader scrolls up. */
-export function ConversationThreadLog({ onScroll, style, ...props }: ComponentProps<"div">) {
+export function ConversationThreadLog({ onScroll, className, ...props }: ComponentProps<"div">) {
   const { id, variant } = useThread("ConversationThreadLog");
   const ref = useRef<HTMLDivElement>(null);
   const pinned = useRef(true);
@@ -176,24 +164,20 @@ export function ConversationThreadLog({ onScroll, style, ...props }: ComponentPr
       aria-labelledby={`${id}-title`}
       // biome-ignore lint/a11y/noNoninteractiveTabindex: the scrollable log must be reachable by keyboard.
       tabIndex={0}
+      data-slot="conversation-thread-log"
+      className={cn(
+        "grid min-w-0 content-start overflow-y-auto overscroll-contain rounded-xl",
+        variant === "compact"
+          ? "max-h-[360px] gap-3 px-0.5 py-1"
+          : "max-h-[520px] gap-5 px-1 pt-1 pb-2",
+        className,
+      )}
       {...props}
       ref={ref}
       onScroll={(event: UIEvent<HTMLDivElement>) => {
         onScroll?.(event);
         const node = event.currentTarget;
         pinned.current = node.scrollHeight - node.scrollTop - node.clientHeight < 32;
-      }}
-      style={{
-        display: "grid",
-        alignContent: "start",
-        gap: variant === "compact" ? 12 : 20,
-        maxHeight: variant === "compact" ? 360 : 520,
-        minWidth: 0,
-        overflowY: "auto",
-        overscrollBehavior: "contain",
-        padding: variant === "compact" ? "4px 2px" : "4px 4px 8px",
-        borderRadius: 12,
-        ...style,
       }}
     />
   );
@@ -226,7 +210,7 @@ export function ConversationThreadComposer(props: Omit<PromptComposerProps, "var
 }
 
 /** Sources referenced in the conversation. Sits beside the thread on wide containers. */
-export function ConversationThreadSources({ style, ...props }: ComponentProps<"aside">) {
+export function ConversationThreadSources({ className, ...props }: ComponentProps<"aside">) {
   const { variant } = useThread("ConversationThreadSources");
   const id = useId();
   const compact = variant === "compact";
@@ -234,53 +218,42 @@ export function ConversationThreadSources({ style, ...props }: ComponentProps<"a
     <SourcesContext.Provider value={id}>
       <aside
         aria-labelledby={id}
+        data-slot="conversation-thread-sources"
+        className={cn(
+          "grid min-w-0 content-start border bg-card",
+          compact ? "gap-1.5 rounded-xl p-3" : "gap-2.5 rounded-[14px] px-3 pt-3.5 pb-2.5",
+          className,
+        )}
         {...props}
-        style={{
-          display: "grid",
-          alignContent: "start",
-          gap: compact ? 6 : 10,
-          minWidth: 0,
-          padding: compact ? 12 : "14px 12px 10px",
-          border: "1px solid var(--uai-border)",
-          borderRadius: compact ? 12 : 14,
-          background: "var(--uai-surface)",
-          ...style,
-        }}
       />
     </SourcesContext.Provider>
   );
 }
 
-export function ConversationThreadSourcesTitle({ style, ...props }: ComponentProps<"h3">) {
+export function ConversationThreadSourcesTitle({ className, ...props }: ComponentProps<"h3">) {
   const id = useContext(SourcesContext);
   if (!id)
     throw new Error("ConversationThreadSourcesTitle must be used within ConversationThreadSources");
   return (
     <h3
+      data-slot="conversation-thread-sources-title"
+      className={cn("m-0 text-[13px]/[18px] font-medium", className)}
       {...props}
       id={id}
-      style={{ margin: 0, fontSize: 13, lineHeight: "18px", fontWeight: 500, ...style }}
     />
   );
 }
 
-export function ConversationThreadSourceList({ style, ...props }: ComponentProps<"ol">) {
+export function ConversationThreadSourceList({ className, ...props }: ComponentProps<"ol">) {
   const id = useContext(SourcesContext);
   if (!id)
     throw new Error("ConversationThreadSourceList must be used within ConversationThreadSources");
   return (
     <ol
       aria-labelledby={id}
+      data-slot="conversation-thread-source-list"
+      className={cn("m-0 grid min-w-0 list-none gap-0.5 p-0", className)}
       {...props}
-      style={{
-        display: "grid",
-        gap: 2,
-        margin: 0,
-        padding: 0,
-        listStyle: "none",
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
@@ -293,68 +266,49 @@ export type ConversationThreadSourceProps = ComponentProps<"li"> & {
 export function ConversationThreadSource({
   index,
   children,
-  style,
+  className,
   ...props
 }: ConversationThreadSourceProps) {
   useThread("ConversationThreadSource");
   return (
     <li
+      data-slot="conversation-thread-source"
+      className={cn(
+        "grid min-w-0 grid-cols-[20px_minmax(0,1fr)] items-start gap-2 rounded-lg p-1.5 transition-[background-color] duration-120 ease-out hover:bg-accent motion-reduce:transition-none",
+        className,
+      )}
       {...props}
-      data-uai-thread-source=""
-      style={{
-        display: "grid",
-        gridTemplateColumns: "20px minmax(0, 1fr)",
-        alignItems: "start",
-        gap: 8,
-        padding: "6px",
-        borderRadius: 8,
-        minWidth: 0,
-        ...style,
-      }}
     >
       <span
         aria-hidden="true"
-        style={{
-          display: "grid",
-          placeItems: "center",
-          height: 18,
-          marginTop: 1,
-          borderRadius: 999,
-          background: "var(--uai-surface-raised)",
-          color: "var(--uai-muted)",
-          fontSize: 11,
-          fontWeight: 500,
-          fontVariantNumeric: "tabular-nums",
-        }}
+        className="mt-px grid h-[18px] place-items-center rounded-full bg-muted text-[11px] font-medium text-muted-foreground tabular-nums"
       >
         {index}
       </span>
-      <span style={{ display: "grid", gap: 2, minWidth: 0 }}>{children}</span>
+      <span className="grid min-w-0 gap-0.5">{children}</span>
     </li>
   );
 }
 
-export function ConversationThreadSourceLink({ style, ...props }: ComponentProps<"a">) {
+export function ConversationThreadSourceLink({ className, ...props }: ComponentProps<"a">) {
   return (
     <a
+      data-slot="conversation-thread-source-link"
+      className={cn(
+        "font-medium wrap-anywhere text-foreground no-underline decoration-border-strong underline-offset-3 hover:underline focus-visible:rounded-[4px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+        className,
+      )}
       {...props}
-      data-uai-thread-link=""
-      style={{
-        color: "var(--uai-text)",
-        fontWeight: 500,
-
-        overflowWrap: "anywhere",
-        ...style,
-      }}
     />
   );
 }
 
-export function ConversationThreadSourceMeta({ style, ...props }: ComponentProps<"span">) {
+export function ConversationThreadSourceMeta({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
+      data-slot="conversation-thread-source-meta"
+      className={cn("text-[12px] wrap-anywhere text-subtle-foreground", className)}
       {...props}
-      style={{ color: "var(--uai-subtle)", fontSize: 12, overflowWrap: "anywhere", ...style }}
     />
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { Mail, MailOpen } from "lucide-react";
 import { type ComponentProps, createContext, useContext, useId, useState } from "react";
 import {
@@ -8,6 +9,7 @@ import {
   type EmptyStateVariant,
 } from "@/components/ui/uai/empty-state";
 import { PageTabs, type PageTabsProps, type PageTabsVariant } from "@/components/ui/uai/page-tabs";
+import { cn } from "@/lib/uai-utils";
 
 export const NOTIFICATION_CENTER_VARIANTS = ["panel", "page", "compact"] as const;
 export type NotificationCenterVariant = (typeof NOTIFICATION_CENTER_VARIANTS)[number];
@@ -41,139 +43,96 @@ const emptyVariants: Record<NotificationCenterVariant, EmptyStateVariant> = {
   page: "plain",
   compact: "compact",
 };
-const srOnly = {
-  position: "absolute",
-  width: 1,
-  height: 1,
-  overflow: "hidden",
-  clip: "rect(0 0 0 0)",
-  whiteSpace: "nowrap",
-} as const;
+const buttonInteraction =
+  "[transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] bg-transparent text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring motion-reduce:transition-none";
 
-const interactionCss = `
-[data-uai-notification-action],[data-uai-notification-toggle],[data-uai-notification-item]{transition:background-color 120ms ease-out,color 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-[data-uai-notification-action],[data-uai-notification-toggle]{background:transparent;color:var(--uai-muted)}
-[data-uai-notification-action]:disabled{color:var(--uai-subtle)}
-[data-uai-notification-action]:hover:not(:disabled),[data-uai-notification-toggle]:hover{background:var(--uai-surface-raised);color:var(--uai-text)}
-[data-uai-notification-action]:active:not(:disabled),[data-uai-notification-toggle]:active{transform:scale(0.97)}
-[data-uai-notification-action]:focus-visible,[data-uai-notification-toggle]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:1px}
-[data-uai-notification-item]{background:transparent}
-[data-uai-notification-item]:not([data-read]){background:color-mix(in oklab,var(--uai-surface-raised) 70%,transparent)}
-[data-uai-notification-item]:hover{background:var(--uai-surface-raised)}
-[data-uai-notification-item] [data-uai-notification-toggle]{opacity:0.7}
-[data-uai-notification-item]:hover [data-uai-notification-toggle],[data-uai-notification-toggle]:focus-visible{opacity:1}
-@keyframes uai-notification-enter{from{opacity:0;transform:translateY(4px)}}
-[data-uai-notification-item]{animation:uai-notification-enter 240ms cubic-bezier(0.23,1,0.32,1) both}
-[data-uai-notification-item]:nth-child(2){animation-delay:40ms}
-[data-uai-notification-item]:nth-child(3){animation-delay:80ms}
-[data-uai-notification-item]:nth-child(n+4){animation-delay:120ms}
-@media (hover: none){[data-uai-notification-item] [data-uai-notification-toggle]{opacity:1}}
-@media (prefers-reduced-motion: reduce){[data-uai-notification-action],[data-uai-notification-toggle],[data-uai-notification-item]{transition:none;animation:none}[data-uai-notification-action]:active:not(:disabled),[data-uai-notification-toggle]:active{transform:none}}`;
+const notificationCenterVariants = cva(
+  "grid min-w-0 content-start text-[13px]/[18px] text-foreground",
+  {
+    variants: {
+      variant: {
+        panel: "gap-3.5 rounded-[14px] border bg-card px-3 pt-4 pb-3",
+        page: "gap-3.5 rounded-[14px] border-0 bg-transparent p-0",
+        compact: "gap-2 rounded-xl border bg-card p-2.5",
+      },
+    },
+  },
+);
 
 export function NotificationCenter({
   variant = "panel",
+  className,
   children,
-  style,
   ...props
 }: NotificationCenterProps) {
   const id = useId();
-  const chrome = variant !== "page";
   return (
     <Context.Provider value={{ id, variant }}>
       <section
         aria-labelledby={`${id}-title`}
-        {...props}
+        data-slot="notification-center"
         data-variant={variant}
-        style={{
-          display: "grid",
-          alignContent: "start",
-          gap: variant === "compact" ? 8 : 14,
-          minWidth: 0,
-          padding: variant === "compact" ? 10 : chrome ? "16px 12px 12px" : 0,
-          border: chrome ? "1px solid var(--uai-border)" : 0,
-          borderRadius: variant === "compact" ? 12 : 14,
-          background: chrome ? "var(--uai-surface)" : "transparent",
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
+        className={cn(notificationCenterVariants({ variant }), className)}
+        {...props}
       >
-        <style>{interactionCss}</style>
         {children}
       </section>
     </Context.Provider>
   );
 }
 
-export function NotificationCenterHeader({ style, ...props }: ComponentProps<"div">) {
+export function NotificationCenterHeader({ className, ...props }: ComponentProps<"div">) {
   const { variant } = useCenter("NotificationCenterHeader");
   return (
     <div
+      data-slot="notification-center-header"
+      className={cn(
+        "flex min-w-0 flex-wrap items-center justify-between gap-2",
+        variant === "panel" && "px-1",
+        className,
+      )}
       {...props}
-      style={{
-        padding: variant === "panel" ? "0 4px" : undefined,
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 8,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function NotificationCenterTitle({ style, ...props }: ComponentProps<"h2">) {
+export function NotificationCenterTitle({ className, ...props }: ComponentProps<"h2">) {
   const context = useCenter("NotificationCenterTitle");
-  const page = context.variant === "page";
   return (
     <h2
+      data-slot="notification-center-title"
+      className={cn(
+        "m-0 flex items-center gap-2 font-semibold tracking-[-0.01em]",
+        context.variant === "page" ? "text-lg/6" : "text-[15px]/5",
+        className,
+      )}
       {...props}
       id={`${context.id}-title`}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        margin: 0,
-        fontSize: page ? 18 : 15,
-        lineHeight: page ? "24px" : "20px",
-        fontWeight: 600,
-        letterSpacing: "-0.01em",
-        ...style,
-      }}
     />
   );
 }
 
 /** Unread total beside the title. Write the full phrase, such as "4 unread". */
-export function NotificationCenterCount({ style, ...props }: ComponentProps<"span">) {
+export function NotificationCenterCount({ className, ...props }: ComponentProps<"span">) {
   useCenter("NotificationCenterCount");
   return (
     <span
+      data-slot="notification-center-count"
+      className={cn(
+        "rounded-full bg-primary/14 px-2 text-[11.5px]/5 font-medium tracking-normal text-[color-mix(in_oklab,var(--primary)_70%,var(--foreground))] tabular-nums",
+        className,
+      )}
       {...props}
-      style={{
-        padding: "0 8px",
-        borderRadius: 999,
-        background: "color-mix(in oklab, var(--uai-accent) 14%, transparent)",
-        color: "color-mix(in oklab, var(--uai-accent) 70%, var(--uai-text))",
-        fontSize: 11.5,
-        lineHeight: "20px",
-        fontWeight: 500,
-        fontVariantNumeric: "tabular-nums",
-        letterSpacing: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function NotificationCenterActions({ style, ...props }: ComponentProps<"div">) {
+export function NotificationCenterActions({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="notification-center-actions"
+      className={cn("flex flex-wrap items-center gap-1", className)}
       {...props}
-      style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 4, ...style }}
     />
   );
 }
@@ -181,30 +140,23 @@ export function NotificationCenterActions({ style, ...props }: ComponentProps<"d
 /** A bulk action such as "Mark all as read". */
 export function NotificationCenterAction({
   type = "button",
-  style,
+  className,
   ...props
 }: ComponentProps<"button">) {
   const context = useCenter("NotificationCenterAction");
   return (
     <button
+      data-slot="notification-center-action"
+      className={cn(
+        "inline-flex cursor-pointer items-center gap-1.5 rounded-full border-0 px-2.5 text-[12.5px] font-medium",
+        buttonInteraction,
+        "hover:enabled:bg-accent hover:enabled:text-foreground active:enabled:scale-[0.97] motion-reduce:active:enabled:scale-100",
+        "disabled:cursor-not-allowed disabled:text-subtle-foreground disabled:opacity-55",
+        context.variant === "compact" ? "h-6.5" : "h-7",
+        className,
+      )}
       {...props}
       type={type}
-      data-uai-notification-action=""
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        height: context.variant === "compact" ? 26 : 28,
-        padding: "0 10px",
-        border: 0,
-        borderRadius: 999,
-        font: "inherit",
-        fontSize: 12.5,
-        fontWeight: 500,
-        cursor: props.disabled ? "not-allowed" : "pointer",
-        opacity: props.disabled ? 0.55 : 1,
-        ...style,
-      }}
     />
   );
 }
@@ -216,51 +168,48 @@ export function NotificationCenterTabs(props: Omit<PageTabsProps, "variant">) {
 }
 
 /** Notifications that share a date, such as Today or Yesterday. */
-export function NotificationCenterGroup({ style, ...props }: ComponentProps<"section">) {
+export function NotificationCenterGroup({ className, ...props }: ComponentProps<"section">) {
   const context = useCenter("NotificationCenterGroup");
   const id = useId();
   return (
     <GroupContext.Provider value={id}>
       <section
         aria-labelledby={id}
+        data-slot="notification-center-group"
+        className={cn(
+          "grid min-w-0",
+          context.variant === "compact" ? "gap-1" : "gap-1.5",
+          className,
+        )}
         {...props}
-        style={{
-          display: "grid",
-          gap: context.variant === "compact" ? 4 : 6,
-          minWidth: 0,
-          ...style,
-        }}
       />
     </GroupContext.Provider>
   );
 }
 
-export function NotificationCenterGroupDate({ style, ...props }: ComponentProps<"h3">) {
+export function NotificationCenterGroupDate({ className, ...props }: ComponentProps<"h3">) {
   const id = useContext(GroupContext);
   if (!id)
     throw new Error("NotificationCenterGroupDate must be used within NotificationCenterGroup");
   return (
     <h3
+      data-slot="notification-center-group-date"
+      className={cn(
+        "m-0 px-1 pt-1 pb-0.5 text-[11.5px]/4 font-medium text-subtle-foreground",
+        className,
+      )}
       {...props}
       id={id}
-      style={{
-        margin: 0,
-        padding: "4px 4px 2px",
-        color: "var(--uai-subtle)",
-        fontSize: 11.5,
-        lineHeight: "16px",
-        fontWeight: 500,
-        ...style,
-      }}
     />
   );
 }
 
-export function NotificationCenterList({ style, ...props }: ComponentProps<"ul">) {
+export function NotificationCenterList({ className, ...props }: ComponentProps<"ul">) {
   return (
     <ul
+      data-slot="notification-center-list"
+      className={cn("m-0 grid list-none gap-0.5 p-0", className)}
       {...props}
-      style={{ display: "grid", gap: 2, margin: 0, padding: 0, listStyle: "none", ...style }}
     />
   );
 }
@@ -275,8 +224,8 @@ export function NotificationCenterItem({
   read,
   defaultRead = false,
   onReadChange,
+  className,
   children,
-  style,
   ...props
 }: NotificationCenterItemProps) {
   const { variant } = useCenter("NotificationCenterItem");
@@ -292,31 +241,27 @@ export function NotificationCenterItem({
   return (
     <ItemContext.Provider value={{ id, read: current, setRead }}>
       <li
+        data-slot="notification-center-item"
+        className={cn(
+          "group/notification-item grid min-w-0 grid-cols-[8px_minmax(0,1fr)_auto] items-start",
+          "transition-[background-color,color] duration-120 ease-[ease-out] hover:bg-accent",
+          "animate-[enter_240ms_cubic-bezier(0.23,1,0.32,1)_both] fade-in-0 slide-in-from-bottom-1 nth-2:[animation-delay:40ms] nth-3:[animation-delay:80ms] nth-[n+4]:[animation-delay:120ms]",
+          "motion-reduce:animate-none motion-reduce:transition-none",
+          current ? "bg-transparent" : "bg-accent/70",
+          compact
+            ? "gap-x-2 rounded-lg px-2 py-1.5"
+            : "gap-x-2.5 rounded-[10px] py-2.5 pr-2.5 pl-3",
+          className,
+        )}
         {...props}
         data-read={current || undefined}
-        data-uai-notification-item=""
-        style={{
-          display: "grid",
-          gridTemplateColumns: "8px minmax(0, 1fr) auto",
-          alignItems: "start",
-          columnGap: compact ? 8 : 10,
-          minWidth: 0,
-          padding: compact ? "6px 8px" : "10px 10px 10px 12px",
-          borderRadius: compact ? 8 : 10,
-          ...style,
-        }}
       >
         <span
           aria-hidden="true"
-          style={{
-            width: 6,
-            height: 6,
-            marginTop: 6,
-            marginLeft: 1,
-            borderRadius: 999,
-            background: current ? "transparent" : "var(--uai-accent)",
-            transition: "background-color 120ms ease-out",
-          }}
+          className={cn(
+            "mt-1.5 ml-px size-1.5 rounded-full transition-[background-color] duration-120 ease-[ease-out]",
+            current ? "bg-transparent" : "bg-primary",
+          )}
         />
         {children}
       </li>
@@ -324,102 +269,105 @@ export function NotificationCenterItem({
   );
 }
 
-export function NotificationCenterItemContent({ style, ...props }: ComponentProps<"div">) {
+export function NotificationCenterItemContent({ className, ...props }: ComponentProps<"div">) {
   useItem("NotificationCenterItemContent");
-  return <div {...props} style={{ display: "grid", gap: 2, minWidth: 0, ...style }} />;
+  return (
+    <div
+      data-slot="notification-center-item-content"
+      className={cn("grid min-w-0 gap-0.5", className)}
+      {...props}
+    />
+  );
 }
 
 /** The notification headline. Unread items announce "Unread" before it. */
-export function NotificationCenterItemTitle({ children, style, ...props }: ComponentProps<"p">) {
+export function NotificationCenterItemTitle({
+  children,
+  className,
+  ...props
+}: ComponentProps<"p">) {
   const item = useItem("NotificationCenterItemTitle");
   return (
     <p
+      data-slot="notification-center-item-title"
+      className={cn(
+        "m-0 font-medium wrap-anywhere",
+        item.read ? "text-muted-foreground" : "text-foreground",
+        className,
+      )}
       {...props}
       id={`${item.id}-title`}
-      style={{
-        margin: 0,
-        color: item.read ? "var(--uai-muted)" : "var(--uai-text)",
-        fontWeight: 500,
-        overflowWrap: "anywhere",
-        ...style,
-      }}
     >
-      {item.read ? null : <span style={srOnly}>Unread: </span>}
+      {item.read ? null : <span className="sr-only">Unread: </span>}
       {children}
     </p>
   );
 }
 
-export function NotificationCenterItemDescription({ style, ...props }: ComponentProps<"p">) {
+export function NotificationCenterItemDescription({ className, ...props }: ComponentProps<"p">) {
   useItem("NotificationCenterItemDescription");
   return (
     <p
+      data-slot="notification-center-item-description"
+      className={cn("m-0 text-[12.5px] text-muted-foreground wrap-anywhere", className)}
       {...props}
-      style={{
-        margin: 0,
-        color: "var(--uai-muted)",
-        fontSize: 12.5,
-        overflowWrap: "anywhere",
-        ...style,
-      }}
     />
   );
 }
 
-export function NotificationCenterItemTime({ style, ...props }: ComponentProps<"time">) {
+export function NotificationCenterItemTime({ className, ...props }: ComponentProps<"time">) {
   useItem("NotificationCenterItemTime");
   return (
     <time
+      data-slot="notification-center-item-time"
+      className={cn(
+        "text-[11.5px]/[18px] whitespace-nowrap text-subtle-foreground tabular-nums",
+        className,
+      )}
       {...props}
-      style={{
-        color: "var(--uai-subtle)",
-        fontSize: 11.5,
-        lineHeight: "18px",
-        fontVariantNumeric: "tabular-nums",
-        whiteSpace: "nowrap",
-        ...style,
-      }}
     />
   );
 }
 
-export function NotificationCenterItemActions({ style, ...props }: ComponentProps<"div">) {
+export function NotificationCenterItemActions({ className, ...props }: ComponentProps<"div">) {
   useItem("NotificationCenterItemActions");
-  return <div {...props} style={{ display: "flex", alignItems: "center", gap: 2, ...style }} />;
+  return (
+    <div
+      data-slot="notification-center-item-actions"
+      className={cn("flex items-center gap-0.5", className)}
+      {...props}
+    />
+  );
 }
 
 /** Toggles the item between read and unread. */
 export function NotificationCenterItemToggle({
   onClick,
-  style,
+  className,
   ...props
 }: Omit<ComponentProps<"button">, "children">) {
   const { variant } = useCenter("NotificationCenterItemToggle");
   const item = useItem("NotificationCenterItemToggle");
   const Icon = item.read ? Mail : MailOpen;
-  const size = variant === "compact" ? 24 : 28;
   return (
     <button
       type="button"
       aria-label={item.read ? "Mark as unread" : "Mark as read"}
       aria-describedby={`${item.id}-title`}
       title={item.read ? "Mark as unread" : "Mark as read"}
+      data-slot="notification-center-item-toggle"
+      className={cn(
+        "grid cursor-pointer place-items-center rounded-lg border-0 p-0",
+        buttonInteraction,
+        "hover:bg-accent hover:text-foreground active:scale-[0.97] motion-reduce:active:scale-100",
+        "opacity-70 group-hover/notification-item:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100",
+        variant === "compact" ? "size-6" : "size-7",
+        className,
+      )}
       {...props}
-      data-uai-notification-toggle=""
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) item.setRead(!item.read);
-      }}
-      style={{
-        display: "grid",
-        placeItems: "center",
-        width: size,
-        height: size,
-        padding: 0,
-        border: 0,
-        borderRadius: 8,
-        cursor: "pointer",
-        ...style,
       }}
     >
       <Icon size={15} strokeWidth={1.75} aria-hidden="true" />

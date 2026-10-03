@@ -63,6 +63,8 @@ with the shadcn CLI or by copying the distributable source manually. Installed c
   one numbered URL per item, and previous and next links in reading order.
 - Each item page shows the live specimen with an in-stage variant pill, then the
   usage example, installation (CLI plus manual source), and accessibility notes.
+- A Theming page, right after Overview, covers installing the theme with the CLI or by
+  hand, the token reference, and how to customize tokens and instances.
 - Distributed components use 14px surfaces, 28px ghost controls, pill buttons, and
   compact raised menus. Accent blue fills the single primary action; Prompt Composer
   send stays ink. Prompt Composer also ships ghost (no card) and compact

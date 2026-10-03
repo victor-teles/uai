@@ -70,7 +70,10 @@ test("copies the content text from the keyboard and announces it", async () => {
 test("renders every variant and guards compound children", () => {
   for (const variant of MESSAGE_VARIANTS) {
     const view = render(<Fixture variant={variant} />);
-    expect(view.container.firstElementChild?.getAttribute("data-variant")).toBe(variant);
+    const root = view.container.firstElementChild;
+    expect(root?.getAttribute("data-variant")).toBe(variant);
+    expect(root?.getAttribute("data-slot")).toBe("message");
+    expect(root?.className).toContain(variant === "compact" ? "gap-2" : "gap-3");
     view.unmount();
   }
   expect(() => render(<MessageContent>Orphan</MessageContent>)).toThrow(

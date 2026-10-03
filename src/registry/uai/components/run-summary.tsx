@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import {
   ArrowRight,
   CircleAlert,
@@ -10,14 +11,8 @@ import {
   Plus,
   TriangleAlert,
 } from "lucide-react";
-import {
-  type ComponentProps,
-  type CSSProperties,
-  createContext,
-  type ReactNode,
-  useContext,
-  useId,
-} from "react";
+import { type ComponentProps, createContext, type ReactNode, useContext, useId } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const RUN_SUMMARY_VARIANTS = ["card", "plain", "compact"] as const;
 export const RUN_SUMMARY_OUTCOMES = ["success", "partial", "failed"] as const;
@@ -42,214 +37,150 @@ function useRunSummary(part: string) {
   return context;
 }
 
-const dangerText = "color-mix(in oklab, var(--uai-danger) 75%, var(--uai-text))";
+const dangerText = "text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))]";
 const outcomeDetails: Record<
   RunSummaryOutcome,
-  { label: string; icon: LucideIcon; color: string }
+  { label: string; icon: LucideIcon; className: string }
 > = {
-  success: { label: "Completed", icon: CircleCheck, color: "var(--uai-success)" },
-  partial: { label: "Completed with warnings", icon: TriangleAlert, color: "var(--uai-warning)" },
-  failed: { label: "Failed", icon: CircleAlert, color: dangerText },
+  success: { label: "Completed", icon: CircleCheck, className: "bg-success/14 text-success" },
+  partial: {
+    label: "Completed with warnings",
+    icon: TriangleAlert,
+    className: "bg-warning/14 text-warning",
+  },
+  failed: { label: "Failed", icon: CircleAlert, className: cn("bg-destructive/14", dangerText) },
 };
 
-const outcomeTint: Record<RunSummaryOutcome, string> = {
-  success: "color-mix(in oklab, var(--uai-success) 14%, transparent)",
-  partial: "color-mix(in oklab, var(--uai-warning) 14%, transparent)",
-  failed: "color-mix(in oklab, var(--uai-danger) 14%, transparent)",
-};
-
-const runSummaryCss = `
-@keyframes uai-run-summary-in{from{opacity:0;transform:translateY(4px)}}
-[data-uai-run-summary]>*{animation:uai-run-summary-in 240ms cubic-bezier(0.23,1,0.32,1) backwards}
-[data-uai-run-summary]>:nth-child(2){animation-delay:40ms}
-[data-uai-run-summary]>:nth-child(3){animation-delay:80ms}
-[data-uai-run-summary]>:nth-child(4){animation-delay:120ms}
-[data-uai-run-summary]>:nth-child(5){animation-delay:160ms}
-[data-uai-run-summary]>:nth-child(n+6){animation-delay:200ms}
-[data-uai-run-summary-artifact]{transition:background-color 120ms ease-out}
-[data-uai-run-summary-artifact]:hover{background:color-mix(in oklab,var(--uai-surface-raised) 50%,transparent)}
-[data-uai-run-summary-action]{transition:background-color 120ms ease-out,filter 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-[data-uai-run-summary-action="secondary"]:hover{background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text))!important}
-[data-uai-run-summary-action="primary"]:hover{filter:brightness(1.08)}
-[data-uai-run-summary-action]:active{transform:scale(0.97)}
-[data-uai-run-summary-action]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-@media (prefers-reduced-motion:reduce){[data-uai-run-summary]>*{animation:none}[data-uai-run-summary-artifact],[data-uai-run-summary-action]{transition:none}[data-uai-run-summary-action]:active{transform:none}}
-`;
-
-const visuallyHidden: CSSProperties = {
-  position: "absolute",
-  width: 1,
-  height: 1,
-  margin: -1,
-  padding: 0,
-  overflow: "hidden",
-  clip: "rect(0 0 0 0)",
-  whiteSpace: "nowrap",
-  border: 0,
-};
+const runSummaryVariants = cva(
+  [
+    "grid min-w-0 text-[13px]/[18px] text-foreground",
+    "*:animate-in *:fade-in-0 *:slide-in-from-bottom-1 *:duration-240 *:ease-out-quint *:fill-mode-backwards *:motion-reduce:animate-none",
+    "*:nth-2:[animation-delay:40ms] *:nth-3:[animation-delay:80ms] *:nth-4:[animation-delay:120ms] *:nth-5:[animation-delay:160ms] *:nth-[n+6]:[animation-delay:200ms]",
+  ],
+  {
+    variants: {
+      variant: {
+        card: "gap-4.5 rounded-[14px] border bg-card p-4",
+        plain: "gap-4.5 rounded-[14px] border-0 bg-transparent p-0",
+        compact: "gap-3 rounded-xl border bg-card p-3",
+      },
+    },
+  },
+);
 
 export function RunSummary({
   variant = "card",
   outcome = "success",
+  className,
   children,
-  style,
   ...props
 }: RunSummaryProps) {
   const id = useId();
-  const chrome = variant !== "plain";
   return (
     <RunSummaryContext.Provider value={{ id, variant, outcome }}>
       <section
         aria-labelledby={`${id}-title`}
-        {...props}
+        data-slot="run-summary"
         data-variant={variant}
         data-outcome={outcome}
-        data-uai-run-summary=""
-        style={{
-          display: "grid",
-          gap: variant === "compact" ? 12 : 18,
-          minWidth: 0,
-          padding: chrome ? (variant === "compact" ? 12 : 16) : 0,
-          border: chrome ? "1px solid var(--uai-border)" : 0,
-          borderRadius: variant === "compact" ? 12 : 14,
-          background: chrome ? "var(--uai-surface)" : "transparent",
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
+        className={cn(runSummaryVariants({ variant }), className)}
+        {...props}
       >
-        <style href="uai-run-summary" precedence="default">
-          {runSummaryCss}
-        </style>
         {children}
       </section>
     </RunSummaryContext.Provider>
   );
 }
 
-export function RunSummaryHeader({ children, style, ...props }: ComponentProps<"div">) {
+export function RunSummaryHeader({ className, children, ...props }: ComponentProps<"div">) {
   const context = useRunSummary("RunSummaryHeader");
-  const { icon: Icon, color, label } = outcomeDetails[context.outcome];
-  const size = context.variant === "compact" ? 24 : 28;
+  const { icon: Icon, className: outcomeClass, label } = outcomeDetails[context.outcome];
+  const compact = context.variant === "compact";
   return (
     <div
+      data-slot="run-summary-header"
+      className={cn("flex min-w-0 items-start", compact ? "gap-2.5" : "gap-3", className)}
       {...props}
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        gap: context.variant === "compact" ? 10 : 12,
-        minWidth: 0,
-        ...style,
-      }}
     >
       <span
-        style={{
-          display: "grid",
-          placeItems: "center",
-          flex: "none",
-          width: size,
-          height: size,
-          borderRadius: context.variant === "compact" ? 8 : 10,
-          background: outcomeTint[context.outcome],
-          color,
-        }}
+        className={cn(
+          "grid flex-none place-items-center",
+          compact ? "size-6 rounded-lg" : "size-7 rounded-[10px]",
+          outcomeClass,
+        )}
       >
-        <Icon
-          size={context.variant === "compact" ? 13 : 15}
-          strokeWidth={1.75}
-          aria-hidden="true"
-        />
-        <span style={visuallyHidden}>{label}</span>
+        <Icon size={compact ? 13 : 15} strokeWidth={1.75} aria-hidden="true" />
+        <span className="sr-only">{label}</span>
       </span>
-      <div style={{ display: "grid", gap: 2, flex: 1, minWidth: 0 }}>{children}</div>
+      <div className="grid min-w-0 flex-1 gap-0.5">{children}</div>
     </div>
   );
 }
 
-export function RunSummaryTitle({ style, ...props }: ComponentProps<"h3">) {
+export function RunSummaryTitle({ className, ...props }: ComponentProps<"h3">) {
   const context = useRunSummary("RunSummaryTitle");
   return (
     <h3
+      data-slot="run-summary-title"
+      className={cn(
+        "m-0 font-medium tracking-[-0.005em] text-balance",
+        context.variant === "compact" ? "pt-0.5 text-[13.5px]/5" : "pt-1 text-[14.5px]/5",
+        className,
+      )}
       {...props}
       id={`${context.id}-title`}
-      style={{
-        margin: 0,
-        paddingTop: context.variant === "compact" ? 2 : 4,
-        fontSize: context.variant === "compact" ? 13.5 : 14.5,
-        lineHeight: "20px",
-        fontWeight: 500,
-        letterSpacing: "-0.005em",
-        textWrap: "balance",
-        ...style,
-      }}
     />
   );
 }
 
-export function RunSummaryDescription({ style, ...props }: ComponentProps<"p">) {
+export function RunSummaryDescription({ className, ...props }: ComponentProps<"p">) {
   useRunSummary("RunSummaryDescription");
   return (
     <p
+      data-slot="run-summary-description"
+      className={cn("m-0 text-[12.5px]/[18px] text-muted-foreground tabular-nums", className)}
       {...props}
-      style={{
-        margin: 0,
-        color: "var(--uai-muted)",
-        fontSize: 12.5,
-        lineHeight: "18px",
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     />
   );
 }
 
-export function RunSummaryStats({ style, ...props }: ComponentProps<"dl">) {
+export function RunSummaryStats({ className, ...props }: ComponentProps<"dl">) {
   const context = useRunSummary("RunSummaryStats");
   return (
     <dl
+      data-slot="run-summary-stats"
+      className={cn(
+        "m-0 grid grid-cols-[repeat(auto-fit,minmax(96px,1fr))]",
+        context.variant === "compact" ? "gap-1" : "gap-1.5",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(96px, 1fr))",
-        gap: context.variant === "compact" ? 4 : 6,
-        margin: 0,
-        ...style,
-      }}
     />
   );
 }
 
 export type RunSummaryStatProps = ComponentProps<"div"> & { label: ReactNode };
 
-export function RunSummaryStat({ label, children, style, ...props }: RunSummaryStatProps) {
+export function RunSummaryStat({ label, children, className, ...props }: RunSummaryStatProps) {
   const context = useRunSummary("RunSummaryStat");
+  const compact = context.variant === "compact";
   return (
     <div
+      data-slot="run-summary-stat"
+      className={cn(
+        "flex flex-col gap-0.5",
+        compact ? "rounded-lg px-2.5 py-1.5" : "rounded-[10px] px-3 py-2.5",
+        context.variant === "plain" ? "bg-muted" : "bg-muted/60",
+        className,
+      )}
       {...props}
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 2,
-        padding: context.variant === "compact" ? "6px 10px" : "10px 12px",
-        borderRadius: context.variant === "compact" ? 8 : 10,
-        background:
-          context.variant === "plain"
-            ? "var(--uai-surface-raised)"
-            : "color-mix(in oklab, var(--uai-surface-raised) 60%, transparent)",
-        ...style,
-      }}
     >
-      <dt style={{ color: "var(--uai-subtle)", fontSize: 11.5, lineHeight: "16px" }}>{label}</dt>
+      <dt className="text-[11.5px]/4 text-subtle-foreground">{label}</dt>
       <dd
-        style={{
-          margin: 0,
-          fontSize: context.variant === "compact" ? 14 : 17,
-          lineHeight: context.variant === "compact" ? "20px" : "24px",
-          fontWeight: 600,
-          letterSpacing: "-0.01em",
-          fontVariantNumeric: "tabular-nums",
-        }}
+        className={cn(
+          "m-0 font-semibold tracking-[-0.01em] tabular-nums",
+          compact ? "text-sm/5" : "text-[17px]/6",
+        )}
       >
         {children}
       </dd>
@@ -264,39 +195,33 @@ export type RunSummaryListProps = ComponentProps<"div"> & {
 
 function SummaryList({
   part,
+  slot,
   defaultLabel,
   ordered = false,
   label,
+  className,
   children,
-  style,
   ...props
-}: RunSummaryListProps & { part: string; defaultLabel: string; ordered?: boolean }) {
+}: RunSummaryListProps & {
+  part: string;
+  slot: string;
+  defaultLabel: string;
+  ordered?: boolean;
+}) {
   const context = useRunSummary(part);
   const headingId = useId();
   const List = ordered ? "ol" : "ul";
   return (
-    <div {...props} style={{ display: "grid", gap: 6, minWidth: 0, ...style }}>
-      <h4
-        id={headingId}
-        style={{
-          margin: 0,
-          color: "var(--uai-subtle)",
-          fontSize: 11.5,
-          lineHeight: "16px",
-          fontWeight: 500,
-        }}
-      >
+    <div data-slot={slot} className={cn("grid min-w-0 gap-1.5", className)} {...props}>
+      <h4 id={headingId} className="m-0 text-[11.5px]/4 font-medium text-subtle-foreground">
         {label ?? defaultLabel}
       </h4>
       <List
         aria-labelledby={headingId}
-        style={{
-          display: "grid",
-          gap: context.variant === "compact" ? 0 : 2,
-          margin: 0,
-          padding: 0,
-          listStyle: "none",
-        }}
+        className={cn(
+          "m-0 grid list-none p-0",
+          context.variant === "compact" ? "gap-0" : "gap-0.5",
+        )}
       >
         {children}
       </List>
@@ -305,17 +230,24 @@ function SummaryList({
 }
 
 export function RunSummaryArtifacts(props: RunSummaryListProps) {
-  return <SummaryList {...props} part="RunSummaryArtifacts" defaultLabel="Changed files" />;
+  return (
+    <SummaryList
+      {...props}
+      part="RunSummaryArtifacts"
+      slot="run-summary-artifacts"
+      defaultLabel="Changed files"
+    />
+  );
 }
 
 export type RunSummaryArtifactChange = "added" | "modified" | "deleted";
 const changeDetails: Record<
   RunSummaryArtifactChange,
-  { label: string; icon: LucideIcon; color: string }
+  { label: string; icon: LucideIcon; className: string }
 > = {
-  added: { label: "Added", icon: Plus, color: "var(--uai-success)" },
-  modified: { label: "Modified", icon: PencilLine, color: "var(--uai-muted)" },
-  deleted: { label: "Deleted", icon: Minus, color: dangerText },
+  added: { label: "Added", icon: Plus, className: "text-success" },
+  modified: { label: "Modified", icon: PencilLine, className: "text-muted-foreground" },
+  deleted: { label: "Deleted", icon: Minus, className: dangerText },
 };
 
 export type RunSummaryArtifactProps = ComponentProps<"li"> & {
@@ -324,41 +256,31 @@ export type RunSummaryArtifactProps = ComponentProps<"li"> & {
 
 export function RunSummaryArtifact({
   change = "modified",
+  className,
   children,
-  style,
   ...props
 }: RunSummaryArtifactProps) {
   const context = useRunSummary("RunSummaryArtifact");
-  const { icon: Icon, color, label } = changeDetails[change];
+  const { icon: Icon, className: changeClass, label } = changeDetails[change];
   return (
     <li
+      data-slot="run-summary-artifact"
+      className={cn(
+        "-mx-2 flex min-w-0 items-center gap-2 rounded-lg px-2",
+        "transition-[background-color] duration-120 ease-[ease-out] hover:bg-accent/50 motion-reduce:transition-none",
+        context.variant === "compact" ? "min-h-6.5" : "min-h-7.5",
+        className,
+      )}
       {...props}
       data-change={change}
-      data-uai-run-summary-artifact=""
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        minWidth: 0,
-        minHeight: context.variant === "compact" ? 26 : 30,
-        margin: "0 -8px",
-        padding: "0 8px",
-        borderRadius: 8,
-        ...style,
-      }}
     >
-      <Icon size={13} strokeWidth={2} aria-hidden="true" style={{ flex: "none", color }} />
-      <span style={visuallyHidden}>{label}: </span>
+      <Icon size={13} strokeWidth={2} aria-hidden="true" className={cn("flex-none", changeClass)} />
+      <span className="sr-only">{label}: </span>
       <span
-        style={{
-          display: "flex",
-          alignItems: "baseline",
-          gap: 8,
-          flex: 1,
-          minWidth: 0,
-          textDecoration: change === "deleted" ? "line-through" : undefined,
-          textDecorationColor: "var(--uai-border-strong)",
-        }}
+        className={cn(
+          "flex min-w-0 flex-1 items-baseline gap-2 decoration-border-strong",
+          change === "deleted" && "line-through",
+        )}
       >
         {children}
       </span>
@@ -366,115 +288,97 @@ export function RunSummaryArtifact({
   );
 }
 
-export function RunSummaryArtifactName({ style, ...props }: ComponentProps<"span">) {
+export function RunSummaryArtifactName({ className, ...props }: ComponentProps<"span">) {
   useRunSummary("RunSummaryArtifactName");
   return (
     <span
+      data-slot="run-summary-artifact-name"
+      className={cn("min-w-0 truncate font-mono text-[12px]", className)}
       {...props}
-      style={{
-        minWidth: 0,
-        overflow: "hidden",
-        whiteSpace: "nowrap",
-        textOverflow: "ellipsis",
-        fontFamily: "var(--font-mono, ui-monospace, monospace)",
-        fontSize: 12,
-        ...style,
-      }}
     />
   );
 }
 
-export function RunSummaryArtifactMeta({ style, ...props }: ComponentProps<"span">) {
+export function RunSummaryArtifactMeta({ className, ...props }: ComponentProps<"span">) {
   useRunSummary("RunSummaryArtifactMeta");
   return (
     <span
+      data-slot="run-summary-artifact-meta"
+      className={cn(
+        "ml-auto flex-none font-mono text-[11.5px] text-subtle-foreground tabular-nums",
+        className,
+      )}
       {...props}
-      style={{
-        flex: "none",
-        marginLeft: "auto",
-        color: "var(--uai-subtle)",
-        fontFamily: "var(--font-mono, ui-monospace, monospace)",
-        fontSize: 11.5,
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     />
   );
 }
 
 export function RunSummaryWarnings(props: RunSummaryListProps) {
-  return <SummaryList {...props} part="RunSummaryWarnings" defaultLabel="Warnings" />;
+  return (
+    <SummaryList
+      {...props}
+      part="RunSummaryWarnings"
+      slot="run-summary-warnings"
+      defaultLabel="Warnings"
+    />
+  );
 }
 
-export function RunSummaryWarning({ children, style, ...props }: ComponentProps<"li">) {
+export function RunSummaryWarning({ className, children, ...props }: ComponentProps<"li">) {
   useRunSummary("RunSummaryWarning");
   return (
     <li
+      data-slot="run-summary-warning"
+      className={cn(
+        "flex items-start gap-2 rounded-[10px] bg-warning/10 px-2.5 py-2 text-[12.5px]/[18px]",
+        className,
+      )}
       {...props}
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        gap: 8,
-        padding: "8px 10px",
-        borderRadius: 10,
-        background: "color-mix(in oklab, var(--uai-warning) 10%, transparent)",
-        fontSize: 12.5,
-        lineHeight: "18px",
-        ...style,
-      }}
     >
-      <TriangleAlert
-        size={14}
-        aria-hidden="true"
-        style={{ flex: "none", marginTop: 2, color: "var(--uai-warning)" }}
-      />
-      <span style={{ minWidth: 0, overflowWrap: "anywhere" }}>{children}</span>
+      <TriangleAlert size={14} aria-hidden="true" className="mt-0.5 flex-none text-warning" />
+      <span className="min-w-0 wrap-anywhere">{children}</span>
     </li>
   );
 }
 
 export function RunSummaryNextSteps(props: RunSummaryListProps) {
-  return <SummaryList {...props} part="RunSummaryNextSteps" defaultLabel="Next steps" ordered />;
+  return (
+    <SummaryList
+      {...props}
+      part="RunSummaryNextSteps"
+      slot="run-summary-next-steps"
+      defaultLabel="Next steps"
+      ordered
+    />
+  );
 }
 
-export function RunSummaryNextStep({ children, style, ...props }: ComponentProps<"li">) {
+export function RunSummaryNextStep({ className, children, ...props }: ComponentProps<"li">) {
   useRunSummary("RunSummaryNextStep");
   return (
     <li
+      data-slot="run-summary-next-step"
+      className={cn("flex min-w-0 items-start gap-2 py-0.75", className)}
       {...props}
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        gap: 8,
-        minWidth: 0,
-        padding: "3px 0",
-        ...style,
-      }}
     >
       <ArrowRight
         size={13}
         strokeWidth={1.75}
         aria-hidden="true"
-        style={{ flex: "none", marginTop: 3, color: "var(--uai-subtle)" }}
+        className="mt-0.75 flex-none text-subtle-foreground"
       />
-      <span style={{ minWidth: 0 }}>{children}</span>
+      <span className="min-w-0">{children}</span>
     </li>
   );
 }
 
-export function RunSummaryActions({ style, ...props }: ComponentProps<"div">) {
+export function RunSummaryActions({ className, ...props }: ComponentProps<"div">) {
   useRunSummary("RunSummaryActions");
   return (
     <div
+      data-slot="run-summary-actions"
+      className={cn("flex flex-wrap justify-end gap-2 pt-0.5", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        justifyContent: "flex-end",
-        gap: 8,
-        paddingTop: 2,
-        ...style,
-      }}
     />
   );
 }
@@ -484,26 +388,25 @@ export type RunSummaryActionProps = ComponentProps<"button"> & {
   primary?: boolean;
 };
 
-export function RunSummaryAction({ primary = false, style, ...props }: RunSummaryActionProps) {
+export function RunSummaryAction({ primary = false, className, ...props }: RunSummaryActionProps) {
   const context = useRunSummary("RunSummaryAction");
+  const compact = context.variant === "compact";
   return (
     <button
       type="button"
-      data-uai-run-summary-action={primary ? "primary" : "secondary"}
+      data-slot="run-summary-action"
+      data-emphasis={primary ? "primary" : "secondary"}
+      className={cn(
+        "cursor-pointer rounded-full border-0 font-medium",
+        "[transition:background-color_120ms_ease-out,filter_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100",
+        "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+        compact ? "h-7 px-3 text-[12.5px]" : "h-8 px-3.5 text-[13px]",
+        primary
+          ? "bg-primary text-primary-foreground hover:brightness-[1.08]"
+          : "bg-secondary text-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+        className,
+      )}
       {...props}
-      style={{
-        height: context.variant === "compact" ? 28 : 32,
-        padding: context.variant === "compact" ? "0 12px" : "0 14px",
-        border: 0,
-        borderRadius: 999,
-        background: primary ? "var(--uai-accent)" : "var(--uai-surface-raised)",
-        color: primary ? "var(--uai-accent-foreground)" : "var(--uai-text)",
-        font: "inherit",
-        fontSize: context.variant === "compact" ? 12.5 : 13,
-        fontWeight: 500,
-        cursor: "pointer",
-        ...style,
-      }}
     />
   );
 }

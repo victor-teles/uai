@@ -365,6 +365,24 @@ Warm graphite neutrals carry structure. One accent blue marks the primary action
 
 **The Ink Send Rule.** Prompt Composer send uses Text on Surface when it can submit, and Border Strong when idle. Never accent.
 
+### Theme tokens
+
+Distributed components read the standard shadcn theme tokens, never `--uai-*` variables. The `uai-theme` registry item fills those tokens with the palette above, so installing it gives the Uai look, and a consumer who keeps their own shadcn theme gets components that match their app. Four tokens extend the shadcn set: `subtle-foreground`, `border-strong`, `success`, and `warning`.
+
+| Uai role | Token | Example classes |
+| --- | --- | --- |
+| Canvas | `background` | `bg-background` |
+| Surface | `card`, `popover` | `bg-card`, `bg-popover` |
+| Raised | `muted`, `accent`, `secondary` | `bg-muted`, `hover:bg-accent`, `bg-secondary` |
+| Border / Border Strong | `border`, `border-strong` | `border`, `border-border-strong` |
+| Text | `foreground` | `text-foreground` |
+| Muted | `muted-foreground` | `text-muted-foreground` |
+| Subtle | `subtle-foreground` | `text-subtle-foreground` |
+| Accent | `primary`, `ring` | `bg-primary text-primary-foreground` |
+| Success / Warning / Danger | `success`, `warning`, `destructive` | `bg-success/14 text-success` |
+
+The theme also ships `ease-out-quint`, the `shimmer-text` utility for live labels, and the `animate-skeleton-shimmer`, `animate-indeterminate`, `animate-ring-pulse`, `animate-grow-x`, and `animate-grow-y` animations. Entrances and pop-ins use `tw-animate-css`.
+
 ## Typography
 
 **Sans:** Inter Variable (site). Distributed components inherit the consumer's sans font.  
@@ -382,7 +400,7 @@ Warm graphite neutrals carry structure. One accent blue marks the primary action
 
 ## Layout
 
-The desktop frame is a 272px sticky sidebar and a flexible main column, centered at 1280px with 1px side rules over the plain canvas. The main column holds one 960px document: header, specimen, then Code example, Installation, and Accessibility sections. Dashed hairlines separate the sections, and a previous/next pager ends the page. The overview page shows the intro, a live Prompt Composer specimen, and a grid of cards for every item, grouped by category.
+The desktop frame is a 272px sticky sidebar and a flexible main column, centered at 1280px with 1px side rules over the plain canvas. The main column holds one 960px document: header, specimen, then Code example, Installation, and Accessibility sections. Dashed hairlines separate the sections, and a previous/next pager ends the page. The overview page shows the intro, a live Prompt Composer specimen, and a grid of cards for every item, grouped by category. The Theming page follows Overview in the sidebar and uses the same document layout: Install the theme, Manual installation as numbered steps with copyable code, a token table with live swatches, and Customize.
 
 Below 900px, a sticky top bar holds the brand, search, and a menu button. The menu opens the same grouped navigation as a full-screen drawer. Below 640px, the pager stacks and the header metadata hides. The page never scrolls horizontally.
 
@@ -392,8 +410,8 @@ Navigation: ⌘K or `/` opens the command palette from anywhere. It searches by 
 
 Depth comes from tone. Cards are Surface on Canvas, and specimens are a 3% tint of Canvas. Lifted exceptions:
 
-- **Floating menu / palette** (`0 0 0 1px var(--uai-border-strong), 0 10px 28px` black at 42%): Popovers, composer menus, and the command palette.
-- **Segmented thumb** (`0 0 0 1px var(--uai-border-strong)`): The active pill.
+- **Floating menu / palette** (a 1px Border Strong ring plus `0 10px 28px` black at 42%): Popovers, composer menus, and the command palette.
+- **Segmented thumb** (a 1px Border Strong ring): The active pill.
 
 ## Shapes
 
@@ -876,14 +894,16 @@ disagrees, these rules win.
 - **Motion:** Sliding thumbs and indicators for tabs, toggles, and segmented controls.
   Fade-up with a stagger of 40ms or less for entering rows (first six only). Pop-in for
   menus and dialogs. `grid-template-rows` for expand.
-- **Interaction states in source:** Inline styles cannot express `:hover`, so each root
-  renders a small scoped `<style>` block (or uses Tailwind arbitrary classes, which require
-  the consumer's Tailwind to scan `components/ui/uai`). Every animation has a
-  `prefers-reduced-motion` fallback.
+- **Styling in source:** Every part is styled with Tailwind classes merged through `cn()`,
+  so a consumer's `className` always wins. Variants use `cva`, every exported part has a
+  `data-slot`, and hover, focus, state, container-query, and reduced-motion rules are
+  Tailwind variants. No inline style objects or injected `<style>` blocks; `style` is
+  only for runtime values such as progress widths. Every animation has a
+  `motion-reduce` fallback.
 
 ## Forms and usability
 
-All eight form components use the the warm graphite tokens in light and dark themes, 13px field type, visible native keyboard focus, and consumer-composed content. New visual values live in the distributed source as inline styles. They use no entrance animation, so reduced motion does not require a separate path.
+All eight form components use the the warm graphite tokens in light and dark themes, 13px field type, visible native keyboard focus, and consumer-composed content. Visual values live in the distributed source as Tailwind classes. They use no entrance animation, so reduced motion does not require a separate path.
 
 | Component | Visual variants | Interaction contract |
 | --- | --- | --- |
@@ -902,7 +922,7 @@ Backend search, upload transport, saves, validation policy, routing, and wizard 
 
 ## Navigation and layout
 
-All five navigation components use the the warm graphite tokens in light and dark themes, 13px / 18px type, and consumer-composed content. New visual values live in the distributed source as inline styles.Only the floating Command Menu animates, and it skips the animation under reduced motion.
+All five navigation components use the the warm graphite tokens in light and dark themes, 13px / 18px type, and consumer-composed content. Visual values live in the distributed source as Tailwind classes. Only the floating Command Menu animates, and it skips the animation under reduced motion.
 
 | Component | Visual variants | Interaction contract |
 | --- | --- | --- |
@@ -918,7 +938,7 @@ Routing, permissions, command execution, dialog placement, and global shortcuts 
 
 ## Feedback and state
 
-All six feedback components use the the warm graphite tokens in light and dark themes, 13px / 18px body type, visible native keyboard focus, and consumer-composed content. New visual values live in the distributed source as inline styles; the dialog pop-in and skeleton motion ship as a small scoped `<style>` block because they need keyframes, `::backdrop`, and a `prefers-reduced-motion` override.
+All six feedback components use the the warm graphite tokens in light and dark themes, 13px / 18px body type, visible native keyboard focus, and consumer-composed content. Visual values live in the distributed source as Tailwind classes; the dialog pop-in, `::backdrop`, and skeleton motion use `tw-animate-css`, `backdrop:` variants, and the theme animations, with `motion-reduce` overrides.
 
 | Component | Visual variants | Interaction contract |
 | --- | --- | --- |
@@ -935,7 +955,7 @@ Banner copy, job control, the action behind inline feedback, the destructive ope
 
 ## Data display
 
-All seven data display components use the warm graphite tokens in light and dark themes, 13px / 18px body type, tabular numerals for figures, visible native keyboard focus, and consumer-composed content. New visual values live in the distributed source as inline styles. Emphasis comes from tone, weight 500, and accent for the one primary action. 
+All seven data display components use the warm graphite tokens in light and dark themes, 13px / 18px body type, tabular numerals for figures, visible native keyboard focus, and consumer-composed content. Visual values live in the distributed source as Tailwind classes. Emphasis comes from tone, weight 500, and accent for the one primary action. 
 | Component | Visual variants | Interaction contract |
 | --- | --- | --- |
 | Data Table Toolbar | toolbar / stacked / compact | Search, filters, column visibility, export, and bulk actions for selected rows. |
@@ -952,7 +972,7 @@ Data fetching, filtering, sorting, export, selection, persistence of board order
 
 ## Content and community
 
-All five content components use the the warm graphite tokens in light and dark themes, 13px / 18px body type, visible native keyboard focus, and consumer-composed content. New visual values live in the distributed source as inline styles.Only the Reaction Bar picker and the Share Menu animate, and both skip the animation under reduced motion.
+All five content components use the the warm graphite tokens in light and dark themes, 13px / 18px body type, visible native keyboard focus, and consumer-composed content. Visual values live in the distributed source as Tailwind classes. Only the Reaction Bar picker and the Share Menu animate, and both skip the animation under reduced motion.
 
 | Component | Visual variants | Interaction contract |
 | --- | --- | --- |
@@ -968,7 +988,7 @@ Follow persistence, comment storage, permissions, moderation policy, reaction co
 
 ## Marketing and conversion
 
-All six marketing components use the the warm graphite tokens in light and dark themes, 13px / 18px body type, visible native keyboard focus, and consumer-composed content. New visual values live in the distributed source as inline styles.Only Product Gallery animates: the zoom transform and the fullscreen pop-in ship as a small scoped `<style>` block and stop under reduced motion.
+All six marketing components use the the warm graphite tokens in light and dark themes, 13px / 18px body type, visible native keyboard focus, and consumer-composed content. Visual values live in the distributed source as Tailwind classes. Only Product Gallery animates: the zoom transform and the fullscreen pop-in use Tailwind motion classes and stop under reduced motion.
 
 | Component | Visual variants | Interaction contract |
 | --- | --- | --- |
@@ -985,7 +1005,7 @@ Campaign scheduling, billing logic and currency formatting, testimonial sourcing
 
 ## AI and automation
 
-All six AI components use the the warm graphite tokens in light and dark themes, 13px / 18px body type, visible native keyboard focus, and consumer-composed content. New visual values live in the distributed source as inline styles. Emphasis comes from tone, weight 500, and accent for the one primary action. Motion runs through the Web Animations API and is skipped under `prefers-reduced-motion`: the citation pop-in, the streaming caret, the response dots, and the tool spinner.
+All six AI components use the the warm graphite tokens in light and dark themes, 13px / 18px body type, visible native keyboard focus, and consumer-composed content. Visual values live in the distributed source as Tailwind classes. Emphasis comes from tone, weight 500, and accent for the one primary action. Motion runs through the Web Animations API and is skipped under `prefers-reduced-motion`: the citation pop-in, the streaming caret, the response dots, and the tool spinner.
 
 | Component | Visual variants | Interaction contract |
 | --- | --- | --- |
@@ -1002,7 +1022,7 @@ Message transport, streaming, and copy text; source retrieval and link targets; 
 
 ## Marketing sites
 
-All eight marketing blocks are full page sections composed from Uai components. They use the warm graphite tokens in light and dark themes, 13px / 18px body type, visible native keyboard focus, and consumer-composed content. New visual values live in the distributed source as inline styles. Responsive layout ships as a small scoped `<style>` block of container queries, so a block stacks to one column whenever its own container is narrow, not only on small viewports.Only the FAQ chevron animates, and it stops under reduced motion.
+All eight marketing blocks are full page sections composed from Uai components. They use the warm graphite tokens in light and dark themes, 13px / 18px body type, visible native keyboard focus, and consumer-composed content. Visual values live in the distributed source as Tailwind classes. Responsive layout uses Tailwind container-query variants (`@container`, `@max-[…]:`), so a block stacks to one column whenever its own container is narrow, not only on small viewports.Only the FAQ chevron animates, and it stops under reduced motion.
 
 | Block | Layout variants | Composes | Interaction contract |
 | --- | --- | --- | --- |
@@ -1021,7 +1041,7 @@ Copy, imagery, plans and prices, billing, testimonials, question content, signup
 
 ## Application surfaces
 
-All seven application blocks are product workflows composed from Uai components. They use the warm graphite tokens in light and dark themes, 13px / 18px body type, visible native keyboard focus, and consumer-composed content. New visual values live in the distributed source as inline styles. Each layout variant maps onto the variants of the components it composes, so a block changes as one unit. Layout reflows with `flex-wrap` and `auto-fit` grids instead of media queries: sidebars, asides, and filter columns wrap above the main column when space runs out.The blocks add no motion of their own; dialogs and menus keep the motion of the components they compose.
+All seven application blocks are product workflows composed from Uai components. They use the warm graphite tokens in light and dark themes, 13px / 18px body type, visible native keyboard focus, and consumer-composed content. Visual values live in the distributed source as Tailwind classes. Each layout variant maps onto the variants of the components it composes, so a block changes as one unit. Layout reflows with `flex-wrap` and `auto-fit` grids instead of media queries: sidebars, asides, and filter columns wrap above the main column when space runs out. The blocks add no motion of their own; dialogs and menus keep the motion of the components they compose.
 
 | Block | Layout variants | Composes | Interaction contract |
 | --- | --- | --- | --- |
@@ -1039,7 +1059,7 @@ Routing, data loading, persistence, permissions, saving, invitations, role chang
 
 ## Data and operations
 
-All seven operations blocks compose existing Uai components inside graphite chrome in light and dark themes, with 13px / 18px body type, tabular numerals for figures, and visible native keyboard focus. Block-owned regions (record lists, result and preview tables, the column mapping, the group-by and report option pills, and the bar chart) use inline styles. Each block maps its layout variant onto the variants of the components it composes, so one switch keeps the whole surface consistent. Checked option pills are accent-tinted. Motion comes only from composed components (the confirmation dialog pop-in and the column menu) and stops under reduced motion.
+All seven operations blocks compose existing Uai components inside graphite chrome in light and dark themes, with 13px / 18px body type, tabular numerals for figures, and visible native keyboard focus. Block-owned regions (record lists, result and preview tables, the column mapping, the group-by and report option pills, and the bar chart) use Tailwind classes. Each block maps its layout variant onto the variants of the components it composes, so one switch keeps the whole surface consistent. Checked option pills are accent-tinted. Motion comes only from composed components (the confirmation dialog pop-in and the column menu) and stops under reduced motion.
 
 | Block | Layout variants | Interaction contract |
 | --- | --- | --- |
@@ -1057,7 +1077,7 @@ Record persistence, query execution, file parsing and transport, decision handli
 
 ## Authentication and onboarding blocks
 
-All three onboarding blocks are account workflows composed from Uai components. They use the warm graphite tokens in light and dark themes, 13px / 18px body type, visible native keyboard focus, and consumer-composed content. New visual values live in the distributed source as inline styles. Responsive layout ships as a small scoped `<style>` block of container queries, so a block stacks to one column whenever its own container is narrow.The blocks add no motion of their own.
+All three onboarding blocks are account workflows composed from Uai components. They use the warm graphite tokens in light and dark themes, 13px / 18px body type, visible native keyboard focus, and consumer-composed content. Visual values live in the distributed source as Tailwind classes. Responsive layout uses Tailwind container-query variants (`@container`, `@max-[…]:`), so a block stacks to one column whenever its own container is narrow. The blocks add no motion of their own.
 
 | Block | Layout variants | Composes | Interaction contract |
 | --- | --- | --- | --- |
@@ -1071,7 +1091,7 @@ Authentication, code delivery and checking, rate limits, persistence of wizard p
 
 ## Commerce blocks
 
-All six commerce blocks are product workflows composed from Uai commerce, form, and feedback components. They use the warm graphite tokens in light and dark themes, 13px / 18px body type, visible keyboard focus, and consumer-composed content. New visual values live in the distributed source as inline styles, and responsive layout ships as a small scoped `<style>` block of container queries, so each block stacks to one column whenever its own container is narrow.
+All six commerce blocks are product workflows composed from Uai commerce, form, and feedback components. They use the warm graphite tokens in light and dark themes, 13px / 18px body type, visible keyboard focus, and consumer-composed content. Visual values live in the distributed source as Tailwind classes, and responsive layout uses Tailwind container-query variants (`@container`, `@max-[…]:`), so each block stacks to one column whenever its own container is narrow.
 | Block | Layout variants | Composes | Interaction contract |
 | --- | --- | --- | --- |
 | Product Detail | split / stacked / compact | Product Gallery, Quantity Picker | Gallery, native radio option groups, availability status, compare-at price, a purchase form with a pending add-to-cart action, and delivery facts. |
@@ -1087,7 +1107,7 @@ Products, prices, inventory, cart storage, discount validation, taxes, shipping 
 
 ## Content and community blocks
 
-All six content and community blocks are reading and discussion surfaces composed from Uai components. They use the warm graphite tokens in light and dark themes, 13px / 18px body type, visible native keyboard focus, and consumer-composed content. New visual values live in the distributed source as inline styles. Article Page, Documentation Page, and Public Profile ship a small scoped `<style>` block of container queries, so their columns stack whenever their own container is narrow; Changelog Page, Comment Thread, and Community Feed reflow with `flex-wrap` and `auto-fill` grids. Each layout variant maps onto the variants of the components it composes.The blocks add no motion of their own; the share menu and reaction picker keep the pop-in of the components they compose, and it stops under reduced motion.
+All six content and community blocks are reading and discussion surfaces composed from Uai components. They use the warm graphite tokens in light and dark themes, 13px / 18px body type, visible native keyboard focus, and consumer-composed content. Visual values live in the distributed source as Tailwind classes. Article Page, Documentation Page, and Public Profile use Tailwind container-query variants, so their columns stack whenever their own container is narrow; Changelog Page, Comment Thread, and Community Feed reflow with `flex-wrap` and `auto-fill` grids. Each layout variant maps onto the variants of the components it composes. The blocks add no motion of their own; the share menu and reaction picker keep the pop-in of the components they compose, and it stops under reduced motion.
 
 | Block | Layout variants | Composes | Interaction contract |
 | --- | --- | --- | --- |
@@ -1104,7 +1124,7 @@ Content storage, rendering of rich text, moderation policy, routing, search inde
 
 ## AI and automation blocks
 
-All four AI blocks compose the AI components (Message, Citation, Attachment, Tool Call, Response Status, Run Summary, Prompt Composer, Thinking, Approval Card, Task List, and Progress Summary) into complete agent surfaces. They use the warm graphite tokens in light and dark themes, 13px / 18px body type, visible keyboard focus, and consumer-composed content. New visual values live in the distributed source as inline styles. Responsive layout ships as a small scoped `<style>` block of container queries, so a block stacks to one column whenever its own container is narrow. Each layout variant maps onto the variants of the components it composes, so one switch changes the whole surface. Send stays ink; approve and other primary actions are accent pills. Live states shimmer and entering rows fade up.
+All four AI blocks compose the AI components (Message, Citation, Attachment, Tool Call, Response Status, Run Summary, Prompt Composer, Thinking, Approval Card, Task List, and Progress Summary) into complete agent surfaces. They use the warm graphite tokens in light and dark themes, 13px / 18px body type, visible keyboard focus, and consumer-composed content. Visual values live in the distributed source as Tailwind classes. Responsive layout uses Tailwind container-query variants (`@container`, `@max-[…]:`), so a block stacks to one column whenever its own container is narrow. Each layout variant maps onto the variants of the components it composes, so one switch changes the whole surface. Send stays ink; approve and other primary actions are accent pills. Live states shimmer and entering rows fade up.
 
 | Block | Layout variants | Composes | Interaction contract |
 | --- | --- | --- | --- |

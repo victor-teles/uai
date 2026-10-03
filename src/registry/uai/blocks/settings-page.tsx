@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, useContext, useId } from "react";
 import {
   ConfirmationDialog,
@@ -20,6 +21,7 @@ import {
   UnsavedChangesBarSave,
   type UnsavedChangesBarVariant,
 } from "@/components/ui/uai/unsaved-changes-bar";
+import { cn } from "@/lib/uai-utils";
 
 export const SETTINGS_PAGE_VARIANTS = ["stacked", "split", "compact"] as const;
 export type SettingsPageVariant = (typeof SETTINGS_PAGE_VARIANTS)[number];
@@ -40,7 +42,7 @@ function useSection(part: string) {
   return context;
 }
 
-const dangerText = "color-mix(in oklab, var(--uai-danger) 75%, var(--uai-text))";
+const dangerText = "text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))]";
 const fieldVariants: Record<SettingsPageVariant, FormFieldVariant> = {
   stacked: "outlined",
   split: "outlined",
@@ -57,181 +59,165 @@ const dialogVariants: Record<SettingsPageVariant, ConfirmationDialogVariant> = {
   compact: "compact",
 };
 
-export function SettingsPage({ variant = "stacked", style, ...props }: SettingsPageProps) {
+const settingsPageVariants = cva("grid min-w-0 content-start text-[13px]/[18px] text-foreground", {
+  variants: {
+    variant: {
+      stacked: "gap-5",
+      split: "gap-5",
+      compact: "gap-3",
+    },
+  },
+});
+
+export function SettingsPage({ variant = "stacked", className, ...props }: SettingsPageProps) {
   const id = useId();
   return (
     <Context.Provider value={{ id, variant }}>
       <section
         aria-labelledby={`${id}-title`}
-        {...props}
+        data-slot="settings-page"
         data-variant={variant}
-        style={{
-          display: "grid",
-          alignContent: "start",
-          gap: variant === "compact" ? 12 : 20,
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
+        className={cn(settingsPageVariants({ variant }), className)}
+        {...props}
       />
     </Context.Provider>
   );
 }
 
-export function SettingsPageHeader({ style, ...props }: ComponentProps<"div">) {
+export function SettingsPageHeader({ className, ...props }: ComponentProps<"div">) {
   usePage("SettingsPageHeader");
-  return <div {...props} style={{ display: "grid", gap: 4, minWidth: 0, ...style }} />;
-}
-
-export function SettingsPageTitle({ style, ...props }: ComponentProps<"h2">) {
-  const context = usePage("SettingsPageTitle");
-  const compact = context.variant === "compact";
   return (
-    <h2
+    <div
+      data-slot="settings-page-header"
+      className={cn("grid min-w-0 gap-1", className)}
       {...props}
-      id={`${context.id}-title`}
-      style={{
-        margin: 0,
-        fontSize: compact ? 15 : 18,
-        lineHeight: compact ? "20px" : "24px",
-        fontWeight: 600,
-        letterSpacing: "-0.01em",
-        ...style,
-      }}
     />
   );
 }
 
-export function SettingsPageDescription({ style, ...props }: ComponentProps<"p">) {
+export function SettingsPageTitle({ className, ...props }: ComponentProps<"h2">) {
+  const context = usePage("SettingsPageTitle");
   return (
-    <p {...props} style={{ margin: 0, color: "var(--uai-muted)", textWrap: "pretty", ...style }} />
+    <h2
+      data-slot="settings-page-title"
+      className={cn(
+        "m-0 font-semibold tracking-[-0.01em]",
+        context.variant === "compact" ? "text-[15px]/5" : "text-lg/6",
+        className,
+      )}
+      {...props}
+      id={`${context.id}-title`}
+    />
   );
 }
+
+export function SettingsPageDescription({ className, ...props }: ComponentProps<"p">) {
+  return (
+    <p
+      data-slot="settings-page-description"
+      className={cn("m-0 text-pretty text-muted-foreground", className)}
+      {...props}
+    />
+  );
+}
+
+const dangerSurface =
+  "border-[color-mix(in_oklab,var(--destructive)_20%,var(--border))] bg-[color-mix(in_oklab,var(--destructive)_5%,var(--card))]";
 
 /** A group of related settings. `tone="danger"` marks destructive actions. */
 export function SettingsPageSection({
   tone = "default",
-  style,
+  className,
   ...props
 }: ComponentProps<"section"> & { tone?: "default" | "danger" }) {
   const { variant } = usePage("SettingsPageSection");
   const id = useId();
   const danger = tone === "danger";
-  const borderColor = danger
-    ? "color-mix(in oklab, var(--uai-danger) 20%, var(--uai-border))"
-    : "var(--uai-border)";
-  const background = danger
-    ? "color-mix(in oklab, var(--uai-danger) 5%, var(--uai-surface))"
-    : "var(--uai-surface)";
   return (
     <Section.Provider value={{ id, tone }}>
       <section
         aria-labelledby={`${id}-title`}
         aria-describedby={`${id}-description`}
+        data-slot="settings-page-section"
+        className={cn(
+          "min-w-0 border-solid",
+          variant === "split"
+            ? cn(
+                "flex flex-wrap gap-x-8 gap-y-3",
+                danger
+                  ? cn("rounded-[14px] border px-5 py-4.5", dangerSurface)
+                  : "rounded-none border-0 border-b border-border px-0 pt-1 pb-6",
+              )
+            : cn(
+                "grid border",
+                variant === "compact" ? "gap-3 rounded-xl p-3.5" : "gap-4 rounded-[14px] p-5",
+                danger ? dangerSurface : "border-border bg-card",
+              ),
+          className,
+        )}
         {...props}
         data-tone={tone}
-        style={
-          variant === "split"
-            ? {
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "12px 32px",
-                minWidth: 0,
-                padding: danger ? "18px 20px" : "4px 0 24px",
-                borderStyle: "solid",
-                borderWidth: danger ? 1 : "0 0 1px",
-                borderColor,
-                borderRadius: danger ? 14 : 0,
-                background: danger ? background : undefined,
-                ...style,
-              }
-            : {
-                display: "grid",
-                gap: variant === "compact" ? 12 : 16,
-                minWidth: 0,
-                padding: variant === "compact" ? 14 : 20,
-                borderStyle: "solid",
-                borderWidth: 1,
-                borderColor,
-                borderRadius: variant === "compact" ? 12 : 14,
-                background,
-                ...style,
-              }
-        }
       />
     </Section.Provider>
   );
 }
 
-export function SettingsPageSectionHeader({ style, ...props }: ComponentProps<"div">) {
+export function SettingsPageSectionHeader({ className, ...props }: ComponentProps<"div">) {
   const { variant } = usePage("SettingsPageSectionHeader");
   useSection("SettingsPageSectionHeader");
   return (
     <div
+      data-slot="settings-page-section-header"
+      className={cn(
+        "grid min-w-0 content-start gap-1",
+        variant === "split" && "flex-[1_1_200px]",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        alignContent: "start",
-        gap: 4,
-        flex: variant === "split" ? "1 1 200px" : undefined,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function SettingsPageSectionTitle({ style, ...props }: ComponentProps<"h3">) {
+export function SettingsPageSectionTitle({ className, ...props }: ComponentProps<"h3">) {
   const section = useSection("SettingsPageSectionTitle");
   return (
     <h3
+      data-slot="settings-page-section-title"
+      className={cn(
+        "m-0 text-sm/5 font-medium",
+        section.tone === "danger" && dangerText,
+        className,
+      )}
       {...props}
       id={`${section.id}-title`}
-      style={{
-        margin: 0,
-        fontSize: 14,
-        lineHeight: "20px",
-        fontWeight: 500,
-        color: section.tone === "danger" ? dangerText : undefined,
-        ...style,
-      }}
     />
   );
 }
 
-export function SettingsPageSectionDescription({ style, ...props }: ComponentProps<"p">) {
+export function SettingsPageSectionDescription({ className, ...props }: ComponentProps<"p">) {
   const section = useSection("SettingsPageSectionDescription");
   return (
     <p
+      data-slot="settings-page-section-description"
+      className={cn("m-0 text-[12.5px]/[18px] text-pretty text-muted-foreground", className)}
       {...props}
       id={`${section.id}-description`}
-      style={{
-        margin: 0,
-        color: "var(--uai-muted)",
-        fontSize: 12.5,
-        lineHeight: "18px",
-        textWrap: "pretty",
-        ...style,
-      }}
     />
   );
 }
 
-export function SettingsPageSectionContent({ style, ...props }: ComponentProps<"div">) {
+export function SettingsPageSectionContent({ className, ...props }: ComponentProps<"div">) {
   const { variant } = usePage("SettingsPageSectionContent");
   return (
     <div
+      data-slot="settings-page-section-content"
+      className={cn(
+        "grid min-w-0 content-start",
+        variant === "compact" ? "gap-3" : "gap-4",
+        variant === "split" && "flex-[2_1_320px]",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        alignContent: "start",
-        gap: variant === "compact" ? 12 : 16,
-        flex: variant === "split" ? "2 1 320px" : undefined,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }

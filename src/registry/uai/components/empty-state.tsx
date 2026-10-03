@@ -1,4 +1,5 @@
-import { type ComponentProps, type CSSProperties, createContext, useContext, useId } from "react";
+import { cva } from "class-variance-authority";
+import { type ComponentProps, createContext, useContext, useId } from "react";
 
 import { cn } from "@/lib/uai-utils";
 
@@ -12,75 +13,93 @@ export type EmptyStateProps = ComponentProps<"section"> & {
   variant?: EmptyStateVariant;
 };
 
-function emptyStateChrome(variant: EmptyStateVariant) {
-  const compact = variant === "compact";
-  const page = variant === "page";
+const emptyStateVariants = cva("w-full min-w-0 text-foreground", {
+  variants: {
+    variant: {
+      card: "flex flex-col items-center gap-[18px] rounded-[14px] border bg-card px-7 py-8 text-center",
+      plain:
+        "flex flex-col items-center gap-[18px] rounded-none bg-transparent px-5 py-7 text-center",
+      compact: "flex items-start gap-3 rounded-xl border bg-card p-3.5 text-left",
+      page: "flex min-h-[400px] flex-wrap items-center justify-center gap-8 rounded-none bg-transparent px-8 py-12 text-left",
+    },
+  },
+});
 
-  return {
-    compact,
-    page,
-    rootClass: page
-      ? "flex flex-wrap items-center justify-center bg-transparent text-left"
-      : compact
-        ? "flex items-start border border-[var(--uai-border)] bg-[var(--uai-surface)] text-left"
-        : cn(
-            "flex flex-col items-center text-center",
-            variant === "card"
-              ? "border border-[var(--uai-border)] bg-[var(--uai-surface)]"
-              : "bg-transparent",
-          ),
-    rootStyle: {
-      borderRadius: compact ? 12 : variant === "card" ? 14 : 0,
-      gap: page ? 32 : compact ? 12 : 18,
-      minHeight: page ? 400 : undefined,
-      padding: page ? "48px 32px" : compact ? 14 : variant === "card" ? "32px 28px" : "28px 20px",
-    } satisfies CSSProperties,
-    mediaClass: page
-      ? "border-transparent bg-transparent text-[var(--uai-text)]"
-      : "border-transparent bg-[var(--uai-surface-raised)] text-[var(--uai-muted)] shadow-[inset_0_1px_0_color-mix(in_oklab,var(--uai-text)_6%,transparent)] [&>svg]:size-[42%] [&>svg]:stroke-[1.75]",
-    mediaStyle: page
-      ? ({
-          width: 160,
-          height: 160,
-          borderColor: "transparent",
-          borderRadius: 0,
-          fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
-          fontSize: "clamp(3.5rem, 10vw, 6rem)",
-          fontVariantNumeric: "tabular-nums",
-          fontWeight: 600,
-          letterSpacing: "-0.035em",
-          lineHeight: 1,
-        } satisfies CSSProperties)
-      : ({
-          width: compact ? 36 : 44,
-          height: compact ? 36 : 44,
-          borderRadius: compact ? 10 : 12,
-        } satisfies CSSProperties),
-    contentClass: page || compact ? "items-start text-left" : "items-center text-center",
-    contentStyle: page ? ({ minWidth: "min(100%, 260px)" } satisfies CSSProperties) : undefined,
-    titleClass: page
-      ? "text-xl leading-7 font-semibold tracking-tight"
-      : compact
-        ? "text-[13px] leading-[18px]"
-        : "text-[15px] leading-5",
-    descriptionClass: page
-      ? "text-sm leading-5"
-      : compact
-        ? "text-[12px] leading-[17px]"
-        : "text-[13px] leading-[19px]",
-    noteClass: page
-      ? "text-[12px] leading-4"
-      : compact
-        ? "text-[11px] leading-4"
-        : "text-[11.5px] leading-4",
-    actionHeight: page ? 34 : compact ? 28 : 32,
-    actionTextClass: compact ? "px-3 text-[12.5px]" : "px-3.5 text-[13px]",
-  };
-}
+const emptyStateMediaVariants = cva("grid shrink-0 place-items-center border border-transparent", {
+  variants: {
+    variant: {
+      card: "size-11 rounded-xl",
+      plain: "size-11 rounded-xl",
+      compact: "size-9 rounded-[10px]",
+      page: "size-40 rounded-none bg-transparent [font-family:var(--font-geist-mono),ui-monospace,monospace] text-[clamp(3.5rem,10vw,6rem)] leading-none font-semibold tracking-[-0.035em] text-foreground tabular-nums",
+    },
+  },
+  compoundVariants: [
+    {
+      variant: ["card", "plain", "compact"],
+      className:
+        "bg-muted text-muted-foreground shadow-[inset_0_1px_0_color-mix(in_oklab,var(--foreground)_6%,transparent)] [&>svg]:size-[42%] [&>svg]:stroke-[1.75]",
+    },
+  ],
+});
+
+const emptyStateTitleVariants = cva("font-medium tracking-[-0.01em] text-balance wrap-anywhere", {
+  variants: {
+    variant: {
+      card: "text-[15px] leading-5",
+      plain: "text-[15px] leading-5",
+      compact: "text-[13px] leading-[18px]",
+      page: "text-xl leading-7 font-semibold tracking-tight",
+    },
+  },
+});
+
+const emptyStateDescriptionVariants = cva("text-pretty text-muted-foreground wrap-anywhere", {
+  variants: {
+    variant: {
+      card: "text-[13px] leading-[19px]",
+      plain: "text-[13px] leading-[19px]",
+      compact: "text-[12px] leading-[17px]",
+      page: "text-sm leading-5",
+    },
+  },
+});
+
+const emptyStateNoteVariants = cva("max-w-[50ch] text-subtle-foreground wrap-anywhere", {
+  variants: {
+    variant: {
+      card: "text-[11.5px] leading-4",
+      plain: "text-[11.5px] leading-4",
+      compact: "text-[11px] leading-4",
+      page: "text-[12px] leading-4",
+    },
+  },
+});
+
+const emptyStateActionVariants = cva(
+  "inline-flex items-center justify-center gap-1.5 rounded-full font-medium whitespace-nowrap no-underline transition-[scale,background-color,filter,opacity] duration-140 ease-out-quint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100 [&>svg]:size-3.5 [&>svg]:shrink-0",
+  {
+    variants: {
+      variant: {
+        card: "min-h-8 px-3.5 text-[13px]/4",
+        plain: "min-h-8 px-3.5 text-[13px]/4",
+        compact: "min-h-7 px-3 text-[12.5px]/4",
+        page: "min-h-8.5 px-3.5 text-[13px]/4",
+      },
+      emphasis: {
+        primary: "bg-primary text-primary-foreground hover:brightness-[1.08]",
+        secondary:
+          "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+      },
+    },
+  },
+);
+
+const leading = (variant: EmptyStateVariant) => variant === "page" || variant === "compact";
 
 type EmptyStateContextValue = {
   titleId: string;
-  chrome: ReturnType<typeof emptyStateChrome>;
+  variant: EmptyStateVariant;
 };
 
 const EmptyStateContext = createContext<EmptyStateContextValue | null>(null);
@@ -95,23 +114,21 @@ export function EmptyState({
   variant = "card",
   children,
   className,
-  style,
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
   ...props
 }: EmptyStateProps) {
   const titleId = useId();
-  const chrome = emptyStateChrome(variant);
 
   return (
-    <EmptyStateContext.Provider value={{ titleId, chrome }}>
+    <EmptyStateContext.Provider value={{ titleId, variant }}>
       <section
+        data-slot="empty-state"
+        data-variant={variant}
+        className={cn(emptyStateVariants({ variant }), className)}
         {...props}
         aria-label={ariaLabel}
         aria-labelledby={ariaLabelledby ?? (ariaLabel ? undefined : titleId)}
-        className={cn("w-full min-w-0 text-[var(--uai-text)]", chrome.rootClass, className)}
-        data-variant={variant}
-        style={{ ...chrome.rootStyle, ...style }}
       >
         {children}
       </section>
@@ -121,17 +138,13 @@ export function EmptyState({
 
 export type EmptyStateMediaProps = ComponentProps<"div">;
 
-export function EmptyStateMedia({ children, className, style, ...props }: EmptyStateMediaProps) {
-  const context = useEmptyState("EmptyStateMedia");
+export function EmptyStateMedia({ children, className, ...props }: EmptyStateMediaProps) {
+  const { variant } = useEmptyState("EmptyStateMedia");
 
   return (
     <div
-      className={cn(
-        "grid shrink-0 place-items-center border",
-        context.chrome.mediaClass,
-        className,
-      )}
-      style={{ ...context.chrome.mediaStyle, ...style }}
+      data-slot="empty-state-media"
+      className={cn(emptyStateMediaVariants({ variant }), className)}
       {...props}
     >
       {children}
@@ -141,22 +154,18 @@ export function EmptyStateMedia({ children, className, style, ...props }: EmptyS
 
 export type EmptyStateContentProps = ComponentProps<"div">;
 
-export function EmptyStateContent({
-  children,
-  className,
-  style,
-  ...props
-}: EmptyStateContentProps) {
-  const context = useEmptyState("EmptyStateContent");
+export function EmptyStateContent({ children, className, ...props }: EmptyStateContentProps) {
+  const { variant } = useEmptyState("EmptyStateContent");
 
   return (
     <div
+      data-slot="empty-state-content"
       className={cn(
         "flex min-w-0 max-w-[48ch] flex-1 flex-col gap-4",
-        context.chrome.contentClass,
+        leading(variant) ? "items-start text-left" : "items-center text-center",
+        variant === "page" && "min-w-[min(100%,260px)]",
         className,
       )}
-      style={{ ...context.chrome.contentStyle, ...style }}
       {...props}
     >
       {children}
@@ -168,7 +177,11 @@ export type EmptyStateHeaderProps = ComponentProps<"header">;
 
 export function EmptyStateHeader({ children, className, ...props }: EmptyStateHeaderProps) {
   return (
-    <header className={cn("grid min-w-0 gap-1.5", className)} {...props}>
+    <header
+      data-slot="empty-state-header"
+      className={cn("grid min-w-0 gap-1.5", className)}
+      {...props}
+    >
       {children}
     </header>
   );
@@ -181,13 +194,10 @@ export function EmptyStateTitle({ children, className, ...props }: EmptyStateTit
 
   return (
     <h2
-      id={context.titleId}
-      className={cn(
-        "font-medium tracking-[-0.01em] text-balance [overflow-wrap:anywhere]",
-        context.chrome.titleClass,
-        className,
-      )}
+      data-slot="empty-state-title"
+      className={cn(emptyStateTitleVariants({ variant: context.variant }), className)}
       {...props}
+      id={context.titleId}
     >
       {children}
     </h2>
@@ -201,15 +211,12 @@ export function EmptyStateDescription({
   className,
   ...props
 }: EmptyStateDescriptionProps) {
-  const context = useEmptyState("EmptyStateDescription");
+  const { variant } = useEmptyState("EmptyStateDescription");
 
   return (
     <p
-      className={cn(
-        "text-pretty text-[var(--uai-muted)] [overflow-wrap:anywhere]",
-        context.chrome.descriptionClass,
-        className,
-      )}
+      data-slot="empty-state-description"
+      className={cn(emptyStateDescriptionVariants({ variant }), className)}
       {...props}
     >
       {children}
@@ -220,13 +227,14 @@ export function EmptyStateDescription({
 export type EmptyStateActionsProps = ComponentProps<"div">;
 
 export function EmptyStateActions({ children, className, ...props }: EmptyStateActionsProps) {
-  const context = useEmptyState("EmptyStateActions");
+  const { variant } = useEmptyState("EmptyStateActions");
 
   return (
     <div
+      data-slot="empty-state-actions"
       className={cn(
         "flex flex-wrap items-center gap-2",
-        context.chrome.page || context.chrome.compact ? "justify-start" : "justify-center",
+        leading(variant) ? "justify-start" : "justify-center",
         className,
       )}
       {...props}
@@ -252,51 +260,38 @@ type EmptyStateLinkActionProps = ComponentProps<"a"> &
 
 export type EmptyStateActionProps = EmptyStateButtonActionProps | EmptyStateLinkActionProps;
 
-const emptyStateActionClass: Record<EmptyStateActionEmphasis, string> = {
-  primary: "bg-[var(--uai-accent)] text-[var(--uai-accent-foreground)] hover:brightness-[1.08]",
-  secondary:
-    "bg-[var(--uai-surface-raised)] text-[var(--uai-text)] hover:bg-[color-mix(in_oklab,var(--uai-surface-raised)_85%,var(--uai-text))]",
-};
-
 export function EmptyStateAction({
   emphasis = "primary",
   className,
-  style,
   ...props
 }: EmptyStateActionProps) {
-  const context = useEmptyState("EmptyStateAction");
-  const actionClassName = cn(
-    "inline-flex items-center justify-center gap-1.5 leading-4 font-medium whitespace-nowrap no-underline transition-[transform,background-color,filter,opacity] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uai-accent)] active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100 [&>svg]:size-3.5 [&>svg]:shrink-0",
-    context.chrome.actionTextClass,
-    emptyStateActionClass[emphasis],
-    className,
-  );
-  const actionStyle = {
-    minHeight: context.chrome.actionHeight,
-    borderRadius: 999,
-    ...style,
-  };
+  const { variant } = useEmptyState("EmptyStateAction");
+  const actionClassName = cn(emptyStateActionVariants({ variant, emphasis }), className);
 
   if (typeof props.href === "string") {
-    return <a {...props} className={actionClassName} style={actionStyle} />;
+    return <a data-slot="empty-state-action" {...props} className={actionClassName} />;
   }
 
   const { type = "button", ...buttonProps } = props;
-  return <button {...buttonProps} type={type} className={actionClassName} style={actionStyle} />;
+  return (
+    <button
+      data-slot="empty-state-action"
+      {...buttonProps}
+      type={type}
+      className={actionClassName}
+    />
+  );
 }
 
 export type EmptyStateNoteProps = ComponentProps<"p">;
 
 export function EmptyStateNote({ children, className, ...props }: EmptyStateNoteProps) {
-  const context = useEmptyState("EmptyStateNote");
+  const { variant } = useEmptyState("EmptyStateNote");
 
   return (
     <p
-      className={cn(
-        "max-w-[50ch] text-[var(--uai-subtle)] [overflow-wrap:anywhere]",
-        context.chrome.noteClass,
-        className,
-      )}
+      data-slot="empty-state-note"
+      className={cn(emptyStateNoteVariants({ variant }), className)}
       {...props}
     >
       {children}

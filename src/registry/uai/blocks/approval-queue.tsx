@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  type ComponentProps,
-  type CSSProperties,
-  createContext,
-  useContext,
-  useId,
-  useState,
-} from "react";
+import { type ComponentProps, createContext, useContext, useId, useState } from "react";
 import {
   ApprovalCard,
   type ApprovalCardProps,
@@ -28,6 +21,7 @@ import {
   type MetricCardProps,
   type MetricCardVariant,
 } from "@/components/ui/uai/metric-card";
+import { cn } from "@/lib/uai-utils";
 
 export const APPROVAL_QUEUE_VARIANTS = ["grouped", "board", "compact"] as const;
 export type ApprovalQueueVariant = (typeof APPROVAL_QUEUE_VARIANTS)[number];
@@ -70,50 +64,10 @@ const emptyVariants: Record<ApprovalQueueVariant, EmptyStateVariant> = {
   compact: "compact",
 };
 
-const queueCss = `
-[data-uai-approval-queue-action]{transition:filter 120ms ease-out,box-shadow 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-[data-uai-approval-queue-action]:hover:not(:disabled){box-shadow:inset 0 0 0 999px color-mix(in oklab,var(--uai-text) 9%,transparent)}
-[data-uai-approval-queue-action][data-uai-approval-queue-action="primary"]:hover:not(:disabled){box-shadow:none;filter:brightness(1.08)}
-[data-uai-approval-queue-action]:active:not(:disabled){transform:scale(0.97)}
-[data-uai-approval-queue-action]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-.uai-approval-queue__option{transition:background-color 160ms cubic-bezier(0.23,1,0.32,1),color 120ms ease-out,box-shadow 160ms cubic-bezier(0.23,1,0.32,1)}
-.uai-approval-queue__option:not([data-checked]):hover{color:var(--uai-text)}
-.uai-approval-queue__option:has(:focus-visible){outline:2px solid var(--uai-accent);outline-offset:1px}
-[data-uai-approval-queue-item]{animation:uai-approval-queue-in 240ms cubic-bezier(0.23,1,0.32,1) both}
-[data-uai-approval-queue-item]:nth-child(2){animation-delay:40ms}
-[data-uai-approval-queue-item]:nth-child(3){animation-delay:80ms}
-[data-uai-approval-queue-item]:nth-child(4){animation-delay:120ms}
-[data-uai-approval-queue-item]:nth-child(5){animation-delay:160ms}
-[data-uai-approval-queue-item]:nth-child(n+6){animation-delay:200ms}
-@keyframes uai-approval-queue-in{from{opacity:0;transform:translateY(4px)}}
-@media (prefers-reduced-motion:reduce){[data-uai-approval-queue-action]{transition:none}[data-uai-approval-queue-action]:active:not(:disabled){transform:none}.uai-approval-queue__option{transition:none}[data-uai-approval-queue-item]{animation:none}}
-`;
-
-function actionStyle(compact: boolean, primary: boolean, disabled?: boolean): CSSProperties {
-  return {
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    height: compact ? 26 : 30,
-    padding: compact ? "0 11px" : "0 13px",
-    border: 0,
-    borderRadius: 999,
-    background: primary ? "var(--uai-accent)" : "var(--uai-surface-raised)",
-    color: primary ? "var(--uai-accent-foreground)" : "var(--uai-text)",
-    fontSize: compact ? 12 : 12.5,
-    fontWeight: 500,
-    lineHeight: "16px",
-    whiteSpace: "nowrap",
-    cursor: disabled ? "not-allowed" : "pointer",
-    opacity: disabled ? 0.5 : 1,
-  };
-}
-
 /** Review queue of pending decisions, grouped by a consumer-chosen key. */
 export function ApprovalQueue({
   variant = "grouped",
-  style,
+  className,
   children,
   ...props
 }: ApprovalQueueProps) {
@@ -122,79 +76,75 @@ export function ApprovalQueue({
     <Context.Provider value={{ id, variant }}>
       <section
         aria-labelledby={`${id}-title`}
+        data-slot="approval-queue"
+        className={cn(
+          "grid min-w-0 content-start text-[13px]/[18px] text-foreground",
+          variant === "compact" ? "gap-2.5" : "gap-4",
+          className,
+        )}
         {...props}
         data-variant={variant}
-        style={{
-          display: "grid",
-          alignContent: "start",
-          gap: variant === "compact" ? 10 : 16,
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
       >
-        <style>{queueCss}</style>
         {children}
       </section>
     </Context.Provider>
   );
 }
 
-export function ApprovalQueueHeader({ style, ...props }: ComponentProps<"div">) {
+export function ApprovalQueueHeader({ className, ...props }: ComponentProps<"div">) {
   useQueue("ApprovalQueueHeader");
   return (
     <div
+      data-slot="approval-queue-header"
+      className={cn("flex min-w-0 flex-wrap items-end justify-between gap-3", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "flex-end",
-        justifyContent: "space-between",
-        gap: 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function ApprovalQueueHeading({ style, ...props }: ComponentProps<"div">) {
+export function ApprovalQueueHeading({ className, ...props }: ComponentProps<"div">) {
   return (
-    <div {...props} style={{ display: "grid", gap: 4, flex: "1 1 240px", minWidth: 0, ...style }} />
+    <div
+      data-slot="approval-queue-heading"
+      className={cn("grid min-w-0 flex-[1_1_240px] gap-1", className)}
+      {...props}
+    />
   );
 }
 
-export function ApprovalQueueTitle({ style, ...props }: ComponentProps<"h2">) {
+export function ApprovalQueueTitle({ className, ...props }: ComponentProps<"h2">) {
   const context = useQueue("ApprovalQueueTitle");
   const compact = context.variant === "compact";
   return (
     <h2
+      data-slot="approval-queue-title"
+      className={cn(
+        "m-0 font-semibold tracking-[-0.015em] wrap-anywhere",
+        compact ? "text-[15px]/5" : "text-lg/6",
+        className,
+      )}
       {...props}
       id={`${context.id}-title`}
-      style={{
-        margin: 0,
-        fontSize: compact ? 15 : 18,
-        lineHeight: compact ? "20px" : "24px",
-        fontWeight: 600,
-        letterSpacing: "-0.015em",
-        overflowWrap: "anywhere",
-        ...style,
-      }}
     />
   );
 }
 
-export function ApprovalQueueDescription({ style, ...props }: ComponentProps<"p">) {
-  return <p {...props} style={{ margin: 0, color: "var(--uai-muted)", ...style }} />;
+export function ApprovalQueueDescription({ className, ...props }: ComponentProps<"p">) {
+  return (
+    <p
+      data-slot="approval-queue-description"
+      className={cn("m-0 text-muted-foreground", className)}
+      {...props}
+    />
+  );
 }
 
-export function ApprovalQueueActions({ style, ...props }: ComponentProps<"div">) {
+export function ApprovalQueueActions({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="approval-queue-actions"
+      className={cn("flex flex-wrap items-center gap-1.5", className)}
       {...props}
-      style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6, ...style }}
     />
   );
 }
@@ -202,37 +152,44 @@ export function ApprovalQueueActions({ style, ...props }: ComponentProps<"div">)
 export function ApprovalQueueAction({
   emphasis = "secondary",
   type = "button",
-  style,
+  className,
   ...props
 }: ComponentProps<"button"> & { emphasis?: "primary" | "secondary" }) {
   const context = useQueue("ApprovalQueueAction");
+  const compact = context.variant === "compact";
   return (
     <button
+      data-slot="approval-queue-action"
+      className={cn(
+        "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap [transition:filter_120ms_ease-out,box-shadow_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring not-disabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:not-disabled:active:scale-100",
+        compact ? "h-6.5 px-2.75 text-[12px]/4" : "h-7.5 px-3.25 text-[12.5px]/4",
+        emphasis === "primary"
+          ? "bg-primary text-primary-foreground not-disabled:hover:brightness-108"
+          : "bg-secondary text-foreground not-disabled:hover:shadow-[inset_0_0_0_999px_color-mix(in_oklab,var(--foreground)_9%,transparent)]",
+        className,
+      )}
       {...props}
       type={type}
-      data-uai-approval-queue-action={emphasis}
-      style={{
-        ...actionStyle(context.variant === "compact", emphasis === "primary", props.disabled),
-        ...style,
-      }}
+      data-emphasis={emphasis}
     />
   );
 }
 
 /** Queue totals. Metric cards reflow from four columns to one. */
-export function ApprovalQueueSummary({ style, ...props }: ComponentProps<"div">) {
+export function ApprovalQueueSummary({ className, ...props }: ComponentProps<"div">) {
   const context = useQueue("ApprovalQueueSummary");
   const compact = context.variant === "compact";
   return (
     <div
+      data-slot="approval-queue-summary"
+      className={cn(
+        "grid min-w-0",
+        compact
+          ? "grid-cols-[repeat(auto-fit,minmax(min(100%,130px),1fr))] gap-2"
+          : "grid-cols-[repeat(auto-fit,minmax(min(100%,160px),1fr))] gap-3",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, ${compact ? 130 : 160}px), 1fr))`,
-        gap: compact ? 8 : 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
@@ -261,7 +218,7 @@ export function ApprovalQueueGroupBy({
   value,
   defaultValue = "",
   onValueChange,
-  style,
+  className,
   children,
   ...props
 }: ApprovalQueueGroupByProps) {
@@ -281,29 +238,14 @@ export function ApprovalQueueGroupBy({
       }}
     >
       <fieldset
+        data-slot="approval-queue-group-by"
+        className={cn(
+          "m-0 flex flex-wrap items-center gap-0.5 rounded-full border-0 bg-card p-0.75 shadow-[inset_0_0_0_1px_var(--border)]",
+          className,
+        )}
         {...props}
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          gap: 2,
-          margin: 0,
-          padding: 3,
-          border: 0,
-          borderRadius: 999,
-          background: "var(--uai-surface)",
-          boxShadow: "inset 0 0 0 1px var(--uai-border)",
-          ...style,
-        }}
       >
-        <legend
-          style={{
-            float: "left",
-            padding: "0 6px 0 10px",
-            color: "var(--uai-subtle)",
-            fontSize: 12,
-          }}
-        >
+        <legend className="float-left pr-1.5 pl-2.5 text-[12px] text-subtle-foreground">
           {label}
         </legend>
         {children}
@@ -315,7 +257,7 @@ export function ApprovalQueueGroupBy({
 export function ApprovalQueueGroupByOption({
   value,
   children,
-  style,
+  className,
   ...props
 }: Omit<ComponentProps<"input">, "value" | "type" | "name" | "checked"> & { value: string }) {
   const group = useContext(GroupByCtx);
@@ -324,23 +266,15 @@ export function ApprovalQueueGroupByOption({
   const checked = group.value === value;
   return (
     <label
-      className="uai-approval-queue__option"
+      data-slot="approval-queue-group-by-option"
       data-checked={checked || undefined}
-      style={{
-        position: "relative",
-        display: "inline-flex",
-        alignItems: "center",
-        height: 24,
-        padding: "0 10px",
-        borderRadius: 999,
-        background: checked ? "var(--uai-surface-raised)" : "transparent",
-        boxShadow: checked ? "0 1px 2px oklch(0 0 0 / 0.08)" : undefined,
-        color: checked ? "var(--uai-text)" : "var(--uai-subtle)",
-        fontSize: 12,
-        fontWeight: 500,
-        cursor: "pointer",
-        ...style,
-      }}
+      className={cn(
+        "relative inline-flex h-6 cursor-pointer items-center rounded-full px-2.5 text-[12px] font-medium [transition:background-color_160ms_cubic-bezier(0.23,1,0.32,1),color_120ms_ease-out,box-shadow_160ms_cubic-bezier(0.23,1,0.32,1)] has-focus-visible:outline-2 has-focus-visible:outline-offset-1 has-focus-visible:outline-ring motion-reduce:transition-none",
+        checked
+          ? "bg-accent text-foreground shadow-[0_1px_2px_oklch(0_0_0/0.08)]"
+          : "bg-transparent text-subtle-foreground hover:text-foreground",
+        className,
+      )}
     >
       <input
         {...props}
@@ -352,7 +286,7 @@ export function ApprovalQueueGroupByOption({
           props.onChange?.(event);
           if (!event.defaultPrevented) group.select(value);
         }}
-        style={{ position: "absolute", inset: 0, margin: 0, opacity: 0, cursor: "pointer" }}
+        className="absolute inset-0 m-0 cursor-pointer opacity-0"
       />
       {children}
     </label>
@@ -360,27 +294,25 @@ export function ApprovalQueueGroupByOption({
 }
 
 /** Lays out groups as stacked sections, or as board columns in Board. */
-export function ApprovalQueueGroups({ style, ...props }: ComponentProps<"div">) {
+export function ApprovalQueueGroups({ className, ...props }: ComponentProps<"div">) {
   const context = useQueue("ApprovalQueueGroups");
   return (
     <div
+      data-slot="approval-queue-groups"
+      className={cn(
+        "grid min-w-0 items-start",
+        context.variant === "board"
+          ? "grid-cols-[repeat(auto-fit,minmax(min(100%,260px),1fr))]"
+          : "grid-cols-[minmax(0,1fr)]",
+        context.variant === "compact" ? "gap-3" : "gap-4",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gridTemplateColumns:
-          context.variant === "board"
-            ? "repeat(auto-fit, minmax(min(100%, 260px), 1fr))"
-            : "minmax(0, 1fr)",
-        alignItems: "start",
-        gap: context.variant === "compact" ? 12 : 16,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function ApprovalQueueGroup({ style, ...props }: ComponentProps<"section">) {
+export function ApprovalQueueGroup({ className, ...props }: ComponentProps<"section">) {
   const context = useQueue("ApprovalQueueGroup");
   const id = useId();
   const board = context.variant === "board";
@@ -388,89 +320,70 @@ export function ApprovalQueueGroup({ style, ...props }: ComponentProps<"section"
     <GroupContext.Provider value={id}>
       <section
         aria-labelledby={id}
+        data-slot="approval-queue-group"
+        className={cn(
+          "grid min-w-0 content-start",
+          context.variant === "compact" ? "gap-1.5" : "gap-2.5",
+          board
+            ? "rounded-[14px] bg-[color-mix(in_oklab,var(--muted)_45%,var(--card))] p-2"
+            : "rounded-none bg-transparent p-0",
+          className,
+        )}
         {...props}
-        style={{
-          display: "grid",
-          alignContent: "start",
-          gap: context.variant === "compact" ? 6 : 10,
-          minWidth: 0,
-          padding: board ? 8 : 0,
-          borderRadius: board ? 14 : 0,
-          background: board
-            ? "color-mix(in oklab, var(--uai-surface-raised) 45%, var(--uai-surface))"
-            : "transparent",
-          ...style,
-        }}
       />
     </GroupContext.Provider>
   );
 }
 
-export function ApprovalQueueGroupHeader({ style, ...props }: ComponentProps<"div">) {
+export function ApprovalQueueGroupHeader({ className, ...props }: ComponentProps<"div">) {
   useGroup("ApprovalQueueGroupHeader");
   return (
     <div
+      data-slot="approval-queue-group-header"
+      className={cn("flex flex-wrap items-center gap-2 px-1 py-0.5", className)}
       {...props}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        flexWrap: "wrap",
-        gap: 8,
-        padding: "2px 4px",
-        ...style,
-      }}
     />
   );
 }
 
-export function ApprovalQueueGroupTitle({ style, ...props }: ComponentProps<"h3">) {
+export function ApprovalQueueGroupTitle({ className, ...props }: ComponentProps<"h3">) {
   const id = useGroup("ApprovalQueueGroupTitle");
   return (
     <h3
+      data-slot="approval-queue-group-title"
+      className={cn("m-0 text-[13px]/[18px] font-medium", className)}
       {...props}
       id={id}
-      style={{ margin: 0, fontSize: 13, lineHeight: "18px", fontWeight: 500, ...style }}
     />
   );
 }
 
-export function ApprovalQueueGroupCount({ style, ...props }: ComponentProps<"span">) {
+export function ApprovalQueueGroupCount({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
+      data-slot="approval-queue-group-count"
+      className={cn(
+        "min-w-5 rounded-full bg-muted px-1.5 text-center text-[11.5px]/[18px] font-medium text-muted-foreground tabular-nums",
+        className,
+      )}
       {...props}
-      style={{
-        minWidth: 20,
-        padding: "0 6px",
-        borderRadius: 999,
-        background: "var(--uai-surface-raised)",
-        color: "var(--uai-muted)",
-        fontSize: 11.5,
-        fontWeight: 500,
-        lineHeight: "18px",
-        textAlign: "center",
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     />
   );
 }
 
-export function ApprovalQueueItems({ style, ...props }: ComponentProps<"ul">) {
+export function ApprovalQueueItems({ className, ...props }: ComponentProps<"ul">) {
   const id = useGroup("ApprovalQueueItems");
   const context = useQueue("ApprovalQueueItems");
   return (
     <ul
       aria-labelledby={id}
+      data-slot="approval-queue-items"
+      className={cn(
+        "m-0 grid min-w-0 list-none p-0",
+        context.variant === "compact" ? "gap-1.5" : "gap-2",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gap: context.variant === "compact" ? 6 : 8,
-        margin: 0,
-        padding: 0,
-        listStyle: "none",
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
@@ -482,7 +395,10 @@ export type ApprovalQueueItemProps = DistributiveOmit<ApprovalCardProps, "varian
 export function ApprovalQueueItem(props: ApprovalQueueItemProps) {
   const context = useQueue("ApprovalQueueItem");
   return (
-    <li data-uai-approval-queue-item="" style={{ minWidth: 0 }}>
+    <li
+      data-slot="approval-queue-item"
+      className="min-w-0 animate-in duration-240 ease-out-quint fade-in-0 slide-in-from-bottom-1 fill-mode-both nth-2:[animation-delay:40ms] nth-3:[animation-delay:80ms] nth-4:[animation-delay:120ms] nth-5:[animation-delay:160ms] nth-[n+6]:[animation-delay:200ms] motion-reduce:animate-none"
+    >
       <ApprovalCard {...(props as ApprovalCardProps)} variant={cardVariants[context.variant]} />
     </li>
   );

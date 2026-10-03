@@ -1,14 +1,9 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { ShieldCheck, Star } from "lucide-react";
-import {
-  type ComponentProps,
-  type CSSProperties,
-  createContext,
-  type ReactNode,
-  useContext,
-  useId,
-} from "react";
+import { type ComponentProps, createContext, type ReactNode, useContext, useId } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const TRUST_PANEL_VARIANTS = ["card", "plain", "compact"] as const;
 export type TrustPanelVariant = (typeof TRUST_PANEL_VARIANTS)[number];
@@ -20,150 +15,97 @@ function useTrust(part: string) {
   if (!context) throw new Error(`${part} must be used within TrustPanel`);
   return context;
 }
-const visuallyHidden: CSSProperties = {
-  position: "absolute",
-  width: 1,
-  height: 1,
-  margin: -1,
-  padding: 0,
-  overflow: "hidden",
-  clip: "rect(0 0 0 0)",
-  whiteSpace: "nowrap",
-  border: 0,
-};
-const shells: Record<TrustPanelVariant, CSSProperties> = {
-  card: {
-    gap: 20,
-    padding: 20,
-    border: "1px solid var(--uai-border)",
-    borderRadius: 14,
-    background: "var(--uai-surface)",
-  },
-  plain: { gap: 16 },
-  compact: {
-    gap: 12,
-    padding: 12,
-    border: "1px solid var(--uai-border)",
-    borderRadius: 12,
-    background: "var(--uai-surface)",
-  },
-};
 
-const trustCss = `
-.uai-trust-logo{color:var(--uai-muted);transition:color 120ms ease-out,background-color 120ms ease-out}
-.uai-trust-logo:hover{color:var(--uai-text)}
-.uai-trust-panel[data-variant=plain] .uai-trust-logo{color:var(--uai-subtle)}
-.uai-trust-panel[data-variant=plain] .uai-trust-logo:hover{color:var(--uai-text)}
-@media (prefers-reduced-motion: reduce){.uai-trust-logo{transition:none}}
-`;
+const trustPanelVariants = cva("box-border grid min-w-0 text-[13px]/[18px] text-card-foreground", {
+  variants: {
+    variant: {
+      card: "gap-5 rounded-[14px] border bg-card p-5",
+      plain: "gap-4",
+      compact: "gap-3 rounded-xl border bg-card p-3",
+    },
+  },
+});
 
-export function TrustPanel({
-  variant = "card",
-  className,
-  style,
-  children,
-  ...props
-}: TrustPanelProps) {
+export function TrustPanel({ variant = "card", className, children, ...props }: TrustPanelProps) {
   const id = useId();
   return (
     <Context.Provider value={{ id, variant }}>
       <section
         aria-labelledby={`${id}-title`}
+        data-slot="trust-panel"
+        className={cn(trustPanelVariants({ variant }), className)}
         {...props}
         data-variant={variant}
-        className={["uai-trust-panel", className].filter(Boolean).join(" ")}
-        style={{
-          boxSizing: "border-box",
-          display: "grid",
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...shells[variant],
-          ...style,
-        }}
       >
-        <style>{trustCss}</style>
         {children}
       </section>
     </Context.Provider>
   );
 }
 
-export function TrustPanelTitle({ style, ...props }: ComponentProps<"h2">) {
+export function TrustPanelTitle({ className, ...props }: ComponentProps<"h2">) {
   const context = useTrust("TrustPanelTitle");
   return (
     <h2
+      data-slot="trust-panel-title"
+      className={cn(
+        "m-0 font-medium text-balance text-muted-foreground",
+        context.variant === "compact" ? "text-xs/[18px]" : "text-[13px]/[18px]",
+        className,
+      )}
       {...props}
       id={`${context.id}-title`}
-      style={{
-        margin: 0,
-        color: "var(--uai-muted)",
-        fontSize: context.variant === "compact" ? 12 : 13,
-        fontWeight: 500,
-        lineHeight: "18px",
-        textWrap: "balance",
-        ...style,
-      }}
     />
   );
 }
 
-export function TrustPanelLogos({ style, ...props }: ComponentProps<"ul">) {
+export function TrustPanelLogos({ className, ...props }: ComponentProps<"ul">) {
   const context = useTrust("TrustPanelLogos");
-  const compact = context.variant === "compact";
   return (
     <ul
+      data-slot="trust-panel-logos"
+      className={cn(
+        "m-0 grid-cols-[repeat(auto-fill,minmax(120px,1fr))] flex-wrap list-none p-0",
+        context.variant === "compact" ? "flex gap-1.5" : "grid",
+        context.variant === "plain" ? "gap-1" : "gap-1.5",
+        className,
+      )}
       {...props}
-      style={{
-        display: compact ? "flex" : "grid",
-        flexWrap: "wrap",
-        gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
-        gap: compact ? 6 : context.variant === "plain" ? 4 : 6,
-        margin: 0,
-        padding: 0,
-        listStyle: "none",
-        ...style,
-      }}
     />
   );
 }
+
+const trustPanelLogoVariants = cva(
+  "relative flex items-center gap-1.5 font-medium tracking-[-0.01em] whitespace-nowrap transition-[color,background-color] duration-120 ease-[ease-out] hover:text-foreground motion-reduce:transition-none",
+  {
+    variants: {
+      variant: {
+        card: "h-11 justify-center rounded-[10px] bg-muted px-3 text-[13px] text-muted-foreground",
+        plain:
+          "h-8 justify-start rounded-[10px] bg-transparent p-0 text-[13px] text-subtle-foreground",
+        compact: "h-7 justify-center rounded-full bg-muted px-2.5 text-xs text-muted-foreground",
+      },
+    },
+  },
+);
 
 export function TrustPanelLogo({
   name,
   children,
   className,
-  style,
   ...props
 }: ComponentProps<"li"> & { name: string; children?: ReactNode }) {
   const context = useTrust("TrustPanelLogo");
-  const compact = context.variant === "compact";
-  const plain = context.variant === "plain";
   return (
     <li
+      data-slot="trust-panel-logo"
+      className={cn(trustPanelLogoVariants({ variant: context.variant }), className)}
       {...props}
-      className={["uai-trust-logo", className].filter(Boolean).join(" ")}
-      style={{
-        position: "relative",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: plain ? "flex-start" : "center",
-        gap: 6,
-        height: compact ? 28 : plain ? 32 : 44,
-        padding: compact ? "0 10px" : plain ? 0 : "0 12px",
-        borderRadius: compact ? 999 : 10,
-        background: plain ? "transparent" : "var(--uai-surface-raised)",
-        fontSize: compact ? 12 : 13,
-        fontWeight: 500,
-        letterSpacing: "-0.01em",
-        whiteSpace: "nowrap",
-        ...style,
-      }}
     >
-      <span aria-hidden="true" style={{ display: "contents" }}>
+      <span aria-hidden="true" className="contents">
         {children}
       </span>
-      <span style={visuallyHidden}>{name}</span>
+      <span className="sr-only">{name}</span>
     </li>
   );
 }
@@ -172,23 +114,17 @@ export function TrustPanelRating({
   value,
   max = 5,
   children,
-  style,
+  className,
   ...props
 }: ComponentProps<"p"> & { value: number; max?: number }) {
   const filled = Math.round(Math.min(Math.max(value, 0), max));
   return (
     <p
+      data-slot="trust-panel-rating"
+      className={cn("m-0 flex flex-wrap items-center gap-2", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        gap: 8,
-        margin: 0,
-        ...style,
-      }}
     >
-      <span aria-hidden="true" style={{ display: "inline-flex", gap: 2 }}>
+      <span aria-hidden="true" className="inline-flex gap-0.5">
         {Array.from({ length: max }, (_, index) => (
           <Star
             // biome-ignore lint/suspicious/noArrayIndexKey: stars are positional and static.
@@ -196,34 +132,25 @@ export function TrustPanelRating({
             size={14}
             strokeWidth={1.75}
             fill={index < filled ? "currentColor" : "none"}
-            style={{ color: index < filled ? "var(--uai-warning)" : "var(--uai-border-strong)" }}
+            className={index < filled ? "text-warning" : "text-border-strong"}
           />
         ))}
       </span>
-      <span style={{ fontVariantNumeric: "tabular-nums" }}>
-        <strong style={{ fontWeight: 500 }}>{value.toFixed(1)}</strong>
-        <span style={{ color: "var(--uai-muted)" }}> out of {max}</span>
+      <span className="tabular-nums">
+        <strong className="font-medium">{value.toFixed(1)}</strong>
+        <span className="text-muted-foreground"> out of {max}</span>
       </span>
-      {children ? (
-        <span style={{ color: "var(--uai-subtle)", fontSize: 12 }}>{children}</span>
-      ) : null}
+      {children ? <span className="text-[12px] text-subtle-foreground">{children}</span> : null}
     </p>
   );
 }
 
-export function TrustPanelBadges({ style, ...props }: ComponentProps<"ul">) {
+export function TrustPanelBadges({ className, ...props }: ComponentProps<"ul">) {
   return (
     <ul
+      data-slot="trust-panel-badges"
+      className={cn("m-0 flex list-none flex-wrap gap-1.5 p-0", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 6,
-        margin: 0,
-        padding: 0,
-        listStyle: "none",
-        ...style,
-      }}
     />
   );
 }
@@ -231,30 +158,19 @@ export function TrustPanelBadges({ style, ...props }: ComponentProps<"ul">) {
 export function TrustPanelBadge({
   icon = <ShieldCheck size={14} strokeWidth={1.75} aria-hidden="true" />,
   children,
-  style,
+  className,
   ...props
 }: ComponentProps<"li"> & { icon?: ReactNode }) {
   return (
     <li
+      data-slot="trust-panel-badge"
+      className={cn(
+        "inline-flex min-h-[26px] items-center gap-1.5 rounded-full bg-muted pr-2.5 pl-2 text-xs/4 text-muted-foreground",
+        className,
+      )}
       {...props}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        minHeight: 26,
-        padding: "0 10px 0 8px",
-        borderRadius: 999,
-        background: "var(--uai-surface-raised)",
-        color: "var(--uai-muted)",
-        fontSize: 12,
-        lineHeight: "16px",
-        ...style,
-      }}
     >
-      <span
-        aria-hidden="true"
-        style={{ display: "inline-flex", flex: "none", color: "var(--uai-success)" }}
-      >
+      <span aria-hidden="true" className="inline-flex flex-none text-success">
         {icon}
       </span>
       {children}

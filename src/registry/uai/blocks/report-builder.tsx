@@ -1,6 +1,7 @@
 "use client";
 
-import { type ComponentProps, type CSSProperties, createContext, useContext, useId } from "react";
+import { cva } from "class-variance-authority";
+import { type ComponentProps, createContext, useContext, useId } from "react";
 import {
   FilterBar,
   type FilterBarProps,
@@ -11,6 +12,7 @@ import {
   type MetricCardProps,
   type MetricCardVariant,
 } from "@/components/ui/uai/metric-card";
+import { cn } from "@/lib/uai-utils";
 
 export const REPORT_BUILDER_VARIANTS = ["sidebar", "stacked", "compact"] as const;
 export type ReportBuilderVariant = (typeof REPORT_BUILDER_VARIANTS)[number];
@@ -43,48 +45,31 @@ const metricVariants: Record<ReportBuilderVariant, MetricCardVariant> = {
   stacked: "plain",
   compact: "compact",
 };
-const builderCss = `
-[data-uai-report-builder-action]{transition:filter 120ms ease-out,box-shadow 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-[data-uai-report-builder-action]:hover:not(:disabled){box-shadow:inset 0 0 0 999px color-mix(in oklab,var(--uai-text) 9%,transparent)}
-[data-uai-report-builder-action][data-uai-report-builder-action="primary"]:hover:not(:disabled){box-shadow:none;filter:brightness(1.08)}
-[data-uai-report-builder-action]:active:not(:disabled){transform:scale(0.97)}
-[data-uai-report-builder-action]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-.uai-report-builder__option{transition:background-color 120ms ease-out,color 120ms ease-out,box-shadow 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-report-builder__option:not([data-checked]):hover{color:var(--uai-text);box-shadow:inset 0 0 0 1px var(--uai-border-strong)}
-.uai-report-builder__option:active{transform:scale(0.97)}
-.uai-report-builder__option:has(:focus-visible){outline:2px solid var(--uai-accent);outline-offset:1px}
-[data-uai-report-builder-fill]{animation:uai-report-builder-grow-x 400ms cubic-bezier(0.23,1,0.32,1) both;transform-origin:left center}
-[data-orientation="vertical"] [data-uai-report-builder-fill]{animation-name:uai-report-builder-grow-y;transform-origin:center bottom}
-@keyframes uai-report-builder-grow-x{from{transform:scaleX(0)}}
-@keyframes uai-report-builder-grow-y{from{transform:scaleY(0)}}
-@media (prefers-reduced-motion:reduce){[data-uai-report-builder-action]{transition:none}[data-uai-report-builder-action]:active:not(:disabled){transform:none}.uai-report-builder__option{transition:none}.uai-report-builder__option:active{transform:none}[data-uai-report-builder-fill]{animation:none}}
-`;
+const reportBuilderActionVariants = cva(
+  "inline-flex items-center justify-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap [transition:filter_120ms_ease-out,box-shadow_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:cursor-pointer enabled:active:[transform:scale(0.97)] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:enabled:active:[transform:none]",
+  {
+    variants: {
+      emphasis: {
+        primary: "bg-primary text-primary-foreground enabled:hover:brightness-108",
+        secondary:
+          "bg-secondary text-secondary-foreground enabled:hover:shadow-[inset_0_0_0_999px_color-mix(in_oklab,var(--foreground)_9%,transparent)]",
+      },
+      compact: {
+        true: "h-[26px] px-[11px] text-[12px]/4",
+        false: "h-[30px] px-[13px] text-[12.5px]/4",
+      },
+    },
+  },
+);
 
-function actionStyle(compact: boolean, primary: boolean, disabled?: boolean): CSSProperties {
-  return {
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    height: compact ? 26 : 30,
-    padding: compact ? "0 11px" : "0 13px",
-    border: 0,
-    borderRadius: 999,
-    background: primary ? "var(--uai-accent)" : "var(--uai-surface-raised)",
-    color: primary ? "var(--uai-accent-foreground)" : "var(--uai-text)",
-    fontSize: compact ? 12 : 12.5,
-    fontWeight: 500,
-    lineHeight: "16px",
-    whiteSpace: "nowrap",
-    cursor: disabled ? "not-allowed" : "pointer",
-    opacity: disabled ? 0.5 : 1,
-  };
-}
+const reportBuilderVariants = cva("grid min-w-0 content-start text-[13px]/[18px] text-foreground", {
+  variants: { variant: { sidebar: "gap-4", stacked: "gap-4", compact: "gap-2.5" } },
+});
 
 /** Report composer: metrics, dimensions, filters, visualization, and export format. */
 export function ReportBuilder({
   variant = "sidebar",
-  style,
+  className,
   children,
   ...props
 }: ReportBuilderProps) {
@@ -93,84 +78,70 @@ export function ReportBuilder({
     <Context.Provider value={{ id, variant }}>
       <section
         aria-labelledby={`${id}-title`}
+        data-slot="report-builder"
+        className={cn(reportBuilderVariants({ variant }), className)}
         {...props}
         data-variant={variant}
-        style={{
-          display: "grid",
-          alignContent: "start",
-          gap: variant === "compact" ? 10 : 16,
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
       >
-        <style>{builderCss}</style>
         {children}
       </section>
     </Context.Provider>
   );
 }
 
-export function ReportBuilderHeader({ style, ...props }: ComponentProps<"div">) {
+export function ReportBuilderHeader({ className, ...props }: ComponentProps<"div">) {
   useBuilder("ReportBuilderHeader");
   return (
     <div
+      data-slot="report-builder-header"
+      className={cn("flex min-w-0 flex-wrap items-end justify-between gap-3", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "flex-end",
-        justifyContent: "space-between",
-        gap: 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function ReportBuilderHeading({ style, ...props }: ComponentProps<"div">) {
-  return (
-    <div {...props} style={{ display: "grid", gap: 4, flex: "1 1 240px", minWidth: 0, ...style }} />
-  );
-}
-
-export function ReportBuilderTitle({ style, ...props }: ComponentProps<"h2">) {
-  const context = useBuilder("ReportBuilderTitle");
-  const compact = context.variant === "compact";
-  return (
-    <h2
-      {...props}
-      id={`${context.id}-title`}
-      style={{
-        margin: 0,
-        fontSize: compact ? 15 : 18,
-        lineHeight: compact ? "20px" : "24px",
-        fontWeight: 600,
-        letterSpacing: "-0.015em",
-        overflowWrap: "anywhere",
-        ...style,
-      }}
-    />
-  );
-}
-
-export function ReportBuilderDescription({ style, ...props }: ComponentProps<"p">) {
-  return (
-    <p
-      {...props}
-      style={{ margin: 0, color: "var(--uai-muted)", fontVariantNumeric: "tabular-nums", ...style }}
-    />
-  );
-}
-
-export function ReportBuilderActions({ style, ...props }: ComponentProps<"div">) {
+export function ReportBuilderHeading({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="report-builder-heading"
+      className={cn("grid min-w-0 flex-[1_1_240px] gap-1", className)}
       {...props}
-      style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6, ...style }}
+    />
+  );
+}
+
+export function ReportBuilderTitle({ className, ...props }: ComponentProps<"h2">) {
+  const context = useBuilder("ReportBuilderTitle");
+  return (
+    <h2
+      data-slot="report-builder-title"
+      className={cn(
+        "m-0 font-semibold tracking-[-0.015em] wrap-anywhere",
+        context.variant === "compact" ? "text-[15px]/5" : "text-lg/6",
+        className,
+      )}
+      {...props}
+      id={`${context.id}-title`}
+    />
+  );
+}
+
+export function ReportBuilderDescription({ className, ...props }: ComponentProps<"p">) {
+  return (
+    <p
+      data-slot="report-builder-description"
+      className={cn("m-0 text-muted-foreground tabular-nums", className)}
+      {...props}
+    />
+  );
+}
+
+export function ReportBuilderActions({ className, ...props }: ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="report-builder-actions"
+      className={cn("flex flex-wrap items-center gap-1.5", className)}
+      {...props}
     />
   );
 }
@@ -178,37 +149,37 @@ export function ReportBuilderActions({ style, ...props }: ComponentProps<"div">)
 export function ReportBuilderAction({
   emphasis = "secondary",
   type = "button",
-  style,
+  className,
   ...props
 }: ComponentProps<"button"> & { emphasis?: "primary" | "secondary" }) {
   const context = useBuilder("ReportBuilderAction");
   return (
     <button
+      data-slot="report-builder-action"
+      className={cn(
+        reportBuilderActionVariants({ emphasis, compact: context.variant === "compact" }),
+        className,
+      )}
       {...props}
       type={type}
-      data-uai-report-builder-action={emphasis}
-      style={{
-        ...actionStyle(context.variant === "compact", emphasis === "primary", props.disabled),
-        ...style,
-      }}
+      data-emphasis={emphasis}
     />
   );
 }
 
 /** Places settings beside the canvas in Sidebar and above it otherwise. */
-export function ReportBuilderBody({ style, ...props }: ComponentProps<"div">) {
+export function ReportBuilderBody({ className, ...props }: ComponentProps<"div">) {
   const context = useBuilder("ReportBuilderBody");
   return (
     <div
+      data-slot="report-builder-body"
+      className={cn(
+        "min-w-0 flex-wrap items-start",
+        context.variant === "sidebar" ? "flex" : "grid",
+        context.variant === "compact" ? "gap-2" : "gap-3",
+        className,
+      )}
       {...props}
-      style={{
-        display: context.variant === "sidebar" ? "flex" : "grid",
-        flexWrap: "wrap",
-        alignItems: "flex-start",
-        gap: context.variant === "compact" ? 8 : 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
@@ -216,78 +187,66 @@ export function ReportBuilderBody({ style, ...props }: ComponentProps<"div">) {
 /** Report settings form. Saving and querying stay with the consumer. */
 export function ReportBuilderConfig({
   "aria-label": label = "Report settings",
-  style,
+  className,
   ...props
 }: ComponentProps<"form">) {
   const context = useBuilder("ReportBuilderConfig");
   const compact = context.variant === "compact";
-  const stacked = context.variant === "stacked";
   return (
     <form
       aria-label={label}
+      data-slot="report-builder-config"
+      className={cn(
+        "m-0 min-w-0 flex-[1_1_240px] flex-wrap content-start border-0 bg-[color-mix(in_oklab,var(--muted)_70%,var(--card))]",
+        context.variant === "stacked" ? "flex" : "grid",
+        compact ? "gap-2.5 rounded-xl p-3" : "gap-4 rounded-[14px] p-4",
+        className,
+      )}
       {...props}
-      style={{
-        display: stacked ? "flex" : "grid",
-        flexWrap: "wrap",
-        alignContent: "start",
-        gap: compact ? 10 : 16,
-        flex: "1 1 240px",
-        minWidth: 0,
-        margin: 0,
-        padding: compact ? 12 : 16,
-        border: 0,
-        borderRadius: compact ? 12 : 14,
-        background: "color-mix(in oklab, var(--uai-surface-raised) 70%, var(--uai-surface))",
-        ...style,
-      }}
     />
   );
 }
 
-export function ReportBuilderSection({ style, ...props }: ComponentProps<"fieldset">) {
+export function ReportBuilderSection({ className, ...props }: ComponentProps<"fieldset">) {
   const context = useBuilder("ReportBuilderSection");
   return (
     <fieldset
+      data-slot="report-builder-section"
+      className={cn(
+        "m-0 grid min-w-0 flex-[1_1_200px] border-0 p-0",
+        context.variant === "compact" ? "gap-1.5" : "gap-2",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gap: context.variant === "compact" ? 6 : 8,
-        flex: "1 1 200px",
-        minWidth: 0,
-        margin: 0,
-        padding: 0,
-        border: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function ReportBuilderSectionTitle({ style, ...props }: ComponentProps<"legend">) {
+export function ReportBuilderSectionTitle({ className, ...props }: ComponentProps<"legend">) {
   return (
     <legend
+      data-slot="report-builder-section-title"
+      className={cn("mb-1.5 p-0 text-[11.5px]/4 font-medium text-subtle-foreground", className)}
       {...props}
-      style={{
-        padding: 0,
-        marginBottom: 6,
-        color: "var(--uai-subtle)",
-        fontSize: 11.5,
-        fontWeight: 500,
-        lineHeight: "16px",
-        ...style,
-      }}
     />
   );
 }
 
-export function ReportBuilderOptions({ style, ...props }: ComponentProps<"div">) {
-  return <div {...props} style={{ display: "flex", flexWrap: "wrap", gap: 6, ...style }} />;
+export function ReportBuilderOptions({ className, ...props }: ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="report-builder-options"
+      className={cn("flex flex-wrap gap-1.5", className)}
+      {...props}
+    />
+  );
 }
 
 /** A checkbox or radio styled as a pill. Native inputs keep arrow-key and Space behavior. */
 export function ReportBuilderOption({
   type = "checkbox",
   children,
+  className,
   style,
   ...props
 }: Omit<ComponentProps<"input">, "type"> & { type?: "checkbox" | "radio" }) {
@@ -295,38 +254,20 @@ export function ReportBuilderOption({
   const checked = Boolean(props.checked ?? props.defaultChecked);
   return (
     <label
-      className="uai-report-builder__option"
+      data-slot="report-builder-option"
       data-checked={checked || undefined}
-      style={{
-        position: "relative",
-        display: "inline-flex",
-        alignItems: "center",
-        height: context.variant === "compact" ? 24 : 28,
-        padding: context.variant === "compact" ? "0 10px" : "0 12px",
-        border: 0,
-        borderRadius: 999,
-        background: checked
-          ? "color-mix(in oklab, var(--uai-accent) 16%, var(--uai-surface))"
-          : "var(--uai-surface)",
-        boxShadow: checked
-          ? "inset 0 0 0 1px color-mix(in oklab, var(--uai-accent) 40%, transparent)"
-          : "inset 0 0 0 1px var(--uai-border)",
-        color: checked
-          ? "color-mix(in oklab, var(--uai-accent) 55%, var(--uai-text))"
-          : "var(--uai-muted)",
-        fontSize: 12,
-        fontWeight: 500,
-        whiteSpace: "nowrap",
-        cursor: props.disabled ? "not-allowed" : "pointer",
-        opacity: props.disabled ? 0.5 : 1,
-        ...style,
-      }}
+      className={cn(
+        "relative inline-flex items-center rounded-full border-0 text-[12px] font-medium whitespace-nowrap [transition:background-color_120ms_ease-out,color_120ms_ease-out,box-shadow_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] active:[transform:scale(0.97)] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-1 has-[:focus-visible]:outline-ring motion-reduce:transition-none motion-reduce:active:[transform:none]",
+        context.variant === "compact" ? "h-6 px-2.5" : "h-7 px-3",
+        checked
+          ? "bg-[color-mix(in_oklab,var(--primary)_16%,var(--card))] text-[color-mix(in_oklab,var(--primary)_55%,var(--foreground))] shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_40%,transparent)]"
+          : "bg-card text-muted-foreground shadow-[inset_0_0_0_1px_var(--border)] hover:text-foreground hover:shadow-[inset_0_0_0_1px_var(--border-strong)]",
+        props.disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
+        className,
+      )}
+      style={style}
     >
-      <input
-        {...props}
-        type={type}
-        style={{ position: "absolute", inset: 0, margin: 0, opacity: 0, cursor: "inherit" }}
-      />
+      <input {...props} type={type} className="absolute inset-0 m-0 cursor-[inherit] opacity-0" />
       {children}
     </label>
   );
@@ -339,37 +280,30 @@ export function ReportBuilderFilters(props: Omit<FilterBarProps, "variant">) {
 }
 
 /** The live preview of the report. */
-export function ReportBuilderCanvas({ style, ...props }: ComponentProps<"section">) {
+export function ReportBuilderCanvas({ className, ...props }: ComponentProps<"section">) {
   const context = useBuilder("ReportBuilderCanvas");
-  const compact = context.variant === "compact";
   return (
     <section
       aria-labelledby={`${context.id}-canvas-title`}
+      data-slot="report-builder-canvas"
+      className={cn(
+        "grid min-w-0 flex-[999_1_360px] content-start border bg-card shadow-[0_1px_2px_oklch(0_0_0/0.04)]",
+        context.variant === "compact" ? "gap-2.5 rounded-xl p-3" : "gap-3.5 rounded-[14px] p-4",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        alignContent: "start",
-        gap: compact ? 10 : 14,
-        flex: "999 1 360px",
-        minWidth: 0,
-        padding: compact ? 12 : 16,
-        border: "1px solid var(--uai-border)",
-        borderRadius: compact ? 12 : 14,
-        background: "var(--uai-surface)",
-        boxShadow: "0 1px 2px oklch(0 0 0 / 0.04)",
-        ...style,
-      }}
     />
   );
 }
 
-export function ReportBuilderCanvasTitle({ style, ...props }: ComponentProps<"h3">) {
+export function ReportBuilderCanvasTitle({ className, ...props }: ComponentProps<"h3">) {
   const context = useBuilder("ReportBuilderCanvasTitle");
   return (
     <h3
+      data-slot="report-builder-canvas-title"
+      className={cn("m-0 text-[13px]/[18px] font-medium", className)}
       {...props}
       id={`${context.id}-canvas-title`}
-      style={{ margin: 0, fontSize: 13, lineHeight: "18px", fontWeight: 500, ...style }}
     />
   );
 }
@@ -384,7 +318,7 @@ export function ReportBuilderMetric(props: Omit<MetricCardProps, "variant">) {
 export function ReportBuilderChart({
   max,
   orientation = "horizontal",
-  style,
+  className,
   ...props
 }: ComponentProps<"ul"> & { max: number; orientation?: ReportBuilderChartOrientation }) {
   const context = useBuilder("ReportBuilderChart");
@@ -392,19 +326,16 @@ export function ReportBuilderChart({
   return (
     <ChartCtx.Provider value={{ max: Math.max(max, 1), orientation }}>
       <ul
+        data-slot="report-builder-chart"
+        className={cn(
+          "m-0 min-w-0 list-none p-0",
+          vertical
+            ? "flex items-stretch gap-2 overflow-x-auto"
+            : cn("grid", context.variant === "compact" ? "gap-1.5" : "gap-2.5"),
+          className,
+        )}
         {...props}
         data-orientation={orientation}
-        style={{
-          display: vertical ? "flex" : "grid",
-          alignItems: vertical ? "stretch" : undefined,
-          gap: vertical ? 8 : context.variant === "compact" ? 6 : 10,
-          minWidth: 0,
-          margin: 0,
-          padding: 0,
-          listStyle: "none",
-          overflowX: vertical ? "auto" : undefined,
-          ...style,
-        }}
       />
     </ChartCtx.Provider>
   );
@@ -412,7 +343,7 @@ export function ReportBuilderChart({
 
 export function ReportBuilderBar({
   value,
-  style,
+  className,
   children,
   ...props
 }: Omit<ComponentProps<"li">, "value"> & { value: number }) {
@@ -420,47 +351,41 @@ export function ReportBuilderBar({
   const builder = useBuilder("ReportBuilderBar");
   const percent = Math.min(Math.max(value / chart.max, 0), 1) * 100;
   const vertical = chart.orientation === "vertical";
+  const compact = builder.variant === "compact";
   return (
     <BarContext.Provider value={value}>
       <li
+        data-slot="report-builder-bar"
+        className={cn(
+          "grid min-w-0 items-center gap-x-2.5 gap-y-1",
+          vertical
+            ? cn(
+                "flex-[1_1_0] grid-cols-[minmax(48px,1fr)] [grid-template-areas:'value'_'bar'_'label']",
+                compact ? "grid-rows-[auto_96px_auto]" : "grid-rows-[auto_140px_auto]",
+              )
+            : "grid-cols-[minmax(72px,30%)_minmax(0,1fr)_auto] [grid-template-areas:'label_bar_value']",
+          className,
+        )}
         {...props}
-        style={{
-          display: "grid",
-          gridTemplateAreas: vertical ? '"value" "bar" "label"' : '"label bar value"',
-          gridTemplateColumns: vertical
-            ? "minmax(48px, 1fr)"
-            : "minmax(72px, 30%) minmax(0, 1fr) auto",
-          gridTemplateRows: vertical
-            ? `auto ${builder.variant === "compact" ? 96 : 140}px auto`
-            : undefined,
-          alignItems: "center",
-          columnGap: 10,
-          rowGap: 4,
-          flex: vertical ? "1 1 0" : undefined,
-          minWidth: 0,
-          ...style,
-        }}
       >
         <span
           aria-hidden="true"
-          style={{
-            gridArea: "bar",
-            display: "flex",
-            alignItems: "flex-end",
-            alignSelf: "stretch",
-            height: vertical ? "100%" : builder.variant === "compact" ? 8 : 10,
-            borderRadius: 999,
-            background: "var(--uai-surface-raised)",
-            overflow: "hidden",
-          }}
+          className={cn(
+            "flex items-end self-stretch overflow-hidden rounded-full bg-muted [grid-area:bar]",
+            vertical ? "h-full" : compact ? "h-2" : "h-2.5",
+          )}
         >
           <span
-            data-uai-report-builder-fill=""
+            data-slot="report-builder-bar-fill"
+            className={cn(
+              "bg-[color-mix(in_oklab,var(--primary)_85%,var(--foreground))] motion-reduce:animate-none",
+              vertical
+                ? "origin-bottom animate-[grow-y_400ms_cubic-bezier(0.23,1,0.32,1)_both] rounded-md"
+                : "origin-left animate-[grow-x_400ms_cubic-bezier(0.23,1,0.32,1)_both] rounded-full",
+            )}
             style={{
               width: vertical ? "100%" : `${percent}%`,
               height: vertical ? `${percent}%` : "100%",
-              borderRadius: vertical ? 6 : 999,
-              background: "color-mix(in oklab, var(--uai-accent) 85%, var(--uai-text))",
             }}
           />
         </span>
@@ -470,40 +395,34 @@ export function ReportBuilderBar({
   );
 }
 
-export function ReportBuilderBarLabel({ style, ...props }: ComponentProps<"span">) {
+export function ReportBuilderBarLabel({ className, ...props }: ComponentProps<"span">) {
   const chart = useChart("ReportBuilderBarLabel");
   const vertical = chart.orientation === "vertical";
   return (
     <span
+      data-slot="report-builder-bar-label"
+      className={cn(
+        "min-w-0 text-muted-foreground wrap-anywhere [grid-area:label]",
+        vertical ? "text-center text-[12px]" : "text-[13px]",
+        className,
+      )}
       {...props}
-      style={{
-        gridArea: "label",
-        minWidth: 0,
-        color: "var(--uai-muted)",
-        fontSize: vertical ? 12 : 13,
-        textAlign: vertical ? "center" : undefined,
-        overflowWrap: "anywhere",
-        ...style,
-      }}
     />
   );
 }
 
-export function ReportBuilderBarValue({ style, children, ...props }: ComponentProps<"span">) {
+export function ReportBuilderBarValue({ className, children, ...props }: ComponentProps<"span">) {
   const chart = useChart("ReportBuilderBarValue");
   const value = useContext(BarContext);
   return (
     <span
+      data-slot="report-builder-bar-value"
+      className={cn(
+        "text-[12px] font-medium whitespace-nowrap tabular-nums [grid-area:value]",
+        chart.orientation === "vertical" ? "text-center" : "text-right",
+        className,
+      )}
       {...props}
-      style={{
-        gridArea: "value",
-        fontSize: 12,
-        fontWeight: 500,
-        fontVariantNumeric: "tabular-nums",
-        textAlign: chart.orientation === "vertical" ? "center" : "right",
-        whiteSpace: "nowrap",
-        ...style,
-      }}
     >
       {children ?? value}
     </span>
@@ -511,19 +430,13 @@ export function ReportBuilderBarValue({ style, children, ...props }: ComponentPr
 }
 
 /** Row counts, refresh times, or export confirmations, announced politely. */
-export function ReportBuilderStatus({ style, ...props }: ComponentProps<"p">) {
+export function ReportBuilderStatus({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
       role="status"
+      data-slot="report-builder-status"
+      className={cn("m-0 px-0.5 text-[12px] text-subtle-foreground tabular-nums", className)}
       {...props}
-      style={{
-        margin: 0,
-        padding: "0 2px",
-        color: "var(--uai-subtle)",
-        fontSize: 12,
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     />
   );
 }

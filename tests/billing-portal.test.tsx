@@ -118,8 +118,8 @@ test("exposes the alert, usage meter, details, and invoice table", () => {
     "Invoice",
     "Amount",
   ]);
-  expect(table.parentElement?.style.overflowX).toBe("auto");
-  expect(screen.getByRole("region", { name: "Invoices" }).style.gridColumn).toBe("1 / -1");
+  expect(table.parentElement?.className).toContain("overflow-x-auto");
+  expect(screen.getByRole("region", { name: "Invoices" }).className).toContain("col-span-full");
 });
 
 test("dismisses the alert and confirms cancellation in a modal", async () => {

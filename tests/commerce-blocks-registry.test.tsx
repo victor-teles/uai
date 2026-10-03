@@ -21,7 +21,7 @@ test("publishes every commerce block without drift and keeps examples executable
     ).text();
     expect(item.category).toBe("Commerce");
     expect(output.type).toBe("registry:block");
-    expect(mirror).toBe(source);
+    expect(mirror).toBe(`export * from "@/registry/uai/blocks/${item.id}";\n`);
     expect(output.files[0].content).toBe(source);
     expect(item.usage).toBe(preview);
     expect(item.accessibility.length).toBeGreaterThanOrEqual(3);

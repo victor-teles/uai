@@ -344,12 +344,33 @@ describe("Uai registry", () => {
     expect(source).not.toContain("links:");
   });
 
-  test("publishes tokens for light and dark themes", async () => {
+  test("publishes shadcn tokens for light and dark themes", async () => {
     const theme = (await Bun.file("public/r/uai-theme.json").json()) as {
-      cssVars?: { light?: Record<string, string>; dark?: Record<string, string> };
+      cssVars?: {
+        theme?: Record<string, string>;
+        light?: Record<string, string>;
+        dark?: Record<string, string>;
+      };
+      css?: Record<string, unknown>;
     };
 
-    expect(theme.cssVars?.light?.["uai-accent"]).toBeDefined();
-    expect(theme.cssVars?.dark?.["uai-accent"]).toBeDefined();
+    for (const token of ["background", "card", "primary", "muted-foreground", "border-strong"]) {
+      expect(theme.cssVars?.light?.[token]).toBeDefined();
+      expect(theme.cssVars?.dark?.[token]).toBeDefined();
+    }
+    expect(theme.cssVars?.theme?.["color-subtle-foreground"]).toBe("var(--subtle-foreground)");
+    expect(theme.css?.["@utility shimmer-text"]).toBeDefined();
+  });
+
+  test("styles registry source with theme classes instead of inline tokens", async () => {
+    for (const item of registryCatalog) {
+      const component = Bun.file(`src/registry/uai/components/${item.id}.tsx`);
+      const source = await ((await component.exists())
+        ? component
+        : Bun.file(`src/registry/uai/blocks/${item.id}.tsx`)
+      ).text();
+      expect(source).not.toContain("var(--uai-");
+      expect(source).not.toContain("<style");
+    }
   });
 });

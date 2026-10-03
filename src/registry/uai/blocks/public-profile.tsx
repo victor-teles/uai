@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, useContext, useId } from "react";
 import {
   ActivityTimeline,
@@ -10,6 +11,7 @@ import {
   type AuthorCardProps,
   type AuthorCardVariant,
 } from "@/components/ui/uai/author-card";
+import { cn } from "@/lib/uai-utils";
 
 export const PUBLIC_PROFILE_VARIANTS = ["sidebar", "banner", "compact"] as const;
 export type PublicProfileVariant = (typeof PUBLIC_PROFILE_VARIANTS)[number];
@@ -23,24 +25,6 @@ function useVariant(part: string) {
 }
 const SectionContext = createContext<string | null>(null);
 
-const layoutCss = `
-[data-uai-profile-layout]{display:grid;gap:20px;min-width:0;align-items:start}
-[data-uai-public-profile="compact"]>[data-uai-profile-layout]{gap:12px}
-@container (min-width: 720px){
-  [data-uai-public-profile="sidebar"]>[data-uai-profile-layout]{grid-template-columns:280px minmax(0,1fr);column-gap:28px}
-  [data-uai-public-profile="sidebar"] [data-uai-profile-region="aside"]{position:sticky;top:16px}
-  [data-uai-public-profile="banner"] [data-uai-profile-region="aside"]{grid-template-columns:minmax(0,1fr) auto;align-items:end}
-}
-@container (min-width: 560px){
-  [data-uai-public-profile="compact"]>[data-uai-profile-layout]{grid-template-columns:220px minmax(0,1fr)}
-}
-.uai-profile-work{transition:background-color 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-profile-work:hover{background:color-mix(in oklab,var(--uai-surface-raised) 88%,var(--uai-text))}
-.uai-profile-work:active{transform:scale(0.98)}
-.uai-profile-work:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-@media (prefers-reduced-motion: reduce){.uai-profile-work{transition:none}.uai-profile-work:active{transform:none}}
-`;
-
 const cardVariants: Record<PublicProfileVariant, AuthorCardVariant> = {
   sidebar: "card",
   banner: "inline",
@@ -52,56 +36,55 @@ const timelineVariants: Record<PublicProfileVariant, ActivityTimelineVariant> = 
   compact: "compact",
 };
 
+const layoutVariants = cva("grid min-w-0 items-start", {
+  variants: {
+    variant: {
+      sidebar: "gap-5 @min-[720px]:grid-cols-[280px_minmax(0,1fr)] @min-[720px]:gap-x-7",
+      banner: "gap-5",
+      compact: "gap-3 @min-[560px]:grid-cols-[220px_minmax(0,1fr)]",
+    },
+  },
+});
+
 /** A public profile: identity, links, follower counts, work, and recent activity. */
 export function PublicProfile({
   variant = "sidebar",
   children,
-  style,
+  className,
   ...props
 }: PublicProfileProps) {
   return (
     <Context.Provider value={variant}>
       <div
-        {...props}
+        data-slot="public-profile"
         data-variant={variant}
-        data-uai-public-profile={variant}
-        style={{
-          boxSizing: "border-box",
-          containerType: "inline-size",
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
+        className={cn(
+          "@container box-border min-w-0 text-[13px]/[18px] text-foreground",
+          className,
+        )}
+        {...props}
       >
-        <style>{layoutCss}</style>
-        <div data-uai-profile-layout="">{children}</div>
+        <div className={layoutVariants({ variant })}>{children}</div>
       </div>
     </Context.Provider>
   );
 }
 
 /** Identity and counts. A column beside the main content, or a banner above it. */
-export function PublicProfileAside({ style, ...props }: ComponentProps<"div">) {
+export function PublicProfileAside({ className, ...props }: ComponentProps<"div">) {
   const variant = useVariant("PublicProfileAside");
-  const banner = variant === "banner";
   return (
     <div
+      data-slot="public-profile-aside"
+      className={cn(
+        "grid min-w-0 rounded-[14px] border-0",
+        variant === "compact" ? "gap-2 p-0" : "gap-3",
+        variant === "sidebar" && "p-0 @min-[720px]:sticky @min-[720px]:top-4",
+        variant === "banner" &&
+          "bg-[linear-gradient(180deg,color-mix(in_oklab,var(--primary)_14%,var(--muted))_0_56px,var(--card)_56px)] p-[clamp(16px,4cqi,28px)] @min-[720px]:grid-cols-[minmax(0,1fr)_auto] @min-[720px]:items-end",
+        className,
+      )}
       {...props}
-      data-uai-profile-region="aside"
-      style={{
-        display: "grid",
-        gap: variant === "compact" ? 8 : 12,
-        minWidth: 0,
-        padding: banner ? "clamp(16px, 4cqi, 28px)" : 0,
-        border: 0,
-        borderRadius: 14,
-        background: banner
-          ? "linear-gradient(180deg, color-mix(in oklab, var(--uai-accent) 14%, var(--uai-surface-raised)) 0 56px, var(--uai-surface) 56px)"
-          : undefined,
-        ...style,
-      }}
     />
   );
 }
@@ -109,23 +92,24 @@ export function PublicProfileAside({ style, ...props }: ComponentProps<"div">) {
 /** Identity card. Compose Author Card parts, links, and the follow button inside it. */
 export function PublicProfileIdentity(props: Omit<AuthorCardProps, "variant">) {
   const variant = useVariant("PublicProfileIdentity");
-  return <AuthorCard {...props} variant={cardVariants[variant]} />;
+  return (
+    <AuthorCard data-slot="public-profile-identity" {...props} variant={cardVariants[variant]} />
+  );
 }
 
 /** Follower, following, and post counts as a description list. */
-export function PublicProfileStats({ style, ...props }: ComponentProps<"dl">) {
+export function PublicProfileStats({ className, ...props }: ComponentProps<"dl">) {
   const variant = useVariant("PublicProfileStats");
   return (
     <dl
+      data-slot="public-profile-stats"
+      className={cn(
+        "m-0 flex flex-wrap",
+        variant === "compact" ? "gap-3" : "gap-5",
+        variant === "banner" ? "p-0" : "px-1 py-0",
+        className,
+      )}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: variant === "compact" ? 12 : 20,
-        margin: 0,
-        padding: variant === "banner" ? 0 : "0 4px",
-        ...style,
-      }}
     />
   );
 }
@@ -133,26 +117,23 @@ export function PublicProfileStats({ style, ...props }: ComponentProps<"dl">) {
 /** One count. The label comes first in the source so it is read before the value. */
 export function PublicProfileStat({
   label,
-  style,
+  className,
   children,
   ...props
 }: ComponentProps<"div"> & { label: string }) {
   const variant = useVariant("PublicProfileStat");
   return (
     <div
+      data-slot="public-profile-stat"
+      className={cn("flex min-w-0 flex-col-reverse", className)}
       {...props}
-      style={{ display: "flex", flexDirection: "column-reverse", minWidth: 0, ...style }}
     >
-      <dt style={{ color: "var(--uai-subtle)", fontSize: 12 }}>{label}</dt>
+      <dt className="text-[12px] text-subtle-foreground">{label}</dt>
       <dd
-        style={{
-          margin: 0,
-          fontSize: variant === "compact" ? 14 : 16,
-          lineHeight: variant === "compact" ? "20px" : "22px",
-          fontWeight: 600,
-          letterSpacing: "-0.01em",
-          fontVariantNumeric: "tabular-nums",
-        }}
+        className={cn(
+          "m-0 font-semibold tracking-[-0.01em] tabular-nums",
+          variant === "compact" ? "text-[14px]/5" : "text-[16px]/[22px]",
+        )}
       >
         {children}
       </dd>
@@ -160,23 +141,22 @@ export function PublicProfileStat({
   );
 }
 
-export function PublicProfileMain({ style, ...props }: ComponentProps<"div">) {
+export function PublicProfileMain({ className, ...props }: ComponentProps<"div">) {
   const variant = useVariant("PublicProfileMain");
   return (
     <div
+      data-slot="public-profile-main"
+      className={cn(
+        "grid min-w-0 content-start",
+        variant === "compact" ? "gap-2" : "gap-3",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        alignContent: "start",
-        gap: variant === "compact" ? 8 : 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function PublicProfileSection({ style, ...props }: ComponentProps<"section">) {
+export function PublicProfileSection({ className, ...props }: ComponentProps<"section">) {
   const variant = useVariant("PublicProfileSection");
   const id = useId();
   const compact = variant === "compact";
@@ -184,71 +164,62 @@ export function PublicProfileSection({ style, ...props }: ComponentProps<"sectio
     <SectionContext.Provider value={id}>
       <section
         aria-labelledby={id}
+        data-slot="public-profile-section"
+        className={cn(
+          "grid min-w-0 bg-card",
+          compact ? "gap-2 rounded-xl p-3" : "gap-3 rounded-[14px] p-4",
+          className,
+        )}
         {...props}
-        style={{
-          display: "grid",
-          gap: compact ? 8 : 12,
-          minWidth: 0,
-          padding: compact ? 12 : 16,
-          borderRadius: compact ? 12 : 14,
-          background: "var(--uai-surface)",
-          ...style,
-        }}
       />
     </SectionContext.Provider>
   );
 }
 
-export function PublicProfileSectionTitle({ style, ...props }: ComponentProps<"h2">) {
+export function PublicProfileSectionTitle({ className, ...props }: ComponentProps<"h2">) {
   const id = useContext(SectionContext);
   if (!id) throw new Error("PublicProfileSectionTitle must be used within PublicProfileSection");
   return (
     <h2
+      data-slot="public-profile-section-title"
+      className={cn("m-0 text-[13px]/[18px] font-medium", className)}
       {...props}
       id={id}
-      style={{ margin: 0, fontSize: 13, lineHeight: "18px", fontWeight: 500, ...style }}
     />
   );
 }
 
 /** Pinned work as a grid of linked tiles. */
-export function PublicProfileWork({ style, ...props }: ComponentProps<"ul">) {
+export function PublicProfileWork({ className, ...props }: ComponentProps<"ul">) {
   const variant = useVariant("PublicProfileWork");
   return (
     <ul
+      data-slot="public-profile-work"
+      className={cn(
+        "m-0 grid list-none gap-2 p-0",
+        variant === "compact"
+          ? "grid-cols-[repeat(auto-fill,minmax(min(100%,200px),1fr))]"
+          : "grid-cols-[repeat(auto-fill,minmax(min(100%,220px),1fr))]",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${variant === "compact" ? 200 : 220}px), 1fr))`,
-        gap: 8,
-        margin: 0,
-        padding: 0,
-        listStyle: "none",
-        ...style,
-      }}
     />
   );
 }
 
-export function PublicProfileWorkItem({ style, children, ...props }: ComponentProps<"a">) {
+export function PublicProfileWorkItem({ className, children, ...props }: ComponentProps<"a">) {
   const variant = useVariant("PublicProfileWorkItem");
   return (
-    <li style={{ display: "grid", minWidth: 0 }}>
+    <li className="grid min-w-0">
       <a
+        data-slot="public-profile-work-item"
+        className={cn(
+          "grid min-w-0 content-start gap-1 rounded-[10px] bg-secondary text-foreground no-underline",
+          "transition-[background-color,transform] duration-[120ms,140ms] ease-[ease-out,cubic-bezier(0.23,1,0.32,1)] hover:bg-[color-mix(in_oklab,var(--secondary)_88%,var(--foreground))] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100",
+          variant === "compact" ? "p-2.5" : "p-3",
+          className,
+        )}
         {...props}
-        className={props.className ? `uai-profile-work ${props.className}` : "uai-profile-work"}
-        style={{
-          display: "grid",
-          alignContent: "start",
-          gap: 4,
-          minWidth: 0,
-          padding: variant === "compact" ? 10 : 12,
-          borderRadius: 10,
-          background: "var(--uai-surface-raised)",
-          color: "var(--uai-text)",
-          textDecoration: "none",
-          ...style,
-        }}
       >
         {children}
       </a>
@@ -256,33 +227,35 @@ export function PublicProfileWorkItem({ style, children, ...props }: ComponentPr
   );
 }
 
-export function PublicProfileWorkTitle({ style, ...props }: ComponentProps<"span">) {
-  return <span {...props} style={{ fontWeight: 500, overflowWrap: "anywhere", ...style }} />;
-}
-
-export function PublicProfileWorkDescription({ style, ...props }: ComponentProps<"span">) {
+export function PublicProfileWorkTitle({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
+      data-slot="public-profile-work-title"
+      className={cn("font-medium wrap-anywhere", className)}
       {...props}
-      style={{ color: "var(--uai-muted)", fontSize: 12.5, textWrap: "pretty", ...style }}
     />
   );
 }
 
-export function PublicProfileWorkMeta({ style, ...props }: ComponentProps<"span">) {
+export function PublicProfileWorkDescription({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
+      data-slot="public-profile-work-description"
+      className={cn("text-[12.5px] text-pretty text-muted-foreground", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: "0 10px",
-        paddingTop: 4,
-        color: "var(--uai-subtle)",
-        fontSize: 12,
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
+    />
+  );
+}
+
+export function PublicProfileWorkMeta({ className, ...props }: ComponentProps<"span">) {
+  return (
+    <span
+      data-slot="public-profile-work-meta"
+      className={cn(
+        "flex flex-wrap gap-x-2.5 gap-y-0 pt-1 text-[12px] text-subtle-foreground tabular-nums",
+        className,
+      )}
+      {...props}
     />
   );
 }
@@ -292,5 +265,11 @@ export function PublicProfileActivity(
   props: Omit<ComponentProps<typeof ActivityTimeline>, "variant">,
 ) {
   const variant = useVariant("PublicProfileActivity");
-  return <ActivityTimeline {...props} variant={timelineVariants[variant]} />;
+  return (
+    <ActivityTimeline
+      data-slot="public-profile-activity"
+      {...props}
+      variant={timelineVariants[variant]}
+    />
+  );
 }

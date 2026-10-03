@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, useContext, useId } from "react";
 import {
   ApprovalCard,
@@ -19,6 +20,7 @@ import {
 import { TaskList, type TaskListProps, type TaskListVariant } from "@/components/ui/uai/task-list";
 import { Thinking, type ThinkingProps } from "@/components/ui/uai/thinking";
 import { ToolCall, type ToolCallProps, type ToolCallVariant } from "@/components/ui/uai/tool-call";
+import { cn } from "@/lib/uai-utils";
 
 export const AGENT_RUN_VARIANTS = ["split", "stacked", "compact"] as const;
 export type AgentRunVariant = (typeof AGENT_RUN_VARIANTS)[number];
@@ -59,79 +61,82 @@ const summaryVariants: Record<AgentRunVariant, RunSummaryVariant> = {
   compact: "compact",
 };
 
-const layoutCss = `
-[data-uai-run-layout]{display:grid;gap:16px;align-items:start;min-width:0}
-[data-uai-run="compact"]>[data-uai-run-layout]{gap:12px}
-@container (min-width: 760px){
-  [data-uai-run="split"]>[data-uai-run-layout]{grid-template-columns:minmax(0,1.4fr) minmax(240px,0.9fr);gap:20px}
-  [data-uai-run-layout]>[data-uai-run-region="header"]{grid-column:1/-1}
-}`;
+const agentRunLayoutVariants = cva("grid min-w-0 items-start", {
+  variants: {
+    variant: {
+      split:
+        "gap-4 @min-[760px]:grid-cols-[minmax(0,1.4fr)_minmax(240px,0.9fr)] @min-[760px]:gap-5",
+      stacked: "gap-4",
+      compact: "gap-3",
+    },
+  },
+});
 
 /** An agent run: activity, tasks, approvals, and the final summary. Split moves tasks and approvals beside the activity at 760px. */
-export function AgentRun({ variant = "split", children, style, ...props }: AgentRunProps) {
+export function AgentRun({ variant = "split", className, children, ...props }: AgentRunProps) {
   const id = useId();
   return (
     <Context.Provider value={{ id, variant }}>
       <section
+        data-slot="agent-run"
         aria-labelledby={`${id}-title`}
+        className={cn(
+          "@container box-border min-w-0 text-[13px]/[18px] text-foreground",
+          className,
+        )}
         {...props}
         data-variant={variant}
-        data-uai-run={variant}
-        style={{
-          boxSizing: "border-box",
-          containerType: "inline-size",
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
       >
-        <style>{layoutCss}</style>
-        <div data-uai-run-layout="">{children}</div>
+        <div className={agentRunLayoutVariants({ variant })}>{children}</div>
       </section>
     </Context.Provider>
   );
 }
 
-export function AgentRunHeader({ style, ...props }: ComponentProps<"header">) {
+export function AgentRunHeader({ className, ...props }: ComponentProps<"header">) {
   const { variant } = useRun("AgentRunHeader");
   return (
     <header
+      data-slot="agent-run-header"
+      className={cn(
+        "grid min-w-0 @min-[760px]:col-span-full",
+        variant === "compact" ? "gap-2" : "gap-3",
+        className,
+      )}
       {...props}
-      data-uai-run-region="header"
-      style={{ display: "grid", gap: variant === "compact" ? 8 : 12, minWidth: 0, ...style }}
     />
   );
 }
 
-export function AgentRunHeading({ style, ...props }: ComponentProps<"div">) {
-  return <div {...props} style={{ display: "grid", gap: 4, minWidth: 0, ...style }} />;
+export function AgentRunHeading({ className, ...props }: ComponentProps<"div">) {
+  return (
+    <div data-slot="agent-run-heading" className={cn("grid min-w-0 gap-1", className)} {...props} />
+  );
 }
 
-export function AgentRunTitle({ style, ...props }: ComponentProps<"h2">) {
+export function AgentRunTitle({ className, ...props }: ComponentProps<"h2">) {
   const { id, variant } = useRun("AgentRunTitle");
-  const compact = variant === "compact";
   return (
     <h2
+      data-slot="agent-run-title"
+      className={cn(
+        "m-0 font-semibold tracking-[-0.01em] wrap-anywhere",
+        variant === "compact" ? "text-[15px]/5" : "text-[18px]/6",
+        className,
+      )}
       {...props}
       id={`${id}-title`}
-      style={{
-        margin: 0,
-        fontSize: compact ? 15 : 18,
-        lineHeight: compact ? "20px" : "24px",
-        fontWeight: 600,
-        letterSpacing: "-0.01em",
-        overflowWrap: "anywhere",
-        ...style,
-      }}
     />
   );
 }
 
-export function AgentRunDescription({ style, ...props }: ComponentProps<"p">) {
+export function AgentRunDescription({ className, ...props }: ComponentProps<"p">) {
   return (
-    <p {...props} style={{ margin: 0, color: "var(--uai-muted)", textWrap: "pretty", ...style }} />
+    <p
+      data-slot="agent-run-description"
+      className={cn("m-0 text-pretty text-muted-foreground", className)}
+      {...props}
+    />
   );
 }
 
@@ -141,48 +146,55 @@ export function AgentRunStatus(props: Omit<ResponseStatusProps, "variant">) {
   return <ResponseStatus {...props} variant={statusVariants[variant]} />;
 }
 
-function Column({ part, style, ...props }: ComponentProps<"div"> & { part: string }) {
+function Column({
+  part,
+  slot,
+  className,
+  ...props
+}: ComponentProps<"div"> & { part: string; slot: string }) {
   const { variant } = useRun(part);
   return (
     <div
+      data-slot={slot}
+      className={cn(
+        "grid min-w-0 content-start",
+        variant === "compact" ? "gap-3" : "gap-4",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        alignContent: "start",
-        gap: variant === "compact" ? 12 : 16,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
 /** The primary column: activity and the final summary. */
 export function AgentRunMain(props: ComponentProps<"div">) {
-  return <Column {...props} part="AgentRunMain" />;
+  return <Column {...props} part="AgentRunMain" slot="agent-run-main" />;
 }
 
 /** The secondary column: tasks and approvals. */
 export function AgentRunAside(props: ComponentProps<"div">) {
-  return <Column {...props} part="AgentRunAside" />;
+  return <Column {...props} part="AgentRunAside" slot="agent-run-aside" />;
 }
 
-function Panel({ part, style, ...props }: ComponentProps<"section"> & { part: string }) {
+function Panel({
+  part,
+  slot,
+  className,
+  ...props
+}: ComponentProps<"section"> & { part: string; slot: string }) {
   const { variant } = useRun(part);
   const id = useId();
-  const compact = variant === "compact";
   return (
     <PanelContext.Provider value={id}>
       <section
+        data-slot={slot}
         aria-labelledby={id}
+        className={cn(
+          "grid min-w-0 content-start",
+          variant === "compact" ? "gap-2" : "gap-3",
+          className,
+        )}
         {...props}
-        style={{
-          display: "grid",
-          alignContent: "start",
-          gap: compact ? 8 : 12,
-          minWidth: 0,
-          ...style,
-        }}
       />
     </PanelContext.Provider>
   );
@@ -190,40 +202,34 @@ function Panel({ part, style, ...props }: ComponentProps<"section"> & { part: st
 
 /** What the agent is doing. Compose AgentRunLog inside it. */
 export function AgentRunActivity(props: ComponentProps<"section">) {
-  return <Panel {...props} part="AgentRunActivity" />;
+  return <Panel {...props} part="AgentRunActivity" slot="agent-run-activity" />;
 }
 
 /** The task plan. Compose AgentRunTaskList inside it. */
 export function AgentRunTasks(props: ComponentProps<"section">) {
-  return <Panel {...props} part="AgentRunTasks" />;
+  return <Panel {...props} part="AgentRunTasks" slot="agent-run-tasks" />;
 }
 
 /** Decisions the agent is waiting on. Compose AgentRunApproval inside it. */
 export function AgentRunApprovals(props: ComponentProps<"section">) {
-  return <Panel {...props} part="AgentRunApprovals" />;
+  return <Panel {...props} part="AgentRunApprovals" slot="agent-run-approvals" />;
 }
 
-export function AgentRunSectionTitle({ style, ...props }: ComponentProps<"h3">) {
+export function AgentRunSectionTitle({ className, ...props }: ComponentProps<"h3">) {
   const id = useContext(PanelContext);
   if (!id) throw new Error("AgentRunSectionTitle must be used within an AgentRun section");
   return (
     <h3
+      data-slot="agent-run-section-title"
+      className={cn("m-0 text-[12px]/4 font-medium text-subtle-foreground", className)}
       {...props}
       id={id}
-      style={{
-        margin: 0,
-        color: "var(--uai-subtle)",
-        fontSize: 12,
-        lineHeight: "16px",
-        fontWeight: 500,
-        ...style,
-      }}
     />
   );
 }
 
 /** A `role="log"` list of thinking and tool steps. New steps are announced politely. */
-export function AgentRunLog({ style, ...props }: ComponentProps<"div">) {
+export function AgentRunLog({ className, ...props }: ComponentProps<"div">) {
   const { variant } = useRun("AgentRunLog");
   const id = useContext(PanelContext);
   return (
@@ -232,22 +238,21 @@ export function AgentRunLog({ style, ...props }: ComponentProps<"div">) {
       aria-live="polite"
       aria-relevant="additions"
       aria-labelledby={id ?? undefined}
+      data-slot="agent-run-log"
+      className={cn(
+        "grid min-w-0 content-start",
+        variant === "compact" ? "gap-1.5" : "gap-2",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        alignContent: "start",
-        gap: variant === "compact" ? 6 : 8,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
 /** Model reasoning and progress. Compose Thinking parts inside it. */
-export function AgentRunThinking({ style, ...props }: ThinkingProps) {
+export function AgentRunThinking({ className, ...props }: ThinkingProps) {
   useRun("AgentRunThinking");
-  return <Thinking {...props} style={{ minWidth: 0, ...style }} />;
+  return <Thinking {...props} className={cn("min-w-0", className)} />;
 }
 
 /** One tool call. Compose Tool Call parts inside it. */

@@ -1,9 +1,9 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import {
   type ClipboardEvent,
   type ComponentProps,
-  type CSSProperties,
   createContext,
   type KeyboardEvent,
   type ReactNode,
@@ -25,6 +25,7 @@ import {
   StatusBannerIcon,
   type StatusBannerTone,
 } from "@/components/ui/uai/status-banner";
+import { cn } from "@/lib/uai-utils";
 
 export const CODE_VERIFICATION_VARIANTS = ["card", "split", "compact"] as const;
 export type CodeVerificationVariant = (typeof CODE_VERIFICATION_VARIANTS)[number];
@@ -68,53 +69,22 @@ function useCodeVerification(part: string) {
   return context;
 }
 
-const layoutCss = `
-[data-uai-code-layout]{display:grid;gap:20px;align-items:start;min-width:0}
-@container (min-width: 640px){
-  [data-uai-code="split"]>[data-uai-code-layout]{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);column-gap:40px}
-}
-[data-uai-code-cell]{border:1px solid transparent;background:var(--uai-canvas);color:var(--uai-text);transition:border-color 120ms ease-out,background-color 120ms ease-out,box-shadow 120ms ease-out}
-[data-uai-code-cell]:hover:not(:focus):not(:disabled){border-color:var(--uai-border)}
-[data-uai-code-cell][data-filled]{border-color:var(--uai-border-strong);background:var(--uai-surface)}
-[data-uai-code-cell]:focus{outline:none;border-color:var(--uai-accent);box-shadow:0 0 0 3px color-mix(in oklab,var(--uai-accent) 22%,transparent)}
-[data-uai-code-cell][aria-invalid="true"]{border-color:var(--uai-danger);background:color-mix(in oklab,var(--uai-danger) 6%,var(--uai-surface))}
-[data-uai-code-cell][readonly],[data-uai-code-cell]:disabled{background:var(--uai-surface-raised);border-color:transparent}
-[data-uai-code][data-status="verified"] [data-uai-code-cell]{color:var(--uai-success);background:color-mix(in oklab,var(--uai-success) 8%,var(--uai-surface))}
-[data-uai-code-submit],[data-uai-code-alternative]{transition:background-color 120ms ease-out,color 120ms ease-out,filter 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-[data-uai-code-submit="ready"]{background:var(--uai-accent);color:var(--uai-accent-foreground)}
-[data-uai-code-submit="ready"]:hover{filter:brightness(1.08)}
-[data-uai-code-submit="idle"]{background:var(--uai-surface-raised);color:var(--uai-subtle)}
-[data-uai-code-submit="ready"]:active,[data-uai-code-alternative]:active{transform:scale(0.97)}
-[data-uai-code-alternative]{background:var(--uai-surface-raised);color:var(--uai-text)}
-[data-uai-code-alternative]:hover{background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text))}
-[data-uai-code-submit]:focus-visible,[data-uai-code-alternative]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-@keyframes uai-code-shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
-[data-uai-code-shimmer]{background:linear-gradient(90deg,color-mix(in oklab,currentColor 55%,transparent) 0%,color-mix(in oklab,currentColor 55%,transparent) 35%,currentColor 50%,color-mix(in oklab,currentColor 55%,transparent) 65%,color-mix(in oklab,currentColor 55%,transparent) 100%) 0 0/200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:uai-code-shimmer 2s linear infinite}
-@media (prefers-reduced-motion: reduce){[data-uai-code-cell],[data-uai-code-submit],[data-uai-code-alternative]{transition:none}[data-uai-code-submit="ready"]:active,[data-uai-code-alternative]:active{transform:none}[data-uai-code-shimmer]{animation:none;background:none;-webkit-text-fill-color:currentColor}}`;
-const shells: Record<CodeVerificationVariant, CSSProperties> = {
-  card: {
-    maxWidth: 440,
-    margin: "0 auto",
-    padding: "clamp(20px, 6cqi, 28px)",
-    border: "1px solid var(--uai-border)",
-    borderRadius: 14,
-    background: "var(--uai-surface)",
+const codeVerificationVariants = cva(
+  "box-border @container min-w-0 rounded-[14px] border bg-card text-[13px]/[18px] text-card-foreground",
+  {
+    variants: {
+      variant: {
+        card: "mx-auto max-w-110 p-[clamp(20px,6cqi,28px)]",
+        split: "p-[clamp(20px,4cqi,32px)]",
+        compact: "mx-auto max-w-90 rounded-xl p-4",
+      },
+    },
   },
-  split: {
-    padding: "clamp(20px, 4cqi, 32px)",
-    border: "1px solid var(--uai-border)",
-    borderRadius: 14,
-    background: "var(--uai-surface)",
-  },
-  compact: {
-    maxWidth: 360,
-    margin: "0 auto",
-    padding: 16,
-    border: "1px solid var(--uai-border)",
-    borderRadius: 12,
-    background: "var(--uai-surface)",
-  },
-};
+);
+
+const codeVerificationActionMotion =
+  "[transition:background-color_120ms_ease-out,color_120ms_ease-out,filter_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none";
+
 const formatTime = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 
@@ -130,7 +100,7 @@ export function CodeVerification({
   resendAfter = 30,
   autoSubmit = true,
   children,
-  style,
+  className,
   ...props
 }: CodeVerificationProps) {
   const id = useId();
@@ -200,79 +170,84 @@ export function CodeVerification({
     >
       <section
         aria-labelledby={`${id}-title`}
-        {...props}
+        data-slot="code-verification"
         data-variant={variant}
+        className={cn(codeVerificationVariants({ variant }), className)}
+        {...props}
         data-status={status}
-        data-uai-code={variant}
-        style={{
-          boxSizing: "border-box",
-          containerType: "inline-size",
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...shells[variant],
-          ...style,
-        }}
       >
-        <style>{layoutCss}</style>
-        <div data-uai-code-layout="">{children}</div>
+        <div
+          className={cn(
+            "grid min-w-0 items-start gap-5",
+            variant === "split" &&
+              "@min-[640px]:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] @min-[640px]:gap-x-10",
+          )}
+        >
+          {children}
+        </div>
       </section>
     </Context.Provider>
   );
 }
 
-export function CodeVerificationHeader({ style, ...props }: ComponentProps<"header">) {
-  return <header {...props} style={{ display: "grid", gap: 6, minWidth: 0, ...style }} />;
-}
-
-export function CodeVerificationTitle({ style, ...props }: ComponentProps<"h2">) {
-  const { id, variant } = useCodeVerification("CodeVerificationTitle");
+export function CodeVerificationHeader({ className, ...props }: ComponentProps<"header">) {
   return (
-    <h2
+    <header
+      data-slot="code-verification-header"
+      className={cn("grid min-w-0 gap-1.5", className)}
       {...props}
-      id={`${id}-title`}
-      style={{
-        margin: 0,
-        fontSize: variant === "compact" ? 15 : 18,
-        fontWeight: 600,
-        lineHeight: variant === "compact" ? "20px" : "24px",
-        letterSpacing: "-0.01em",
-        textWrap: "balance",
-        ...style,
-      }}
     />
   );
 }
 
-export function CodeVerificationDescription({ style, ...props }: ComponentProps<"p">) {
+export function CodeVerificationTitle({ className, ...props }: ComponentProps<"h2">) {
+  const { id, variant } = useCodeVerification("CodeVerificationTitle");
+  return (
+    <h2
+      data-slot="code-verification-title"
+      className={cn(
+        "m-0 font-semibold tracking-[-0.01em] text-balance",
+        variant === "compact" ? "text-[15px]/5" : "text-lg/6",
+        className,
+      )}
+      {...props}
+      id={`${id}-title`}
+    />
+  );
+}
+
+export function CodeVerificationDescription({ className, ...props }: ComponentProps<"p">) {
   const { id } = useCodeVerification("CodeVerificationDescription");
   return (
     <p
+      data-slot="code-verification-description"
+      className={cn("m-0 text-pretty text-muted-foreground", className)}
       {...props}
       id={`${id}-description`}
-      style={{ margin: 0, color: "var(--uai-muted)", textWrap: "pretty", ...style }}
     />
   );
 }
 
 /** Where the code was sent, emphasised inside the description. */
-export function CodeVerificationDestination({ style, ...props }: ComponentProps<"strong">) {
+export function CodeVerificationDestination({ className, ...props }: ComponentProps<"strong">) {
   return (
     <strong
+      data-slot="code-verification-destination"
+      className={cn("font-medium wrap-anywhere text-foreground", className)}
       {...props}
-      style={{ color: "var(--uai-text)", fontWeight: 500, overflowWrap: "anywhere", ...style }}
     />
   );
 }
 
 /** The form region. Enter submits the entered code. */
-export function CodeVerificationForm({ onSubmit, style, ...props }: ComponentProps<"form">) {
+export function CodeVerificationForm({ onSubmit, className, ...props }: ComponentProps<"form">) {
   const context = useCodeVerification("CodeVerificationForm");
   return (
     <form
       noValidate
       aria-labelledby={`${context.id}-title`}
+      data-slot="code-verification-form"
+      className={cn("grid min-w-0 gap-3.5", className)}
       {...props}
       onSubmit={(event) => {
         onSubmit?.(event);
@@ -284,7 +259,6 @@ export function CodeVerificationForm({ onSubmit, style, ...props }: ComponentPro
         }
         context.verify(context.code);
       }}
-      style={{ display: "grid", gap: 14, minWidth: 0, ...style }}
     />
   );
 }
@@ -303,6 +277,7 @@ export type CodeVerificationInputProps = Omit<ComponentProps<"fieldset">, "child
 export function CodeVerificationInput({
   label = "Verification code",
   mode = "numeric",
+  className,
   style,
   ...props
 }: CodeVerificationInputProps) {
@@ -363,18 +338,15 @@ export function CodeVerificationInput({
     <fieldset
       aria-label={label}
       aria-describedby={`${context.id}-description ${context.id}-message`}
+      data-slot="code-verification-input"
+      className={cn(
+        "m-0 grid min-w-0 border-0 p-0",
+        variant === "split" ? "justify-start" : "justify-center",
+        variant === "compact" ? "gap-1.5" : "gap-2",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gridTemplateColumns: `repeat(${length}, minmax(0, ${size}px))`,
-        justifyContent: variant === "split" ? "start" : "center",
-        gap: variant === "compact" ? 6 : 8,
-        minWidth: 0,
-        margin: 0,
-        padding: 0,
-        border: 0,
-        ...style,
-      }}
+      style={{ gridTemplateColumns: `repeat(${length}, minmax(0, ${size}px))`, ...style }}
     >
       {Array.from({ length }, (_, index) => {
         const char = code[index] ?? "";
@@ -387,7 +359,26 @@ export function CodeVerificationInput({
             }}
             aria-label={`Character ${index + 1} of ${length}`}
             aria-invalid={invalid || undefined}
-            data-uai-code-cell=""
+            data-slot="code-verification-cell"
+            className={cn(
+              "box-border h-12 w-full min-w-0 rounded-[10px] border p-0 text-center text-[20px] font-medium tabular-nums caret-foreground outline-none [transition:border-color_120ms_ease-out,background-color_120ms_ease-out,box-shadow_120ms_ease-out] focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--primary)_22%,transparent)] motion-reduce:transition-none",
+              variant === "compact" && "h-10 rounded-lg text-[18px]",
+              status === "verified"
+                ? "border-transparent bg-[color-mix(in_oklab,var(--success)_8%,var(--card))] text-success"
+                : cn(
+                    "text-foreground hover:not-focus:border-border",
+                    locked
+                      ? "border-transparent bg-muted"
+                      : invalid
+                        ? "border-destructive bg-[color-mix(in_oklab,var(--destructive)_6%,var(--card))]"
+                        : cn(
+                            "focus:border-primary",
+                            char
+                              ? "border-border-strong bg-card"
+                              : "border-transparent bg-background",
+                          ),
+                  ),
+            )}
             data-filled={char ? "" : undefined}
             autoComplete={index === 0 ? "one-time-code" : "off"}
             inputMode={mode === "numeric" ? "numeric" : "text"}
@@ -414,20 +405,6 @@ export function CodeVerificationInput({
               fill(index, event.clipboardData.getData("text"));
             }}
             onKeyDown={onKeyDown(index)}
-            style={{
-              boxSizing: "border-box",
-              width: "100%",
-              minWidth: 0,
-              height: size + 4,
-              padding: 0,
-              borderRadius: variant === "compact" ? 8 : 10,
-              fontFamily: "inherit",
-              fontSize: variant === "compact" ? 18 : 20,
-              fontWeight: 500,
-              fontVariantNumeric: "tabular-nums",
-              textAlign: "center",
-              caretColor: "var(--uai-text)",
-            }}
           />
         );
       })}
@@ -467,7 +444,7 @@ export function CodeVerificationMessage({
 export function CodeVerificationSubmit({
   pendingLabel = "Verifying…",
   children,
-  style,
+  className,
   ...props
 }: ComponentProps<"button"> & { pendingLabel?: ReactNode }) {
   const context = useCodeVerification("CodeVerificationSubmit");
@@ -476,109 +453,98 @@ export function CodeVerificationSubmit({
   return (
     <button
       type="submit"
+      data-slot="code-verification-submit"
+      className={cn(
+        "rounded-full border-0 px-4 text-[13px] font-medium",
+        codeVerificationActionMotion,
+        context.variant === "compact" ? "h-7.5" : "h-8.5",
+        ready || pending
+          ? "bg-primary text-primary-foreground hover:brightness-108 active:scale-[0.97] motion-reduce:active:scale-100"
+          : "bg-muted text-subtle-foreground",
+        pending ? "cursor-progress" : ready ? "cursor-pointer" : "cursor-not-allowed",
+        className,
+      )}
       {...props}
       aria-disabled={!ready || pending || undefined}
       aria-busy={pending || undefined}
-      data-uai-code-submit={ready || pending ? "ready" : "idle"}
-      style={{
-        height: context.variant === "compact" ? 30 : 34,
-        padding: "0 16px",
-        border: 0,
-        borderRadius: 999,
-        font: "inherit",
-        fontSize: 13,
-        fontWeight: 500,
-        cursor: pending ? "progress" : ready ? "pointer" : "not-allowed",
-        ...style,
-      }}
+      data-state={ready || pending ? "ready" : "idle"}
     >
-      {pending ? <span data-uai-code-shimmer="">{pendingLabel}</span> : children}
+      {pending ? (
+        <span className="animate-shimmer bg-[linear-gradient(90deg,color-mix(in_oklab,currentColor_55%,transparent)_0%,color-mix(in_oklab,currentColor_55%,transparent)_35%,currentColor_50%,color-mix(in_oklab,currentColor_55%,transparent)_65%,color-mix(in_oklab,currentColor_55%,transparent)_100%)] bg-[length:200%_100%] bg-clip-text [-webkit-text-fill-color:transparent] motion-reduce:animate-none motion-reduce:bg-none motion-reduce:[-webkit-text-fill-color:currentColor]">
+          {pendingLabel}
+        </span>
+      ) : (
+        children
+      )}
     </button>
   );
 }
 
 /** Groups the resend action and its Inline Feedback status. */
-export function CodeVerificationResend({ style, ...props }: InlineFeedbackProps) {
+export function CodeVerificationResend({ className, ...props }: InlineFeedbackProps) {
   useCodeVerification("CodeVerificationResend");
   return (
-    <InlineFeedback duration={4000} {...props} style={{ justifyContent: "center", ...style }} />
+    <InlineFeedback
+      duration={4000}
+      data-slot="code-verification-resend"
+      className={cn("justify-center", className)}
+      {...props}
+    />
   );
 }
 
 /** Requests a new code. Disabled while the countdown runs, which it shows as m:ss. */
 export function CodeVerificationResendButton({
   children,
-  style,
+  className,
   ...props
 }: Omit<ComponentProps<typeof InlineFeedbackAction>, "onAction">) {
   const context = useCodeVerification("CodeVerificationResendButton");
   const waiting = context.remaining > 0;
   return (
     <InlineFeedbackAction
+      className={cn(
+        "border-0 bg-transparent px-1 decoration-border-strong underline-offset-3",
+        waiting
+          ? "cursor-default text-subtle-foreground no-underline"
+          : "cursor-pointer text-foreground underline",
+        className,
+      )}
       {...props}
       disabled={waiting || context.status === "verified"}
       onAction={context.resend}
-      style={{
-        border: 0,
-        padding: "0 4px",
-        background: "transparent",
-        color: waiting ? "var(--uai-subtle)" : "var(--uai-text)",
-        textDecorationLine: waiting ? "none" : "underline",
-        textDecorationColor: "var(--uai-border-strong)",
-        textUnderlineOffset: 3,
-        cursor: waiting ? "default" : "pointer",
-        ...style,
-      }}
     >
       {children}
-      {waiting && (
-        <span style={{ fontVariantNumeric: "tabular-nums" }}>
-          {" "}
-          in {formatTime(context.remaining)}
-        </span>
-      )}
+      {waiting && <span className="tabular-nums"> in {formatTime(context.remaining)}</span>}
     </InlineFeedbackAction>
   );
 }
 
 /** Other ways to verify, such as a call, backup code, or authenticator app. */
-export function CodeVerificationAlternatives({ style, ...props }: ComponentProps<"div">) {
+export function CodeVerificationAlternatives({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="code-verification-alternatives"
+      className={cn(
+        "flex flex-wrap items-center justify-center gap-1.5 border-t pt-4 text-[12px] text-subtle-foreground",
+        className,
+      )}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 6,
-        paddingTop: 16,
-        borderTop: "1px solid var(--uai-border)",
-        color: "var(--uai-subtle)",
-        fontSize: 12,
-        ...style,
-      }}
     />
   );
 }
 
-export function CodeVerificationAlternative({ style, ...props }: ComponentProps<"button">) {
+export function CodeVerificationAlternative({ className, ...props }: ComponentProps<"button">) {
   return (
     <button
       type="button"
+      data-slot="code-verification-alternative"
+      className={cn(
+        "h-7 cursor-pointer rounded-full border-0 bg-muted px-3 text-[12.5px] font-medium text-foreground hover:bg-[color-mix(in_oklab,var(--muted)_85%,var(--foreground))] active:scale-[0.97] motion-reduce:active:scale-100",
+        codeVerificationActionMotion,
+        className,
+      )}
       {...props}
-      data-uai-code-alternative=""
-      style={{
-        height: 28,
-        padding: "0 12px",
-        border: 0,
-        borderRadius: 999,
-        font: "inherit",
-        fontSize: 12.5,
-        fontWeight: 500,
-        cursor: "pointer",
-        ...style,
-      }}
     />
   );
 }

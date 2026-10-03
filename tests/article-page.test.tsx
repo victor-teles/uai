@@ -73,9 +73,9 @@ test("changes the reading size with arrow keys as a radio group", async () => {
   const user = userEvent.setup();
   const onTextSizeChange = mock();
   const view = render(<Fixture onTextSizeChange={onTextSizeChange} />);
-  const content = view.container.querySelector<HTMLElement>("[data-uai-article-content]");
+  const content = view.container.querySelector<HTMLElement>('[data-slot="article-page-content"]');
   expect(content?.dataset.textSize).toBe("default");
-  expect(content?.style.fontSize).toBe("16px");
+  expect(content?.className).toContain("text-[16px]/[26px]");
   const current = screen.getByRole("radio", { name: "Default text" });
   expect(current.getAttribute("aria-checked")).toBe("true");
   expect(screen.getByRole("radio", { name: "Small text" }).tabIndex).toBe(-1);
@@ -83,7 +83,7 @@ test("changes the reading size with arrow keys as a radio group", async () => {
   await user.keyboard("{ArrowRight}");
   expect(onTextSizeChange).toHaveBeenCalledWith("large");
   expect(document.activeElement).toBe(screen.getByRole("radio", { name: "Large text" }));
-  expect(content?.style.fontSize).toBe("18px");
+  expect(content?.className).toContain("text-[18px]/[30px]");
   await user.keyboard("{Home}");
   expect(content?.dataset.textSize).toBe("small");
 });
@@ -111,9 +111,9 @@ test("opens the share menu from the toolbar", async () => {
 test("renders every variant and guards its parts", () => {
   for (const variant of ARTICLE_PAGE_VARIANTS) {
     const view = render(<Fixture variant={variant} />);
-    expect(view.container.querySelector("[data-uai-article]")?.getAttribute("data-variant")).toBe(
-      variant,
-    );
+    expect(
+      view.container.querySelector('[data-slot="article-page"]')?.getAttribute("data-variant"),
+    ).toBe(variant);
     view.unmount();
   }
   expect(() => render(<ArticlePageTitle />)).toThrow(

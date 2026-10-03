@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { Check, Link2, Share, Share2 } from "lucide-react";
 import {
   type ComponentProps,
@@ -11,6 +12,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const SHARE_MENU_VARIANTS = ["outlined", "ghost", "compact"] as const;
 export type ShareMenuVariant = (typeof SHARE_MENU_VARIANTS)[number];
@@ -45,33 +47,33 @@ function useShare(part: string) {
   if (!context) throw new Error(`${part} must be used within ShareMenu`);
   return context;
 }
-const floatingShadow =
-  "0 0 0 1px var(--uai-border-strong), 0 12px 28px -10px oklch(0 0 0 / 0.32), 0 2px 6px -2px oklch(0 0 0 / 0.12)";
-const shareCss = `
-.uai-share-trigger{background:var(--uai-surface);box-shadow:inset 0 0 0 1px var(--uai-border);color:var(--uai-text);transition:background-color 120ms ease-out,box-shadow 120ms ease-out,color 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-share-trigger:hover,.uai-share-trigger[aria-expanded=true]{background:var(--uai-surface-raised);box-shadow:inset 0 0 0 1px var(--uai-border-strong)}
-.uai-share[data-variant=ghost] .uai-share-trigger{background:transparent;box-shadow:none;color:var(--uai-muted)}
-.uai-share[data-variant=ghost] .uai-share-trigger:hover,.uai-share[data-variant=ghost] .uai-share-trigger[aria-expanded=true]{background:var(--uai-surface-raised);color:var(--uai-text)}
-.uai-share[data-variant=compact] .uai-share-trigger{background:var(--uai-surface-raised);box-shadow:none}
-.uai-share[data-variant=compact] .uai-share-trigger:hover,.uai-share[data-variant=compact] .uai-share-trigger[aria-expanded=true]{background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text))}
-.uai-share-trigger:active{transform:scale(0.97)}
-.uai-share-trigger:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-.uai-share-trigger[data-copied] svg{color:var(--uai-success);animation:uai-share-check 220ms cubic-bezier(0.16,1,0.3,1)}
-.uai-share-item{background:transparent;transition:background-color 120ms ease-out}
-.uai-share-item:focus,.uai-share-item:hover{background:var(--uai-surface-raised);outline:none}
-.uai-share-item:focus-visible{outline:none}
-.uai-share-item svg{flex:none;color:var(--uai-muted);transition:color 120ms ease-out}
-.uai-share-item:is(:focus,:hover) svg{color:var(--uai-text)}
-@keyframes uai-share-check{from{opacity:0;transform:scale(0.6)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion: reduce){
-.uai-share-trigger,.uai-share-item,.uai-share-item svg{transition:none}
-.uai-share-trigger:active{transform:none}
-.uai-share-trigger[data-copied] svg{animation:none}
-}
-`;
-function cx(...names: (string | undefined)[]) {
-  return names.filter(Boolean).join(" ");
-}
+const shareMenuTriggerVariants = cva(
+  "inline-flex cursor-pointer items-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap [transition:background-color_120ms_ease-out,box-shadow_120ms_ease-out,color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:[transform:scale(0.97)] data-copied:[&_svg]:animate-in data-copied:[&_svg]:fade-in-0 data-copied:[&_svg]:zoom-in-60 data-copied:[&_svg]:text-success data-copied:[&_svg]:duration-220 data-copied:[&_svg]:ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none motion-reduce:active:[transform:none] motion-reduce:data-copied:[&_svg]:animate-none",
+  {
+    variants: {
+      variant: {
+        outlined:
+          "h-7 bg-card pr-3 pl-2.5 text-[12.5px] text-foreground shadow-[inset_0_0_0_1px_var(--border)] hover:bg-accent hover:shadow-[inset_0_0_0_1px_var(--border-strong)] aria-expanded:bg-accent aria-expanded:shadow-[inset_0_0_0_1px_var(--border-strong)]",
+        ghost:
+          "h-7 bg-transparent pr-3 pl-2.5 text-[12.5px] text-muted-foreground shadow-none hover:bg-accent hover:text-foreground aria-expanded:bg-accent aria-expanded:text-foreground",
+        compact:
+          "h-6 bg-secondary pr-2.5 pl-2 text-[12px] text-foreground shadow-none hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] aria-expanded:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+      },
+    },
+  },
+);
+const shareMenuItemVariants = cva(
+  "box-border flex w-full cursor-pointer items-center rounded-[10px] border-0 bg-transparent text-start text-foreground no-underline outline-offset-[-2px] transition-[background-color] duration-120 ease-[ease-out] hover:bg-accent focus:bg-accent focus:outline-none [&_svg]:flex-none [&_svg]:text-muted-foreground [&_svg]:transition-[color] [&_svg]:duration-120 [&_svg]:ease-[ease-out] hover:[&_svg]:text-foreground focus:[&_svg]:text-foreground motion-reduce:transition-none motion-reduce:[&_svg]:transition-none",
+  {
+    variants: {
+      variant: {
+        outlined: "min-h-8 gap-2.5 px-2.5 text-[13px]/[18px]",
+        ghost: "min-h-8 gap-2.5 px-2.5 text-[13px]/[18px]",
+        compact: "min-h-7 gap-2 px-2 text-[12.5px]/[18px]",
+      },
+    },
+  },
+);
 function menuItems(menu: HTMLElement | null) {
   return Array.from(
     menu?.querySelectorAll<HTMLElement>('[role="menuitem"]:not([aria-disabled="true"])') ?? [],
@@ -87,7 +89,6 @@ export function ShareMenu({
   defaultOpen = false,
   onOpenChange,
   className,
-  style,
   children,
   ...props
 }: ShareMenuProps) {
@@ -140,32 +141,14 @@ export function ShareMenu({
       }}
     >
       <div
-        ref={rootRef}
-        {...props}
+        data-slot="share-menu"
         data-variant={variant}
-        className={cx("uai-share", className)}
-        style={{
-          position: "relative",
-          display: "inline-flex",
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
+        className={cn("relative inline-flex text-[13px]/[18px] text-foreground", className)}
+        {...props}
+        ref={rootRef}
       >
-        <style>{shareCss}</style>
         {children}
-        <span
-          role="status"
-          style={{
-            position: "absolute",
-            width: 1,
-            height: 1,
-            overflow: "hidden",
-            clipPath: "inset(50%)",
-            whiteSpace: "nowrap",
-          }}
-        >
+        <span role="status" className="sr-only">
           {message}
         </span>
       </div>
@@ -178,7 +161,6 @@ export function ShareMenuTrigger({
   onClick,
   onKeyDown,
   className,
-  style,
   ...props
 }: ComponentProps<"button">) {
   const context = useShare("ShareMenuTrigger");
@@ -186,8 +168,10 @@ export function ShareMenuTrigger({
   const Icon = context.copied ? Check : Share2;
   return (
     <button
-      ref={context.triggerRef}
+      data-slot="share-menu-trigger"
+      className={cn(shareMenuTriggerVariants({ variant: context.variant }), className)}
       {...props}
+      ref={context.triggerRef}
       type="button"
       aria-haspopup="menu"
       aria-expanded={context.open}
@@ -205,21 +189,6 @@ export function ShareMenuTrigger({
         }
       }}
       data-copied={context.copied ? "" : undefined}
-      className={cx("uai-share-trigger", className)}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        height: compact ? 24 : 28,
-        padding: compact ? "0 10px 0 8px" : "0 12px 0 10px",
-        border: 0,
-        borderRadius: 999,
-        fontSize: compact ? 12 : 12.5,
-        fontWeight: 500,
-        whiteSpace: "nowrap",
-        cursor: "pointer",
-        ...style,
-      }}
     >
       <Icon
         key={context.copied ? "copied" : "share"}
@@ -237,7 +206,7 @@ export function ShareMenuContent({
   "aria-label": label = "Share options",
   onClick,
   onKeyDown,
-  style,
+  className,
   ...props
 }: ComponentProps<"div"> & { align?: "start" | "end" }) {
   const context = useShare("ShareMenuContent");
@@ -267,6 +236,14 @@ export function ShareMenuContent({
       role="menu"
       aria-label={label}
       tabIndex={-1}
+      data-slot="share-menu-content"
+      data-align={align}
+      className={cn(
+        "absolute top-[calc(100%+6px)] z-20 grid gap-px rounded-[14px] bg-popover p-1 shadow-[0_0_0_1px_var(--border-strong),0_12px_28px_-10px_oklch(0_0_0/0.32),0_2px_6px_-2px_oklch(0_0_0/0.12)]",
+        align === "end" ? "end-0 origin-top-right" : "start-0 origin-top-left",
+        context.variant === "compact" ? "min-w-[184px]" : "min-w-[200px]",
+        className,
+      )}
       {...props}
       onClick={(event) => {
         onClick?.(event);
@@ -291,44 +268,10 @@ export function ShareMenuContent({
           context.setOpen(false, "trigger");
         } else if (event.key === "Tab") context.setOpen(false);
       }}
-      style={{
-        position: "absolute",
-        top: "calc(100% + 6px)",
-        [align === "end" ? "insetInlineEnd" : "insetInlineStart"]: 0,
-        zIndex: 20,
-        display: "grid",
-        gap: 1,
-        minWidth: context.variant === "compact" ? 184 : 200,
-        padding: 4,
-        borderRadius: 14,
-        background: "var(--uai-surface)",
-        boxShadow: floatingShadow,
-        transformOrigin: align === "end" ? "top right" : "top left",
-        ...style,
-      }}
     />
   );
 }
 
-const itemStyle = (compact: boolean): React.CSSProperties => ({
-  boxSizing: "border-box",
-  display: "flex",
-  alignItems: "center",
-  gap: compact ? 8 : 10,
-  width: "100%",
-  minHeight: compact ? 28 : 32,
-  padding: compact ? "0 8px" : "0 10px",
-  border: 0,
-  borderRadius: 10,
-  color: "var(--uai-text)",
-  fontSize: compact ? 12.5 : 13,
-  lineHeight: "18px",
-  textAlign: "start",
-  textDecoration: "none",
-  cursor: "pointer",
-  outlineOffset: -2,
-});
-const ITEM = "uai-share-item";
 const highlight = {
   onPointerMove: (event: React.PointerEvent<HTMLElement>) => {
     if (document.activeElement !== event.currentTarget) event.currentTarget.focus();
@@ -340,7 +283,6 @@ export function ShareMenuNative({
   children = "Share via…",
   onClick,
   className,
-  style,
   ...props
 }: ComponentProps<"button">) {
   const context = useShare("ShareMenuNative");
@@ -349,6 +291,8 @@ export function ShareMenuNative({
   if (!supported) return null;
   return (
     <button
+      data-slot="share-menu-native"
+      className={cn(shareMenuItemVariants({ variant: context.variant }), className)}
       {...props}
       {...highlight}
       type="button"
@@ -368,8 +312,6 @@ export function ShareMenuNative({
           if ((error as Error)?.name !== "AbortError") context.announce("Sharing failed");
         }
       }}
-      className={cx(ITEM, className)}
-      style={{ ...itemStyle(context.variant === "compact"), ...style }}
     >
       <Share size={14} strokeWidth={1.75} aria-hidden="true" />
       {children}
@@ -383,12 +325,13 @@ export function ShareMenuCopy({
   errorMessage = "Couldn’t copy the link",
   onClick,
   className,
-  style,
   ...props
 }: ComponentProps<"button"> & { copiedMessage?: string; errorMessage?: string }) {
   const context = useShare("ShareMenuCopy");
   return (
     <button
+      data-slot="share-menu-copy"
+      className={cn(shareMenuItemVariants({ variant: context.variant }), className)}
       {...props}
       {...highlight}
       type="button"
@@ -405,8 +348,6 @@ export function ShareMenuCopy({
           context.announce(errorMessage);
         }
       }}
-      className={cx(ITEM, className)}
-      style={{ ...itemStyle(context.variant === "compact"), ...style }}
     >
       <Link2 size={14} strokeWidth={1.75} aria-hidden="true" />
       {children}
@@ -415,34 +356,29 @@ export function ShareMenuCopy({
 }
 
 /** A link to a share destination. The menu closes after the link is followed. */
-export function ShareMenuChannel({ className, style, ...props }: ComponentProps<"a">) {
+export function ShareMenuChannel({ className, ...props }: ComponentProps<"a">) {
   const context = useShare("ShareMenuChannel");
   return (
     <a
       target="_blank"
       rel="noopener noreferrer"
+      data-slot="share-menu-channel"
+      className={cn(shareMenuItemVariants({ variant: context.variant }), className)}
       {...props}
       {...highlight}
       role="menuitem"
       tabIndex={-1}
-      className={cx(ITEM, className)}
-      style={{ ...itemStyle(context.variant === "compact"), ...style }}
     />
   );
 }
 
-export function ShareMenuSeparator({ style, ...props }: ComponentProps<"hr">) {
+export function ShareMenuSeparator({ className, ...props }: ComponentProps<"hr">) {
   useShare("ShareMenuSeparator");
   return (
     <hr
+      data-slot="share-menu-separator"
+      className={cn("mx-2 my-1 h-px border-0 bg-border", className)}
       {...props}
-      style={{
-        height: 1,
-        margin: "4px 8px",
-        border: 0,
-        background: "var(--uai-border)",
-        ...style,
-      }}
     />
   );
 }

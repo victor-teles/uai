@@ -31,7 +31,8 @@ test("composes ordered tasks with visible status text", () => {
   expect(screen.getByRole("list", { name: "Registry work" }).className).toContain("list-none");
   expect(screen.getAllByRole("listitem")).toHaveLength(2);
   expect(screen.getByText("Complete")).toBeTruthy();
-  expect(screen.getByText("Complete").className).toContain("var(--uai-text)");
+  expect(screen.getByText("Complete").className).toContain("bg-success/14");
+  expect(screen.getByText("In progress").className).toContain("text-foreground");
   expect(screen.getByText("In progress")).toBeTruthy();
 });
 
@@ -41,18 +42,19 @@ test("renders card, timeline, and compact chrome from the root variant", () => {
 
   expect(TASK_LIST_VARIANTS).toEqual(["card", "timeline", "compact"]);
   expect(list.dataset.variant).toBe("card");
-  expect(list.style.borderRadius).toBe("14px");
+  expect(list.dataset.slot).toBe("task-list");
+  expect(list.className).toContain("rounded-[14px]");
 
   rerender(<TaskListFixture variant="timeline" />);
   expect(list.dataset.variant).toBe("timeline");
-  expect(list.style.borderRadius).toBe("0px");
+  expect(list.className).toContain("rounded-none");
   expect(list.className).toContain("bg-transparent");
   expect(list.className).not.toContain("gap-3");
   expect(container.querySelector("li")?.className).toContain("pb-6");
 
   rerender(<TaskListFixture variant="compact" />);
   expect(list.dataset.variant).toBe("compact");
-  expect(list.style.borderRadius).toBe("12px");
+  expect(list.className).toContain("rounded-xl");
   expect(container.querySelector("li")?.className).toContain("min-h-12");
 });
 
@@ -70,7 +72,7 @@ test("identifies the active step and allows localized status copy", () => {
 
   expect(screen.getByRole("listitem").getAttribute("aria-current")).toBe("step");
   expect(screen.getByText("Em andamento")).toBeTruthy();
-  expect(screen.getByText(/Validar a experiência/).className).toContain("[overflow-wrap:anywhere]");
+  expect(screen.getByText(/Validar a experiência/).className).toContain("wrap-anywhere");
   expect(screen.getByText(/Confirmar que títulos/).className).not.toContain("truncate");
 });
 

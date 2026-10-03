@@ -1,13 +1,8 @@
 "use client";
 
-import {
-  type ComponentProps,
-  type CSSProperties,
-  createContext,
-  useContext,
-  useId,
-  useState,
-} from "react";
+import { cva } from "class-variance-authority";
+import { type ComponentProps, createContext, useContext, useId, useState } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const FORM_FIELD_VARIANTS = ["outlined", "filled", "compact"] as const;
 export type FormFieldVariant = (typeof FORM_FIELD_VARIANTS)[number];
@@ -33,21 +28,43 @@ type FieldContext = {
   change: (value: string) => void;
 };
 const Context = createContext<FieldContext | null>(null);
-const fieldCss = `
-.uai-form-field-control{border:1px solid var(--uai-field-border);background:var(--uai-field-fill);transition:border-color 120ms ease-out,background-color 120ms ease-out,box-shadow 120ms ease-out}
-.uai-form-field-control::placeholder{color:var(--uai-subtle)}
-.uai-form-field-control:hover:not(:disabled):not(:focus){border-color:var(--uai-border-strong)}
-.uai-form-field-control:focus{outline:none;border-color:var(--uai-border-strong);box-shadow:0 0 0 3px color-mix(in oklab,var(--uai-accent) 24%,transparent)}
-.uai-form-field-control[aria-invalid="true"]{border-color:color-mix(in oklab,var(--uai-danger) 70%,transparent)}
-.uai-form-field-control[aria-invalid="true"]:focus{border-color:var(--uai-danger);box-shadow:0 0 0 3px color-mix(in oklab,var(--uai-danger) 22%,transparent)}
-.uai-form-field-control:disabled{opacity:0.55;cursor:not-allowed}
-@media (prefers-reduced-motion: reduce){.uai-form-field-control{border:1px solid var(--uai-field-border);background:var(--uai-field-fill);transition:none}}
-`;
 function useField() {
   const context = useContext(Context);
   if (!context) throw new Error("FormField children must be used within FormField");
   return context;
 }
+
+const formFieldVariants = cva("grid min-w-0 text-[13px]/[18px] text-foreground", {
+  variants: {
+    variant: {
+      outlined: "gap-1.5",
+      filled: "gap-1.5",
+      compact: "gap-1",
+    },
+  },
+});
+
+const formFieldControlVariants = cva(
+  [
+    "box-border block w-full min-w-0 border text-foreground outline-none",
+    "transition-[border-color,background-color,box-shadow] duration-120 ease-[ease-out] motion-reduce:transition-none",
+    "placeholder:text-subtle-foreground",
+    "hover:enabled:not-focus:border-border-strong",
+    "focus:border-border-strong focus:ring-3 focus:ring-primary/24",
+    "aria-invalid:border-destructive/70 aria-invalid:focus:border-destructive aria-invalid:focus:ring-destructive/22",
+    "disabled:cursor-not-allowed disabled:opacity-55",
+  ],
+  {
+    variants: {
+      variant: {
+        outlined: "rounded-[10px] border-border bg-background px-3 py-2.25 text-[13px]/[18px]",
+        filled: "rounded-[10px] border-transparent bg-muted px-3 py-2.25 text-[13px]/[18px]",
+        compact: "rounded-lg border-border bg-background px-2.5 py-1.5 text-[12.5px]/[18px]",
+      },
+    },
+  },
+);
+
 export function FormField({
   variant = "outlined",
   inputId,
@@ -58,8 +75,8 @@ export function FormField({
   defaultValue = "",
   onValueChange,
   maxLength,
+  className,
   children,
-  style,
   ...props
 }: FormFieldProps) {
   const generatedId = useId();
@@ -80,38 +97,32 @@ export function FormField({
   return (
     <Context.Provider value={context}>
       <div
-        {...props}
+        data-slot="form-field"
         data-variant={variant}
-        style={{
-          display: "grid",
-          gap: variant === "compact" ? 4 : 6,
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
+        className={cn(formFieldVariants({ variant }), className)}
+        {...props}
       >
-        <style>{fieldCss}</style>
         {children}
       </div>
     </Context.Provider>
   );
 }
-export function FormFieldLabel({ children, style, ...props }: ComponentProps<"label">) {
+export function FormFieldLabel({ className, children, ...props }: ComponentProps<"label">) {
   const context = useField();
   return (
     <label
+      data-slot="form-field-label"
+      className={cn(
+        "font-medium",
+        context.variant === "compact" ? "text-[12.5px]" : "text-[13px]",
+        className,
+      )}
       {...props}
       htmlFor={context.id}
-      style={{ fontSize: context.variant === "compact" ? 12.5 : 13, fontWeight: 500, ...style }}
     >
       {children}
       {context.required && (
-        <span style={{ color: "var(--uai-subtle)", fontWeight: 400, fontSize: 12 }}>
-          {" "}
-          (required)
-        </span>
+        <span className="text-[12px] font-normal text-subtle-foreground"> (required)</span>
       )}
     </label>
   );
@@ -125,41 +136,23 @@ function fieldControl(context: FieldContext) {
     maxLength: context.maxLength,
     "aria-invalid": context.invalid || undefined,
     "aria-describedby": `${context.id}-description ${context.id}-error ${context.id}-count`,
-    className: "uai-form-field-control",
-    style: {
-      display: "block",
-      width: "100%",
-      minWidth: 0,
-      boxSizing: "border-box" as const,
-      "--uai-field-border": context.variant === "filled" ? "transparent" : "var(--uai-border)",
-      "--uai-field-fill":
-        context.variant === "filled" ? "var(--uai-surface-raised)" : "var(--uai-canvas)",
-      borderRadius: context.variant === "compact" ? 8 : 10,
-      padding: context.variant === "compact" ? "6px 10px" : "9px 12px",
-      color: "var(--uai-text)",
-      font: "inherit",
-      fontSize: context.variant === "compact" ? 12.5 : 13,
-      lineHeight: "18px",
-    } as CSSProperties,
   };
 }
 export function FormFieldInput({
   onChange,
   className,
-  style,
   ...props
 }: Omit<
   ComponentProps<"input">,
   "value" | "defaultValue" | "id" | "maxLength" | "required" | "disabled"
 >) {
   const context = useField();
-  const control = fieldControl(context);
   return (
     <input
+      data-slot="form-field-input"
+      className={cn(formFieldControlVariants({ variant: context.variant }), className)}
       {...props}
-      {...control}
-      className={className ? `${control.className} ${className}` : control.className}
-      style={{ ...control.style, ...style }}
+      {...fieldControl(context)}
       onChange={(event) => {
         onChange?.(event);
         if (!event.defaultPrevented) context.change(event.target.value);
@@ -170,26 +163,24 @@ export function FormFieldInput({
 export function FormFieldTextarea({
   onChange,
   className,
-  style,
   ...props
 }: Omit<
   ComponentProps<"textarea">,
   "value" | "defaultValue" | "id" | "maxLength" | "required" | "disabled"
 >) {
   const context = useField();
-  const control = fieldControl(context);
   return (
     <textarea
       rows={3}
+      data-slot="form-field-textarea"
+      className={cn(
+        formFieldControlVariants({ variant: context.variant }),
+        "resize-y",
+        context.variant === "compact" ? "min-h-14" : "min-h-19",
+        className,
+      )}
       {...props}
-      {...control}
-      className={className ? `${control.className} ${className}` : control.className}
-      style={{
-        ...control.style,
-        resize: "vertical",
-        minHeight: context.variant === "compact" ? 56 : 76,
-        ...style,
-      }}
+      {...fieldControl(context)}
       onChange={(event) => {
         onChange?.(event);
         if (!event.defaultPrevented) context.change(event.target.value);
@@ -197,47 +188,41 @@ export function FormFieldTextarea({
     />
   );
 }
-export function FormFieldDescription({ style, ...props }: ComponentProps<"p">) {
+export function FormFieldDescription({ className, ...props }: ComponentProps<"p">) {
   const context = useField();
   return (
     <p
+      data-slot="form-field-description"
+      className={cn("m-0 text-xs/4 text-muted-foreground", className)}
       {...props}
       id={`${context.id}-description`}
-      style={{ margin: 0, fontSize: 12, lineHeight: "16px", color: "var(--uai-muted)", ...style }}
     />
   );
 }
-export function FormFieldError({ style, ...props }: ComponentProps<"p">) {
+export function FormFieldError({ className, ...props }: ComponentProps<"p">) {
   const context = useField();
   if (!context.invalid) return null;
   return (
     <p
       role="alert"
+      data-slot="form-field-error"
+      className={cn(
+        "m-0 text-xs/4 text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))]",
+        className,
+      )}
       {...props}
       id={`${context.id}-error`}
-      style={{
-        margin: 0,
-        fontSize: 12,
-        lineHeight: "16px",
-        color: "color-mix(in oklab, var(--uai-danger) 75%, var(--uai-text))",
-        ...style,
-      }}
     />
   );
 }
-export function FormFieldCount({ style, ...props }: ComponentProps<"span">) {
+export function FormFieldCount({ className, ...props }: ComponentProps<"span">) {
   const context = useField();
   return (
     <span
+      data-slot="form-field-count"
+      className={cn("text-right text-[11.5px] text-subtle-foreground tabular-nums", className)}
       {...props}
       id={`${context.id}-count`}
-      style={{
-        fontSize: 11.5,
-        color: "var(--uai-subtle)",
-        textAlign: "right",
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     >
       {context.value.length}
       {context.maxLength === undefined ? " characters" : ` / ${context.maxLength} characters`}

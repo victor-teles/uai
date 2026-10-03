@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   type ComponentProps,
@@ -16,6 +17,7 @@ import {
   type ReactionBarProps,
   type ReactionBarVariant,
 } from "@/components/ui/uai/reaction-bar";
+import { cn } from "@/lib/uai-utils";
 
 export const COMMUNITY_FEED_VARIANTS = ["list", "cards", "compact"] as const;
 export type CommunityFeedVariant = (typeof COMMUNITY_FEED_VARIANTS)[number];
@@ -52,22 +54,23 @@ function usePost(part: string) {
   return id;
 }
 
-const feedCss = `
-.uai-community-feed-pill{transition:background-color 120ms ease-out,color 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-community-feed-pill:not([aria-checked=true]):not([aria-current]):not(:disabled):hover{background:var(--uai-surface-raised);color:var(--uai-text)}
-.uai-community-feed-pill:not(:disabled):active{transform:scale(0.96)}
-.uai-community-feed-pill:focus-visible,.uai-community-feed-link:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-.uai-community-feed-link{transition:color 120ms ease-out}
-.uai-community-feed-link:hover{color:var(--uai-text)}
-[data-uai-community-feed-post]{animation:uai-community-feed-fade-up 240ms cubic-bezier(0.23,1,0.32,1) both}
-li:nth-child(2)>[data-uai-community-feed-post]{animation-delay:40ms}
-li:nth-child(3)>[data-uai-community-feed-post]{animation-delay:80ms}
-li:nth-child(4)>[data-uai-community-feed-post]{animation-delay:120ms}
-li:nth-child(5)>[data-uai-community-feed-post]{animation-delay:160ms}
-li:nth-child(n+6)>[data-uai-community-feed-post]{animation-delay:200ms}
-@keyframes uai-community-feed-fade-up{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion: reduce){.uai-community-feed-pill,.uai-community-feed-link{transition:none}.uai-community-feed-pill:not(:disabled):active{transform:none}[data-uai-community-feed-post]{animation:none}}
-`;
+const pill =
+  "[transition:background-color_120ms_ease-out,color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.96] motion-reduce:transition-none motion-reduce:enabled:active:scale-100";
+const pillIdle =
+  "bg-transparent text-muted-foreground enabled:hover:bg-accent enabled:hover:text-foreground";
+const pillSelected = "bg-accent text-foreground";
+const feedLink =
+  "no-underline transition-[color] duration-120 ease-out hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none";
+
+const communityFeedVariants = cva("grid min-w-0 text-[13px]/[18px] text-foreground", {
+  variants: {
+    variant: {
+      list: "gap-5",
+      cards: "gap-5",
+      compact: "gap-3",
+    },
+  },
+});
 
 const reactionVariants: Record<CommunityFeedVariant, ReactionBarVariant> = {
   list: "pill",
@@ -96,7 +99,7 @@ export function CommunityFeed({
   defaultPage = 1,
   onPageChange,
   children,
-  style,
+  className,
   ...props
 }: CommunityFeedProps) {
   const id = useId();
@@ -118,64 +121,51 @@ export function CommunityFeed({
     >
       <section
         aria-labelledby={`${id}-title`}
-        {...props}
+        data-slot="community-feed"
         data-variant={variant}
-        style={{
-          display: "grid",
-          gap: variant === "compact" ? 12 : 20,
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
+        className={cn(communityFeedVariants({ variant }), className)}
+        {...props}
       >
-        <style>{feedCss}</style>
         {children}
       </section>
     </Context.Provider>
   );
 }
 
-export function CommunityFeedHeader({ style, ...props }: ComponentProps<"header">) {
+export function CommunityFeedHeader({ className, ...props }: ComponentProps<"header">) {
   useFeed("CommunityFeedHeader");
   return (
     <header
+      data-slot="community-feed-header"
+      className={cn("flex min-w-0 flex-wrap items-end justify-between gap-3", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "flex-end",
-        justifyContent: "space-between",
-        gap: 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function CommunityFeedTitle({ style, ...props }: ComponentProps<"h2">) {
+export function CommunityFeedTitle({ className, ...props }: ComponentProps<"h2">) {
   const { id, variant } = useFeed("CommunityFeedTitle");
   return (
     <h2
+      data-slot="community-feed-title"
+      className={cn(
+        "m-0 font-semibold tracking-[-0.015em]",
+        variant === "compact" ? "text-base/[22px]" : "text-xl/[26px]",
+        className,
+      )}
       {...props}
       id={`${id}-title`}
-      style={{
-        margin: 0,
-        fontSize: variant === "compact" ? 16 : 20,
-        lineHeight: variant === "compact" ? "22px" : "26px",
-        fontWeight: 600,
-        letterSpacing: "-0.015em",
-        ...style,
-      }}
     />
   );
 }
 
-export function CommunityFeedDescription({ style, ...props }: ComponentProps<"p">) {
+export function CommunityFeedDescription({ className, ...props }: ComponentProps<"p">) {
   return (
-    <p {...props} style={{ margin: 0, color: "var(--uai-muted)", textWrap: "pretty", ...style }} />
+    <p
+      data-slot="community-feed-description"
+      className={cn("m-0 text-pretty text-muted-foreground", className)}
+      {...props}
+    />
   );
 }
 
@@ -183,7 +173,7 @@ export function CommunityFeedDescription({ style, ...props }: ComponentProps<"p"
 export function CommunityFeedFilters({
   "aria-label": label = "Filter posts",
   onKeyDown,
-  style,
+  className,
   ...props
 }: ComponentProps<"div">) {
   useFeed("CommunityFeedFilters");
@@ -191,12 +181,13 @@ export function CommunityFeedFilters({
     <div
       role="radiogroup"
       aria-label={label}
+      data-slot="community-feed-filters"
+      className={cn("flex flex-wrap items-center gap-1", className)}
       {...props}
       onKeyDown={(event) => {
         onKeyDown?.(event);
         if (!event.defaultPrevented) moveRadio(event);
       }}
-      style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 4, ...style }}
     />
   );
 }
@@ -204,7 +195,7 @@ export function CommunityFeedFilters({
 export function CommunityFeedFilter({
   value,
   onClick,
-  style,
+  className,
   ...props
 }: Omit<ComponentProps<"button">, "value"> & { value: string }) {
   const context = useFeed("CommunityFeedFilter");
@@ -212,81 +203,62 @@ export function CommunityFeedFilter({
   return (
     // biome-ignore lint/a11y/useSemanticElements: APG radio group built from buttons for custom segmented styling.
     <button
+      data-slot="community-feed-filter"
+      className={cn(
+        "inline-flex cursor-pointer items-center gap-1.5 rounded-full border-0 px-3 text-[12.5px] font-medium whitespace-nowrap",
+        context.variant === "compact" ? "h-6" : "h-7",
+        checked ? pillSelected : pillIdle,
+        pill,
+        className,
+      )}
       {...props}
       type="button"
       role="radio"
       aria-checked={checked}
       tabIndex={checked ? 0 : -1}
-      className={joinClass("uai-community-feed-pill", props.className)}
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) context.setFilter(value);
-      }}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        height: context.variant === "compact" ? 24 : 28,
-        padding: "0 12px",
-        border: 0,
-        borderRadius: 999,
-        background: checked ? "var(--uai-surface-raised)" : "transparent",
-        color: checked ? "var(--uai-text)" : "var(--uai-muted)",
-        font: "inherit",
-        fontSize: 12.5,
-        fontWeight: 500,
-        whiteSpace: "nowrap",
-        cursor: "pointer",
-        ...style,
       }}
     />
   );
 }
 
-export function CommunityFeedPosts({ style, ...props }: ComponentProps<"ol">) {
+export function CommunityFeedPosts({ className, ...props }: ComponentProps<"ol">) {
   const { variant } = useFeed("CommunityFeedPosts");
   return (
     <ol
+      data-slot="community-feed-posts"
+      className={cn(
+        "m-0 grid min-w-0 list-none p-0",
+        variant === "list" && "gap-0",
+        variant === "cards" && "grid-cols-[repeat(auto-fill,minmax(min(100%,280px),1fr))] gap-3",
+        variant === "compact" && "gap-1.5",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gridTemplateColumns:
-          variant === "cards" ? "repeat(auto-fill, minmax(min(100%, 280px), 1fr))" : undefined,
-        gap: variant === "list" ? 0 : variant === "cards" ? 12 : 6,
-        margin: 0,
-        padding: 0,
-        listStyle: "none",
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
 /** One post, an article named by CommunityFeedPostTitle. */
-export function CommunityFeedPost({ style, ...props }: ComponentProps<"article">) {
+export function CommunityFeedPost({ className, ...props }: ComponentProps<"article">) {
   const { variant } = useFeed("CommunityFeedPost");
   const id = useId();
-  const list = variant === "list";
   return (
-    <li style={{ display: "grid", minWidth: 0 }}>
+    <li className="grid min-w-0 [&:nth-child(2)>*]:[animation-delay:40ms] [&:nth-child(3)>*]:[animation-delay:80ms] [&:nth-child(4)>*]:[animation-delay:120ms] [&:nth-child(5)>*]:[animation-delay:160ms] [&:nth-child(n+6)>*]:[animation-delay:200ms]">
       <PostContext.Provider value={id}>
         <article
           aria-labelledby={`${id}-title`}
+          data-slot="community-feed-post"
+          className={cn(
+            "grid min-w-0 animate-in content-start fade-in-0 slide-in-from-bottom-1 duration-240 ease-out-quint fill-mode-both motion-reduce:animate-none",
+            variant === "list" && "gap-2.5 rounded-none border-b bg-transparent px-0 py-4",
+            variant === "cards" && "gap-2.5 rounded-[14px] bg-card p-4",
+            variant === "compact" && "gap-1.5 rounded-xl bg-card p-3",
+            className,
+          )}
           {...props}
-          data-uai-community-feed-post=""
-          style={{
-            display: "grid",
-            alignContent: "start",
-            gap: variant === "compact" ? 6 : 10,
-            minWidth: 0,
-            padding: list ? "16px 0" : variant === "compact" ? 12 : 16,
-            border: 0,
-            borderBottom: list ? "1px solid var(--uai-border)" : undefined,
-            borderRadius: list ? 0 : variant === "compact" ? 12 : 14,
-            background: list ? "transparent" : "var(--uai-surface)",
-            ...style,
-          }}
         />
       </PostContext.Provider>
     </li>
@@ -294,46 +266,35 @@ export function CommunityFeedPost({ style, ...props }: ComponentProps<"article">
 }
 
 /** Author and posting time. */
-export function CommunityFeedPostHeader({ style, ...props }: ComponentProps<"header">) {
+export function CommunityFeedPostHeader({ className, ...props }: ComponentProps<"header">) {
   usePost("CommunityFeedPostHeader");
   return (
     <header
+      data-slot="community-feed-post-header"
+      className={cn("flex min-w-0 flex-wrap items-center justify-between gap-2", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 8,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
 /** The post author, an inline Author Card. Compose Author Card parts inside it. */
-export function CommunityFeedPostAuthor({ style, ...props }: Omit<AuthorCardProps, "variant">) {
+export function CommunityFeedPostAuthor({ className, ...props }: Omit<AuthorCardProps, "variant">) {
   usePost("CommunityFeedPostAuthor");
   return (
-    <AuthorCard {...props} variant="inline" style={{ alignItems: "center", rowGap: 0, ...style }} />
+    <AuthorCard {...props} variant="inline" className={cn("items-center gap-y-0", className)} />
   );
 }
 
 export function CommunityFeedPostTime({
-  style,
+  className,
   ...props
 }: ComponentProps<"time"> & { dateTime: string }) {
   usePost("CommunityFeedPostTime");
   return (
     <time
+      data-slot="community-feed-post-time"
+      className={cn("text-[12px] text-subtle-foreground tabular-nums", className)}
       {...props}
-      style={{
-        color: "var(--uai-subtle)",
-        fontSize: 12,
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     />
   );
 }
@@ -341,7 +302,7 @@ export function CommunityFeedPostTime({
 /** The post title. Pass `href` to link to the full post. */
 export function CommunityFeedPostTitle({
   href,
-  style,
+  className,
   children,
   ...props
 }: ComponentProps<"h3"> & { href?: string }) {
@@ -349,23 +310,17 @@ export function CommunityFeedPostTitle({
   const { variant } = useFeed("CommunityFeedPostTitle");
   return (
     <h3
+      data-slot="community-feed-post-title"
+      className={cn(
+        "m-0 font-medium text-balance",
+        variant === "compact" ? "text-[13px]/[18px]" : "text-[15px]/[22px]",
+        className,
+      )}
       {...props}
       id={`${id}-title`}
-      style={{
-        margin: 0,
-        fontSize: variant === "compact" ? 13 : 15,
-        lineHeight: variant === "compact" ? "18px" : "22px",
-        fontWeight: 500,
-        textWrap: "balance",
-        ...style,
-      }}
     >
       {href ? (
-        <a
-          href={href}
-          className="uai-community-feed-link"
-          style={{ color: "inherit", textDecoration: "none" }}
-        >
+        <a href={href} className={cn("text-inherit", feedLink)}>
           {children}
         </a>
       ) : (
@@ -375,83 +330,58 @@ export function CommunityFeedPostTitle({
   );
 }
 
-export function CommunityFeedPostBody({ style, ...props }: ComponentProps<"p">) {
+export function CommunityFeedPostBody({ className, ...props }: ComponentProps<"p">) {
   const { variant } = useFeed("CommunityFeedPostBody");
   return (
     <p
+      data-slot="community-feed-post-body"
+      className={cn(
+        "m-0 text-pretty wrap-anywhere text-muted-foreground",
+        variant === "compact" && "line-clamp-2",
+        className,
+      )}
       {...props}
-      style={{
-        display: variant === "compact" ? "-webkit-box" : undefined,
-        WebkitLineClamp: variant === "compact" ? 2 : undefined,
-        WebkitBoxOrient: variant === "compact" ? "vertical" : undefined,
-        overflow: variant === "compact" ? "hidden" : undefined,
-        margin: 0,
-        color: "var(--uai-muted)",
-        textWrap: "pretty",
-        overflowWrap: "anywhere",
-        ...style,
-      }}
     />
   );
 }
 
 export function CommunityFeedPostTags({
   "aria-label": label = "Tags",
-  style,
+  className,
   ...props
 }: ComponentProps<"ul">) {
   usePost("CommunityFeedPostTags");
   return (
     <ul
       aria-label={label}
+      data-slot="community-feed-post-tags"
+      className={cn("m-0 flex list-none flex-wrap gap-1 p-0", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 4,
-        margin: 0,
-        padding: 0,
-        listStyle: "none",
-        ...style,
-      }}
     />
   );
 }
 
-export function CommunityFeedPostTag({ style, ...props }: ComponentProps<"li">) {
+export function CommunityFeedPostTag({ className, ...props }: ComponentProps<"li">) {
   return (
     <li
+      data-slot="community-feed-post-tag"
+      className={cn(
+        "inline-flex h-5 items-center rounded-md bg-muted px-2 text-[11.5px] font-medium text-muted-foreground",
+        className,
+      )}
       {...props}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        height: 20,
-        padding: "0 8px",
-        borderRadius: 6,
-        background: "var(--uai-surface-raised)",
-        color: "var(--uai-muted)",
-        fontSize: 11.5,
-        fontWeight: 500,
-        ...style,
-      }}
     />
   );
 }
 
 /** Reactions, reply counts, and post actions. */
-export function CommunityFeedPostFooter({ style, ...props }: ComponentProps<"footer">) {
+export function CommunityFeedPostFooter({ className, ...props }: ComponentProps<"footer">) {
   usePost("CommunityFeedPostFooter");
   return (
     <footer
+      data-slot="community-feed-post-footer"
+      className={cn("flex min-w-0 flex-wrap items-center gap-2", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        gap: 8,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
@@ -463,23 +393,17 @@ export function CommunityFeedPostReactions(props: Omit<ReactionBarProps, "varian
 }
 
 /** A muted link or label such as "12 replies". */
-export function CommunityFeedPostMeta({ style, ...props }: ComponentProps<"a">) {
+export function CommunityFeedPostMeta({ className, ...props }: ComponentProps<"a">) {
   usePost("CommunityFeedPostMeta");
   return (
     <a
+      data-slot="community-feed-post-meta"
+      className={cn(
+        "ms-auto inline-flex items-center gap-1.5 text-[12px] text-subtle-foreground tabular-nums",
+        feedLink,
+        className,
+      )}
       {...props}
-      className={joinClass("uai-community-feed-link", props.className)}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        marginInlineStart: "auto",
-        color: "var(--uai-subtle)",
-        fontSize: 12,
-        fontVariantNumeric: "tabular-nums",
-        textDecoration: "none",
-        ...style,
-      }}
     />
   );
 }
@@ -503,50 +427,32 @@ function pageItems(page: number, count: number): (number | "gap")[] {
 export function CommunityFeedPagination({
   pageCount,
   "aria-label": label = "Pagination",
-  style,
+  className,
   ...props
 }: ComponentProps<"nav"> & { pageCount: number }) {
   const context = useFeed("CommunityFeedPagination");
   if (pageCount <= 1) return null;
-  const size = context.variant === "compact" ? 24 : 28;
   const button = (current: boolean) =>
-    ({
-      display: "inline-grid",
-      placeItems: "center",
-      minWidth: size,
-      height: size,
-      padding: "0 6px",
-      border: 0,
-      borderRadius: 999,
-      background: current ? "var(--uai-surface-raised)" : "transparent",
-      color: current ? "var(--uai-text)" : "var(--uai-muted)",
-      font: "inherit",
-      fontSize: 12.5,
-      fontWeight: 500,
-      fontVariantNumeric: "tabular-nums",
-      cursor: "pointer",
-    }) as const;
+    cn(
+      "inline-grid cursor-pointer place-items-center rounded-full border-0 px-1.5 text-[12.5px] font-medium tabular-nums disabled:opacity-40",
+      context.variant === "compact" ? "h-6 min-w-6" : "h-7 min-w-7",
+      current ? pillSelected : pillIdle,
+      pill,
+    );
   const { page, setPage } = context;
   return (
     <nav
       aria-label={label}
+      data-slot="community-feed-pagination"
+      className={cn("flex flex-wrap items-center justify-center gap-0.5", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 2,
-        ...style,
-      }}
     >
       <button
         type="button"
         aria-label="Previous page"
         disabled={page <= 1}
         onClick={() => setPage(page - 1)}
-        className="uai-community-feed-pill"
-        style={{ ...button(false), opacity: page <= 1 ? 0.4 : 1 }}
+        className={button(false)}
       >
         <ChevronLeft size={14} strokeWidth={1.75} aria-hidden="true" />
       </button>
@@ -556,7 +462,7 @@ export function CommunityFeedPagination({
             // biome-ignore lint/suspicious/noArrayIndexKey: gaps have no identity beyond their position.
             key={`gap-${index}`}
             aria-hidden="true"
-            style={{ color: "var(--uai-subtle)", padding: "0 4px" }}
+            className="px-1 text-subtle-foreground"
           >
             …
           </span>
@@ -567,8 +473,7 @@ export function CommunityFeedPagination({
             aria-label={`Page ${item}`}
             aria-current={item === page ? "page" : undefined}
             onClick={() => setPage(item)}
-            className="uai-community-feed-pill"
-            style={button(item === page)}
+            className={button(item === page)}
           >
             {item}
           </button>
@@ -579,8 +484,7 @@ export function CommunityFeedPagination({
         aria-label="Next page"
         disabled={page >= pageCount}
         onClick={() => setPage(page + 1)}
-        className="uai-community-feed-pill"
-        style={{ ...button(false), opacity: page >= pageCount ? 0.4 : 1 }}
+        className={button(false)}
       >
         <ChevronRight size={14} strokeWidth={1.75} aria-hidden="true" />
       </button>
@@ -607,8 +511,4 @@ function moveRadio(event: KeyboardEvent<HTMLElement>) {
   const target = radios[(next + radios.length) % radios.length];
   target?.focus();
   target?.click();
-}
-
-function joinClass(base: string, extra?: string) {
-  return extra ? `${base} ${extra}` : base;
 }

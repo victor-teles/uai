@@ -11,7 +11,7 @@ test("publishes every AI source without drift and keeps examples executable", as
     const mirror = await Bun.file(`src/components/ui/uai/${item.id}.tsx`).text();
     const output = await Bun.file(`public/r/${item.id}.json`).json();
     const preview = await Bun.file(`src/components/registry/ai/${item.id}-preview.tsx`).text();
-    expect(mirror).toBe(source);
+    expect(mirror).toBe(`export * from "@/registry/uai/components/${item.id}";\n`);
     expect(output.files[0].content).toBe(source);
     expect(item.usage).toBe(preview);
     expect(item.category).toBe("AI");

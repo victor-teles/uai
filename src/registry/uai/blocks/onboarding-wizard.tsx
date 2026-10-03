@@ -1,8 +1,8 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import {
   type ComponentProps,
-  type CSSProperties,
   createContext,
   type ReactNode,
   useContext,
@@ -23,6 +23,7 @@ import {
   StepIndicatorStep,
   type StepIndicatorVariant,
 } from "@/components/ui/uai/step-indicator";
+import { cn } from "@/lib/uai-utils";
 
 export const ONBOARDING_WIZARD_VARIANTS = ["sidebar", "stacked", "compact"] as const;
 export type OnboardingWizardVariant = (typeof ONBOARDING_WIZARD_VARIANTS)[number];
@@ -67,40 +68,41 @@ function useWizard(part: string) {
 }
 const PanelContext = createContext<string | null>(null);
 
-const layoutCss = `
-[data-uai-wizard-layout]{display:grid;gap:20px;min-width:0;grid-template-areas:"header" "progress" "body"}
-[data-uai-wizard-part="header"]{grid-area:header}
-[data-uai-wizard-part="progress"]{grid-area:progress}
-[data-uai-wizard-part="body"]{grid-area:body}
-@container (min-width: 720px){
-  [data-uai-wizard="sidebar"]>[data-uai-wizard-layout]{grid-template-columns:220px minmax(0,1fr);grid-template-rows:auto 1fr;grid-template-areas:"progress header" "progress body";column-gap:32px}
-}
-[data-uai-wizard-button]{transition:background-color 120ms ease-out,color 120ms ease-out,filter 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-[data-uai-wizard-button="primary"]{background:var(--uai-accent);color:var(--uai-accent-foreground)}
-[data-uai-wizard-button="secondary"]{background:var(--uai-surface-raised);color:var(--uai-text)}
-[data-uai-wizard-button="ghost"]{background:transparent;color:var(--uai-muted)}
-[data-uai-wizard-button="primary"]:hover:not(:disabled){filter:brightness(1.08)}
-[data-uai-wizard-button="secondary"]:hover:not(:disabled){background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text))}
-[data-uai-wizard-button="ghost"]:hover:not(:disabled){background:var(--uai-surface-raised);color:var(--uai-text)}
-[data-uai-wizard-button]:active:not(:disabled){transform:scale(0.97)}
-[data-uai-wizard-button]:disabled{opacity:0.6;cursor:not-allowed}
-[data-uai-wizard-button]:focus-visible,[data-uai-wizard-step]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px;border-radius:6px}
-[data-uai-wizard-step]:hover{color:var(--uai-text)}
-@keyframes uai-wizard-enter{from{opacity:0;transform:translateY(4px)}}
-[data-uai-wizard-enter]{animation:uai-wizard-enter 240ms cubic-bezier(0.23,1,0.32,1) both}
-@keyframes uai-wizard-shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
-[data-uai-wizard-shimmer]{background:linear-gradient(90deg,color-mix(in oklab,currentColor 55%,transparent) 0%,color-mix(in oklab,currentColor 55%,transparent) 35%,currentColor 50%,color-mix(in oklab,currentColor 55%,transparent) 65%,color-mix(in oklab,currentColor 55%,transparent) 100%) 0 0/200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:uai-wizard-shimmer 2s linear infinite}
-@media (prefers-reduced-motion: reduce){[data-uai-wizard-button]{transition:none}[data-uai-wizard-button]:active:not(:disabled){transform:none}[data-uai-wizard-enter]{animation:none}[data-uai-wizard-shimmer]{animation:none;background:none;-webkit-text-fill-color:currentColor}}`;
-const shells: Record<OnboardingWizardVariant, CSSProperties> = {
-  sidebar: { padding: "clamp(16px, 4cqi, 28px)", borderRadius: 14 },
-  stacked: {
-    maxWidth: 720,
-    margin: "0 auto",
-    padding: "clamp(16px, 4cqi, 28px)",
-    borderRadius: 14,
+const onboardingWizardVariants = cva(
+  "box-border @container min-w-0 border bg-card text-[13px]/[18px] text-card-foreground",
+  {
+    variants: {
+      variant: {
+        sidebar: "rounded-[14px] p-[clamp(16px,4cqi,28px)]",
+        stacked: "mx-auto max-w-180 rounded-[14px] p-[clamp(16px,4cqi,28px)]",
+        compact: "mx-auto max-w-130 rounded-xl p-4",
+      },
+    },
   },
-  compact: { maxWidth: 520, margin: "0 auto", padding: 16, borderRadius: 12 },
-};
+);
+
+const onboardingWizardButtonVariants = cva(
+  "cursor-pointer rounded-full border-0 font-medium [transition:background-color_120ms_ease-out,color_120ms_ease-out,filter_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
+  {
+    variants: {
+      emphasis: {
+        primary: "bg-primary text-primary-foreground enabled:hover:brightness-108",
+        secondary:
+          "bg-secondary text-secondary-foreground enabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+        ghost:
+          "bg-transparent text-muted-foreground enabled:hover:bg-accent enabled:hover:text-accent-foreground",
+      },
+      size: {
+        default: "h-8 px-3.5 text-[13px]",
+        compact: "h-7 px-3 text-[12.5px]",
+      },
+    },
+  },
+);
+
+const enterMotion =
+  "animate-[enter_240ms_var(--ease-out-quint)_both] fade-in-0 slide-in-from-bottom-1 motion-reduce:animate-none";
+
 const indicatorVariants: Record<OnboardingWizardVariant, StepIndicatorVariant> = {
   sidebar: "vertical",
   stacked: "horizontal",
@@ -118,7 +120,7 @@ export function OnboardingWizard({
   onValueChange,
   onComplete,
   children,
-  style,
+  className,
   ...props
 }: OnboardingWizardProps) {
   const id = useId();
@@ -213,77 +215,70 @@ export function OnboardingWizard({
     >
       <section
         aria-labelledby={`${id}-title`}
-        {...props}
+        data-slot="onboarding-wizard"
         data-variant={variant}
-        data-uai-wizard={variant}
-        style={{
-          boxSizing: "border-box",
-          containerType: "inline-size",
-          minWidth: 0,
-          border: "1px solid var(--uai-border)",
-          background: "var(--uai-surface)",
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...shells[variant],
-          ...style,
-        }}
+        className={cn(onboardingWizardVariants({ variant }), className)}
+        {...props}
       >
-        <style>{layoutCss}</style>
-        <div data-uai-wizard-layout="">{children}</div>
+        <div
+          className={cn(
+            "grid min-w-0 gap-5 [grid-template-areas:'header'_'progress'_'body']",
+            variant === "sidebar" &&
+              "@min-[720px]:grid-cols-[220px_minmax(0,1fr)] @min-[720px]:grid-rows-[auto_1fr] @min-[720px]:gap-x-8 @min-[720px]:[grid-template-areas:'progress_header'_'progress_body']",
+          )}
+        >
+          {children}
+        </div>
       </section>
     </Context.Provider>
   );
 }
 
-export function OnboardingWizardHeader({ style, ...props }: ComponentProps<"header">) {
+export function OnboardingWizardHeader({ className, ...props }: ComponentProps<"header">) {
   return (
     <header
+      data-slot="onboarding-wizard-header"
+      className={cn("grid min-w-0 gap-1 [grid-area:header]", className)}
       {...props}
-      data-uai-wizard-part="header"
-      style={{ display: "grid", gap: 4, minWidth: 0, ...style }}
     />
   );
 }
 
-export function OnboardingWizardTitle({ style, ...props }: ComponentProps<"h2">) {
+export function OnboardingWizardTitle({ className, ...props }: ComponentProps<"h2">) {
   const { id, variant } = useWizard("OnboardingWizardTitle");
   return (
     <h2
+      data-slot="onboarding-wizard-title"
+      className={cn(
+        "m-0 font-semibold tracking-[-0.01em]",
+        variant === "compact" ? "text-[15px]/5" : "text-lg/6",
+        className,
+      )}
       {...props}
       id={`${id}-title`}
-      style={{
-        margin: 0,
-        fontSize: variant === "compact" ? 15 : 18,
-        fontWeight: 600,
-        lineHeight: variant === "compact" ? "20px" : "24px",
-        letterSpacing: "-0.01em",
-        ...style,
-      }}
     />
   );
 }
 
-export function OnboardingWizardDescription({ style, ...props }: ComponentProps<"p">) {
+export function OnboardingWizardDescription({ className, ...props }: ComponentProps<"p">) {
   return (
-    <p {...props} style={{ margin: 0, color: "var(--uai-muted)", textWrap: "pretty", ...style }} />
+    <p
+      data-slot="onboarding-wizard-description"
+      className={cn("m-0 text-pretty text-muted-foreground", className)}
+      {...props}
+    />
   );
 }
 
 /** "Step 2 of 4", announced politely as the step changes. */
-export function OnboardingWizardStepCount({ style, ...props }: ComponentProps<"p">) {
+export function OnboardingWizardStepCount({ className, ...props }: ComponentProps<"p">) {
   const { index, steps } = useWizard("OnboardingWizardStepCount");
   return (
     <p
       aria-live="polite"
+      data-slot="onboarding-wizard-step-count"
+      className={cn("m-0 text-[12px] text-subtle-foreground tabular-nums", className)}
       {...props}
-      style={{
-        margin: 0,
-        color: "var(--uai-subtle)",
-        fontSize: 12,
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     >
       Step {Math.min(index + 1, steps.length || 1)} of {steps.length || 1}
     </p>
@@ -291,17 +286,16 @@ export function OnboardingWizardStepCount({ style, ...props }: ComponentProps<"p
 }
 
 export function OnboardingWizardProgress({
-  style,
+  className,
   ...props
 }: Omit<ComponentProps<typeof StepIndicator>, "variant">) {
   const { variant } = useWizard("OnboardingWizardProgress");
   return (
     <StepIndicator
       aria-label="Setup progress"
+      className={cn("min-w-0 self-start [grid-area:progress]", className)}
       {...props}
-      data-uai-wizard-part="progress"
       variant={indicatorVariants[variant]}
-      style={{ alignSelf: "start", minWidth: 0, ...style }}
     />
   );
 }
@@ -328,35 +322,24 @@ export function OnboardingWizardProgressStep({
         <button
           type="button"
           onClick={() => context.goTo(value)}
-          data-uai-wizard-step=""
-          style={{
-            display: "grid",
-            gap: 2,
-            padding: 0,
-            border: 0,
-            background: "transparent",
-            color: "inherit",
-            font: "inherit",
-            textAlign: "start",
-            cursor: "pointer",
-          }}
+          className="grid cursor-pointer gap-0.5 border-0 bg-transparent p-0 text-start text-inherit hover:text-foreground focus-visible:rounded-[6px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         >
           {children}
         </button>
       ) : (
-        <span style={{ display: "grid", gap: 2 }}>{children}</span>
+        <span className="grid gap-0.5">{children}</span>
       )}
     </StepIndicatorStep>
   );
 }
 
 /** Holds the panels, error, and footer. */
-export function OnboardingWizardBody({ style, ...props }: ComponentProps<"div">) {
+export function OnboardingWizardBody({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="onboarding-wizard-body"
+      className={cn("grid min-w-0 content-start gap-4 [grid-area:body]", className)}
       {...props}
-      data-uai-wizard-part="body"
-      style={{ display: "grid", gap: 16, alignContent: "start", minWidth: 0, ...style }}
     />
   );
 }
@@ -373,7 +356,7 @@ export function OnboardingWizardPanel({
   value,
   optional = false,
   validate,
-  style,
+  className,
   ...props
 }: OnboardingWizardPanelProps) {
   const context = useWizard("OnboardingWizardPanel");
@@ -395,29 +378,21 @@ export function OnboardingWizardPanel({
   return (
     <PanelContext.Provider value={value}>
       <fieldset
+        data-slot="onboarding-wizard-panel"
+        className={cn("m-0 grid min-w-0 gap-3.5 border-0 p-0", enterMotion, className)}
         {...props}
         id={`${context.id}-panel-${value}`}
         aria-labelledby={`${context.id}-panel-${value}-title`}
         hidden={!active}
         disabled={context.pending}
         data-value={value}
-        data-uai-wizard-enter=""
-        style={{
-          display: active ? "grid" : "none",
-          gap: 14,
-          minWidth: 0,
-          margin: 0,
-          padding: 0,
-          border: 0,
-          ...style,
-        }}
       />
     </PanelContext.Provider>
   );
 }
 
 /** The step heading. Focus moves here when the step changes after the first render. */
-export function OnboardingWizardPanelTitle({ style, ...props }: ComponentProps<"h3">) {
+export function OnboardingWizardPanelTitle({ className, ...props }: ComponentProps<"h3">) {
   const context = useWizard("OnboardingWizardPanelTitle");
   const value = useContext(PanelContext);
   if (value === null) {
@@ -433,26 +408,21 @@ export function OnboardingWizardPanelTitle({ style, ...props }: ComponentProps<"
   return (
     <h3
       tabIndex={-1}
+      data-slot="onboarding-wizard-panel-title"
+      className={cn("m-0 text-[15px]/5 font-medium outline-none", className)}
       {...props}
       ref={ref}
       id={`${context.id}-panel-${value}-title`}
-      style={{
-        margin: 0,
-        fontSize: 15,
-        fontWeight: 500,
-        lineHeight: "20px",
-        outline: "none",
-        ...style,
-      }}
     />
   );
 }
 
-export function OnboardingWizardPanelDescription({ style, ...props }: ComponentProps<"p">) {
+export function OnboardingWizardPanelDescription({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="onboarding-wizard-panel-description"
+      className={cn("m-0 -mt-2 text-pretty text-muted-foreground", className)}
       {...props}
-      style={{ margin: "-8px 0 0", color: "var(--uai-muted)", textWrap: "pretty", ...style }}
     />
   );
 }
@@ -469,110 +439,115 @@ export function OnboardingWizardError({
       <StatusBannerIcon />
       <StatusBannerContent>
         {children}
-        <StatusBannerDescription style={{ color: "inherit" }}>
-          {context.error}
-        </StatusBannerDescription>
+        <StatusBannerDescription className="text-inherit">{context.error}</StatusBannerDescription>
       </StatusBannerContent>
     </StatusBanner>
   );
 }
 
-export function OnboardingWizardFooter({ style, ...props }: ComponentProps<"div">) {
+export function OnboardingWizardFooter({ className, ...props }: ComponentProps<"div">) {
   const { complete } = useWizard("OnboardingWizardFooter");
   if (complete) return null;
   return (
     <div
+      data-slot="onboarding-wizard-footer"
+      className={cn("flex flex-wrap items-center justify-end gap-2 pt-1", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        justifyContent: "flex-end",
-        gap: 8,
-        paddingTop: 4,
-        ...style,
-      }}
     />
   );
 }
 
-const button = (variant: OnboardingWizardVariant): CSSProperties => ({
-  height: variant === "compact" ? 28 : 32,
-  padding: variant === "compact" ? "0 12px" : "0 14px",
-  border: 0,
-  borderRadius: 999,
-  font: "inherit",
-  fontSize: variant === "compact" ? 12.5 : 13,
-  fontWeight: 500,
-  cursor: "pointer",
-});
+const buttonSize = (variant: OnboardingWizardVariant) =>
+  variant === "compact" ? "compact" : "default";
 
 /** Returns to the previous step. Hidden on the first step. */
-export function OnboardingWizardBack({ onClick, style, ...props }: ComponentProps<"button">) {
+export function OnboardingWizardBack({ onClick, className, ...props }: ComponentProps<"button">) {
   const context = useWizard("OnboardingWizardBack");
   if (context.index === 0) return null;
   return (
     <button
       type="button"
+      data-slot="onboarding-wizard-back"
+      className={cn(
+        onboardingWizardButtonVariants({
+          emphasis: "secondary",
+          size: buttonSize(context.variant),
+        }),
+        "mr-auto",
+        className,
+      )}
       {...props}
       disabled={context.pending}
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) context.back();
       }}
-      data-uai-wizard-button="secondary"
-      style={{ ...button(context.variant), marginRight: "auto", ...style }}
     />
   );
 }
 
 /** Advances without validation. Renders only on optional steps. */
-export function OnboardingWizardSkip({ onClick, style, ...props }: ComponentProps<"button">) {
+export function OnboardingWizardSkip({ onClick, className, ...props }: ComponentProps<"button">) {
   const context = useWizard("OnboardingWizardSkip");
   if (!context.steps[context.index]?.optional) return null;
   return (
     <button
       type="button"
+      data-slot="onboarding-wizard-skip"
+      className={cn(
+        onboardingWizardButtonVariants({ emphasis: "ghost", size: buttonSize(context.variant) }),
+        className,
+      )}
       {...props}
       disabled={context.pending}
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) void context.next({ skip: true });
       }}
-      data-uai-wizard-button="ghost"
-      style={{ ...button(context.variant), ...style }}
     />
   );
 }
 
 function Advance({
   part,
+  slot,
   last,
   pendingLabel,
   children,
   onClick,
-  style,
+  className,
   ...props
-}: ComponentProps<"button"> & { part: string; last: boolean; pendingLabel: ReactNode }) {
+}: ComponentProps<"button"> & {
+  part: string;
+  slot: string;
+  last: boolean;
+  pendingLabel: ReactNode;
+}) {
   const context = useWizard(part);
   if ((context.index === context.steps.length - 1) !== last) return null;
   return (
     <button
       type="button"
+      data-slot={slot}
+      className={cn(
+        onboardingWizardButtonVariants({ emphasis: "primary", size: buttonSize(context.variant) }),
+        context.pending && "cursor-progress",
+        className,
+      )}
       {...props}
       aria-busy={context.pending || undefined}
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) void context.next();
       }}
-      data-uai-wizard-button="primary"
-      style={{
-        ...button(context.variant),
-        cursor: context.pending ? "progress" : "pointer",
-        ...style,
-      }}
     >
-      {context.pending ? <span data-uai-wizard-shimmer="">{pendingLabel}</span> : children}
+      {context.pending ? (
+        <span className="animate-shimmer bg-[linear-gradient(90deg,color-mix(in_oklab,currentColor_55%,transparent)_0%,color-mix(in_oklab,currentColor_55%,transparent)_35%,currentColor_50%,color-mix(in_oklab,currentColor_55%,transparent)_65%,color-mix(in_oklab,currentColor_55%,transparent)_100%)] bg-[length:200%_100%] bg-clip-text [-webkit-text-fill-color:transparent] motion-reduce:animate-none motion-reduce:bg-none motion-reduce:[-webkit-text-fill-color:currentColor]">
+          {pendingLabel}
+        </span>
+      ) : (
+        children
+      )}
     </button>
   );
 }
@@ -583,7 +558,13 @@ export function OnboardingWizardNext({
   ...props
 }: ComponentProps<"button"> & { pendingLabel?: ReactNode }) {
   return (
-    <Advance {...props} part="OnboardingWizardNext" last={false} pendingLabel={pendingLabel} />
+    <Advance
+      {...props}
+      part="OnboardingWizardNext"
+      slot="onboarding-wizard-next"
+      last={false}
+      pendingLabel={pendingLabel}
+    />
   );
 }
 
@@ -592,11 +573,19 @@ export function OnboardingWizardFinish({
   pendingLabel = "Finishing…",
   ...props
 }: ComponentProps<"button"> & { pendingLabel?: ReactNode }) {
-  return <Advance {...props} part="OnboardingWizardFinish" last pendingLabel={pendingLabel} />;
+  return (
+    <Advance
+      {...props}
+      part="OnboardingWizardFinish"
+      slot="onboarding-wizard-finish"
+      last
+      pendingLabel={pendingLabel}
+    />
+  );
 }
 
 /** Replaces the panels once setup finishes. Focus moves here so the result is announced. */
-export function OnboardingWizardComplete({ style, ...props }: ComponentProps<"div">) {
+export function OnboardingWizardComplete({ className, ...props }: ComponentProps<"div">) {
   const context = useWizard("OnboardingWizardComplete");
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -607,20 +596,15 @@ export function OnboardingWizardComplete({ style, ...props }: ComponentProps<"di
     <div
       role="status"
       tabIndex={-1}
+      data-slot="onboarding-wizard-complete"
+      className={cn(
+        "grid min-w-0 gap-2 bg-[color-mix(in_oklab,var(--success)_8%,var(--card))] p-5 shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--success)_24%,transparent)] outline-offset-2",
+        context.variant === "compact" ? "rounded-xl" : "rounded-[14px]",
+        enterMotion,
+        className,
+      )}
       {...props}
       ref={ref}
-      data-uai-wizard-enter=""
-      style={{
-        display: "grid",
-        gap: 8,
-        minWidth: 0,
-        padding: 20,
-        borderRadius: context.variant === "compact" ? 12 : 14,
-        background: "color-mix(in oklab, var(--uai-success) 8%, var(--uai-surface))",
-        boxShadow: "inset 0 0 0 1px color-mix(in oklab, var(--uai-success) 24%, transparent)",
-        outlineOffset: 2,
-        ...style,
-      }}
     />
   );
 }

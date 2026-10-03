@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, useContext, useId } from "react";
 import {
   ActivityTimeline,
@@ -15,6 +16,7 @@ import {
   type DescriptionListProps,
   type DescriptionListVariant,
 } from "@/components/ui/uai/description-list";
+import { cn } from "@/lib/uai-utils";
 
 export const PROFILE_PAGE_VARIANTS = ["sidebar", "stacked", "compact"] as const;
 export type ProfilePageVariant = (typeof PROFILE_PAGE_VARIANTS)[number];
@@ -44,58 +46,45 @@ const timelineVariants: Record<ProfilePageVariant, ActivityTimelineVariant> = {
   compact: "compact",
 };
 
-const interactionCss = `
-[data-uai-profile-action]{transition:background-color 120ms ease-out,filter 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-[data-uai-profile-action="primary"]{background:var(--uai-accent);color:var(--uai-accent-foreground)}
-[data-uai-profile-action="secondary"]{background:var(--uai-surface-raised);color:var(--uai-text)}
-[data-uai-profile-action="danger"]{background:color-mix(in oklab,var(--uai-danger) 12%,transparent);color:var(--uai-danger)}
-[data-uai-profile-action="primary"]:hover:not(:disabled){filter:brightness(1.08)}
-[data-uai-profile-action="secondary"]:hover:not(:disabled){background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text))}
-[data-uai-profile-action="danger"]:hover:not(:disabled){background:color-mix(in oklab,var(--uai-danger) 20%,transparent)}
-[data-uai-profile-action]:active:not(:disabled){transform:scale(0.97)}
-[data-uai-profile-action]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-@media (prefers-reduced-motion: reduce){[data-uai-profile-action]{transition:none}[data-uai-profile-action]:active:not(:disabled){transform:none}}`;
+const profilePageVariants = cva(
+  "flex min-w-0 flex-wrap items-start text-[13px]/[18px] text-foreground",
+  { variants: { variant: { sidebar: "gap-5", stacked: "gap-5", compact: "gap-3" } } },
+);
 
 /** Identity beside activity and details. The aside wraps above the main column on narrow widths. */
-export function ProfilePage({ variant = "sidebar", children, style, ...props }: ProfilePageProps) {
+export function ProfilePage({
+  variant = "sidebar",
+  className,
+  children,
+  ...props
+}: ProfilePageProps) {
   return (
     <Context.Provider value={variant}>
       <div
+        data-slot="profile-page"
+        className={cn(profilePageVariants({ variant }), className)}
         {...props}
         data-variant={variant}
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "flex-start",
-          gap: variant === "compact" ? 12 : 20,
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
       >
-        <style>{interactionCss}</style>
         {children}
       </div>
     </Context.Provider>
   );
 }
 
-export function ProfilePageAside({ style, ...props }: ComponentProps<"div">) {
+const asideClasses: Record<ProfilePageVariant, string> = {
+  sidebar: "flex-[1_1_260px] max-w-[300px] gap-3",
+  stacked: "flex-[1_1_100%] gap-3",
+  compact: "flex-[1_1_220px] max-w-[260px] gap-2",
+};
+
+export function ProfilePageAside({ className, ...props }: ComponentProps<"div">) {
   const variant = useVariant("ProfilePageAside");
   return (
     <div
+      data-slot="profile-page-aside"
+      className={cn("grid min-w-0", asideClasses[variant], className)}
       {...props}
-      style={{
-        display: "grid",
-        gap: variant === "compact" ? 8 : 12,
-        flex:
-          variant === "stacked" ? "1 1 100%" : variant === "compact" ? "1 1 220px" : "1 1 260px",
-        maxWidth: variant === "stacked" ? undefined : variant === "compact" ? 260 : 300,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
@@ -103,13 +92,15 @@ export function ProfilePageAside({ style, ...props }: ComponentProps<"div">) {
 /** Identity card. Compose Author Card parts inside it. */
 export function ProfilePageIdentity(props: Omit<AuthorCardProps, "variant">) {
   const variant = useVariant("ProfilePageIdentity");
-  return <AuthorCard {...props} variant={cardVariants[variant]} />;
+  return (
+    <AuthorCard data-slot="profile-page-identity" {...props} variant={cardVariants[variant]} />
+  );
 }
 
 /** Account actions such as editing the profile or sending a message. */
 export function ProfilePageActions({
   "aria-label": label = "Account actions",
-  style,
+  className,
   ...props
 }: ComponentProps<"div">) {
   useVariant("ProfilePageActions");
@@ -118,69 +109,78 @@ export function ProfilePageActions({
     <div
       role="group"
       aria-label={label}
+      data-slot="profile-page-actions"
+      className={cn("flex flex-wrap gap-1.5", className)}
       {...props}
-      style={{ display: "flex", flexWrap: "wrap", gap: 6, ...style }}
     />
   );
 }
+
+const profilePageActionVariants = cva(
+  [
+    "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap",
+    "[transition:background-color_120ms_ease-out,filter_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)]",
+    "enabled:active:scale-97 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+    "motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
+  ],
+  {
+    variants: {
+      intent: {
+        primary: "bg-primary text-primary-foreground enabled:hover:brightness-108",
+        secondary:
+          "bg-secondary text-secondary-foreground enabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+        danger: "bg-destructive/12 text-destructive enabled:hover:bg-destructive/20",
+      },
+      compact: {
+        true: "h-[26px] px-2.5 text-[12px]",
+        false: "h-[30px] px-[13px] text-[12.5px]",
+      },
+    },
+  },
+);
 
 export function ProfilePageAction({
   emphasis = "secondary",
   tone = "default",
   type = "button",
-  style,
+  className,
   ...props
 }: ComponentProps<"button"> & {
   emphasis?: "primary" | "secondary";
   tone?: "default" | "danger";
 }) {
   const variant = useVariant("ProfilePageAction");
-  const compact = variant === "compact";
+  const intent = emphasis === "primary" ? "primary" : tone === "danger" ? "danger" : "secondary";
   return (
     <button
+      data-slot="profile-page-action"
+      className={cn(
+        profilePageActionVariants({ intent, compact: variant === "compact" }),
+        className,
+      )}
       {...props}
       type={type}
-      data-uai-profile-action={
-        emphasis === "primary" ? "primary" : tone === "danger" ? "danger" : "secondary"
-      }
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 6,
-        height: compact ? 26 : 30,
-        padding: compact ? "0 10px" : "0 13px",
-        border: 0,
-        borderRadius: 999,
-        font: "inherit",
-        fontSize: compact ? 12 : 12.5,
-        fontWeight: 500,
-        whiteSpace: "nowrap",
-        cursor: "pointer",
-        ...style,
-      }}
+      data-intent={intent}
     />
   );
 }
 
-export function ProfilePageMain({ style, ...props }: ComponentProps<"div">) {
+export function ProfilePageMain({ className, ...props }: ComponentProps<"div">) {
   const variant = useVariant("ProfilePageMain");
   return (
     <div
+      data-slot="profile-page-main"
+      className={cn(
+        "grid min-w-0 flex-[999_1_360px] content-start",
+        variant === "compact" ? "gap-2" : "gap-3",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        alignContent: "start",
-        gap: variant === "compact" ? 8 : 12,
-        flex: "999 1 360px",
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function ProfilePageSection({ style, ...props }: ComponentProps<"section">) {
+export function ProfilePageSection({ className, ...props }: ComponentProps<"section">) {
   const variant = useVariant("ProfilePageSection");
   const id = useId();
   const compact = variant === "compact";
@@ -188,47 +188,37 @@ export function ProfilePageSection({ style, ...props }: ComponentProps<"section"
     <SectionContext.Provider value={id}>
       <section
         aria-labelledby={id}
+        data-slot="profile-page-section"
+        className={cn(
+          "grid min-w-0 border bg-card",
+          compact ? "gap-2 rounded-xl p-3" : "gap-3 rounded-[14px] px-[18px] py-4",
+          className,
+        )}
         {...props}
-        style={{
-          display: "grid",
-          gap: compact ? 8 : 12,
-          minWidth: 0,
-          padding: compact ? 12 : "16px 18px",
-          border: "1px solid var(--uai-border)",
-          borderRadius: compact ? 12 : 14,
-          background: "var(--uai-surface)",
-          ...style,
-        }}
       />
     </SectionContext.Provider>
   );
 }
 
-export function ProfilePageSectionHeader({ style, ...props }: ComponentProps<"div">) {
+export function ProfilePageSectionHeader({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="profile-page-section-header"
+      className={cn("flex min-w-0 flex-wrap items-center justify-between gap-2", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 8,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function ProfilePageSectionTitle({ style, ...props }: ComponentProps<"h3">) {
+export function ProfilePageSectionTitle({ className, ...props }: ComponentProps<"h3">) {
   const id = useContext(SectionContext);
   if (!id) throw new Error("ProfilePageSectionTitle must be used within ProfilePageSection");
   return (
     <h3
+      data-slot="profile-page-section-title"
+      className={cn("m-0 text-[13px]/[18px] font-medium", className)}
       {...props}
       id={id}
-      style={{ margin: 0, fontSize: 13, lineHeight: "18px", fontWeight: 500, ...style }}
     />
   );
 }
@@ -236,7 +226,13 @@ export function ProfilePageSectionTitle({ style, ...props }: ComponentProps<"h3"
 /** Contact details. Compose Description List parts inside it. */
 export function ProfilePageDetails(props: Omit<DescriptionListProps, "variant">) {
   const variant = useVariant("ProfilePageDetails");
-  return <DescriptionList {...props} variant={detailVariants[variant]} />;
+  return (
+    <DescriptionList
+      data-slot="profile-page-details"
+      {...props}
+      variant={detailVariants[variant]}
+    />
+  );
 }
 
 /** Recent activity. Compose Activity Timeline parts inside it. */
@@ -244,5 +240,11 @@ export function ProfilePageActivity(
   props: Omit<ComponentProps<typeof ActivityTimeline>, "variant">,
 ) {
   const variant = useVariant("ProfilePageActivity");
-  return <ActivityTimeline {...props} variant={timelineVariants[variant]} />;
+  return (
+    <ActivityTimeline
+      data-slot="profile-page-activity"
+      {...props}
+      variant={timelineVariants[variant]}
+    />
+  );
 }

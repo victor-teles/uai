@@ -1,7 +1,9 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { type ComponentProps, createContext, useContext, useId, useState } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const CALENDAR_VIEW_VARIANTS = ["card", "plain", "compact"] as const;
 export type CalendarViewVariant = (typeof CALENDAR_VIEW_VARIANTS)[number];
@@ -48,17 +50,15 @@ function useCalendar(part: string) {
   return context;
 }
 
-const srOnly = {
-  position: "absolute",
-  width: 1,
-  height: 1,
-  margin: -1,
-  padding: 0,
-  overflow: "hidden",
-  clip: "rect(0, 0, 0, 0)",
-  whiteSpace: "nowrap",
-  border: 0,
-} as const;
+const calendarViewVariants = cva("grid min-w-0 rounded-[14px] text-[13px]/[18px] text-foreground", {
+  variants: {
+    variant: {
+      card: "gap-3 border bg-card p-3.5 text-card-foreground",
+      plain: "gap-3 border-0 bg-transparent p-0",
+      compact: "gap-2 border-0 bg-transparent p-0",
+    },
+  },
+});
 
 function startOfDay(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -106,7 +106,7 @@ export function CalendarView({
   today,
   weekStartsOn = 0,
   locale = "en-US",
-  style,
+  className,
   children,
   ...props
 }: CalendarViewProps) {
@@ -137,22 +137,11 @@ export function CalendarView({
     <Context.Provider value={context}>
       <section
         aria-labelledby={`${id}-title`}
+        data-slot="calendar-view"
+        className={cn(calendarViewVariants({ variant }), className)}
         {...props}
         data-variant={variant}
         data-view={context.view}
-        style={{
-          display: "grid",
-          gap: variant === "compact" ? 8 : 12,
-          minWidth: 0,
-          padding: variant === "card" ? 14 : 0,
-          border: variant === "card" ? "1px solid var(--uai-border)" : 0,
-          borderRadius: 14,
-          background: variant === "card" ? "var(--uai-surface)" : "transparent",
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
       >
         {children}
       </section>
@@ -160,23 +149,17 @@ export function CalendarView({
   );
 }
 
-export function CalendarViewHeader({ style, ...props }: ComponentProps<"div">) {
+export function CalendarViewHeader({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="calendar-view-header"
+      className={cn("flex flex-wrap items-center justify-between gap-2", className)}
       {...props}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        flexWrap: "wrap",
-        gap: 8,
-        ...style,
-      }}
     />
   );
 }
 
-export function CalendarViewTitle({ style, children, ...props }: ComponentProps<"h3">) {
+export function CalendarViewTitle({ className, children, ...props }: ComponentProps<"h3">) {
   const context = useCalendar("CalendarViewTitle");
   const { date, view, locale, weekStartsOn } = context;
   let label: string;
@@ -194,47 +177,39 @@ export function CalendarViewTitle({ style, children, ...props }: ComponentProps<
   }
   return (
     <h3
+      data-slot="calendar-view-title"
+      className={cn(
+        "m-0 font-semibold tracking-[-0.01em] tabular-nums",
+        context.variant === "compact" ? "text-[13px]/5" : "text-sm/5",
+        className,
+      )}
       {...props}
       id={`${context.id}-title`}
       aria-live="polite"
-      style={{
-        margin: 0,
-        fontSize: context.variant === "compact" ? 13 : 14,
-        lineHeight: "20px",
-        fontWeight: 600,
-        letterSpacing: "-0.01em",
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     >
       {children ?? label}
     </h3>
   );
 }
 
-function controlStyle(variant: CalendarViewVariant) {
-  return {
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    minWidth: variant === "compact" ? 24 : 28,
-    height: variant === "compact" ? 24 : 28,
-    padding: variant === "compact" ? "0 10px" : "0 12px",
-    border: 0,
-    borderRadius: 999,
-    fontSize: variant === "compact" ? 12 : 12.5,
-    fontWeight: 500,
-    cursor: "pointer",
-  } as const;
+function controlClass(variant: CalendarViewVariant) {
+  return cn(
+    "inline-flex cursor-pointer items-center justify-center rounded-full border-0 font-medium",
+    variant === "compact" ? "h-6 min-w-6 px-2.5 text-[12px]" : "h-7 min-w-7 px-3 text-[12.5px]",
+  );
 }
-const easeOut = "cubic-bezier(0.23, 1, 0.32, 1)";
 const press =
-  "[transition:background-color_120ms_ease-out,color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uai-accent)] motion-reduce:transition-none motion-reduce:active:scale-100";
+  "[transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_var(--ease-out-quint)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100";
 // Ghost icon button and secondary pill, per the shared button rules.
-const ghostClass = `bg-transparent text-[var(--uai-muted)] hover:bg-[var(--uai-surface-raised)] hover:text-[var(--uai-text)] ${press}`;
-const secondaryClass = `bg-[var(--uai-surface-raised)] text-[var(--uai-text)] hover:bg-[color-mix(in_oklab,var(--uai-surface-raised)_85%,var(--uai-text))] ${press}`;
+const ghostClass = `bg-transparent text-muted-foreground hover:bg-accent hover:text-foreground ${press}`;
+const secondaryClass = `bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] ${press}`;
+const modeThumbOffset: Record<CalendarViewMode, string> = {
+  month: "translate-x-0",
+  week: "translate-x-full",
+  day: "translate-x-[200%]",
+};
 
-export function CalendarViewNavigation({ style, ...props }: ComponentProps<"div">) {
+export function CalendarViewNavigation({ className, ...props }: ComponentProps<"div">) {
   const context = useCalendar("CalendarViewNavigation");
   const step = (direction: 1 | -1) => {
     const { date, view } = context;
@@ -242,28 +217,28 @@ export function CalendarViewNavigation({ style, ...props }: ComponentProps<"div"
       context.setDate(new Date(date.getFullYear(), date.getMonth() + direction, 1));
     else context.setDate(addDays(date, direction * (view === "week" ? 7 : 1)));
   };
+  const iconButton = cn(controlClass(context.variant), "rounded-lg p-0", ghostClass);
   return (
     // biome-ignore lint/a11y/useSemanticElements: a fieldset would add form semantics to calendar navigation buttons.
     <div
       role="group"
       aria-label="Calendar navigation"
+      data-slot="calendar-view-navigation"
+      className={cn("flex items-center gap-0.5", className)}
       {...props}
-      style={{ display: "flex", alignItems: "center", gap: 2, ...style }}
     >
       <button
         type="button"
         aria-label={`Previous ${context.view}`}
         onClick={() => step(-1)}
-        className={ghostClass}
-        style={{ ...controlStyle(context.variant), padding: 0, borderRadius: 8 }}
+        className={iconButton}
       >
         <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" />
       </button>
       <button
         type="button"
         onClick={() => context.setDate(context.today)}
-        className={secondaryClass}
-        style={{ ...controlStyle(context.variant), marginInline: 2 }}
+        className={cn(controlClass(context.variant), "mx-0.5", secondaryClass)}
       >
         Today
       </button>
@@ -271,8 +246,7 @@ export function CalendarViewNavigation({ style, ...props }: ComponentProps<"div"
         type="button"
         aria-label={`Next ${context.view}`}
         onClick={() => step(1)}
-        className={ghostClass}
-        style={{ ...controlStyle(context.variant), padding: 0, borderRadius: 8 }}
+        className={iconButton}
       >
         <ChevronRight size={16} strokeWidth={1.75} aria-hidden="true" />
       </button>
@@ -280,41 +254,27 @@ export function CalendarViewNavigation({ style, ...props }: ComponentProps<"div"
   );
 }
 
-export function CalendarViewModes({ style, ...props }: ComponentProps<"div">) {
+export function CalendarViewModes({ className, ...props }: ComponentProps<"div">) {
   const context = useCalendar("CalendarViewModes");
   return (
     // biome-ignore lint/a11y/useSemanticElements: the layout buttons are a toggle group, not a form fieldset.
     <div
       role="group"
       aria-label="Calendar layout"
+      data-slot="calendar-view-modes"
+      className={cn(
+        "relative isolate inline-grid grid-cols-3 rounded-full bg-muted p-0.5",
+        className,
+      )}
       {...props}
-      style={{
-        position: "relative",
-        isolation: "isolate",
-        display: "inline-grid",
-        gridTemplateColumns: `repeat(${CALENDAR_VIEW_MODES.length}, minmax(0, 1fr))`,
-        padding: 2,
-        borderRadius: 999,
-        background: "var(--uai-surface-raised)",
-        ...style,
-      }}
     >
       {/* One thumb slides under the active layout instead of each button repainting. */}
       <span
         aria-hidden="true"
-        style={{
-          position: "absolute",
-          zIndex: -1,
-          top: 2,
-          bottom: 2,
-          left: 2,
-          width: `calc((100% - 4px) / ${CALENDAR_VIEW_MODES.length})`,
-          borderRadius: 999,
-          background: "var(--uai-surface)",
-          boxShadow: "0 0 0 1px var(--uai-border), 0 1px 2px oklch(0 0 0 / 0.08)",
-          transform: `translateX(${CALENDAR_VIEW_MODES.indexOf(context.view) * 100}%)`,
-          transition: `transform 240ms ${easeOut}`,
-        }}
+        className={cn(
+          "absolute inset-y-0.5 left-0.5 -z-1 w-[calc((100%-4px)/3)] rounded-full bg-card shadow-[0_0_0_1px_var(--border),0_1px_2px_oklch(0_0_0/0.08)] transition-[translate] duration-240 ease-out-quint",
+          modeThumbOffset[context.view],
+        )}
       />
       {CALENDAR_VIEW_MODES.map((mode) => {
         const active = context.view === mode;
@@ -324,11 +284,13 @@ export function CalendarViewModes({ style, ...props }: ComponentProps<"div">) {
             type="button"
             aria-pressed={active}
             onClick={() => context.setView(mode)}
-            className={`bg-transparent ${active ? "text-[var(--uai-text)]" : "text-[var(--uai-subtle)] hover:text-[var(--uai-muted)]"} ${press}`}
-            style={{
-              ...controlStyle(context.variant),
-              height: context.variant === "compact" ? 22 : 26,
-            }}
+            className={cn(
+              controlClass(context.variant),
+              context.variant === "compact" ? "h-5.5" : "h-6.5",
+              "bg-transparent",
+              active ? "text-foreground" : "text-subtle-foreground hover:text-muted-foreground",
+              press,
+            )}
           >
             {mode.charAt(0).toUpperCase() + mode.slice(1)}
           </button>
@@ -349,7 +311,7 @@ export function CalendarViewGrid({
   events = [],
   maxEvents = 2,
   onEventSelect,
-  style,
+  className,
   ...props
 }: CalendarViewGridProps) {
   const context = useCalendar("CalendarViewGrid");
@@ -364,57 +326,34 @@ export function CalendarViewGrid({
     const content = (
       <>
         {showTime ? (
-          <span
-            style={{
-              flexShrink: 0,
-              color: "var(--uai-subtle)",
-              fontWeight: 400,
-              fontVariantNumeric: "tabular-nums",
-            }}
-          >
-            {when}
-          </span>
+          <span className="shrink-0 font-normal text-subtle-foreground tabular-nums">{when}</span>
         ) : (
-          <span style={srOnly}>{when}, </span>
+          <span className="sr-only">{when}, </span>
         )}
-        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          {event.title}
-        </span>
+        <span className="truncate">{event.title}</span>
       </>
     );
     // All-day events read as tinted accent chips; timed events as quiet tonal chips.
-    const itemStyle = {
-      display: "flex",
-      alignItems: "center",
-      gap: 6,
-      width: "100%",
-      minWidth: 0,
-      padding: compact ? "1px 6px" : "2px 6px",
-      border: 0,
-      borderRadius: 6,
-      background: event.allDay
-        ? "color-mix(in oklab, var(--uai-accent) 16%, transparent)"
-        : "var(--uai-surface-raised)",
-      color: "var(--uai-text)",
-      font: "inherit",
-      fontSize: compact ? 11 : 11.5,
-      lineHeight: "16px",
-      fontWeight: 500,
-      textAlign: "left",
-    } as const;
+    const itemClass = cn(
+      "flex w-full min-w-0 items-center gap-1.5 rounded-md border-0 px-1.5 text-left font-medium text-foreground",
+      compact ? "py-px text-[11px]/4" : "py-0.5 text-[11.5px]/4",
+      event.allDay ? "bg-primary/16" : "bg-muted",
+    );
     return (
-      <li key={event.id} style={{ minWidth: 0 }}>
+      <li key={event.id} className="min-w-0">
         {onEventSelect ? (
           <button
             type="button"
             onClick={() => onEventSelect(event)}
-            className="[transition:filter_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] hover:brightness-110 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--uai-accent)] motion-reduce:transition-none motion-reduce:active:scale-100"
-            style={{ ...itemStyle, cursor: "pointer" }}
+            className={cn(
+              itemClass,
+              "cursor-pointer [transition:filter_120ms_ease-out,scale_140ms_var(--ease-out-quint)] hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100",
+            )}
           >
             {content}
           </button>
         ) : (
-          <span style={itemStyle}>{content}</span>
+          <span className={itemClass}>{content}</span>
         )}
       </li>
     );
@@ -429,43 +368,28 @@ export function CalendarViewGrid({
       <td
         key={dateKey(day)}
         aria-current={isToday ? "date" : undefined}
-        style={{
-          height: view === "month" ? (compact ? 68 : 92) : 160,
-          padding: compact ? 3 : 4,
-          border: "1px solid var(--uai-border)",
-          verticalAlign: "top",
-          background: muted
-            ? "color-mix(in oklab, var(--uai-canvas) 70%, var(--uai-surface))"
-            : "var(--uai-surface)",
-          color: muted ? "var(--uai-subtle)" : undefined,
-        }}
+        className={cn(
+          "border align-top",
+          view === "month" ? (compact ? "h-[68px]" : "h-[92px]") : "h-40",
+          compact ? "p-0.75" : "p-1",
+          muted
+            ? "bg-[color-mix(in_oklab,var(--background)_70%,var(--card))] text-subtle-foreground"
+            : "bg-card",
+        )}
       >
         <time
           dateTime={dateKey(day)}
-          style={{
-            display: "inline-grid",
-            placeItems: "center",
-            minWidth: compact ? 20 : 22,
-            height: compact ? 20 : 22,
-            marginBottom: 2,
-            padding: "0 5px",
-            borderRadius: 999,
-            background: isToday ? "var(--uai-accent)" : undefined,
-            color: isToday
-              ? "var(--uai-accent-foreground)"
-              : muted
-                ? undefined
-                : "var(--uai-muted)",
-            fontSize: compact ? 11.5 : 12,
-            fontWeight: 500,
-            fontVariantNumeric: "tabular-nums",
-          }}
+          className={cn(
+            "mb-0.5 inline-grid place-items-center rounded-full px-1.25 font-medium tabular-nums",
+            compact ? "h-5 min-w-5 text-[11.5px]" : "h-5.5 min-w-5.5 text-[12px]",
+            isToday ? "bg-primary text-primary-foreground" : !muted && "text-muted-foreground",
+          )}
         >
           <span aria-hidden="true">{day.getDate()}</span>
-          <span style={srOnly}>{long.format(day)}</span>
+          <span className="sr-only">{long.format(day)}</span>
         </time>
         {visible.length > 0 ? (
-          <ul style={{ display: "grid", gap: 2, margin: 0, padding: 0, listStyle: "none" }}>
+          <ul className="m-0 grid list-none gap-0.5 p-0">
             {visible.map((event) => eventItem(event, view === "week"))}
           </ul>
         ) : null}
@@ -477,17 +401,10 @@ export function CalendarViewGrid({
               context.setDate(day);
               context.setView("day");
             }}
-            className={`bg-transparent text-[var(--uai-subtle)] hover:bg-[var(--uai-surface-raised)] hover:text-[var(--uai-text)] ${press}`}
-            style={{
-              marginTop: 2,
-              padding: "0 6px",
-              border: 0,
-              borderRadius: 6,
-              fontSize: 11,
-              lineHeight: "16px",
-              fontWeight: 500,
-              cursor: "pointer",
-            }}
+            className={cn(
+              "mt-0.5 cursor-pointer rounded-md border-0 bg-transparent px-1.5 text-[11px]/4 font-medium text-subtle-foreground hover:bg-accent hover:text-foreground",
+              press,
+            )}
           >
             +{hidden} more
           </button>
@@ -496,35 +413,25 @@ export function CalendarViewGrid({
     );
   };
 
-  const shell = {
-    minWidth: 0,
-    overflowX: "auto",
-    borderRadius: compact ? 10 : 12,
-    ...style,
-  } as const;
+  const shell = cn("min-w-0 overflow-x-auto", compact ? "rounded-[10px]" : "rounded-xl");
 
   if (view === "day") {
     const dayEvents = eventsOn(events, date);
     return (
-      <div {...props} style={shell}>
+      <div data-slot="calendar-view-grid" className={cn(shell, className)} {...props}>
         {dayEvents.length === 0 ? (
           <p
-            style={{
-              margin: 0,
-              padding: "32px 12px",
-              border: "1px dashed var(--uai-border)",
-              borderRadius: compact ? 10 : 12,
-              color: "var(--uai-subtle)",
-              fontSize: 12.5,
-              textAlign: "center",
-            }}
+            className={cn(
+              "m-0 border border-dashed px-3 py-8 text-center text-[12.5px] text-subtle-foreground",
+              compact ? "rounded-[10px]" : "rounded-xl",
+            )}
           >
             No events on {long.format(date)}.
           </p>
         ) : (
           <ol
             aria-label={`Events on ${long.format(date)}`}
-            style={{ display: "grid", gap: 4, margin: 0, padding: 0, listStyle: "none" }}
+            className="m-0 grid list-none gap-1 p-0"
           >
             {dayEvents.map((event) => {
               const when = event.allDay
@@ -535,49 +442,38 @@ export function CalendarViewGrid({
               const body = (
                 <>
                   <span
-                    style={{
-                      width: compact ? 112 : 132,
-                      flexShrink: 0,
-                      color: "var(--uai-subtle)",
-                      fontSize: compact ? 12 : 12.5,
-                      fontVariantNumeric: "tabular-nums",
-                    }}
+                    className={cn(
+                      "shrink-0 text-subtle-foreground tabular-nums",
+                      compact ? "w-28 text-[12px]" : "w-33 text-[12.5px]",
+                    )}
                   >
                     {when}
                   </span>
-                  <span style={{ fontWeight: 500, overflowWrap: "anywhere" }}>{event.title}</span>
+                  <span className="font-medium wrap-anywhere">{event.title}</span>
                 </>
               );
-              const rowStyle = {
-                display: "flex",
-                flexWrap: "wrap",
-                alignItems: "baseline",
-                gap: 8,
-                width: "100%",
-                padding: compact ? "6px 10px" : "9px 12px",
-                border: 0,
-                borderRadius: compact ? 8 : 10,
-                background: event.allDay
-                  ? "color-mix(in oklab, var(--uai-accent) 12%, transparent)"
-                  : "var(--uai-surface-raised)",
-                boxShadow: event.allDay ? undefined : "inset 2px 0 0 var(--uai-border-strong)",
-                color: "inherit",
-                font: "inherit",
-                textAlign: "left",
-              } as const;
+              const rowClass = cn(
+                "flex w-full flex-wrap items-baseline gap-2 border-0 text-left text-inherit",
+                compact ? "rounded-lg px-2.5 py-1.5" : "rounded-[10px] px-3 py-2.25",
+                event.allDay
+                  ? "bg-primary/12"
+                  : "bg-muted shadow-[inset_2px_0_0_var(--border-strong)]",
+              );
               return (
                 <li key={event.id}>
                   {onEventSelect ? (
                     <button
                       type="button"
                       onClick={() => onEventSelect(event)}
-                      className="[transition:filter_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] hover:brightness-110 active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uai-accent)] motion-reduce:transition-none motion-reduce:active:scale-100"
-                      style={{ ...rowStyle, cursor: "pointer" }}
+                      className={cn(
+                        rowClass,
+                        "cursor-pointer [transition:filter_120ms_ease-out,scale_140ms_var(--ease-out-quint)] hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100",
+                      )}
                     >
                       {body}
                     </button>
                   ) : (
-                    <span style={rowStyle}>{body}</span>
+                    <span className={rowClass}>{body}</span>
                   )}
                 </li>
               );
@@ -602,17 +498,11 @@ export function CalendarViewGrid({
   }
 
   return (
-    <div {...props} style={{ border: "1px solid var(--uai-border)", ...shell }}>
+    <div data-slot="calendar-view-grid" className={cn("border", shell, className)} {...props}>
+      {/* border-hidden hides the outer cell edges; the rounded shell draws the frame. */}
       <table
         aria-labelledby={`${context.id}-title`}
-        style={{
-          width: "100%",
-          minWidth: 560,
-          tableLayout: "fixed",
-          borderCollapse: "collapse",
-          // Hide the outer cell edges; the rounded shell draws the frame.
-          borderStyle: "hidden",
-        }}
+        className="w-full min-w-[560px] table-fixed border-collapse border-hidden"
       >
         <thead>
           <tr>
@@ -620,16 +510,10 @@ export function CalendarViewGrid({
               <th
                 key={dateKey(day)}
                 scope="col"
-                style={{
-                  padding: compact ? "6px 6px" : "8px 8px",
-                  borderBottom: "1px solid var(--uai-border)",
-                  color: "var(--uai-subtle)",
-                  fontSize: compact ? 11 : 11.5,
-                  lineHeight: "16px",
-                  fontWeight: 500,
-                  textAlign: "left",
-                  fontVariantNumeric: "tabular-nums",
-                }}
+                className={cn(
+                  "border-b text-left font-medium text-subtle-foreground tabular-nums",
+                  compact ? "p-1.5 text-[11px]/4" : "p-2 text-[11.5px]/4",
+                )}
               >
                 {weekday.format(day)}
                 {view === "week" ? ` ${day.getDate()}` : null}

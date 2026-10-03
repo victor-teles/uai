@@ -76,13 +76,15 @@ test("preserves the leading error rule when switching between plain and card", (
       <FormErrorSummaryTitle />
     </FormErrorSummary>,
   );
-  expect(summary.style.borderLeftWidth).toBe("3px");
-  expect(summary.style.borderTopWidth).toBe("0px");
+  expect(summary.getAttribute("data-variant")).toBe("plain");
+  expect(summary.className).toContain("border-l-3");
+  expect(summary.className).toContain("border-0");
   view.rerender(
     <FormErrorSummary variant="card">
       <FormErrorSummaryTitle />
     </FormErrorSummary>,
   );
-  expect(summary.style.borderLeftWidth).toBe("3px");
-  expect(summary.style.borderTopWidth).toBe("1px");
+  expect(summary.className).toContain("border-l-3");
+  expect(summary.className).not.toContain("border-0");
+  expect(summary.className.split(" ")).toContain("border");
 });

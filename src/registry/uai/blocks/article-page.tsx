@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import {
   type ComponentProps,
   createContext,
@@ -14,6 +15,7 @@ import {
   type ShareMenuProps,
   type ShareMenuVariant,
 } from "@/components/ui/uai/share-menu";
+import { cn } from "@/lib/uai-utils";
 
 export const ARTICLE_PAGE_VARIANTS = ["centered", "sidebar", "compact"] as const;
 export type ArticlePageVariant = (typeof ARTICLE_PAGE_VARIANTS)[number];
@@ -41,43 +43,10 @@ function useArticle(part: string) {
 }
 const RelatedContext = createContext<string | null>(null);
 
-const layoutCss = `
-[data-uai-article-layout]{display:grid;gap:28px;min-width:0}
-[data-uai-article="compact"]>[data-uai-article-layout]{gap:16px}
-[data-uai-article="centered"]>[data-uai-article-layout]{max-width:680px;margin:0 auto}
-@container (min-width: 760px){
-  [data-uai-article="sidebar"]>[data-uai-article-layout]{grid-template-columns:minmax(0,1fr) 240px;column-gap:48px;align-items:start}
-  [data-uai-article="sidebar"] [data-uai-article-region="header"]{grid-column:1 / -1}
-  [data-uai-article="sidebar"] [data-uai-article-region="related"]{position:sticky;top:16px}
-}
-[data-uai-article-content]>*{margin:0}
-[data-uai-article-content]>*+*{margin-top:1em}
-[data-uai-article-content] h2{font-size:1.25em;line-height:1.3;font-weight:600;letter-spacing:-0.01em;margin-top:1.6em}
-[data-uai-article-content] h3{font-size:1.08em;line-height:1.35;font-weight:500;margin-top:1.4em}
-[data-uai-article-content] a{color:inherit;text-decoration:underline;text-decoration-color:var(--uai-border-strong);text-underline-offset:3px;transition:text-decoration-color 120ms ease-out}
-[data-uai-article-content] a:hover{text-decoration-color:var(--uai-text)}
-[data-uai-article-content] blockquote{padding:2px 0 2px 16px;border-inline-start:2px solid var(--uai-border-strong);color:var(--uai-muted)}
-[data-uai-article-content] ul,[data-uai-article-content] ol{padding-inline-start:1.25em}
-[data-uai-article-content] ul{list-style:disc}
-[data-uai-article-content] ol{list-style:decimal}
-[data-uai-article-content] li+li{margin-top:0.35em}
-[data-uai-article-content] li::marker{color:var(--uai-subtle)}
-[data-uai-article-content] code{padding:1px 6px;border-radius:6px;background:var(--uai-surface-raised);font-size:0.88em}
-[data-uai-article-content]{transition:font-size 180ms cubic-bezier(0.23,1,0.32,1),line-height 180ms cubic-bezier(0.23,1,0.32,1)}
-.uai-article-size{transition:background-color 120ms ease-out,color 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-article-size[aria-checked=false]:hover{color:var(--uai-text)}
-.uai-article-size:active{transform:scale(0.94)}
-.uai-article-size:focus-visible{outline:2px solid var(--uai-accent);outline-offset:1px}
-.uai-article-related{transition:background-color 120ms ease-out}
-.uai-article-related:hover{background:var(--uai-surface-raised)}
-.uai-article-related:focus-visible{outline:2px solid var(--uai-accent);outline-offset:0}
-@media (prefers-reduced-motion: reduce){[data-uai-article-content],.uai-article-size,.uai-article-related{transition:none}.uai-article-size:active{transform:none}}
-`;
-
-const contentType: Record<ArticlePageTextSize, { fontSize: number; lineHeight: string }> = {
-  small: { fontSize: 14, lineHeight: "22px" },
-  default: { fontSize: 16, lineHeight: "26px" },
-  large: { fontSize: 18, lineHeight: "30px" },
+const contentType: Record<ArticlePageTextSize, string> = {
+  small: "text-[14px]/[22px]",
+  default: "text-[16px]/[26px]",
+  large: "text-[18px]/[30px]",
 };
 const shareVariants: Record<ArticlePageVariant, ShareMenuVariant> = {
   centered: "outlined",
@@ -85,14 +54,25 @@ const shareVariants: Record<ArticlePageVariant, ShareMenuVariant> = {
   compact: "compact",
 };
 
+const articlePageLayoutVariants = cva("grid min-w-0", {
+  variants: {
+    variant: {
+      centered: "mx-auto max-w-[680px] gap-7",
+      sidebar:
+        "gap-7 @min-[760px]:grid-cols-[minmax(0,1fr)_240px] @min-[760px]:items-start @min-[760px]:gap-x-12",
+      compact: "gap-4",
+    },
+  },
+});
+
 /** A long-form article with metadata, reading controls, content, sharing, and related reading. */
 export function ArticlePage({
   variant = "centered",
   textSize,
   defaultTextSize = "default",
   onTextSizeChange,
+  className,
   children,
-  style,
   ...props
 }: ArticlePageProps) {
   const id = useId();
@@ -113,140 +93,117 @@ export function ArticlePage({
     >
       <article
         aria-labelledby={`${id}-title`}
+        data-slot="article-page"
+        className={cn(
+          "@container box-border min-w-0 text-[13px]/[18px] text-foreground",
+          className,
+        )}
         {...props}
         data-variant={variant}
-        data-uai-article={variant}
-        style={{
-          boxSizing: "border-box",
-          containerType: "inline-size",
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
       >
-        <style>{layoutCss}</style>
-        <div data-uai-article-layout="">{children}</div>
+        <div data-slot="article-page-layout" className={articlePageLayoutVariants({ variant })}>
+          {children}
+        </div>
       </article>
     </Context.Provider>
   );
 }
 
-export function ArticlePageHeader({ style, ...props }: ComponentProps<"header">) {
+export function ArticlePageHeader({ className, ...props }: ComponentProps<"header">) {
   const { variant } = useArticle("ArticlePageHeader");
   return (
     <header
+      data-slot="article-page-header"
+      className={cn(
+        "grid min-w-0 border-b",
+        variant === "compact" ? "gap-2.5 pb-3" : "gap-4 pb-5",
+        variant === "sidebar" && "@min-[760px]:col-span-full",
+        className,
+      )}
       {...props}
-      data-uai-article-region="header"
-      style={{
-        display: "grid",
-        gap: variant === "compact" ? 10 : 16,
-        minWidth: 0,
-        paddingBottom: variant === "compact" ? 12 : 20,
-        borderBottom: "1px solid var(--uai-border)",
-        ...style,
-      }}
     />
   );
 }
 
 /** A short label above the title, such as the section or topic. */
-export function ArticlePageCategory({ style, ...props }: ComponentProps<"p">) {
+export function ArticlePageCategory({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="article-page-category"
+      className={cn("m-0 text-xs/4 font-medium text-primary", className)}
       {...props}
-      style={{
-        margin: 0,
-        color: "var(--uai-accent)",
-        fontSize: 12,
-        fontWeight: 500,
-        lineHeight: "16px",
-        ...style,
-      }}
     />
   );
 }
 
-export function ArticlePageTitle({ style, ...props }: ComponentProps<"h1">) {
+export function ArticlePageTitle({ className, ...props }: ComponentProps<"h1">) {
   const { id, variant } = useArticle("ArticlePageTitle");
   return (
     <h1
+      data-slot="article-page-title"
+      className={cn(
+        "m-0 font-semibold tracking-[-0.02em] text-balance",
+        variant === "compact"
+          ? "text-[22px]/[1.15]"
+          : "text-[length:clamp(26px,3cqi+12px,36px)]/[1.15]",
+        className,
+      )}
       {...props}
       id={`${id}-title`}
-      style={{
-        margin: 0,
-        fontSize: variant === "compact" ? 22 : "clamp(26px, 3cqi + 12px, 36px)",
-        fontWeight: 600,
-        lineHeight: 1.15,
-        letterSpacing: "-0.02em",
-        textWrap: "balance",
-        ...style,
-      }}
     />
   );
 }
 
-export function ArticlePageDescription({ style, ...props }: ComponentProps<"p">) {
+export function ArticlePageDescription({ className, ...props }: ComponentProps<"p">) {
   const { variant } = useArticle("ArticlePageDescription");
   return (
     <p
+      data-slot="article-page-description"
+      className={cn(
+        "m-0 max-w-[60ch] text-pretty text-muted-foreground",
+        variant === "compact" ? "text-[13px]/[18px]" : "text-[15px]/[22px]",
+        className,
+      )}
       {...props}
-      style={{
-        maxWidth: "60ch",
-        margin: 0,
-        color: "var(--uai-muted)",
-        fontSize: variant === "compact" ? 13 : 15,
-        lineHeight: variant === "compact" ? "18px" : "22px",
-        textWrap: "pretty",
-        ...style,
-      }}
     />
   );
 }
 
 /** Byline row: the author, dates, and reading time on the start side, reading controls on the end side. */
-export function ArticlePageMeta({ style, ...props }: ComponentProps<"div">) {
+export function ArticlePageMeta({ className, ...props }: ComponentProps<"div">) {
   useArticle("ArticlePageMeta");
   return (
     <div
+      data-slot="article-page-meta"
+      className={cn("flex min-w-0 flex-wrap items-center justify-between gap-3", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
 /** The byline, an inline Author Card. Compose Author Card parts inside it. */
-export function ArticlePageAuthor({ style, ...props }: Omit<AuthorCardProps, "variant">) {
+export function ArticlePageAuthor({ className, ...props }: Omit<AuthorCardProps, "variant">) {
   useArticle("ArticlePageAuthor");
   return (
-    <AuthorCard {...props} variant="inline" style={{ alignItems: "center", rowGap: 2, ...style }} />
+    <AuthorCard
+      data-slot="article-page-author"
+      className={cn("items-center gap-y-0.5", className)}
+      {...props}
+      variant="inline"
+    />
   );
 }
 
 /** Muted publication details such as dates and reading time. */
-export function ArticlePageDetails({ style, ...props }: ComponentProps<"p">) {
+export function ArticlePageDetails({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="article-page-details"
+      className={cn(
+        "m-0 flex flex-wrap gap-x-2 gap-y-0 text-[12px] text-subtle-foreground tabular-nums",
+        className,
+      )}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: "0 8px",
-        margin: 0,
-        color: "var(--uai-subtle)",
-        fontSize: 12,
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     />
   );
 }
@@ -254,7 +211,7 @@ export function ArticlePageDetails({ style, ...props }: ComponentProps<"p">) {
 /** Reading controls and sharing. */
 export function ArticlePageToolbar({
   "aria-label": label = "Reading controls",
-  style,
+  className,
   ...props
 }: ComponentProps<"div">) {
   useArticle("ArticlePageToolbar");
@@ -263,8 +220,9 @@ export function ArticlePageToolbar({
     <div
       role="group"
       aria-label={label}
+      data-slot="article-page-toolbar"
+      className={cn("flex flex-wrap items-center gap-2", className)}
       {...props}
-      style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, ...style }}
     />
   );
 }
@@ -273,28 +231,24 @@ export function ArticlePageToolbar({
 export function ArticlePageTextSizeControl({
   "aria-label": label = "Text size",
   onKeyDown,
-  style,
+  className,
   ...props
 }: ComponentProps<"div">) {
   const { variant } = useArticle("ArticlePageTextSizeControl");
-  const compact = variant === "compact";
   return (
     <div
       role="radiogroup"
       aria-label={label}
+      data-slot="article-page-text-size-control"
+      className={cn(
+        "inline-flex items-center gap-0.5 rounded-full bg-card",
+        variant === "compact" ? "p-px" : "p-0.5",
+        className,
+      )}
       {...props}
       onKeyDown={(event) => {
         onKeyDown?.(event);
         if (!event.defaultPrevented) moveRadio(event);
-      }}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 2,
-        padding: compact ? 1 : 2,
-        borderRadius: 999,
-        background: "var(--uai-surface)",
-        ...style,
       }}
     />
   );
@@ -303,10 +257,17 @@ export function ArticlePageTextSizeControl({
 export type ArticlePageTextSizeOptionProps = Omit<ComponentProps<"button">, "value"> & {
   value: ArticlePageTextSize;
 };
+
+const optionTextSize: Record<ArticlePageTextSize, string> = {
+  small: "text-[11px]/none",
+  default: "text-[13px]/none",
+  large: "text-[15px]/none",
+};
+
 export function ArticlePageTextSizeOption({
   value,
   onClick,
-  style,
+  className,
   ...props
 }: ArticlePageTextSizeOptionProps) {
   const context = useArticle("ArticlePageTextSizeOption");
@@ -315,31 +276,27 @@ export function ArticlePageTextSizeOption({
   return (
     // biome-ignore lint/a11y/useSemanticElements: APG radio group built from buttons for custom segmented styling.
     <button
+      data-slot="article-page-text-size-option"
+      className={cn(
+        "grid cursor-pointer place-items-center rounded-full border-0 px-1.5 font-medium",
+        "[transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)]",
+        "focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring active:scale-94",
+        "motion-reduce:transition-none motion-reduce:active:scale-100",
+        compact ? "h-[22px] min-w-6" : "h-6 min-w-7",
+        checked
+          ? "bg-accent text-accent-foreground"
+          : "bg-transparent text-subtle-foreground hover:text-foreground",
+        optionTextSize[value],
+        className,
+      )}
       {...props}
       type="button"
       role="radio"
       aria-checked={checked}
       tabIndex={checked ? 0 : -1}
-      className={props.className ? `uai-article-size ${props.className}` : "uai-article-size"}
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) context.setTextSize(value);
-      }}
-      style={{
-        display: "grid",
-        placeItems: "center",
-        minWidth: compact ? 24 : 28,
-        height: compact ? 22 : 24,
-        padding: "0 6px",
-        border: 0,
-        borderRadius: 999,
-        background: checked ? "var(--uai-surface-raised)" : "transparent",
-        color: checked ? "var(--uai-text)" : "var(--uai-subtle)",
-        fontSize: value === "small" ? 11 : value === "large" ? 15 : 13,
-        fontWeight: 500,
-        lineHeight: 1,
-        cursor: "pointer",
-        ...style,
       }}
     />
   );
@@ -348,33 +305,41 @@ export function ArticlePageTextSizeOption({
 /** Share Menu sized for the article. Compose ShareMenuTrigger and ShareMenuContent inside it. */
 export function ArticlePageShare(props: Omit<ShareMenuProps, "variant">) {
   const { variant } = useArticle("ArticlePageShare");
-  return <ShareMenu {...props} variant={shareVariants[variant]} />;
+  return <ShareMenu data-slot="article-page-share" {...props} variant={shareVariants[variant]} />;
 }
 
+const articleContentProse = [
+  "[&>*]:mx-0 [&>*]:mb-0 [&>:where(:first-child)]:mt-0 [&>*+*]:mt-[1em]",
+  "[&_h2]:mt-[1.6em] [&_h2]:text-[1.25em]/[1.3] [&_h2]:font-semibold [&_h2]:tracking-[-0.01em]",
+  "[&_h3]:mt-[1.4em] [&_h3]:text-[1.08em]/[1.35] [&_h3]:font-medium",
+  "[&_a]:text-inherit [&_a]:underline [&_a]:decoration-border-strong [&_a]:underline-offset-3 [&_a]:transition-[text-decoration-color] [&_a]:duration-120 [&_a]:ease-[ease-out] [&_a:hover]:decoration-foreground motion-reduce:[&_a]:transition-none",
+  "[&_blockquote]:border-s-2 [&_blockquote]:border-border-strong [&_blockquote]:py-0.5 [&_blockquote]:ps-4 [&_blockquote]:pe-0 [&_blockquote]:text-muted-foreground",
+  "[&_ol]:list-decimal [&_ol]:ps-[1.25em] [&_ul]:list-disc [&_ul]:ps-[1.25em] [&_li+li]:mt-[0.35em] [&_li::marker]:text-subtle-foreground",
+  "[&_code]:rounded-md [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-px [&_code]:text-[0.88em]",
+];
+
 /** The article body. Type size follows the reading controls. */
-export function ArticlePageContent({ style, ...props }: ComponentProps<"div">) {
+export function ArticlePageContent({ className, ...props }: ComponentProps<"div">) {
   const { textSize, variant } = useArticle("ArticlePageContent");
-  const type = contentType[textSize];
   return (
     <div
+      data-slot="article-page-content"
+      className={cn(
+        "min-w-0 text-pretty wrap-anywhere",
+        "[transition:font-size_180ms_cubic-bezier(0.23,1,0.32,1),line-height_180ms_cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none",
+        variant !== "compact" && "max-w-[68ch]",
+        contentType[textSize],
+        articleContentProse,
+        className,
+      )}
       {...props}
-      data-uai-article-content=""
       data-text-size={textSize}
-      style={{
-        minWidth: 0,
-        maxWidth: variant === "compact" ? undefined : "68ch",
-        fontSize: type.fontSize,
-        lineHeight: type.lineHeight,
-        textWrap: "pretty",
-        overflowWrap: "anywhere",
-        ...style,
-      }}
     />
   );
 }
 
 /** Related reading, rendered as a labelled complementary region. */
-export function ArticlePageRelated({ style, ...props }: ComponentProps<"aside">) {
+export function ArticlePageRelated({ className, ...props }: ComponentProps<"aside">) {
   const { variant } = useArticle("ArticlePageRelated");
   const id = useId();
   const compact = variant === "compact";
@@ -382,78 +347,59 @@ export function ArticlePageRelated({ style, ...props }: ComponentProps<"aside">)
     <RelatedContext.Provider value={id}>
       <aside
         aria-labelledby={id}
+        data-slot="article-page-related"
+        className={cn(
+          "grid min-w-0 bg-card",
+          compact ? "gap-2 rounded-xl p-2.5" : "gap-3 rounded-[14px] p-3",
+          variant === "sidebar" && "@min-[760px]:sticky @min-[760px]:top-4",
+          className,
+        )}
         {...props}
-        data-uai-article-region="related"
-        style={{
-          display: "grid",
-          gap: compact ? 8 : 12,
-          minWidth: 0,
-          padding: compact ? 10 : 12,
-          borderRadius: compact ? 12 : 14,
-          background: "var(--uai-surface)",
-          ...style,
-        }}
       />
     </RelatedContext.Provider>
   );
 }
 
-export function ArticlePageRelatedTitle({ style, ...props }: ComponentProps<"h2">) {
+export function ArticlePageRelatedTitle({ className, ...props }: ComponentProps<"h2">) {
   const id = useContext(RelatedContext);
   if (!id) throw new Error("ArticlePageRelatedTitle must be used within ArticlePageRelated");
   return (
     <h2
+      data-slot="article-page-related-title"
+      className={cn(
+        "m-0 px-2 pt-0.5 text-[11.5px]/4 font-medium text-subtle-foreground",
+        className,
+      )}
       {...props}
       id={id}
-      style={{
-        margin: 0,
-        padding: "2px 8px 0",
-        color: "var(--uai-subtle)",
-        fontSize: 11.5,
-        lineHeight: "16px",
-        fontWeight: 500,
-        ...style,
-      }}
     />
   );
 }
 
-export function ArticlePageRelatedList({ style, ...props }: ComponentProps<"ul">) {
+export function ArticlePageRelatedList({ className, ...props }: ComponentProps<"ul">) {
   return (
     <ul
+      data-slot="article-page-related-list"
+      className={cn("m-0 grid list-none gap-0.5 p-0", className)}
       {...props}
-      style={{
-        display: "grid",
-        gap: 2,
-        margin: 0,
-        padding: 0,
-        listStyle: "none",
-        ...style,
-      }}
     />
   );
 }
 
-export function ArticlePageRelatedItem({ style, children, ...props }: ComponentProps<"a">) {
+export function ArticlePageRelatedItem({ className, children, ...props }: ComponentProps<"a">) {
   const { variant } = useArticle("ArticlePageRelatedItem");
   return (
-    <li style={{ display: "grid", minWidth: 0 }}>
+    <li className="grid min-w-0">
       <a
+        data-slot="article-page-related-item"
+        className={cn(
+          "grid min-w-0 gap-0.5 rounded-lg font-medium text-foreground no-underline",
+          "transition-[background-color] duration-120 ease-[ease-out] hover:bg-accent motion-reduce:transition-none",
+          "focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-ring",
+          variant === "compact" ? "px-2 py-1.5" : "p-2",
+          className,
+        )}
         {...props}
-        className={
-          props.className ? `uai-article-related ${props.className}` : "uai-article-related"
-        }
-        style={{
-          display: "grid",
-          gap: 2,
-          minWidth: 0,
-          padding: variant === "compact" ? "6px 8px" : "8px",
-          borderRadius: 8,
-          color: "var(--uai-text)",
-          fontWeight: 500,
-          textDecoration: "none",
-          ...style,
-        }}
       >
         {children}
       </a>
@@ -462,17 +408,12 @@ export function ArticlePageRelatedItem({ style, children, ...props }: ComponentP
 }
 
 /** Muted detail under a related link, such as the reading time. */
-export function ArticlePageRelatedMeta({ style, ...props }: ComponentProps<"span">) {
+export function ArticlePageRelatedMeta({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
+      data-slot="article-page-related-meta"
+      className={cn("text-[12px] font-normal text-subtle-foreground tabular-nums", className)}
       {...props}
-      style={{
-        color: "var(--uai-subtle)",
-        fontSize: 12,
-        fontWeight: 400,
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     />
   );
 }

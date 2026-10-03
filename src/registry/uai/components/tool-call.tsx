@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import {
   Check,
   ChevronDown,
@@ -10,7 +11,6 @@ import {
 } from "lucide-react";
 import {
   type ComponentProps,
-  type CSSProperties,
   createContext,
   type ReactNode,
   useContext,
@@ -19,6 +19,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const TOOL_CALL_VARIANTS = ["card", "inline", "compact"] as const;
 export const TOOL_CALL_STATUSES = ["queued", "running", "success", "error"] as const;
@@ -48,7 +49,7 @@ function useToolCall(part: string) {
   return context;
 }
 
-const dangerText = "color-mix(in oklab, var(--uai-danger) 75%, var(--uai-text))";
+const dangerText = "text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))]";
 const statusDetails: Record<
   ToolCallStatus,
   { label: string; icon: LucideIcon; color: string; tint: string }
@@ -56,40 +57,46 @@ const statusDetails: Record<
   queued: {
     label: "Queued",
     icon: CircleDashed,
-    color: "var(--uai-subtle)",
-    tint: "transparent",
+    color: "text-subtle-foreground",
+    tint: "bg-transparent shadow-[inset_0_0_0_1px_var(--border)]",
   },
   running: {
     label: "Running",
     icon: LoaderCircle,
-    color: "var(--uai-text)",
-    tint: "var(--uai-surface-raised)",
+    color: "text-foreground",
+    tint: "bg-muted",
   },
   success: {
     label: "Succeeded",
     icon: Check,
-    color: "var(--uai-success)",
-    tint: "color-mix(in oklab, var(--uai-success) 14%, transparent)",
+    color: "text-success",
+    tint: "bg-success/14",
   },
   error: {
     label: "Failed",
     icon: CircleAlert,
     color: dangerText,
-    tint: "color-mix(in oklab, var(--uai-danger) 14%, transparent)",
+    tint: "bg-destructive/14",
   },
 };
 
-const toolCallCss = `
-@keyframes uai-tool-call-shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
-@keyframes uai-tool-call-reveal{from{opacity:0;transform:translateY(-4px)}}
-[data-uai-tool-call-trigger]{transition:background-color 120ms ease-out}
-[data-uai-tool-call-trigger]:hover{background:color-mix(in oklab,var(--uai-surface-raised) 50%,transparent)!important}
-[data-uai-tool-call-trigger]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:-2px}
-[data-uai-tool-call-trigger]:hover [data-uai-tool-call-chevron]{color:var(--uai-text)!important}
-[data-uai-tool-call][data-status="running"] [data-uai-tool-call-status]{background-image:linear-gradient(90deg,var(--uai-subtle) 0%,var(--uai-subtle) 35%,var(--uai-text) 50%,var(--uai-subtle) 65%,var(--uai-subtle) 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:uai-tool-call-shimmer 2s linear infinite}
-[data-uai-tool-call-content]:not([hidden]){animation:uai-tool-call-reveal 240ms cubic-bezier(0.23,1,0.32,1)}
-@media (prefers-reduced-motion:reduce){[data-uai-tool-call-trigger],[data-uai-tool-call-content]{transition:none;animation:none!important}[data-uai-tool-call][data-status="running"] [data-uai-tool-call-status]{animation:none;background:none;color:var(--uai-text)!important}}
-`;
+const toolCallVariants = cva("min-w-0 overflow-hidden text-[13px]/[18px] text-foreground", {
+  variants: {
+    variant: {
+      card: "rounded-[14px] border bg-card",
+      inline: "rounded-[14px] border-0 bg-transparent",
+      compact: "rounded-xl border bg-card",
+    },
+    error: { true: "", false: "" },
+  },
+  compoundVariants: [
+    {
+      variant: ["card", "compact"],
+      error: true,
+      className: "border-[color-mix(in_oklab,var(--destructive)_45%,var(--border))]",
+    },
+  ],
+});
 
 export function ToolCall({
   variant = "card",
@@ -97,14 +104,13 @@ export function ToolCall({
   open,
   defaultOpen = false,
   onOpenChange,
+  className,
   children,
-  style,
   ...props
 }: ToolCallProps) {
   const id = useId();
   const [internal, setInternal] = useState(defaultOpen);
   const visible = open ?? internal;
-  const chrome = variant !== "inline";
   return (
     <ToolCallContext.Provider
       value={{
@@ -119,52 +125,31 @@ export function ToolCall({
       }}
     >
       <div
+        data-slot="tool-call"
+        className={cn(toolCallVariants({ variant, error: status === "error" }), className)}
         {...props}
         aria-busy={status === "running" || undefined}
         data-variant={variant}
         data-status={status}
         data-state={visible ? "open" : "closed"}
-        data-uai-tool-call=""
-        style={{
-          minWidth: 0,
-          overflow: "hidden",
-          border: chrome
-            ? `1px solid ${
-                status === "error"
-                  ? "color-mix(in oklab, var(--uai-danger) 45%, var(--uai-border))"
-                  : "var(--uai-border)"
-              }`
-            : 0,
-          borderRadius: variant === "compact" ? 12 : 14,
-          background: chrome ? "var(--uai-surface)" : "transparent",
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
       >
-        <style href="uai-tool-call" precedence="default">
-          {toolCallCss}
-        </style>
         {children}
       </div>
     </ToolCallContext.Provider>
   );
 }
 
-export function ToolCallHeader({ style, ...props }: ComponentProps<"div">) {
+export function ToolCallHeader({ className, ...props }: ComponentProps<"div">) {
   const context = useToolCall("ToolCallHeader");
   return (
     <div
+      data-slot="tool-call-header"
+      className={cn(
+        "flex min-w-0 items-center gap-2",
+        context.variant === "inline" ? "pr-1" : context.variant === "compact" ? "pr-2" : "pr-3",
+        className,
+      )}
       {...props}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        minWidth: 0,
-        paddingRight: context.variant === "inline" ? 4 : context.variant === "compact" ? 8 : 12,
-        ...style,
-      }}
     />
   );
 }
@@ -190,162 +175,121 @@ function StatusIcon({ status, size }: { status: ToolCallStatus; size: number }) 
       size={size}
       strokeWidth={2}
       aria-hidden="true"
-      style={{ flex: "none", color }}
+      className={cn("flex-none", color)}
     />
   );
 }
 
-export function ToolCallTrigger({ children, onClick, style, ...props }: ComponentProps<"button">) {
+export function ToolCallTrigger({
+  children,
+  onClick,
+  className,
+  ...props
+}: ComponentProps<"button">) {
   const context = useToolCall("ToolCallTrigger");
   const compact = context.variant === "compact";
   const inline = context.variant === "inline";
   return (
     <button
+      data-slot="tool-call-trigger"
       type="button"
+      className={cn(
+        "group/tool-call-trigger flex min-w-0 flex-auto cursor-pointer items-center gap-2 border-0 bg-transparent text-left font-[inherit] text-inherit outline-none transition-[background-color] duration-120 ease-out hover:bg-accent/50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none",
+        compact ? "min-h-[34px]" : "min-h-11",
+        inline ? "rounded-[10px] px-1.5" : compact ? "rounded-none px-2" : "rounded-none px-3",
+        className,
+      )}
       {...props}
       aria-expanded={context.open}
       aria-controls={`${context.id}-content`}
-      data-uai-tool-call-trigger=""
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) context.toggle();
       }}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        flex: "1 1 auto",
-        minWidth: 0,
-        minHeight: compact ? 34 : 44,
-        padding: inline ? "0 6px" : compact ? "0 8px" : "0 12px",
-        border: 0,
-        borderRadius: inline ? 10 : 0,
-        outline: "none",
-        background: "transparent",
-        color: "inherit",
-        font: "inherit",
-        textAlign: "left",
-        cursor: "pointer",
-        ...style,
-      }}
     >
       <span
-        style={{
-          display: "grid",
-          placeItems: "center",
-          flex: "none",
-          width: compact ? 20 : 24,
-          height: compact ? 20 : 24,
-          borderRadius: compact ? 6 : 8,
-          background: statusDetails[context.status].tint,
-          boxShadow: context.status === "queued" ? "inset 0 0 0 1px var(--uai-border)" : undefined,
-          transition: "background-color 200ms ease-out",
-        }}
+        className={cn(
+          "grid flex-none place-items-center transition-[background-color] duration-200 ease-out",
+          compact ? "size-5 rounded-[6px]" : "size-6 rounded-lg",
+          statusDetails[context.status].tint,
+        )}
       >
         <StatusIcon status={context.status} size={compact ? 12 : 13} />
       </span>
-      <span style={{ display: "flex", alignItems: "baseline", gap: 8, flex: 1, minWidth: 0 }}>
-        {children}
-      </span>
+      <span className="flex min-w-0 flex-1 items-baseline gap-2">{children}</span>
       <ChevronDown
         size={14}
         aria-hidden="true"
-        data-uai-tool-call-chevron=""
-        style={{
-          flex: "none",
-          color: "var(--uai-subtle)",
-          transform: context.open ? "rotate(180deg)" : undefined,
-          transition: "transform 180ms cubic-bezier(0.23, 1, 0.32, 1), color 120ms ease-out",
-        }}
+        className={cn(
+          "flex-none text-subtle-foreground [transition:rotate_180ms_cubic-bezier(0.23,1,0.32,1),color_120ms_ease-out] group-hover/tool-call-trigger:text-foreground",
+          context.open && "rotate-180",
+        )}
       />
     </button>
   );
 }
 
-export function ToolCallName({ style, ...props }: ComponentProps<"span">) {
+export function ToolCallName({ className, ...props }: ComponentProps<"span">) {
   useToolCall("ToolCallName");
   return (
     <span
+      data-slot="tool-call-name"
+      className={cn("flex-none font-mono text-[12px] font-medium tracking-[-0.01em]", className)}
       {...props}
-      style={{
-        flex: "none",
-        fontFamily: "var(--font-mono, ui-monospace, monospace)",
-        fontSize: 12,
-        fontWeight: 500,
-        letterSpacing: "-0.01em",
-        ...style,
-      }}
     />
   );
 }
 
-export function ToolCallSummary({ style, ...props }: ComponentProps<"span">) {
+export function ToolCallSummary({ className, ...props }: ComponentProps<"span">) {
   useToolCall("ToolCallSummary");
   return (
     <span
+      data-slot="tool-call-summary"
+      className={cn("min-w-0 truncate text-[12.5px] text-muted-foreground", className)}
       {...props}
-      style={{
-        minWidth: 0,
-        overflow: "hidden",
-        whiteSpace: "nowrap",
-        textOverflow: "ellipsis",
-        color: "var(--uai-muted)",
-        fontSize: 12.5,
-        ...style,
-      }}
     />
   );
 }
 
-export function ToolCallStatus({ children, style, ...props }: ComponentProps<"span">) {
+export function ToolCallStatus({ children, className, ...props }: ComponentProps<"span">) {
   const context = useToolCall("ToolCallStatus");
   const details = statusDetails[context.status];
+  const settled = context.status === "success" || context.status === "error";
   return (
     <span
+      data-slot="tool-call-status"
       role="status"
-      data-uai-tool-call-status=""
+      className={cn(
+        "flex-none rounded-full py-0.5 text-[11.5px]/4 font-medium whitespace-nowrap tabular-nums",
+        settled ? cn("px-2", details.tint, details.color) : "px-0",
+        context.status === "queued" && "text-subtle-foreground",
+        context.status === "running" && "shimmer-text",
+        className,
+      )}
       {...props}
-      style={{
-        flex: "none",
-        padding: context.status === "success" || context.status === "error" ? "2px 8px" : "2px 0",
-        borderRadius: 999,
-        background:
-          context.status === "success" || context.status === "error" ? details.tint : undefined,
-        color:
-          context.status === "queued"
-            ? "var(--uai-subtle)"
-            : context.status === "running"
-              ? "var(--uai-text)"
-              : details.color,
-        fontSize: 11.5,
-        lineHeight: "16px",
-        fontWeight: 500,
-        fontVariantNumeric: "tabular-nums",
-        whiteSpace: "nowrap",
-        ...style,
-      }}
     >
       {children ?? details.label}
     </span>
   );
 }
 
-export function ToolCallContent({ style, ...props }: ComponentProps<"div">) {
+export function ToolCallContent({ className, ...props }: ComponentProps<"div">) {
   const context = useToolCall("ToolCallContent");
   const inline = context.variant === "inline";
   return (
     <div
+      data-slot="tool-call-content"
+      className={cn(
+        "animate-in gap-2.5 fade-in-0 slide-in-from-top-1 duration-240 ease-out-quint motion-reduce:animate-none",
+        context.open ? "grid" : "hidden",
+        inline
+          ? "border-t-0 pt-1.5 pr-0 pb-1 pl-[38px]"
+          : cn("border-t", context.variant === "compact" ? "p-2" : "p-3"),
+        className,
+      )}
       {...props}
       id={`${context.id}-content`}
       hidden={!context.open}
-      data-uai-tool-call-content=""
-      style={{
-        display: context.open ? "grid" : "none",
-        gap: 10,
-        padding: inline ? "6px 0 4px 38px" : context.variant === "compact" ? 8 : 12,
-        borderTop: inline ? 0 : "1px solid var(--uai-border)",
-        ...style,
-      }}
     />
   );
 }
@@ -357,74 +301,64 @@ export type ToolCallPayloadProps = ComponentProps<"div"> & {
 
 function Payload({
   part,
+  slot,
   defaultLabel,
   label,
+  className,
   children,
-  style,
   ...props
-}: ToolCallPayloadProps & { part: string; defaultLabel: string }) {
+}: ToolCallPayloadProps & { part: string; slot: string; defaultLabel: string }) {
   const context = useToolCall(part);
   const labelId = `${context.id}-${defaultLabel.toLowerCase()}`;
-  const code: CSSProperties = {
-    margin: 0,
-    maxHeight: 220,
-    overflow: "auto",
-    padding: "8px 10px",
-    borderRadius: context.variant === "compact" ? 8 : 10,
-    background: context.variant === "inline" ? "var(--uai-surface-raised)" : "var(--uai-canvas)",
-    color: "color-mix(in oklab, var(--uai-text) 88%, var(--uai-muted))",
-    fontFamily: "var(--font-mono, ui-monospace, monospace)",
-    fontSize: 11.5,
-    lineHeight: "18px",
-    whiteSpace: "pre-wrap",
-    overflowWrap: "anywhere",
-  };
   return (
     // biome-ignore lint/a11y/useSemanticElements: a labelled group keeps the payload heading lightweight inside chat logs.
     <div
+      data-slot={slot}
       role="group"
       aria-labelledby={labelId}
+      className={cn("grid gap-1", className)}
       {...props}
-      style={{ display: "grid", gap: 4, ...style }}
     >
-      <span id={labelId} style={{ color: "var(--uai-subtle)", fontSize: 11.5, lineHeight: "16px" }}>
+      <span id={labelId} className="text-[11.5px]/4 text-subtle-foreground">
         {label ?? defaultLabel}
       </span>
-      <pre style={code}>{children}</pre>
+      <pre
+        className={cn(
+          "m-0 max-h-[220px] overflow-auto px-2.5 py-2 font-mono text-[11.5px]/[18px] whitespace-pre-wrap text-[color-mix(in_oklab,var(--foreground)_88%,var(--muted-foreground))] wrap-anywhere",
+          context.variant === "compact" ? "rounded-lg" : "rounded-[10px]",
+          context.variant === "inline" ? "bg-muted" : "bg-background",
+        )}
+      >
+        {children}
+      </pre>
     </div>
   );
 }
 
 export function ToolCallInput(props: ToolCallPayloadProps) {
-  return <Payload {...props} part="ToolCallInput" defaultLabel="Input" />;
+  return <Payload {...props} part="ToolCallInput" slot="tool-call-input" defaultLabel="Input" />;
 }
 
 export function ToolCallOutput(props: ToolCallPayloadProps) {
   const context = useToolCall("ToolCallOutput");
   if (context.status === "queued" || context.status === "error") return null;
-  return <Payload {...props} part="ToolCallOutput" defaultLabel="Output" />;
+  return <Payload {...props} part="ToolCallOutput" slot="tool-call-output" defaultLabel="Output" />;
 }
 
-export function ToolCallError({ children, style, ...props }: ComponentProps<"p">) {
+export function ToolCallError({ children, className, ...props }: ComponentProps<"p">) {
   const context = useToolCall("ToolCallError");
   if (context.status !== "error") return null;
   return (
     <p
+      data-slot="tool-call-error"
+      className={cn(
+        "m-0 flex items-start gap-2 rounded-[10px] bg-destructive/10 px-2.5 py-2 text-[12.5px]",
+        dangerText,
+        className,
+      )}
       {...props}
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        gap: 8,
-        margin: 0,
-        padding: "8px 10px",
-        borderRadius: 10,
-        background: "color-mix(in oklab, var(--uai-danger) 10%, transparent)",
-        color: dangerText,
-        fontSize: 12.5,
-        ...style,
-      }}
     >
-      <CircleAlert size={14} aria-hidden="true" style={{ flex: "none", marginTop: 2 }} />
+      <CircleAlert size={14} aria-hidden="true" className="mt-0.5 flex-none" />
       <span>{children ?? "The tool returned an error."}</span>
     </p>
   );

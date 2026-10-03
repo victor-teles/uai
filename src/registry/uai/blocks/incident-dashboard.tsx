@@ -1,6 +1,7 @@
 "use client";
 
-import { type ComponentProps, type CSSProperties, createContext, useContext, useId } from "react";
+import { cva } from "class-variance-authority";
+import { type ComponentProps, createContext, useContext, useId } from "react";
 import {
   ActivityTimeline,
   type ActivityTimelineVariant,
@@ -20,6 +21,7 @@ import {
   type StatusBannerProps,
   type StatusBannerVariant,
 } from "@/components/ui/uai/status-banner";
+import { cn } from "@/lib/uai-utils";
 
 export const INCIDENT_DASHBOARD_VARIANTS = ["overview", "split", "compact"] as const;
 export type IncidentDashboardVariant = (typeof INCIDENT_DASHBOARD_VARIANTS)[number];
@@ -63,51 +65,33 @@ const impactVariants: Record<IncidentDashboardVariant, DescriptionListVariant> =
   split: "inline",
   compact: "stacked",
 };
-const severityColors: Record<IncidentDashboardSeverityLevel, string> = {
-  critical: "var(--uai-danger)",
-  major: "var(--uai-warning)",
-  minor: "var(--uai-muted)",
+const severityClasses: Record<IncidentDashboardSeverityLevel, string> = {
+  critical: "bg-destructive/14 text-destructive",
+  major: "bg-warning/14 text-warning",
+  minor: "bg-muted-foreground/14 text-muted-foreground",
 };
 
-const dashboardCss = `
-[data-uai-incident-dashboard-action]{transition:filter 120ms ease-out,box-shadow 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-[data-uai-incident-dashboard-action]:hover:not(:disabled){box-shadow:inset 0 0 0 999px color-mix(in oklab,var(--uai-text) 9%,transparent)}
-[data-uai-incident-dashboard-action][data-uai-incident-dashboard-action="primary"]:hover:not(:disabled){box-shadow:none;filter:brightness(1.08)}
-[data-uai-incident-dashboard-action]:active:not(:disabled){transform:scale(0.97)}
-[data-uai-incident-dashboard-action]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-[data-uai-incident-dashboard-input]{transition:box-shadow 120ms ease-out}
-[data-uai-incident-dashboard-input]:focus{outline:none;box-shadow:0 0 0 1px var(--uai-border-strong),0 0 0 4px color-mix(in oklab,var(--uai-accent) 22%,transparent)}
-[data-uai-incident-dashboard-input]::placeholder{color:var(--uai-subtle)}
-[data-uai-incident-dashboard-pulse]{animation:uai-incident-dashboard-pulse 2s cubic-bezier(0.23,1,0.32,1) infinite}
-@keyframes uai-incident-dashboard-pulse{0%{box-shadow:0 0 0 0 color-mix(in oklab,currentColor 45%,transparent)}70%,100%{box-shadow:0 0 0 5px transparent}}
-@media (prefers-reduced-motion:reduce){[data-uai-incident-dashboard-action]{transition:none}[data-uai-incident-dashboard-action]:active:not(:disabled){transform:none}[data-uai-incident-dashboard-input]{transition:none}[data-uai-incident-dashboard-pulse]{animation:none}}
-`;
-
-function actionStyle(compact: boolean, primary: boolean, disabled?: boolean): CSSProperties {
-  return {
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    height: compact ? 26 : 30,
-    padding: compact ? "0 11px" : "0 13px",
-    border: 0,
-    borderRadius: 999,
-    background: primary ? "var(--uai-accent)" : "var(--uai-surface-raised)",
-    color: primary ? "var(--uai-accent-foreground)" : "var(--uai-text)",
-    fontSize: compact ? 12 : 12.5,
-    fontWeight: 500,
-    lineHeight: "16px",
-    whiteSpace: "nowrap",
-    cursor: disabled ? "not-allowed" : "pointer",
-    opacity: disabled ? 0.5 : 1,
-  };
-}
+const incidentDashboardActionVariants = cva(
+  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap [transition:filter_120ms_ease-out,box-shadow_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
+  {
+    variants: {
+      emphasis: {
+        primary: "bg-primary text-primary-foreground enabled:hover:brightness-108",
+        secondary:
+          "bg-secondary text-secondary-foreground enabled:hover:shadow-[inset_0_0_0_999px_color-mix(in_oklab,var(--foreground)_9%,transparent)]",
+      },
+      compact: {
+        true: "h-[26px] px-[11px] text-[12px]/4",
+        false: "h-7.5 px-[13px] text-[12.5px]/4",
+      },
+    },
+  },
+);
 
 /** Live incident view: status, impact, metrics, timeline, responders, and updates. */
 export function IncidentDashboard({
   variant = "overview",
-  style,
+  className,
   children,
   ...props
 }: IncidentDashboardProps) {
@@ -115,117 +99,106 @@ export function IncidentDashboard({
   return (
     <Context.Provider value={{ id, variant }}>
       <section
+        data-slot="incident-dashboard"
         aria-labelledby={`${id}-title`}
+        className={cn(
+          "grid min-w-0 content-start text-[13px]/[18px] text-foreground",
+          variant === "compact" ? "gap-2.5" : "gap-4",
+          className,
+        )}
         {...props}
         data-variant={variant}
-        style={{
-          display: "grid",
-          alignContent: "start",
-          gap: variant === "compact" ? 10 : 16,
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
       >
-        <style>{dashboardCss}</style>
         {children}
       </section>
     </Context.Provider>
   );
 }
 
-export function IncidentDashboardHeader({ style, ...props }: ComponentProps<"div">) {
+export function IncidentDashboardHeader({ className, ...props }: ComponentProps<"div">) {
   useDashboard("IncidentDashboardHeader");
   return (
     <div
+      data-slot="incident-dashboard-header"
+      className={cn("flex min-w-0 flex-wrap items-end justify-between gap-3", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "flex-end",
-        justifyContent: "space-between",
-        gap: 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function IncidentDashboardHeading({ style, ...props }: ComponentProps<"div">) {
+export function IncidentDashboardHeading({ className, ...props }: ComponentProps<"div">) {
   return (
-    <div {...props} style={{ display: "grid", gap: 4, flex: "1 1 240px", minWidth: 0, ...style }} />
+    <div
+      data-slot="incident-dashboard-heading"
+      className={cn("grid min-w-0 flex-[1_1_240px] gap-1", className)}
+      {...props}
+    />
   );
 }
 
-export function IncidentDashboardTitle({ style, ...props }: ComponentProps<"h2">) {
+export function IncidentDashboardTitle({ className, ...props }: ComponentProps<"h2">) {
   const context = useDashboard("IncidentDashboardTitle");
-  const compact = context.variant === "compact";
   return (
     <h2
+      data-slot="incident-dashboard-title"
+      className={cn(
+        "m-0 font-semibold tracking-[-0.015em] wrap-anywhere",
+        context.variant === "compact" ? "text-[15px]/5" : "text-[18px]/6",
+        className,
+      )}
       {...props}
       id={`${context.id}-title`}
-      style={{
-        margin: 0,
-        fontSize: compact ? 15 : 18,
-        lineHeight: compact ? "20px" : "24px",
-        fontWeight: 600,
-        letterSpacing: "-0.015em",
-        overflowWrap: "anywhere",
-        ...style,
-      }}
     />
   );
 }
 
-export function IncidentDashboardDescription({ style, ...props }: ComponentProps<"p">) {
-  return <p {...props} style={{ margin: 0, color: "var(--uai-muted)", ...style }} />;
+export function IncidentDashboardDescription({ className, ...props }: ComponentProps<"p">) {
+  return (
+    <p
+      data-slot="incident-dashboard-description"
+      className={cn("m-0 text-muted-foreground", className)}
+      {...props}
+    />
+  );
 }
 
 /** Severity label. Color reinforces the text and is never the only signal. */
 export function IncidentDashboardSeverity({
   level = "major",
-  style,
+  className,
   children,
   ...props
 }: ComponentProps<"span"> & { level?: IncidentDashboardSeverityLevel }) {
   return (
     <span
+      data-slot="incident-dashboard-severity"
+      className={cn(
+        "inline-flex h-5 w-fit items-center gap-1.5 rounded-full pr-2 pl-[7px] text-[11.5px]/4 font-medium",
+        severityClasses[level],
+        className,
+      )}
       {...props}
       data-level={level}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        width: "fit-content",
-        height: 20,
-        padding: "0 8px 0 7px",
-        borderRadius: 999,
-        background: `color-mix(in oklab, ${severityColors[level]} 14%, transparent)`,
-        color: severityColors[level],
-        fontSize: 11.5,
-        fontWeight: 500,
-        lineHeight: "16px",
-        ...style,
-      }}
     >
       <span
         aria-hidden="true"
-        data-uai-incident-dashboard-pulse={level === "critical" ? "" : undefined}
-        style={{ width: 6, height: 6, borderRadius: 999, background: "currentColor" }}
+        className={cn(
+          "size-1.5 rounded-full bg-current",
+          level === "critical" &&
+            "animate-[ring-pulse_2s_cubic-bezier(0.23,1,0.32,1)_infinite] motion-reduce:animate-none",
+        )}
       />
       {children}
     </span>
   );
 }
 
-export function IncidentDashboardActions({ style, ...props }: ComponentProps<"div">) {
+export function IncidentDashboardActions({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="incident-dashboard-actions"
+      className={cn("flex flex-wrap items-center gap-1.5", className)}
       {...props}
-      style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6, ...style }}
     />
   );
 }
@@ -233,19 +206,20 @@ export function IncidentDashboardActions({ style, ...props }: ComponentProps<"di
 export function IncidentDashboardAction({
   emphasis = "secondary",
   type = "button",
-  style,
+  className,
   ...props
 }: ComponentProps<"button"> & { emphasis?: "primary" | "secondary" }) {
   const context = useDashboard("IncidentDashboardAction");
   return (
     <button
+      data-slot="incident-dashboard-action"
+      data-emphasis={emphasis}
+      className={cn(
+        incidentDashboardActionVariants({ emphasis, compact: context.variant === "compact" }),
+        className,
+      )}
       {...props}
       type={type}
-      data-uai-incident-dashboard-action={emphasis}
-      style={{
-        ...actionStyle(context.variant === "compact", emphasis === "primary", props.disabled),
-        ...style,
-      }}
     />
   );
 }
@@ -256,19 +230,20 @@ export function IncidentDashboardStatus(props: Omit<StatusBannerProps, "variant"
   return <StatusBanner {...props} variant={bannerVariants[context.variant]} />;
 }
 
-export function IncidentDashboardMetrics({ style, ...props }: ComponentProps<"div">) {
+export function IncidentDashboardMetrics({ className, ...props }: ComponentProps<"div">) {
   const context = useDashboard("IncidentDashboardMetrics");
   const compact = context.variant === "compact";
   return (
     <div
+      data-slot="incident-dashboard-metrics"
+      className={cn(
+        "grid min-w-0",
+        compact
+          ? "grid-cols-[repeat(auto-fit,minmax(min(100%,130px),1fr))] gap-2"
+          : "grid-cols-[repeat(auto-fit,minmax(min(100%,160px),1fr))] gap-3",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, ${compact ? 130 : 160}px), 1fr))`,
-        gap: compact ? 8 : 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
@@ -278,26 +253,24 @@ export function IncidentDashboardMetric(props: Omit<MetricCardProps, "variant">)
   return <MetricCard {...props} variant={metricVariants[context.variant]} />;
 }
 
+const incidentDashboardBodyVariants = cva("min-w-0 items-start", {
+  variants: {
+    variant: {
+      overview: "grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-3",
+      split: "flex flex-wrap gap-3",
+      compact: "grid grid-cols-[minmax(0,1fr)] gap-2",
+    },
+  },
+});
+
 /** Panels in equal columns (Overview), a wide main column (Split), or one column (Compact). */
-export function IncidentDashboardBody({ style, ...props }: ComponentProps<"div">) {
+export function IncidentDashboardBody({ className, ...props }: ComponentProps<"div">) {
   const context = useDashboard("IncidentDashboardBody");
-  const columns = {
-    overview: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))",
-    split: "repeat(auto-fit, minmax(min(100%, 240px), 1fr))",
-    compact: "minmax(0, 1fr)",
-  }[context.variant];
   return (
     <div
+      data-slot="incident-dashboard-body"
+      className={cn(incidentDashboardBodyVariants({ variant: context.variant }), className)}
       {...props}
-      style={{
-        display: context.variant === "split" ? "flex" : "grid",
-        flexWrap: "wrap",
-        gridTemplateColumns: columns,
-        alignItems: "start",
-        gap: context.variant === "compact" ? 8 : 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
@@ -305,7 +278,7 @@ export function IncidentDashboardBody({ style, ...props }: ComponentProps<"div">
 /** A dashboard panel. `span="wide"` takes the larger column in Split. */
 export function IncidentDashboardPanel({
   span = "narrow",
-  style,
+  className,
   ...props
 }: ComponentProps<"section"> & { span?: "wide" | "narrow" }) {
   const context = useDashboard("IncidentDashboardPanel");
@@ -314,35 +287,31 @@ export function IncidentDashboardPanel({
   return (
     <PanelContext.Provider value={labelId}>
       <section
+        data-slot="incident-dashboard-panel"
+        data-span={span}
         aria-labelledby={labelId}
+        className={cn(
+          "grid min-w-0 content-start border bg-card shadow-[0_1px_2px_oklch(0_0_0/0.04)]",
+          span === "wide" ? "flex-[999_1_360px]" : "flex-[1_1_240px]",
+          compact ? "gap-2 rounded-xl p-3" : "gap-3 rounded-[14px] p-4",
+          className,
+        )}
         {...props}
-        style={{
-          display: "grid",
-          alignContent: "start",
-          gap: compact ? 8 : 12,
-          flex: span === "wide" ? "999 1 360px" : "1 1 240px",
-          minWidth: 0,
-          padding: compact ? 12 : 16,
-          border: "1px solid var(--uai-border)",
-          borderRadius: compact ? 12 : 14,
-          background: "var(--uai-surface)",
-          boxShadow: "0 1px 2px oklch(0 0 0 / 0.04)",
-          ...style,
-        }}
       />
     </PanelContext.Provider>
   );
 }
 
-export function IncidentDashboardPanelTitle({ style, ...props }: ComponentProps<"h3">) {
+export function IncidentDashboardPanelTitle({ className, ...props }: ComponentProps<"h3">) {
   const labelId = useContext(PanelContext);
   if (!labelId)
     throw new Error("IncidentDashboardPanelTitle must be used within IncidentDashboardPanel");
   return (
     <h3
+      data-slot="incident-dashboard-panel-title"
+      className={cn("m-0 text-[13px]/[18px] font-medium", className)}
       {...props}
       id={labelId}
-      style={{ margin: 0, fontSize: 13, lineHeight: "18px", fontWeight: 500, ...style }}
     />
   );
 }
@@ -361,117 +330,103 @@ export function IncidentDashboardTimeline(
   return <ActivityTimeline {...props} variant={timelineVariants[context.variant]} />;
 }
 
-export function IncidentDashboardResponders({ style, ...props }: ComponentProps<"ul">) {
+export function IncidentDashboardResponders({ className, ...props }: ComponentProps<"ul">) {
   const context = useDashboard("IncidentDashboardResponders");
   return (
     <ul
+      data-slot="incident-dashboard-responders"
+      className={cn(
+        "m-0 grid min-w-0 list-none p-0",
+        context.variant === "compact" ? "gap-1.5" : "gap-2.5",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gap: context.variant === "compact" ? 6 : 10,
-        margin: 0,
-        padding: 0,
-        listStyle: "none",
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function IncidentDashboardResponder({ style, ...props }: ComponentProps<"li">) {
+export function IncidentDashboardResponder({ className, ...props }: ComponentProps<"li">) {
   return (
     <li
+      data-slot="incident-dashboard-responder"
+      className={cn(
+        "grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-x-2.5",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gridTemplateColumns: "auto minmax(0, 1fr)",
-        alignItems: "center",
-        columnGap: 10,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
 /** Initials avatar. Decorative because the name is always present as text. */
-export function IncidentDashboardResponderAvatar({ style, ...props }: ComponentProps<"span">) {
+export function IncidentDashboardResponderAvatar({ className, ...props }: ComponentProps<"span">) {
   const context = useDashboard("IncidentDashboardResponderAvatar");
-  const size = context.variant === "compact" ? 24 : 28;
+  const compact = context.variant === "compact";
   return (
     <span
+      data-slot="incident-dashboard-responder-avatar"
       aria-hidden="true"
+      className={cn(
+        "row-span-2 grid place-items-center rounded-full bg-muted font-medium tracking-[0.01em] text-muted-foreground shadow-[0_0_0_1px_oklch(1_0_0/0.08)]",
+        compact ? "size-6 text-[10px]" : "size-7 text-[10.5px]",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        placeItems: "center",
-        gridRow: "span 2",
-        width: size,
-        height: size,
-        borderRadius: 999,
-        background: "var(--uai-surface-raised)",
-        boxShadow: "0 0 0 1px oklch(1 0 0 / 0.08)",
-        color: "var(--uai-muted)",
-        fontSize: context.variant === "compact" ? 10 : 10.5,
-        fontWeight: 500,
-        letterSpacing: "0.01em",
-        ...style,
-      }}
     />
   );
 }
 
-export function IncidentDashboardResponderName({ style, ...props }: ComponentProps<"span">) {
-  return <span {...props} style={{ fontWeight: 500, overflowWrap: "anywhere", ...style }} />;
-}
-
-export function IncidentDashboardResponderRole({ style, ...props }: ComponentProps<"span">) {
+export function IncidentDashboardResponderName({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
+      data-slot="incident-dashboard-responder-name"
+      className={cn("font-medium wrap-anywhere", className)}
       {...props}
-      style={{ color: "var(--uai-subtle)", fontSize: 12, lineHeight: "16px", ...style }}
+    />
+  );
+}
+
+export function IncidentDashboardResponderRole({ className, ...props }: ComponentProps<"span">) {
+  return (
+    <span
+      data-slot="incident-dashboard-responder-role"
+      className={cn("text-[12px]/4 text-subtle-foreground", className)}
+      {...props}
     />
   );
 }
 
 /** Post an update. Publishing stays with the consumer through `onSubmit`. */
-export function IncidentDashboardUpdate({ style, ...props }: ComponentProps<"form">) {
+export function IncidentDashboardUpdate({ className, ...props }: ComponentProps<"form">) {
   const context = useDashboard("IncidentDashboardUpdate");
   const id = useId();
   return (
     <UpdateContext.Provider value={id}>
       <form
+        data-slot="incident-dashboard-update"
+        className={cn(
+          "m-0 grid min-w-0",
+          context.variant === "compact" ? "gap-1.5" : "gap-2",
+          className,
+        )}
         {...props}
-        style={{
-          display: "grid",
-          gap: context.variant === "compact" ? 6 : 8,
-          minWidth: 0,
-          margin: 0,
-          ...style,
-        }}
       />
     </UpdateContext.Provider>
   );
 }
 
 export function IncidentDashboardUpdateLabel({
-  style,
+  className,
   children,
   ...props
 }: ComponentProps<"label">) {
   const id = useUpdate("IncidentDashboardUpdateLabel");
   return (
     <label
+      data-slot="incident-dashboard-update-label"
+      className={cn("text-[11.5px]/4 font-medium text-subtle-foreground", className)}
       {...props}
       htmlFor={id}
-      style={{
-        color: "var(--uai-subtle)",
-        fontSize: 11.5,
-        fontWeight: 500,
-        lineHeight: "16px",
-        ...style,
-      }}
     >
       {children}
     </label>
@@ -479,52 +434,44 @@ export function IncidentDashboardUpdateLabel({
 }
 
 export function IncidentDashboardUpdateInput({
-  style,
+  className,
   ...props
 }: Omit<ComponentProps<"textarea">, "id">) {
   const id = useUpdate("IncidentDashboardUpdateInput");
   return (
     <textarea
+      data-slot="incident-dashboard-update-input"
       rows={3}
+      className={cn(
+        "box-border w-full min-w-0 resize-y rounded-[10px] border-0 bg-background px-[11px] py-[9px] text-[13px]/[18px] text-inherit transition-[box-shadow] duration-120 ease-out placeholder:text-subtle-foreground focus:shadow-[0_0_0_1px_var(--border-strong),0_0_0_4px_color-mix(in_oklab,var(--primary)_22%,transparent)] focus:outline-none motion-reduce:transition-none",
+        className,
+      )}
       {...props}
       id={id}
-      data-uai-incident-dashboard-input=""
-      style={{
-        width: "100%",
-        minWidth: 0,
-        boxSizing: "border-box",
-        padding: "9px 11px",
-        border: 0,
-        borderRadius: 10,
-        background: "var(--uai-canvas)",
-        color: "inherit",
-        font: "inherit",
-        fontSize: 13,
-        lineHeight: "18px",
-        resize: "vertical",
-        ...style,
-      }}
     />
   );
 }
 
 export function IncidentDashboardUpdateSubmit({
   children = "Post update",
-  style,
+  className,
   ...props
 }: Omit<ComponentProps<"button">, "type">) {
   useUpdate("IncidentDashboardUpdateSubmit");
   const context = useDashboard("IncidentDashboardUpdateSubmit");
   return (
     <button
+      data-slot="incident-dashboard-update-submit"
+      className={cn(
+        incidentDashboardActionVariants({
+          emphasis: "primary",
+          compact: context.variant === "compact",
+        }),
+        "justify-self-end",
+        className,
+      )}
       {...props}
       type="submit"
-      data-uai-incident-dashboard-action="primary"
-      style={{
-        ...actionStyle(context.variant === "compact", true, props.disabled),
-        justifySelf: "end",
-        ...style,
-      }}
     >
       {children}
     </button>

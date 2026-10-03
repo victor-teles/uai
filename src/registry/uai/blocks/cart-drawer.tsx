@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { ShoppingBag, X } from "lucide-react";
 import {
   type ComponentProps,
@@ -24,6 +25,7 @@ import {
   type PriceSummaryVariant,
 } from "@/components/ui/uai/price-summary";
 import { QuantityPicker, type QuantityPickerProps } from "@/components/ui/uai/quantity-picker";
+import { cn } from "@/lib/uai-utils";
 
 export const CART_DRAWER_VARIANTS = ["side", "sheet", "compact"] as const;
 export type CartDrawerVariant = (typeof CART_DRAWER_VARIANTS)[number];
@@ -50,21 +52,10 @@ function useDrawer(part: string) {
   return context;
 }
 
-const drawerCss = `
-.uai-cart-drawer{position:fixed;max-height:none;overflow:hidden}
-.uai-cart-drawer::backdrop{background:color-mix(in oklab,var(--uai-canvas) 55%,transparent);backdrop-filter:blur(2px)}
-.uai-cart-drawer[data-variant=side][open],.uai-cart-drawer[data-variant=compact][open]{animation:uai-cart-drawer-side 220ms cubic-bezier(0.23,1,0.32,1)}
-.uai-cart-drawer[data-variant=sheet][open]{animation:uai-cart-drawer-sheet 220ms cubic-bezier(0.23,1,0.32,1)}
-@keyframes uai-cart-drawer-side{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
-@keyframes uai-cart-drawer-sheet{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
-.uai-cart-drawer-button{transition:background-color 120ms ease-out,color 120ms ease-out,filter 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-cart-drawer-button:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-.uai-cart-drawer-button:active{transform:scale(0.97)}
-.uai-cart-drawer-button[data-kind=primary]:hover{filter:brightness(1.08)}
-.uai-cart-drawer-button[data-kind=secondary]:hover{background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text))}
-.uai-cart-drawer-button[data-kind=ghost]:hover{background:var(--uai-surface-raised);color:var(--uai-text)}
-@media (prefers-reduced-motion: reduce){.uai-cart-drawer[open]{animation:none}.uai-cart-drawer-button{transition:none}.uai-cart-drawer-button:active{transform:none}}
-`;
+const buttonBase =
+  "[transition:background-color_120ms_ease-out,color_120ms_ease-out,filter_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100";
+const secondaryButton =
+  "cursor-pointer rounded-full border-0 bg-secondary text-[13px] font-medium text-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]";
 
 const itemVariants: Record<CartDrawerVariant, CartItemVariant> = {
   side: "plain",
@@ -102,7 +93,7 @@ export function CartDrawer({
   };
   return (
     <Context.Provider value={{ id, variant, open: current, setOpen, triggerRef, closeRef }}>
-      <div data-variant={variant} style={{ display: "contents" }}>
+      <div data-slot="cart-drawer" data-variant={variant} className="contents">
         {children}
       </div>
     </Context.Provider>
@@ -119,7 +110,7 @@ export function CartDrawerTrigger({
   count,
   children = "Cart",
   onClick,
-  style,
+  className,
   ...props
 }: CartDrawerTriggerProps) {
   const context = useDrawer("CartDrawerTrigger");
@@ -129,55 +120,51 @@ export function CartDrawerTrigger({
       aria-haspopup="dialog"
       aria-expanded={context.open}
       aria-controls={`${context.id}-drawer`}
+      data-slot="cart-drawer-trigger"
+      className={cn(
+        buttonBase,
+        secondaryButton,
+        "inline-flex h-8 items-center gap-2 pr-1.5 pl-3",
+        className,
+      )}
       {...props}
       ref={context.triggerRef}
-      className={joinClass("uai-cart-drawer-button", props.className)}
-      data-kind="secondary"
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) context.setOpen(true);
       }}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 8,
-        height: 32,
-        padding: "0 6px 0 12px",
-        border: 0,
-        borderRadius: 999,
-        background: "var(--uai-surface-raised)",
-        color: "var(--uai-text)",
-        fontSize: 13,
-        fontWeight: 500,
-        cursor: "pointer",
-        ...style,
-      }}
     >
-      <ShoppingBag size={14} strokeWidth={1.75} aria-hidden="true" color="var(--uai-muted)" />
+      <ShoppingBag
+        size={14}
+        strokeWidth={1.75}
+        aria-hidden="true"
+        className="text-muted-foreground"
+      />
       {children}
       {count === undefined ? null : (
-        <span
-          style={{
-            display: "inline-grid",
-            placeItems: "center",
-            minWidth: 20,
-            height: 20,
-            padding: "0 6px",
-            borderRadius: 999,
-            background: "var(--uai-accent)",
-            color: "var(--uai-accent-foreground)",
-            fontSize: 11.5,
-            fontWeight: 500,
-            fontVariantNumeric: "tabular-nums",
-          }}
-        >
+        <span className="inline-grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1.5 text-[11.5px] font-medium text-primary-foreground tabular-nums">
           {count}
-          <span style={visuallyHidden}>{count === 1 ? " item" : " items"}</span>
+          <span className="sr-only">{count === 1 ? " item" : " items"}</span>
         </span>
       )}
     </button>
   );
 }
+
+const cartDrawerContentVariants = cva(
+  "fixed box-border max-w-full overflow-hidden border-0 bg-popover p-0 text-[13px]/[18px] text-popover-foreground duration-220 ease-out-quint fade-in-0 backdrop:bg-background/55 backdrop:backdrop-blur-[2px] open:animate-in motion-reduce:open:animate-none",
+  {
+    variants: {
+      variant: {
+        side: "m-0 ml-auto h-full max-h-dvh w-[min(100%,420px)] rounded-none shadow-[0_0_0_1px_var(--border),-12px_0_32px_-16px_oklch(0_0_0/0.24)] slide-in-from-right-6",
+        sheet:
+          "mx-auto mt-auto mb-0 h-auto max-h-[min(88dvh,720px)] w-[min(100%,640px)] rounded-t-3xl rounded-b-none shadow-[0_0_0_1px_var(--border),0_-12px_32px_-16px_oklch(0_0_0/0.24)] slide-in-from-bottom-6",
+        compact:
+          "m-0 ml-auto h-full max-h-dvh w-[min(100%,360px)] rounded-none shadow-[0_0_0_1px_var(--border),-12px_0_32px_-16px_oklch(0_0_0/0.24)] slide-in-from-right-6",
+      },
+    },
+  },
+);
 
 /**
  * The drawer: a native modal dialog. Focus moves to the close button (or an element marked
@@ -185,7 +172,6 @@ export function CartDrawerTrigger({
  */
 export function CartDrawerContent({
   children,
-  style,
   className,
   onClick,
   onKeyDown,
@@ -212,16 +198,15 @@ export function CartDrawerContent({
       (returnRef.current ?? triggerRef.current)?.focus();
     }
   }, [open, closeRef, triggerRef]);
-  const sheet = variant === "sheet";
-  const compact = variant === "compact";
   return (
     <dialog
       aria-labelledby={`${context.id}-title`}
+      data-slot="cart-drawer-content"
+      className={cn(cartDrawerContentVariants({ variant }), className)}
       {...props}
       id={`${context.id}-drawer`}
       ref={ref}
       data-variant={variant}
-      className={["uai-cart-drawer", className].filter(Boolean).join(" ")}
       onCancel={(event) => {
         event.preventDefault();
         context.setOpen(false);
@@ -239,82 +224,37 @@ export function CartDrawerContent({
           context.setOpen(false);
         }
       }}
-      style={{
-        boxSizing: "border-box",
-        width: sheet ? "min(100%, 640px)" : compact ? "min(100%, 360px)" : "min(100%, 420px)",
-        maxWidth: "100%",
-        height: sheet ? "auto" : "100%",
-        maxHeight: sheet ? "min(88dvh, 720px)" : "100dvh",
-        margin: sheet ? "auto auto 0" : "0 0 0 auto",
-        padding: 0,
-        border: 0,
-        borderRadius: sheet ? "24px 24px 0 0" : 0,
-        background: "var(--uai-surface)",
-        color: "var(--uai-text)",
-        boxShadow: sheet
-          ? "0 0 0 1px var(--uai-border), 0 -12px 32px -16px oklch(0 0 0 / 0.24)"
-          : "0 0 0 1px var(--uai-border), -12px 0 32px -16px oklch(0 0 0 / 0.24)",
-        fontSize: 13,
-        lineHeight: "18px",
-        ...style,
-      }}
     >
-      <style>{drawerCss}</style>
-      {open ? (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            height: "100%",
-            maxHeight: "inherit",
-            minHeight: 0,
-          }}
-        >
-          {children}
-        </div>
-      ) : null}
+      {open ? <div className="flex h-full max-h-[inherit] min-h-0 flex-col">{children}</div> : null}
     </dialog>
   );
 }
 
-function padding(variant: CartDrawerVariant) {
-  return variant === "compact" ? 14 : 20;
-}
-
-export function CartDrawerHeader({ children, style, ...props }: ComponentProps<"header">) {
+export function CartDrawerHeader({ children, className, ...props }: ComponentProps<"header">) {
   const context = useDrawer("CartDrawerHeader");
   return (
     <header
+      data-slot="cart-drawer-header"
+      className={cn(
+        "flex flex-none items-center justify-between gap-3",
+        context.variant === "compact" ? "py-2.5 pr-1.5 pl-3.5" : "py-4 pr-3 pl-5",
+        className,
+      )}
       {...props}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 12,
-        flex: "none",
-        padding: `${padding(context.variant) - 4}px ${padding(context.variant) - 8}px ${padding(context.variant) - 4}px ${padding(context.variant)}px`,
-        ...style,
-      }}
     >
       {children}
     </header>
   );
 }
 
-export function CartDrawerTitle({ style, ...props }: ComponentProps<"h2">) {
+export function CartDrawerTitle({ className, ...props }: ComponentProps<"h2">) {
   const context = useDrawer("CartDrawerTitle");
   return (
     <h2
+      data-slot="cart-drawer-title"
+      className={cn("m-0 text-[15px]/5 font-semibold tracking-[-0.01em]", className)}
       {...props}
       id={`${context.id}-title`}
-      style={{
-        margin: 0,
-        fontSize: 15,
-        fontWeight: 600,
-        lineHeight: "20px",
-        letterSpacing: "-0.01em",
-        ...style,
-      }}
     />
   );
 }
@@ -323,7 +263,7 @@ export function CartDrawerTitle({ style, ...props }: ComponentProps<"h2">) {
 export function CartDrawerClose({
   "aria-label": ariaLabel = "Close cart",
   onClick,
-  style,
+  className,
   ...props
 }: ComponentProps<"button">) {
   const context = useDrawer("CartDrawerClose");
@@ -331,26 +271,17 @@ export function CartDrawerClose({
     <button
       type="button"
       aria-label={ariaLabel}
+      data-slot="cart-drawer-close"
+      className={cn(
+        buttonBase,
+        "grid size-7 flex-none cursor-pointer place-items-center rounded-lg border-0 bg-transparent text-muted-foreground hover:bg-accent hover:text-foreground",
+        className,
+      )}
       {...props}
       ref={context.closeRef}
-      className={joinClass("uai-cart-drawer-button", props.className)}
-      data-kind="ghost"
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) context.setOpen(false);
-      }}
-      style={{
-        display: "grid",
-        placeItems: "center",
-        width: 28,
-        height: 28,
-        flex: "none",
-        border: 0,
-        borderRadius: 8,
-        background: "transparent",
-        color: "var(--uai-muted)",
-        cursor: "pointer",
-        ...style,
       }}
     >
       <X size={16} strokeWidth={1.75} aria-hidden="true" />
@@ -359,54 +290,47 @@ export function CartDrawerClose({
 }
 
 /** Scrollable region that holds the cart lines and the empty state. */
-export function CartDrawerBody({ style, ...props }: ComponentProps<"div">) {
+export function CartDrawerBody({ className, ...props }: ComponentProps<"div">) {
   const context = useDrawer("CartDrawerBody");
   return (
     <div
+      data-slot="cart-drawer-body"
+      className={cn(
+        "grid min-h-0 flex-[1_1_auto] content-start gap-4 overflow-y-auto overscroll-contain",
+        context.variant === "compact" ? "p-3.5" : "p-5",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        alignContent: "start",
-        gap: 16,
-        flex: "1 1 auto",
-        minHeight: 0,
-        padding: padding(context.variant),
-        overflowY: "auto",
-        overscrollBehavior: "contain",
-        ...style,
-      }}
     />
   );
 }
 
 export function CartDrawerItems({
   "aria-label": ariaLabel = "Items in your cart",
-  style,
+  className,
   ...props
 }: ComponentProps<"ul">) {
   const context = useDrawer("CartDrawerItems");
   return (
     <ul
       aria-label={ariaLabel}
+      data-slot="cart-drawer-items"
+      className={cn(
+        "m-0 grid list-none p-0",
+        context.variant === "compact" ? "gap-2" : "gap-4.5",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gap: context.variant === "compact" ? 8 : 18,
-        margin: 0,
-        padding: 0,
-        listStyle: "none",
-        ...style,
-      }}
     />
   );
 }
 
 /** One cart line. Compose CartItem parts inside; the block picks the cart item style. */
-export function CartDrawerItem({ style, ...props }: Omit<CartItemProps, "variant">) {
+export function CartDrawerItem(props: Omit<CartItemProps, "variant">) {
   const context = useDrawer("CartDrawerItem");
   return (
-    <li style={{ minWidth: 0 }}>
-      <CartItem {...props} variant={itemVariants[context.variant]} style={style} />
+    <li data-slot="cart-drawer-item" className="min-w-0">
+      <CartItem {...props} variant={itemVariants[context.variant]} />
     </li>
   );
 }
@@ -418,21 +342,20 @@ export function CartDrawerQuantity(props: Omit<QuantityPickerProps, "variant">) 
 }
 
 /** Pinned footer with the discount field, totals, and checkout actions. */
-export function CartDrawerFooter({ style, ...props }: ComponentProps<"footer">) {
+export function CartDrawerFooter({ className, ...props }: ComponentProps<"footer">) {
   const context = useDrawer("CartDrawerFooter");
+  const compact = context.variant === "compact";
   return (
     <footer
+      data-slot="cart-drawer-footer"
+      className={cn(
+        "grid flex-none border-t bg-[color-mix(in_oklab,var(--background)_35%,var(--card))]",
+        compact
+          ? "gap-2.5 p-3.5 pb-[max(14px,env(safe-area-inset-bottom))]"
+          : "gap-3.5 p-5 pb-[max(20px,env(safe-area-inset-bottom))]",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gap: context.variant === "compact" ? 10 : 14,
-        flex: "none",
-        padding: padding(context.variant),
-        paddingBottom: `max(${padding(context.variant)}px, env(safe-area-inset-bottom))`,
-        borderTop: "1px solid var(--uai-border)",
-        background: "color-mix(in oklab, var(--uai-canvas) 35%, var(--uai-surface))",
-        ...style,
-      }}
     />
   );
 }
@@ -449,32 +372,23 @@ export function CartDrawerSummary(props: Omit<PriceSummaryProps, "variant">) {
   return <PriceSummary {...props} variant={summaryVariants[context.variant]} />;
 }
 
-export function CartDrawerActions({ style, ...props }: ComponentProps<"div">) {
-  return <div {...props} style={{ display: "grid", gap: 8, ...style }} />;
+export function CartDrawerActions({ className, ...props }: ComponentProps<"div">) {
+  return <div data-slot="cart-drawer-actions" className={cn("grid gap-2", className)} {...props} />;
 }
 
 /** The primary checkout link, filled with the accent color. */
-export function CartDrawerCheckout({ style, className, ...props }: ComponentProps<"a">) {
+export function CartDrawerCheckout({ className, ...props }: ComponentProps<"a">) {
   const context = useDrawer("CartDrawerCheckout");
   return (
     <a
+      data-slot="cart-drawer-checkout"
+      className={cn(
+        buttonBase,
+        "inline-flex items-center justify-center rounded-full bg-primary px-4 text-[13px] font-medium text-primary-foreground no-underline hover:brightness-108",
+        context.variant === "compact" ? "h-8" : "h-10",
+        className,
+      )}
       {...props}
-      className={joinClass("uai-cart-drawer-button", className)}
-      data-kind="primary"
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        height: context.variant === "compact" ? 32 : 40,
-        padding: "0 16px",
-        borderRadius: 999,
-        background: "var(--uai-accent)",
-        color: "var(--uai-accent-foreground)",
-        fontSize: 13,
-        fontWeight: 500,
-        textDecoration: "none",
-        ...style,
-      }}
     />
   );
 }
@@ -483,50 +397,28 @@ export function CartDrawerCheckout({ style, className, ...props }: ComponentProp
 export function CartDrawerContinue({
   children = "Continue shopping",
   onClick,
-  style,
+  className,
   ...props
 }: ComponentProps<"button">) {
   const context = useDrawer("CartDrawerContinue");
   return (
     <button
       type="button"
+      data-slot="cart-drawer-continue"
+      className={cn(
+        buttonBase,
+        secondaryButton,
+        "px-4",
+        context.variant === "compact" ? "h-8" : "h-10",
+        className,
+      )}
       {...props}
-      className={joinClass("uai-cart-drawer-button", props.className)}
-      data-kind="secondary"
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) context.setOpen(false);
-      }}
-      style={{
-        height: context.variant === "compact" ? 32 : 40,
-        padding: "0 16px",
-        border: 0,
-        borderRadius: 999,
-        background: "var(--uai-surface-raised)",
-        color: "var(--uai-text)",
-        fontSize: 13,
-        fontWeight: 500,
-        cursor: "pointer",
-        ...style,
       }}
     >
       {children}
     </button>
   );
-}
-
-const visuallyHidden = {
-  position: "absolute",
-  width: 1,
-  height: 1,
-  margin: -1,
-  padding: 0,
-  overflow: "hidden",
-  clip: "rect(0 0 0 0)",
-  whiteSpace: "nowrap",
-  border: 0,
-} as const;
-
-function joinClass(base: string, extra?: string) {
-  return extra ? `${base} ${extra}` : base;
 }

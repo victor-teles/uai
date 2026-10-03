@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { ChevronDown } from "lucide-react";
 import {
   type ComponentProps,
@@ -19,6 +20,7 @@ import {
   type OrderStatusProps,
   type OrderStatusVariant,
 } from "@/components/ui/uai/order-status";
+import { cn } from "@/lib/uai-utils";
 
 export const ORDER_TRACKING_VARIANTS = ["split", "stacked", "compact"] as const;
 export type OrderTrackingVariant = (typeof ORDER_TRACKING_VARIANTS)[number];
@@ -32,34 +34,6 @@ function useTracking(part: string) {
   return context;
 }
 
-const layoutCss = `
-[data-uai-tracking-layout]{display:grid;gap:20px;align-items:start;min-width:0}
-[data-uai-tracking="compact"]>[data-uai-tracking-layout]{gap:12px}
-[data-uai-tracking-column]{display:grid;gap:20px;align-content:start;min-width:0}
-[data-uai-tracking="compact"] [data-uai-tracking-column]{gap:12px}
-@container (min-width: 720px){
-  [data-uai-tracking="split"]>[data-uai-tracking-layout]{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);column-gap:28px}
-  [data-uai-tracking="split"] [data-uai-tracking-full]{grid-column:1 / -1}
-}
-.uai-tracking-disclosure-icon{transition:transform 180ms cubic-bezier(0.23,1,0.32,1)}
-[aria-expanded=true]>.uai-tracking-disclosure-icon{transform:rotate(180deg)}
-[data-uai-tracking-event]{position:relative}
-[data-uai-tracking-event]:not(:last-child)::before{content:"";position:absolute;left:6px;top:17px;bottom:1px;width:1px;background:var(--uai-border)}
-[data-uai-tracking-earlier]>li{animation:uai-tracking-fade-up 240ms cubic-bezier(0.23,1,0.32,1) both}
-[data-uai-tracking-earlier]>li:nth-child(2){animation-delay:40ms}
-[data-uai-tracking-earlier]>li:nth-child(3){animation-delay:80ms}
-[data-uai-tracking-earlier]>li:nth-child(4){animation-delay:120ms}
-[data-uai-tracking-earlier]>li:nth-child(n+5){animation-delay:160ms}
-@keyframes uai-tracking-fade-up{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-.uai-tracking-button{transition:background-color 120ms ease-out,filter 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-tracking-button:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-.uai-tracking-button:active{transform:scale(0.97)}
-.uai-tracking-button[data-kind=primary]:hover{filter:brightness(1.08)}
-.uai-tracking-button[data-kind=secondary]:hover{background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text))}
-.uai-tracking-button[data-kind=ghost]:hover{background:var(--uai-surface-raised);color:var(--uai-text)}
-@media (prefers-reduced-motion: reduce){.uai-tracking-disclosure-icon,.uai-tracking-button{transition:none}[data-uai-tracking-earlier]>li{animation:none}.uai-tracking-button:active{transform:none}}
-`;
-
 const statusVariants: Record<OrderTrackingVariant, OrderStatusVariant> = {
   split: "card",
   stacked: "card",
@@ -71,24 +45,27 @@ const detailsVariants: Record<OrderTrackingVariant, DescriptionListVariant> = {
   compact: "inline",
 };
 
-function card(variant: OrderTrackingVariant) {
-  const compact = variant === "compact";
-  return {
-    boxSizing: "border-box",
-    display: "grid",
-    gap: compact ? 10 : 14,
-    minWidth: 0,
-    padding: compact ? 12 : 16,
-    borderRadius: compact ? 12 : 14,
-    background: "var(--uai-surface)",
-  } as const;
-}
+const actionButton =
+  "transition-[background-color,filter,transform] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100";
+
+const orderTrackingVariants = cva(
+  "@container box-border min-w-0 text-[13px]/[18px] text-foreground",
+  {
+    variants: {
+      variant: {
+        split: "",
+        stacked: "mx-auto my-0 max-w-[640px]",
+        compact: "mx-auto my-0 max-w-[480px]",
+      },
+    },
+  },
+);
 
 /** Order status, shipment events, delivery estimates, and support for one order. */
 export function OrderTracking({
   variant = "split",
   children,
-  style,
+  className,
   ...props
 }: OrderTrackingProps) {
   const id = useId();
@@ -96,74 +73,73 @@ export function OrderTracking({
     <Context.Provider value={{ id, variant }}>
       <section
         aria-labelledby={`${id}-title`}
-        {...props}
+        data-slot="order-tracking"
         data-variant={variant}
-        data-uai-tracking={variant}
-        style={{
-          boxSizing: "border-box",
-          containerType: "inline-size",
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...(variant === "stacked" ? { maxWidth: 640, margin: "0 auto" } : null),
-          ...(variant === "compact" ? { maxWidth: 480, margin: "0 auto" } : null),
-          ...style,
-        }}
+        className={cn(orderTrackingVariants({ variant }), className)}
+        {...props}
       >
-        <style>{layoutCss}</style>
-        <div data-uai-tracking-layout="">{children}</div>
+        <div
+          className={cn(
+            "grid min-w-0 items-start",
+            variant === "compact" ? "gap-3" : "gap-5",
+            variant === "split" &&
+              "@min-[720px]:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] @min-[720px]:gap-x-7",
+          )}
+        >
+          {children}
+        </div>
       </section>
     </Context.Provider>
   );
 }
 
-export function OrderTrackingHeader({ style, ...props }: ComponentProps<"header">) {
-  useTracking("OrderTrackingHeader");
+export function OrderTrackingHeader({ className, ...props }: ComponentProps<"header">) {
+  const { variant } = useTracking("OrderTrackingHeader");
   return (
     <header
+      data-slot="order-tracking-header"
+      className={cn(
+        "flex min-w-0 flex-wrap items-end justify-between gap-3",
+        variant === "split" && "@min-[720px]:col-span-full",
+        className,
+      )}
       {...props}
-      data-uai-tracking-full=""
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "flex-end",
-        justifyContent: "space-between",
-        gap: 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function OrderTrackingHeading({ style, ...props }: ComponentProps<"div">) {
-  return <div {...props} style={{ display: "grid", gap: 4, minWidth: 0, ...style }} />;
+export function OrderTrackingHeading({ className, ...props }: ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="order-tracking-heading"
+      className={cn("grid min-w-0 gap-1", className)}
+      {...props}
+    />
+  );
 }
 
-export function OrderTrackingTitle({ style, ...props }: ComponentProps<"h2">) {
+export function OrderTrackingTitle({ className, ...props }: ComponentProps<"h2">) {
   const { id, variant } = useTracking("OrderTrackingTitle");
   return (
     <h2
+      data-slot="order-tracking-title"
+      className={cn(
+        "m-0 font-semibold tracking-[-0.015em]",
+        variant === "compact" ? "text-[18px]/[1.2]" : "text-[22px]/[1.2]",
+        className,
+      )}
       {...props}
       id={`${id}-title`}
-      style={{
-        margin: 0,
-        fontSize: variant === "compact" ? 18 : 22,
-        fontWeight: 600,
-        lineHeight: 1.2,
-        letterSpacing: "-0.015em",
-        ...style,
-      }}
     />
   );
 }
 
-export function OrderTrackingDescription({ style, ...props }: ComponentProps<"p">) {
+export function OrderTrackingDescription({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="order-tracking-description"
+      className={cn("m-0 text-muted-foreground tabular-nums", className)}
       {...props}
-      style={{ margin: 0, color: "var(--uai-muted)", fontVariantNumeric: "tabular-nums", ...style }}
     />
   );
 }
@@ -177,39 +153,27 @@ export type OrderTrackingEstimateProps = ComponentProps<"div"> & {
 export function OrderTrackingEstimate({
   label = "Estimated delivery",
   children,
-  style,
+  className,
   ...props
 }: OrderTrackingEstimateProps) {
   const { variant } = useTracking("OrderTrackingEstimate");
+  const compact = variant === "compact";
   return (
     <div
+      data-slot="order-tracking-estimate"
+      className={cn(
+        "grid gap-0.5 bg-card",
+        compact ? "rounded-xl px-3 py-2" : "rounded-[14px] px-3.5 py-2.5",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gap: 2,
-        padding: variant === "compact" ? "8px 12px" : "10px 14px",
-        borderRadius: variant === "compact" ? 12 : 14,
-        background: "var(--uai-surface)",
-        ...style,
-      }}
     >
+      <span className="text-[11.5px]/4 font-medium text-subtle-foreground">{label}</span>
       <span
-        style={{
-          color: "var(--uai-subtle)",
-          fontSize: 11.5,
-          fontWeight: 500,
-          lineHeight: "16px",
-        }}
-      >
-        {label}
-      </span>
-      <span
-        style={{
-          fontSize: variant === "compact" ? 15 : 18,
-          fontWeight: 600,
-          lineHeight: 1.2,
-          fontVariantNumeric: "tabular-nums",
-        }}
+        className={cn(
+          "font-semibold tabular-nums",
+          compact ? "text-[15px]/[1.2]" : "text-[18px]/[1.2]",
+        )}
       >
         {children}
       </span>
@@ -218,26 +182,52 @@ export function OrderTrackingEstimate({
 }
 
 /** A column in the split layout; stacks with the other column on narrow containers. */
-export function OrderTrackingColumn({ style, ...props }: ComponentProps<"div">) {
-  useTracking("OrderTrackingColumn");
-  return <div {...props} data-uai-tracking-column="" style={style} />;
+export function OrderTrackingColumn({ className, ...props }: ComponentProps<"div">) {
+  const { variant } = useTracking("OrderTrackingColumn");
+  return (
+    <div
+      data-slot="order-tracking-column"
+      className={cn(
+        "grid min-w-0 content-start",
+        variant === "compact" ? "gap-3" : "gap-5",
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 
 /** Fulfillment progress. Compose OrderStatus parts inside; the block picks the status style. */
 export function OrderTrackingStatus(props: Omit<OrderStatusProps, "variant">) {
   const { variant } = useTracking("OrderTrackingStatus");
-  return <OrderStatus {...props} variant={statusVariants[variant]} />;
+  return (
+    <OrderStatus data-slot="order-tracking-status" {...props} variant={statusVariants[variant]} />
+  );
 }
 
 export type OrderTrackingPanelProps = ComponentProps<"section"> & { title: ReactNode };
 
 /** A titled card, used for shipment events, items, details, and support. */
-export function OrderTrackingPanel({ title, children, style, ...props }: OrderTrackingPanelProps) {
+export function OrderTrackingPanel({
+  title,
+  children,
+  className,
+  ...props
+}: OrderTrackingPanelProps) {
   const { variant } = useTracking("OrderTrackingPanel");
   const id = useId();
   return (
-    <section aria-labelledby={id} {...props} style={{ ...card(variant), ...style }}>
-      <h3 id={id} style={{ margin: 0, fontSize: 14, fontWeight: 500, lineHeight: "20px" }}>
+    <section
+      aria-labelledby={id}
+      data-slot="order-tracking-panel"
+      className={cn(
+        "box-border grid min-w-0 bg-card",
+        variant === "compact" ? "gap-2.5 rounded-xl p-3" : "gap-3.5 rounded-[14px] p-4",
+        className,
+      )}
+      {...props}
+    >
+      <h3 id={id} className="m-0 text-[14px]/5 font-medium">
         {title}
       </h3>
       {children}
@@ -246,12 +236,13 @@ export function OrderTrackingPanel({ title, children, style, ...props }: OrderTr
 }
 
 /** Shipment scan events, newest first. */
-export function OrderTrackingEvents({ style, ...props }: ComponentProps<"ol">) {
+export function OrderTrackingEvents({ className, ...props }: ComponentProps<"ol">) {
   useTracking("OrderTrackingEvents");
   return (
     <ol
+      data-slot="order-tracking-events"
+      className={cn("m-0 grid list-none gap-0 p-0", className)}
       {...props}
-      style={{ display: "grid", gap: 0, margin: 0, padding: 0, listStyle: "none", ...style }}
     />
   );
 }
@@ -266,60 +257,42 @@ export type OrderTrackingEventProps = ComponentProps<"li"> & {
   latest?: boolean;
 };
 
+/** One scan event with its time and location. */
 export function OrderTrackingEvent({
   dateTime,
   time,
   location,
   latest = false,
   children,
-  style,
+  className,
   ...props
 }: OrderTrackingEventProps) {
   useTracking("OrderTrackingEvent");
   return (
     <li
+      data-slot="order-tracking-event"
+      className={cn(
+        "relative grid grid-cols-[13px_minmax(0,1fr)] gap-x-2.5 pb-3.5",
+        "not-last:before:absolute not-last:before:top-[17px] not-last:before:bottom-px not-last:before:left-1.5 not-last:before:w-px not-last:before:bg-border",
+        className,
+      )}
       {...props}
       data-latest={latest || undefined}
-      data-uai-tracking-event=""
-      style={{
-        display: "grid",
-        gridTemplateColumns: "13px minmax(0, 1fr)",
-        columnGap: 10,
-        paddingBottom: 14,
-        ...style,
-      }}
     >
       <span
         aria-hidden="true"
-        style={{
-          width: 7,
-          height: 7,
-          marginTop: 6,
-          marginLeft: 3,
-          borderRadius: 999,
-          background: latest ? "var(--uai-text)" : "var(--uai-border-strong)",
-          boxShadow: latest
-            ? "0 0 0 3px color-mix(in oklab, var(--uai-text) 14%, transparent)"
-            : "none",
-        }}
+        className={cn(
+          "mt-1.5 ml-0.75 size-1.75 rounded-full",
+          latest ? "bg-foreground ring-3 ring-foreground/14" : "bg-border-strong",
+        )}
       />
-      <div style={{ display: "grid", gap: 2, minWidth: 0 }}>
+      <div className="grid min-w-0 gap-0.5">
         <span
-          style={{
-            fontWeight: latest ? 500 : 400,
-            color: latest ? "var(--uai-text)" : "var(--uai-muted)",
-          }}
+          className={latest ? "font-medium text-foreground" : "font-normal text-muted-foreground"}
         >
           {children}
         </span>
-        <span
-          style={{
-            color: "var(--uai-subtle)",
-            fontSize: 12,
-            lineHeight: "16px",
-            fontVariantNumeric: "tabular-nums",
-          }}
-        >
+        <span className="text-xs/4 text-subtle-foreground tabular-nums">
           <time dateTime={dateTime}>{time}</time>
           {location ? <> · {location}</> : null}
         </span>
@@ -342,19 +315,27 @@ export function OrderTrackingEarlierEvents({
   expandedLabel = "Hide earlier events",
   defaultOpen = false,
   children,
-  style,
+  className,
   ...props
 }: OrderTrackingEarlierEventsProps) {
   useTracking("OrderTrackingEarlierEvents");
   const id = useId();
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div {...props} style={{ display: "grid", gap: 8, ...style }}>
+    <div
+      data-slot="order-tracking-earlier-events"
+      className={cn("grid gap-2", className)}
+      {...props}
+    >
       <ol
         id={id}
         hidden={!open}
-        data-uai-tracking-earlier=""
-        style={{ display: open ? "grid" : "none", margin: 0, padding: 0, listStyle: "none" }}
+        className={cn(
+          open ? "grid" : "hidden",
+          "m-0 list-none p-0",
+          "[&>li]:animate-in [&>li]:fade-in-0 [&>li]:slide-in-from-bottom-1 [&>li]:duration-240 [&>li]:ease-out-quint [&>li]:fill-mode-both motion-reduce:[&>li]:animate-none",
+          "[&>li:nth-child(2)]:[animation-delay:40ms] [&>li:nth-child(3)]:[animation-delay:80ms] [&>li:nth-child(4)]:[animation-delay:120ms] [&>li:nth-child(n+5)]:[animation-delay:160ms]",
+        )}
       >
         {children}
       </ol>
@@ -363,31 +344,20 @@ export function OrderTrackingEarlierEvents({
         aria-expanded={open}
         aria-controls={id}
         onClick={() => setOpen(!open)}
-        className="uai-tracking-button"
-        data-kind="ghost"
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          justifySelf: "start",
-          gap: 6,
-          height: 28,
-          margin: "-4px 0 0 13px",
-          padding: "0 10px",
-          border: 0,
-          borderRadius: 8,
-          background: "transparent",
-          color: "var(--uai-muted)",
-          fontSize: 12.5,
-          fontWeight: 500,
-          cursor: "pointer",
-        }}
+        className={cn(
+          actionButton,
+          "-mt-1 mr-0 mb-0 ml-[13px] inline-flex h-7 cursor-pointer items-center gap-1.5 justify-self-start rounded-lg border-0 bg-transparent px-2.5 text-[12.5px] font-medium text-muted-foreground hover:bg-accent hover:text-foreground",
+        )}
       >
         {open ? expandedLabel : label}
         <ChevronDown
           size={14}
           strokeWidth={1.75}
           aria-hidden="true"
-          className="uai-tracking-disclosure-icon"
+          className={cn(
+            "transition-transform duration-180 ease-out-quint motion-reduce:transition-none",
+            open && "rotate-180",
+          )}
         />
       </button>
     </div>
@@ -397,49 +367,59 @@ export function OrderTrackingEarlierEvents({
 /** Shipping facts such as carrier, tracking number, and address. Compose DescriptionList parts inside. */
 export function OrderTrackingDetails(props: Omit<DescriptionListProps, "variant">) {
   const { variant } = useTracking("OrderTrackingDetails");
-  return <DescriptionList {...props} variant={detailsVariants[variant]} />;
+  return (
+    <DescriptionList
+      data-slot="order-tracking-details"
+      {...props}
+      variant={detailsVariants[variant]}
+    />
+  );
 }
 
 /** Support links and copy for problems with the order. */
-export function OrderTrackingSupport({ children, style, ...props }: ComponentProps<"div">) {
+export function OrderTrackingSupport({ children, className, ...props }: ComponentProps<"div">) {
   useTracking("OrderTrackingSupport");
   return (
-    <div {...props} style={{ display: "grid", gap: 10, color: "var(--uai-muted)", ...style }}>
+    <div
+      data-slot="order-tracking-support"
+      className={cn("grid gap-2.5 text-muted-foreground", className)}
+      {...props}
+    >
       {children}
     </div>
   );
 }
 
-export function OrderTrackingSupportActions({ style, ...props }: ComponentProps<"div">) {
-  return <div {...props} style={{ display: "flex", flexWrap: "wrap", gap: 8, ...style }} />;
+export function OrderTrackingSupportActions({ className, ...props }: ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="order-tracking-support-actions"
+      className={cn("flex flex-wrap gap-2", className)}
+      {...props}
+    />
+  );
 }
 
 export function OrderTrackingSupportAction({
   emphasis = "secondary",
   className,
-  style,
   ...props
 }: ComponentProps<"a"> & { emphasis?: "primary" | "secondary" }) {
   const { variant } = useTracking("OrderTrackingSupportAction");
-  const primary = emphasis === "primary";
   return (
     <a
+      data-slot="order-tracking-support-action"
+      className={cn(
+        actionButton,
+        "inline-flex items-center rounded-full px-3.5 text-[12.5px] font-medium no-underline",
+        variant === "compact" ? "h-7" : "h-8",
+        emphasis === "primary"
+          ? "bg-primary text-primary-foreground hover:brightness-108"
+          : "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+        className,
+      )}
       {...props}
-      className={className ? `uai-tracking-button ${className}` : "uai-tracking-button"}
       data-kind={emphasis}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        height: variant === "compact" ? 28 : 32,
-        padding: "0 14px",
-        borderRadius: 999,
-        background: primary ? "var(--uai-accent)" : "var(--uai-surface-raised)",
-        color: primary ? "var(--uai-accent-foreground)" : "var(--uai-text)",
-        fontSize: 12.5,
-        fontWeight: 500,
-        textDecoration: "none",
-        ...style,
-      }}
     />
   );
 }

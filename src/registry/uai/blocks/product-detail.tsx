@@ -1,9 +1,9 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { LoaderCircle } from "lucide-react";
 import {
   type ComponentProps,
-  type CSSProperties,
   createContext,
   type FormEvent,
   type ReactNode,
@@ -21,6 +21,7 @@ import {
   type QuantityPickerProps,
   type QuantityPickerVariant,
 } from "@/components/ui/uai/quantity-picker";
+import { cn } from "@/lib/uai-utils";
 
 export const PRODUCT_DETAIL_VARIANTS = ["split", "stacked", "compact"] as const;
 export type ProductDetailVariant = (typeof PRODUCT_DETAIL_VARIANTS)[number];
@@ -54,30 +55,6 @@ function useOption(part: string) {
   return context;
 }
 
-const layoutCss = `
-[data-uai-product-detail-layout]{display:grid;gap:24px;align-items:start;min-width:0}
-[data-uai-product-detail="compact"]>[data-uai-product-detail-layout]{gap:16px}
-@container (min-width: 720px){
-  [data-uai-product-detail="split"]>[data-uai-product-detail-layout]{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);column-gap:40px}
-}
-@container (min-width: 560px){
-  [data-uai-product-detail="compact"]>[data-uai-product-detail-layout]{grid-template-columns:minmax(0,0.9fr) minmax(0,1fr);column-gap:20px}
-}
-.uai-product-detail-swatch{transition:background-color 120ms ease-out,box-shadow 120ms ease-out,color 120ms ease-out}
-.uai-product-detail-swatch:hover{background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text))}
-.uai-product-detail-swatch:has(input:focus-visible){outline:2px solid var(--uai-accent);outline-offset:2px}
-.uai-product-detail-swatch:has(input:checked){box-shadow:inset 0 0 0 1.5px var(--uai-text);background:var(--uai-surface);color:var(--uai-text)}
-.uai-product-detail-swatch:has(input:disabled){opacity:0.45;cursor:not-allowed;text-decoration:line-through;background:var(--uai-surface-raised)}
-.uai-product-detail-button{transition:filter 120ms ease-out,background-color 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-product-detail-button:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-.uai-product-detail-button:active:not(:disabled){transform:scale(0.97)}
-.uai-product-detail-button[data-kind="primary"]:hover:not(:disabled){filter:brightness(1.08)}
-.uai-product-detail-button[data-kind="secondary"]:hover{background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text))}
-.uai-product-detail-spin{animation:uai-product-detail-spin 900ms linear infinite}
-@keyframes uai-product-detail-spin{to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion: reduce){.uai-product-detail-spin{animation:none}.uai-product-detail-swatch,.uai-product-detail-button{transition:none}.uai-product-detail-button:active:not(:disabled){transform:none}}
-`;
-
 const galleryVariants: Record<ProductDetailVariant, ProductGalleryVariant> = {
   split: "side",
   stacked: "stacked",
@@ -88,18 +65,42 @@ const quantityVariants: Record<ProductDetailVariant, QuantityPickerVariant> = {
   stacked: "pill",
   compact: "compact",
 };
-const toneColor: Record<ProductDetailAvailabilityTone, string> = {
-  available: "var(--uai-success)",
-  low: "var(--uai-warning)",
-  unavailable: "var(--uai-danger)",
+const toneDot: Record<ProductDetailAvailabilityTone, string> = {
+  available: "bg-success ring-success/18",
+  low: "bg-warning ring-warning/18",
+  unavailable: "bg-destructive ring-destructive/18",
 };
+const buttonClass =
+  "inline-flex items-center justify-center rounded-full border-0 text-[13px] font-medium transition-[filter,background-color,transform] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.97] motion-reduce:transition-none motion-reduce:enabled:active:scale-100";
+
+const productDetailVariants = cva(
+  "@container box-border min-w-0 text-[13px]/[18px] text-foreground",
+  {
+    variants: {
+      variant: {
+        split: "",
+        stacked: "mx-auto my-0 max-w-[640px]",
+        compact: "",
+      },
+    },
+  },
+);
+const layoutVariants = cva("grid min-w-0 items-start", {
+  variants: {
+    variant: {
+      split: "gap-6 @min-[720px]:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] @min-[720px]:gap-x-10",
+      stacked: "gap-6",
+      compact: "gap-4 @min-[560px]:grid-cols-[minmax(0,0.9fr)_minmax(0,1fr)] @min-[560px]:gap-x-5",
+    },
+  },
+});
 
 /** Gallery, options, availability, price, delivery, and purchase actions for one product. */
 export function ProductDetail({
   variant = "split",
   onAddToCart,
   children,
-  style,
+  className,
   ...props
 }: ProductDetailProps) {
   const id = useId();
@@ -119,22 +120,12 @@ export function ProductDetail({
     <Context.Provider value={{ id, variant, pending, submit }}>
       <section
         aria-labelledby={`${id}-title`}
-        {...props}
+        data-slot="product-detail"
         data-variant={variant}
-        data-uai-product-detail={variant}
-        style={{
-          boxSizing: "border-box",
-          containerType: "inline-size",
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...(variant === "stacked" ? { maxWidth: 640, margin: "0 auto" } : null),
-          ...style,
-        }}
+        className={cn(productDetailVariants({ variant }), className)}
+        {...props}
       >
-        <style>{layoutCss}</style>
-        <div data-uai-product-detail-layout="">{children}</div>
+        <div className={layoutVariants({ variant })}>{children}</div>
       </section>
     </Context.Provider>
   );
@@ -150,113 +141,114 @@ export function ProductDetailGallery({
     <ProductGallery
       role="group"
       aria-label={ariaLabel}
+      data-slot="product-detail-gallery"
       {...props}
       variant={galleryVariants[variant]}
     />
   );
 }
 
-export function ProductDetailInfo({ style, ...props }: ComponentProps<"div">) {
+export function ProductDetailInfo({ className, ...props }: ComponentProps<"div">) {
   const { variant } = useDetail("ProductDetailInfo");
   return (
     <div
+      data-slot="product-detail-info"
+      className={cn("grid min-w-0", variant === "compact" ? "gap-3.5" : "gap-5", className)}
       {...props}
-      style={{
-        display: "grid",
-        gap: variant === "compact" ? 14 : 20,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function ProductDetailHeader({ style, ...props }: ComponentProps<"header">) {
-  return <header {...props} style={{ display: "grid", gap: 6, minWidth: 0, ...style }} />;
+export function ProductDetailHeader({ className, ...props }: ComponentProps<"header">) {
+  return (
+    <header
+      data-slot="product-detail-header"
+      className={cn("grid min-w-0 gap-1.5", className)}
+      {...props}
+    />
+  );
 }
 
-export function ProductDetailEyebrow({ style, ...props }: ComponentProps<"p">) {
+export function ProductDetailEyebrow({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="product-detail-eyebrow"
+      className={cn("m-0 text-xs/4 text-subtle-foreground", className)}
       {...props}
-      style={{ margin: 0, color: "var(--uai-subtle)", fontSize: 12, lineHeight: "16px", ...style }}
     />
   );
 }
 
-export function ProductDetailTitle({ style, ...props }: ComponentProps<"h2">) {
+export function ProductDetailTitle({ className, ...props }: ComponentProps<"h2">) {
   const { id, variant } = useDetail("ProductDetailTitle");
   return (
     <h2
+      data-slot="product-detail-title"
+      className={cn(
+        "m-0 font-semibold tracking-[-0.015em] text-balance",
+        variant === "compact"
+          ? "text-[18px]/[1.2]"
+          : "text-[length:clamp(20px,2cqi_+_12px,26px)]/[1.2]",
+        className,
+      )}
       {...props}
       id={`${id}-title`}
-      style={{
-        margin: 0,
-        fontSize: variant === "compact" ? 18 : "clamp(20px, 2cqi + 12px, 26px)",
-        fontWeight: 600,
-        lineHeight: 1.2,
-        letterSpacing: "-0.015em",
-        textWrap: "balance",
-        ...style,
-      }}
     />
   );
 }
 
 /** Current price, with an optional compare-at price inside ProductDetailComparePrice. */
-export function ProductDetailPrice({ style, ...props }: ComponentProps<"p">) {
+export function ProductDetailPrice({ className, ...props }: ComponentProps<"p">) {
   const { variant } = useDetail("ProductDetailPrice");
   return (
     <p
+      data-slot="product-detail-price"
+      className={cn(
+        "m-0 flex flex-wrap items-baseline gap-2 font-medium tabular-nums",
+        variant === "compact" ? "text-[16px]/[1.2]" : "text-[20px]/[1.2]",
+        className,
+      )}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "baseline",
-        gap: 8,
-        margin: 0,
-        fontSize: variant === "compact" ? 16 : 20,
-        fontWeight: 500,
-        lineHeight: 1.2,
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     />
   );
 }
 
-export function ProductDetailComparePrice({ children, style, ...props }: ComponentProps<"s">) {
+export function ProductDetailComparePrice({ children, className, ...props }: ComponentProps<"s">) {
   return (
-    <s {...props} style={{ color: "var(--uai-subtle)", fontSize: 13, fontWeight: 400, ...style }}>
-      <span style={visuallyHidden}>Was </span>
+    <s
+      data-slot="product-detail-compare-price"
+      className={cn("text-[13px] font-normal text-subtle-foreground", className)}
+      {...props}
+    >
+      <span className="sr-only">Was </span>
       {children}
     </s>
   );
 }
 
-export function ProductDetailDescription({ style, ...props }: ComponentProps<"p">) {
+export function ProductDetailDescription({ className, ...props }: ComponentProps<"p">) {
   return (
-    <p {...props} style={{ margin: 0, color: "var(--uai-muted)", textWrap: "pretty", ...style }} />
+    <p
+      data-slot="product-detail-description"
+      className={cn("m-0 text-pretty text-muted-foreground", className)}
+      {...props}
+    />
   );
 }
 
 /** The purchase form. Options and quantity inside it are submitted to onAddToCart. */
-export function ProductDetailPurchase({ style, onSubmit, ...props }: ComponentProps<"form">) {
+export function ProductDetailPurchase({ className, onSubmit, ...props }: ComponentProps<"form">) {
   const context = useDetail("ProductDetailPurchase");
   return (
     <form
+      data-slot="product-detail-purchase"
+      className={cn("grid min-w-0", context.variant === "compact" ? "gap-3" : "gap-4", className)}
       {...props}
       aria-busy={context.pending || undefined}
       onSubmit={(event) => {
         onSubmit?.(event);
         if (!event.defaultPrevented) context.submit(event);
         else event.preventDefault();
-      }}
-      style={{
-        display: "grid",
-        gap: context.variant === "compact" ? 12 : 16,
-        minWidth: 0,
-        ...style,
       }}
     />
   );
@@ -279,7 +271,7 @@ export function ProductDetailOption({
   selection,
   onValueChange,
   children,
-  style,
+  className,
   ...props
 }: ProductDetailOptionProps) {
   useDetail("ProductDetailOption");
@@ -287,6 +279,8 @@ export function ProductDetailOption({
   return (
     <OptionContext.Provider value={{ name, legendId }}>
       <fieldset
+        data-slot="product-detail-option"
+        className={cn("m-0 grid min-w-0 gap-2 border-0 p-0", className)}
         {...props}
         onChange={(event) => {
           const target = event.target;
@@ -294,18 +288,14 @@ export function ProductDetailOption({
             onValueChange?.(target.value);
           }
         }}
-        style={{ display: "grid", gap: 8, minWidth: 0, margin: 0, padding: 0, border: 0, ...style }}
       >
-        <legend
-          id={legendId}
-          style={{ display: "flex", gap: 6, padding: 0, marginBottom: 6, fontWeight: 500 }}
-        >
+        <legend id={legendId} className="mb-1.5 flex gap-1.5 p-0 font-medium">
           {label}
           {selection ? (
-            <span style={{ color: "var(--uai-subtle)", fontWeight: 400 }}>{selection}</span>
+            <span className="font-normal text-subtle-foreground">{selection}</span>
           ) : null}
         </legend>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>{children}</div>
+        <div className="flex flex-wrap gap-2">{children}</div>
       </fieldset>
     </OptionContext.Provider>
   );
@@ -326,28 +316,22 @@ export function ProductDetailOptionValue({
   value,
   swatch,
   children,
-  style,
+  className,
   ...props
 }: ProductDetailOptionValueProps) {
   const option = useOption("ProductDetailOptionValue");
   return (
     <label
-      className="uai-product-detail-swatch"
-      style={{
-        position: "relative",
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 8,
-        minHeight: 32,
-        padding: swatch ? "0 12px 0 6px" : "0 12px",
-        borderRadius: 999,
-        background: "var(--uai-surface-raised)",
-        color: "var(--uai-muted)",
-        cursor: "pointer",
-        fontSize: 13,
-        fontWeight: 500,
-        ...style,
-      }}
+      data-slot="product-detail-option-value"
+      className={cn(
+        "relative inline-flex min-h-8 cursor-pointer items-center gap-2 rounded-full bg-secondary text-[13px] font-medium text-muted-foreground",
+        "transition-[background-color,box-shadow,color] duration-120 ease-out hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] motion-reduce:transition-none",
+        "has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-ring",
+        "has-[input:checked]:bg-card has-[input:checked]:text-foreground has-[input:checked]:shadow-[inset_0_0_0_1.5px_var(--foreground)]",
+        "has-[input:disabled]:cursor-not-allowed has-[input:disabled]:bg-secondary has-[input:disabled]:line-through has-[input:disabled]:opacity-45",
+        swatch ? "py-0 pr-3 pl-1.5" : "px-3 py-0",
+        className,
+      )}
     >
       <input
         {...props}
@@ -355,18 +339,13 @@ export function ProductDetailOptionValue({
         name={option.name}
         value={value}
         required
-        style={{ position: "absolute", inset: 0, margin: 0, opacity: 0, cursor: "inherit" }}
+        className="absolute inset-0 m-0 cursor-[inherit] opacity-0"
       />
       {swatch ? (
         <span
           aria-hidden="true"
-          style={{
-            width: 20,
-            height: 20,
-            borderRadius: 999,
-            background: swatch,
-            boxShadow: "0 0 0 1px oklch(1 0 0 / 0.08), inset 0 0 0 1px oklch(0 0 0 / 0.12)",
-          }}
+          className="size-5 rounded-full shadow-[0_0_0_1px_oklch(1_0_0/0.08),inset_0_0_0_1px_oklch(0_0_0/0.12)]"
+          style={{ background: swatch }}
         />
       ) : null}
       {children}
@@ -382,28 +361,22 @@ export type ProductDetailAvailabilityProps = ComponentProps<"p"> & {
 export function ProductDetailAvailability({
   tone = "available",
   children,
-  style,
+  className,
   ...props
 }: ProductDetailAvailabilityProps) {
   return (
     <p
       role="status"
+      data-slot="product-detail-availability"
+      className={cn("m-0 flex items-center gap-2", className)}
       {...props}
       data-tone={tone}
-      style={{ display: "flex", alignItems: "center", gap: 8, margin: 0, ...style }}
     >
       <span
         aria-hidden="true"
-        style={{
-          width: 8,
-          height: 8,
-          flex: "none",
-          borderRadius: 999,
-          background: toneColor[tone],
-          boxShadow: `0 0 0 3px color-mix(in oklab, ${toneColor[tone]} 18%, transparent)`,
-        }}
+        className={cn("size-2 flex-none rounded-full ring-3", toneDot[tone])}
       />
-      <span style={{ fontWeight: 500, color: "var(--uai-muted)" }}>{children}</span>
+      <span className="font-medium text-muted-foreground">{children}</span>
     </p>
   );
 }
@@ -411,14 +384,21 @@ export function ProductDetailAvailability({
 /** Quantity control for the purchase form. Compose QuantityPicker parts inside. */
 export function ProductDetailQuantity(props: Omit<QuantityPickerProps, "variant">) {
   const { variant } = useDetail("ProductDetailQuantity");
-  return <QuantityPicker {...props} variant={quantityVariants[variant]} />;
+  return (
+    <QuantityPicker
+      data-slot="product-detail-quantity"
+      {...props}
+      variant={quantityVariants[variant]}
+    />
+  );
 }
 
-export function ProductDetailActions({ style, ...props }: ComponentProps<"div">) {
+export function ProductDetailActions({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="product-detail-actions"
+      className={cn("flex flex-wrap items-end gap-2", className)}
       {...props}
-      style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", gap: 8, ...style }}
     />
   );
 }
@@ -433,43 +413,36 @@ export function ProductDetailAddToCart({
   pendingLabel = "Adding…",
   children = "Add to cart",
   disabled,
-  style,
+  className,
   ...props
 }: ProductDetailAddToCartProps) {
   const context = useDetail("ProductDetailAddToCart");
-  const compact = context.variant === "compact";
   const blocked = disabled || context.pending;
   return (
     <button
+      data-slot="product-detail-add-to-cart"
+      className={cn(
+        buttonClass,
+        "flex-[1_1_160px] gap-2 px-4.5 text-primary-foreground",
+        context.variant === "compact" ? "h-8" : "h-10",
+        blocked
+          ? "cursor-not-allowed bg-[color-mix(in_oklab,var(--primary)_55%,var(--card))]"
+          : "cursor-pointer bg-primary enabled:hover:brightness-108",
+        className,
+      )}
       {...props}
       type="submit"
       disabled={blocked}
       aria-busy={context.pending || undefined}
-      className={joinClass("uai-product-detail-button", props.className)}
       data-kind="primary"
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 8,
-        flex: "1 1 160px",
-        height: compact ? 32 : 40,
-        padding: "0 18px",
-        border: 0,
-        borderRadius: 999,
-        background: blocked
-          ? "color-mix(in oklab, var(--uai-accent) 55%, var(--uai-surface))"
-          : "var(--uai-accent)",
-        color: "var(--uai-accent-foreground)",
-        fontSize: 13,
-        fontWeight: 500,
-        cursor: blocked ? "not-allowed" : "pointer",
-        ...style,
-      }}
     >
       {context.pending ? (
         <>
-          <LoaderCircle size={14} aria-hidden="true" className="uai-product-detail-spin" />
+          <LoaderCircle
+            size={14}
+            aria-hidden="true"
+            className="animate-[spin_900ms_linear_infinite] motion-reduce:animate-none"
+          />
           {pendingLabel}
         </>
       ) : (
@@ -480,49 +453,36 @@ export function ProductDetailAddToCart({
 }
 
 /** A secondary action, such as saving the product for later. */
-export function ProductDetailSecondaryAction({ style, ...props }: ComponentProps<"button">) {
+export function ProductDetailSecondaryAction({ className, ...props }: ComponentProps<"button">) {
   const { variant } = useDetail("ProductDetailSecondaryAction");
   return (
     <button
       type="button"
+      data-slot="product-detail-secondary-action"
+      className={cn(
+        buttonClass,
+        "cursor-pointer gap-1.5 bg-secondary px-4 text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+        variant === "compact" ? "h-8" : "h-10",
+        className,
+      )}
       {...props}
-      className={joinClass("uai-product-detail-button", props.className)}
       data-kind="secondary"
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 6,
-        height: variant === "compact" ? 32 : 40,
-        padding: "0 16px",
-        border: 0,
-        borderRadius: 999,
-        background: "var(--uai-surface-raised)",
-        color: "var(--uai-text)",
-        fontSize: 13,
-        fontWeight: 500,
-        cursor: "pointer",
-        ...style,
-      }}
     />
   );
 }
 
 /** Delivery and returns facts, rendered as a description list. */
-export function ProductDetailDelivery({ style, ...props }: ComponentProps<"dl">) {
+export function ProductDetailDelivery({ className, ...props }: ComponentProps<"dl">) {
   const { variant } = useDetail("ProductDetailDelivery");
   return (
     <dl
+      data-slot="product-detail-delivery"
+      className={cn(
+        "m-0 grid gap-0.5 bg-card p-1",
+        variant === "compact" ? "rounded-xl" : "rounded-[14px]",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gap: 2,
-        margin: 0,
-        padding: 4,
-        borderRadius: variant === "compact" ? 12 : 14,
-        background: "var(--uai-surface)",
-        ...style,
-      }}
     />
   );
 }
@@ -536,49 +496,28 @@ export function ProductDetailDeliveryItem({
   label,
   icon,
   children,
-  style,
+  className,
   ...props
 }: ProductDetailDeliveryItemProps) {
   const { variant } = useDetail("ProductDetailDeliveryItem");
   return (
     <div
+      data-slot="product-detail-delivery-item"
+      className={cn(
+        "grid gap-x-2.5 gap-y-0.5",
+        icon ? "grid-cols-[20px_minmax(0,1fr)]" : "grid-cols-[minmax(0,1fr)]",
+        variant === "compact" ? "rounded-lg px-2.5 py-2" : "rounded-[10px] px-3 py-2.5",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gridTemplateColumns: icon ? "20px minmax(0, 1fr)" : "minmax(0, 1fr)",
-        columnGap: 10,
-        rowGap: 2,
-        padding: variant === "compact" ? "8px 10px" : "10px 12px",
-        borderRadius: variant === "compact" ? 8 : 10,
-        ...style,
-      }}
     >
       {icon ? (
-        <span
-          aria-hidden="true"
-          style={{ gridRow: "span 2", paddingTop: 1, color: "var(--uai-muted)" }}
-        >
+        <span aria-hidden="true" className="row-span-2 pt-px text-muted-foreground">
           {icon}
         </span>
       ) : null}
-      <dt style={{ fontWeight: 500 }}>{label}</dt>
-      <dd style={{ margin: 0, color: "var(--uai-muted)", fontSize: 12.5 }}>{children}</dd>
+      <dt className="font-medium">{label}</dt>
+      <dd className="m-0 text-[12.5px] text-muted-foreground">{children}</dd>
     </div>
   );
 }
-
-function joinClass(base: string, extra?: string) {
-  return extra ? `${base} ${extra}` : base;
-}
-
-const visuallyHidden: CSSProperties = {
-  position: "absolute",
-  width: 1,
-  height: 1,
-  margin: -1,
-  padding: 0,
-  overflow: "hidden",
-  clip: "rect(0 0 0 0)",
-  whiteSpace: "nowrap",
-  border: 0,
-};

@@ -65,7 +65,8 @@ test("toggles zoom with a pressed button and resets it on selection", async () =
   const zoom = screen.getByRole("button", { name: "Zoom image" });
   await user.click(zoom);
   expect(zoom.getAttribute("aria-pressed")).toBe("true");
-  expect(mainImage().style.transform).toBe("scale(2)");
+  expect(mainImage().className).toContain("scale-200");
+  expect(mainImage().className).toContain("cursor-zoom-out");
   await user.click(screen.getByRole("button", { name: "Top view" }));
   expect(zoom.getAttribute("aria-pressed")).toBe("false");
 });

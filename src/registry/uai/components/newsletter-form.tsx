@@ -1,8 +1,8 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import {
   type ComponentProps,
-  type CSSProperties,
   createContext,
   type FormEvent,
   useContext,
@@ -12,6 +12,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const NEWSLETTER_FORM_VARIANTS = ["inline", "stacked", "card"] as const;
 export type NewsletterFormVariant = (typeof NEWSLETTER_FORM_VARIANTS)[number];
@@ -54,33 +55,34 @@ function useNewsletter(part: string) {
 }
 const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const dangerText = "color-mix(in oklab, var(--uai-danger) 75%, var(--uai-text))";
-const successText = "color-mix(in oklab, var(--uai-success) 75%, var(--uai-text))";
-const newsletterCss = `
-.uai-newsletter-field{background:var(--uai-surface);box-shadow:0 0 0 1px var(--uai-border);transition:box-shadow 120ms ease-out}
-.uai-newsletter[data-variant=card] .uai-newsletter-field,.uai-newsletter[data-variant=card] .uai-newsletter-input{background:var(--uai-canvas)}
-.uai-newsletter-field:focus-within{box-shadow:0 0 0 1px var(--uai-border-strong),0 0 0 4px color-mix(in oklab,var(--uai-accent) 14%,transparent)}
-.uai-newsletter[data-variant=stacked] .uai-newsletter-field{background:transparent;box-shadow:none}
-.uai-newsletter-input{outline:none;transition:box-shadow 120ms ease-out}
-.uai-newsletter-input::placeholder{color:var(--uai-subtle);opacity:1}
-.uai-newsletter[data-variant=stacked] .uai-newsletter-input{background:var(--uai-surface);box-shadow:0 0 0 1px var(--uai-border)}
-.uai-newsletter[data-variant=stacked] .uai-newsletter-input:focus{box-shadow:0 0 0 1px var(--uai-border-strong),0 0 0 4px color-mix(in oklab,var(--uai-accent) 14%,transparent)}
-.uai-newsletter[data-variant=stacked] .uai-newsletter-input[aria-invalid=true]{box-shadow:0 0 0 1px color-mix(in oklab,var(--uai-danger) 70%,transparent)}
-.uai-newsletter-field:has([aria-invalid=true]){box-shadow:0 0 0 1px color-mix(in oklab,var(--uai-danger) 70%,transparent)}
-.uai-newsletter-submit{background:var(--uai-accent);color:var(--uai-accent-foreground);transition:filter 120ms ease-out,opacity 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-newsletter-submit:hover{filter:brightness(1.08)}
-.uai-newsletter-submit:active{transform:scale(0.97)}
-.uai-newsletter-submit[aria-disabled=true]{opacity:0.7;filter:none;transform:none}
-.uai-newsletter-submit:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-.uai-newsletter-message{transition:color 120ms ease-out}
-@media (prefers-reduced-motion: reduce){
-.uai-newsletter-field,.uai-newsletter-input,.uai-newsletter-submit,.uai-newsletter-message{transition:none}
-.uai-newsletter-submit:active{transform:none}
-}
-`;
-function cx(...names: (string | undefined)[]) {
-  return names.filter(Boolean).join(" ");
-}
+const dangerText = "text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))]";
+const successText = "text-[color-mix(in_oklab,var(--success)_75%,var(--foreground))]";
+const invalidRing = "shadow-[0_0_0_1px_color-mix(in_oklab,var(--destructive)_70%,transparent)]";
+const fieldRing =
+  "shadow-[0_0_0_1px_var(--border)] focus-within:shadow-[0_0_0_1px_var(--border-strong),0_0_0_4px_color-mix(in_oklab,var(--primary)_14%,transparent)]";
+const inputRing =
+  "shadow-[0_0_0_1px_var(--border)] focus:shadow-[0_0_0_1px_var(--border-strong),0_0_0_4px_color-mix(in_oklab,var(--primary)_14%,transparent)]";
+
+const newsletterFormVariants = cva("box-border grid min-w-0 text-[13px]/[18px] text-foreground", {
+  variants: {
+    variant: {
+      inline: "gap-2",
+      stacked: "gap-3",
+      card: "gap-3 rounded-[14px] border bg-card p-5",
+    },
+  },
+});
+
+const newsletterFormFieldVariants = cva("min-w-0 items-center", {
+  variants: {
+    variant: {
+      inline:
+        "flex gap-1 rounded-full bg-card py-1 pr-1 pl-3.5 transition-shadow duration-120 ease-out motion-reduce:transition-none",
+      stacked: "grid gap-2 rounded-none bg-transparent p-0 shadow-none",
+      card: "flex gap-1 rounded-full bg-background py-1 pr-1 pl-3.5 transition-shadow duration-120 ease-out motion-reduce:transition-none",
+    },
+  },
+});
 
 export function NewsletterForm({
   variant = "inline",
@@ -88,7 +90,6 @@ export function NewsletterForm({
   defaultEmail = "",
   children,
   className,
-  style,
   ...props
 }: NewsletterFormProps) {
   const id = useId();
@@ -145,71 +146,49 @@ export function NewsletterForm({
       <form
         noValidate
         aria-busy={status === "submitting"}
-        {...props}
+        data-slot="newsletter-form"
         data-variant={variant}
-        className={cx("uai-newsletter", className)}
+        className={cn(newsletterFormVariants({ variant }), className)}
+        {...props}
         onSubmit={handleSubmit}
-        style={{
-          boxSizing: "border-box",
-          display: "grid",
-          gap: variant === "inline" ? 8 : 12,
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...(variant === "card"
-            ? {
-                padding: 20,
-                border: "1px solid var(--uai-border)",
-                borderRadius: 14,
-                background: "var(--uai-surface)",
-              }
-            : null),
-          ...style,
-        }}
       >
-        <style>{newsletterCss}</style>
         {children}
       </form>
     </Context.Provider>
   );
 }
 
-export function NewsletterFormLabel({ style, ...props }: ComponentProps<"label">) {
+export function NewsletterFormLabel({ className, ...props }: ComponentProps<"label">) {
   const context = useNewsletter("NewsletterFormLabel");
   return (
     // biome-ignore lint/a11y/noLabelWithoutControl: htmlFor targets NewsletterFormInput; consumers supply the text.
     <label
+      data-slot="newsletter-form-label"
+      className={cn("text-[13px] font-medium", className)}
       {...props}
       htmlFor={`${context.id}-email`}
-      style={{ fontSize: 13, fontWeight: 500, ...style }}
     />
   );
 }
 
-export function NewsletterFormField({ className, style, ...props }: ComponentProps<"div">) {
+export function NewsletterFormField({ className, ...props }: ComponentProps<"div">) {
   const context = useNewsletter("NewsletterFormField");
-  const stacked = context.variant === "stacked";
+  const invalid = context.status === "invalid" || context.status === "duplicate";
   return (
     <div
+      data-slot="newsletter-form-field"
+      className={cn(
+        newsletterFormFieldVariants({ variant: context.variant }),
+        context.variant !== "stacked" && (invalid ? invalidRing : fieldRing),
+        className,
+      )}
       {...props}
-      className={cx("uai-newsletter-field", className)}
-      style={{
-        display: stacked ? "grid" : "flex",
-        alignItems: "center",
-        gap: stacked ? 8 : 4,
-        minWidth: 0,
-        padding: stacked ? 0 : "4px 4px 4px 14px",
-        borderRadius: stacked ? 0 : 999,
-        ...style,
-      }}
     />
   );
 }
 
 export function NewsletterFormInput({
   className,
-  style,
   onChange,
   ...props
 }: Omit<ComponentProps<"input">, "value" | "defaultValue" | "id" | "type">) {
@@ -221,6 +200,13 @@ export function NewsletterFormInput({
       name="email"
       autoComplete="email"
       inputMode="email"
+      data-slot="newsletter-form-input"
+      className={cn(
+        "box-border w-full min-w-0 flex-1 border-0 bg-transparent text-[13px]/[18px] text-inherit outline-none transition-shadow duration-120 ease-out placeholder:text-subtle-foreground placeholder:opacity-100 motion-reduce:transition-none",
+        stacked ? "h-9 rounded-[10px] px-3" : "h-7 rounded-none p-0",
+        stacked && (invalid ? invalidRing : inputRing),
+        className,
+      )}
       {...props}
       ref={context.inputRef}
       id={`${context.id}-email`}
@@ -229,22 +215,6 @@ export function NewsletterFormInput({
       value={context.email}
       aria-invalid={invalid || undefined}
       aria-describedby={`${context.id}-message`}
-      className={cx("uai-newsletter-input", className)}
-      style={{
-        flex: 1,
-        boxSizing: "border-box",
-        width: "100%",
-        minWidth: 0,
-        height: stacked ? 36 : 28,
-        padding: stacked ? "0 12px" : 0,
-        border: 0,
-        borderRadius: stacked ? 10 : 0,
-        background: "transparent",
-        color: "inherit",
-        fontSize: 13,
-        lineHeight: "18px",
-        ...style,
-      }}
       onChange={(event) => {
         onChange?.(event);
         if (!event.defaultPrevented) context.setEmail(event.target.value);
@@ -258,7 +228,6 @@ export function NewsletterFormSubmit({
   pendingLabel = "Subscribing…",
   onClick,
   className,
-  style,
   ...props
 }: Omit<ComponentProps<"button">, "type"> & { pendingLabel?: string }) {
   const context = useNewsletter("NewsletterFormSubmit");
@@ -266,22 +235,18 @@ export function NewsletterFormSubmit({
   const stacked = context.variant === "stacked";
   return (
     <button
+      data-slot="newsletter-form-submit"
+      className={cn(
+        "flex-none rounded-full border-0 bg-primary px-3.5 text-[13px] font-medium whitespace-nowrap text-primary-foreground [transition:filter_120ms_ease-out,opacity_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none",
+        stacked ? "h-8.5" : "h-7.5",
+        pending
+          ? "cursor-progress opacity-70"
+          : "cursor-pointer hover:brightness-108 active:scale-[0.97] motion-reduce:active:scale-100",
+        className,
+      )}
       {...props}
       type="submit"
       aria-disabled={pending || undefined}
-      className={cx("uai-newsletter-submit", className)}
-      style={{
-        flex: "none",
-        height: stacked ? 34 : 30,
-        padding: "0 14px",
-        border: 0,
-        borderRadius: 999,
-        fontSize: 13,
-        fontWeight: 500,
-        whiteSpace: "nowrap",
-        cursor: pending ? "progress" : "pointer",
-        ...style,
-      }}
       onClick={(event) => {
         if (pending) event.preventDefault();
         onClick?.(event);
@@ -295,7 +260,7 @@ export function NewsletterFormSubmit({
 export function NewsletterFormConsent({
   required = true,
   children,
-  style,
+  className,
   ...props
 }: Omit<ComponentProps<"label">, "htmlFor"> & { required?: boolean }) {
   const context = useNewsletter("NewsletterFormConsent");
@@ -307,18 +272,13 @@ export function NewsletterFormConsent({
   const checkboxId = `${context.id}-consent`;
   return (
     <label
+      data-slot="newsletter-form-consent"
+      className={cn(
+        "flex cursor-pointer items-start gap-2 text-xs/4 text-muted-foreground",
+        className,
+      )}
       {...props}
       htmlFor={checkboxId}
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        gap: 8,
-        color: "var(--uai-muted)",
-        fontSize: 12,
-        lineHeight: "16px",
-        cursor: "pointer",
-        ...style,
-      }}
     >
       <input
         ref={context.consentRef}
@@ -330,14 +290,7 @@ export function NewsletterFormConsent({
         aria-invalid={context.status === "consent" || undefined}
         aria-describedby={`${context.id}-message`}
         onChange={(event) => context.setConsent(event.target.checked)}
-        style={{
-          flex: "none",
-          width: 14,
-          height: 14,
-          margin: "1px 0 0",
-          accentColor: "var(--uai-accent)",
-          cursor: "pointer",
-        }}
+        className="m-0 mt-px size-3.5 flex-none cursor-pointer accent-primary"
       />
       <span>{children}</span>
     </label>
@@ -365,7 +318,6 @@ export function NewsletterFormMessage({
   messages,
   children,
   className,
-  style,
   ...props
 }: ComponentProps<"p"> & { messages?: NewsletterFormMessages }) {
   const context = useNewsletter("NewsletterFormMessage");
@@ -373,14 +325,17 @@ export function NewsletterFormMessage({
   const copy = missing
     ? (messages?.invalid ?? "Enter your email address.")
     : (messages?.[context.status] ?? COPY[context.status]);
-  const tone: CSSProperties = { color: TONE[context.status] ?? "var(--uai-subtle)" };
   return (
     <p
       role="status"
+      data-slot="newsletter-form-message"
+      className={cn(
+        "m-0 min-h-4 text-xs/4 transition-colors duration-120 ease-out motion-reduce:transition-none",
+        TONE[context.status] ?? "text-subtle-foreground",
+        className,
+      )}
       {...props}
       id={`${context.id}-message`}
-      className={cx("uai-newsletter-message", className)}
-      style={{ margin: 0, minHeight: 16, fontSize: 12, lineHeight: "16px", ...tone, ...style }}
     >
       {context.status === "idle" ? children : copy}
     </p>

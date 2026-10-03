@@ -1,3 +1,4 @@
+import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, type ReactNode, useContext, useId } from "react";
 
 import { cn } from "@/lib/uai-utils";
@@ -12,18 +13,20 @@ export type PriceSummaryProps = ComponentProps<"section"> & {
   variant?: PriceSummaryVariant;
 };
 
+const priceSummaryVariants = cva("w-full text-card-foreground", {
+  variants: {
+    variant: {
+      card: "rounded-[14px] border border-border/60 bg-card p-[18px]",
+      plain: "rounded-none bg-transparent p-0",
+      compact: "rounded-xl border border-border/60 bg-card p-3",
+    },
+  },
+});
+
 function priceSummaryChrome(variant: PriceSummaryVariant) {
   const compact = variant === "compact";
 
   return {
-    rootClass:
-      variant === "plain"
-        ? "bg-transparent"
-        : "border border-[color-mix(in_oklab,var(--uai-border)_60%,transparent)] bg-[var(--uai-surface)]",
-    rootStyle: {
-      borderRadius: compact ? 12 : variant === "card" ? 14 : 0,
-      padding: compact ? 12 : variant === "card" ? 18 : 0,
-    },
     headerClass: compact ? "mb-3" : "mb-4",
     titleClass: compact ? "text-[13px] leading-[18px]" : "text-[14px] leading-5",
     descriptionClass: compact ? "mt-0.5 text-[11.5px] leading-4" : "mt-0.5 text-[12px] leading-4",
@@ -53,7 +56,6 @@ export function PriceSummary({
   variant = "card",
   children,
   className,
-  style,
   "aria-labelledby": ariaLabelledby,
   ...props
 }: PriceSummaryProps) {
@@ -63,10 +65,10 @@ export function PriceSummary({
   return (
     <PriceSummaryContext.Provider value={{ titleId, chrome }}>
       <section
-        {...props}
-        className={cn("w-full text-[var(--uai-text)]", chrome.rootClass, className)}
-        style={{ ...chrome.rootStyle, ...style }}
+        data-slot="price-summary"
         data-variant={variant}
+        className={cn(priceSummaryVariants({ variant }), className)}
+        {...props}
         aria-labelledby={ariaLabelledby ?? titleId}
       >
         {children}
@@ -81,7 +83,11 @@ export function PriceSummaryHeader({ children, className, ...props }: PriceSumma
   const context = usePriceSummary("PriceSummaryHeader");
 
   return (
-    <header className={cn(context.chrome.headerClass, className)} {...props}>
+    <header
+      data-slot="price-summary-header"
+      className={cn(context.chrome.headerClass, className)}
+      {...props}
+    >
       {children}
     </header>
   );
@@ -94,9 +100,10 @@ export function PriceSummaryTitle({ children, className, ...props }: PriceSummar
 
   return (
     <h2
-      id={context.titleId}
+      data-slot="price-summary-title"
       className={cn("font-medium tracking-[-0.01em]", context.chrome.titleClass, className)}
       {...props}
+      id={context.titleId}
     >
       {children}
     </h2>
@@ -114,7 +121,8 @@ export function PriceSummaryDescription({
 
   return (
     <p
-      className={cn("text-[var(--uai-subtle)]", context.chrome.descriptionClass, className)}
+      data-slot="price-summary-description"
+      className={cn("text-subtle-foreground", context.chrome.descriptionClass, className)}
       {...props}
     >
       {children}
@@ -128,7 +136,11 @@ export function PriceSummaryList({ children, className, ...props }: PriceSummary
   const context = usePriceSummary("PriceSummaryList");
 
   return (
-    <dl className={cn("grid", context.chrome.listClass, className)} {...props}>
+    <dl
+      data-slot="price-summary-list"
+      className={cn("grid", context.chrome.listClass, className)}
+      {...props}
+    >
       {children}
     </dl>
   );
@@ -140,9 +152,9 @@ export type PriceSummaryItemProps = ComponentProps<"div"> & {
 };
 
 const priceSummaryToneClass: Record<PriceSummaryTone, string> = {
-  default: "text-[var(--uai-text)]",
-  muted: "text-[var(--uai-muted)]",
-  success: "text-[var(--uai-success)]",
+  default: "text-card-foreground",
+  muted: "text-muted-foreground",
+  success: "text-success",
 };
 
 export function PriceSummaryItem({
@@ -156,10 +168,12 @@ export function PriceSummaryItem({
 
   return (
     <div
+      data-slot="price-summary-item"
+      data-tone={tone}
       className={cn("flex min-w-0 items-baseline", context.chrome.itemClass, className)}
       {...props}
     >
-      <dt className="min-w-0 text-[var(--uai-muted)] [overflow-wrap:anywhere]">{label}</dt>
+      <dt className="min-w-0 text-muted-foreground wrap-anywhere">{label}</dt>
       <span className="min-w-4 flex-1" aria-hidden="true" />
       <dd
         className={cn(
@@ -189,24 +203,25 @@ export function PriceSummaryTotal({
 
   return (
     <div
+      data-slot="price-summary-total"
       className={cn(
-        "flex items-end justify-between gap-4 border-t border-[color-mix(in_oklab,var(--uai-border)_60%,transparent)]",
+        "flex items-end justify-between gap-4 border-t border-border/60",
         context.chrome.totalClass,
         className,
       )}
       {...props}
     >
-      <dt className="min-w-0 [overflow-wrap:anywhere]">
+      <dt className="min-w-0 wrap-anywhere">
         <span className={cn("block font-medium", context.chrome.totalLabelClass)}>{label}</span>
         {hint ? (
-          <span className="mt-0.5 block text-[11.5px] leading-4 text-[var(--uai-subtle)]">
+          <span className="mt-0.5 block text-[11.5px] leading-4 text-subtle-foreground">
             {hint}
           </span>
         ) : null}
       </dt>
       <dd
         className={cn(
-          "ml-auto min-w-0 max-w-[58%] text-right font-semibold tracking-[-0.025em] tabular-nums [overflow-wrap:anywhere]",
+          "ml-auto min-w-0 max-w-[58%] text-right font-semibold tracking-[-0.025em] tabular-nums wrap-anywhere",
           context.chrome.totalValueClass,
         )}
       >
@@ -222,7 +237,11 @@ export function PriceSummaryNote({ children, className, ...props }: PriceSummary
   const context = usePriceSummary("PriceSummaryNote");
 
   return (
-    <p className={cn("text-[var(--uai-subtle)]", context.chrome.noteClass, className)} {...props}>
+    <p
+      data-slot="price-summary-note"
+      className={cn("text-subtle-foreground", context.chrome.noteClass, className)}
+      {...props}
+    >
       {children}
     </p>
   );

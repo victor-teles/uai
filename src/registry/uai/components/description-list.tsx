@@ -1,6 +1,8 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, useContext } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const DESCRIPTION_LIST_VARIANTS = ["inline", "stacked", "grid"] as const;
 export type DescriptionListVariant = (typeof DESCRIPTION_LIST_VARIANTS)[number];
@@ -13,126 +15,94 @@ function useVariant(part: string) {
   return variant;
 }
 
-export function DescriptionList({ variant = "inline", style, ...props }: DescriptionListProps) {
+const descriptionListVariants = cva("m-0 grid min-w-0 text-[13px]/[18px] text-foreground", {
+  variants: {
+    variant: {
+      inline: "grid-cols-[minmax(0,1fr)] gap-0",
+      stacked: "grid-cols-[minmax(0,1fr)] gap-0",
+      grid: "grid-cols-[repeat(auto-fit,minmax(min(100%,180px),1fr))] gap-2",
+    },
+  },
+});
+
+export function DescriptionList({ variant = "inline", className, ...props }: DescriptionListProps) {
   return (
     <Context.Provider value={variant}>
       <dl
-        {...props}
+        data-slot="description-list"
         data-variant={variant}
-        style={{
-          display: "grid",
-          gridTemplateColumns:
-            variant === "grid"
-              ? "repeat(auto-fit, minmax(min(100%, 180px), 1fr))"
-              : "minmax(0, 1fr)",
-          gap: variant === "grid" ? 8 : 0,
-          margin: 0,
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
+        className={cn(descriptionListVariants({ variant }), className)}
+        {...props}
       />
     </Context.Provider>
   );
 }
 
-export function DescriptionListItem({ style, className, ...props }: ComponentProps<"div">) {
+const descriptionListItemVariants = cva("flex min-w-0 flex-wrap gap-x-4", {
+  variants: {
+    variant: {
+      inline:
+        "flex-row items-baseline gap-y-1 rounded-none border-b bg-transparent py-2.25 last:border-b-0",
+      stacked:
+        "flex-col items-stretch gap-y-0.5 rounded-none border-b bg-transparent py-2.5 last:border-b-0",
+      grid: "flex-col items-stretch gap-y-1 rounded-[10px] bg-muted px-3 py-2.5",
+    },
+  },
+});
+
+export function DescriptionListItem({ className, ...props }: ComponentProps<"div">) {
   const variant = useVariant("DescriptionListItem");
   return (
     <div
+      data-slot="description-list-item"
+      className={cn(descriptionListItemVariants({ variant }), className)}
       {...props}
-      className={[
-        variant === "grid" ? undefined : "border-b border-[var(--uai-border)] last:border-b-0",
-        className,
-      ]
-        .filter(Boolean)
-        .join(" ")}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        flexDirection: variant === "inline" ? "row" : "column",
-        alignItems: variant === "inline" ? "baseline" : "stretch",
-        columnGap: 16,
-        rowGap: variant === "stacked" ? 2 : 4,
-        minWidth: 0,
-        padding: variant === "grid" ? "10px 12px" : variant === "stacked" ? "10px 0" : "9px 0",
-        borderRadius: variant === "grid" ? 10 : 0,
-        background: variant === "grid" ? "var(--uai-surface-raised)" : "transparent",
-        ...style,
-      }}
     />
   );
 }
 
-export function DescriptionListTerm({ style, ...props }: ComponentProps<"dt">) {
+export function DescriptionListTerm({ className, ...props }: ComponentProps<"dt">) {
   const variant = useVariant("DescriptionListTerm");
   return (
     <dt
+      data-slot="description-list-term"
+      className={cn(
+        "font-normal",
+        variant === "inline"
+          ? "max-w-50 flex-[1_1_140px] text-[12.5px]/[18px] text-muted-foreground"
+          : "text-[11.5px]/4 text-subtle-foreground",
+        className,
+      )}
       {...props}
-      style={{
-        flex: variant === "inline" ? "1 1 140px" : undefined,
-        maxWidth: variant === "inline" ? 200 : undefined,
-        color: variant === "inline" ? "var(--uai-muted)" : "var(--uai-subtle)",
-        fontSize: variant === "inline" ? 12.5 : 11.5,
-        lineHeight: variant === "inline" ? "18px" : "16px",
-        fontWeight: 400,
-        ...style,
-      }}
     />
   );
 }
 
-export function DescriptionListDetails({ style, ...props }: ComponentProps<"dd">) {
+export function DescriptionListDetails({ className, ...props }: ComponentProps<"dd">) {
   const variant = useVariant("DescriptionListDetails");
   return (
     <dd
+      data-slot="description-list-details"
+      className={cn(
+        "m-0 flex min-w-0 items-center justify-between gap-2 font-medium wrap-anywhere",
+        variant === "inline" && "min-h-7 flex-[999_1_220px]",
+        className,
+      )}
       {...props}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 8,
-        flex: variant === "inline" ? "999 1 220px" : undefined,
-        minWidth: 0,
-        minHeight: variant === "inline" ? 28 : undefined,
-        margin: 0,
-        fontWeight: 500,
-        overflowWrap: "anywhere",
-        ...style,
-      }}
     />
   );
 }
 
-export function DescriptionListAction({ style, className, ...props }: ComponentProps<"button">) {
+export function DescriptionListAction({ className, ...props }: ComponentProps<"button">) {
   return (
     <button
+      data-slot="description-list-action"
+      className={cn(
+        "inline-flex h-6.5 min-w-6.5 shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 bg-transparent px-2.5 text-[12px] font-medium text-muted-foreground [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100",
+        className,
+      )}
       {...props}
       type="button"
-      className={[
-        "bg-transparent text-[var(--uai-muted)] [transition:background-color_120ms_ease-out,color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-[var(--uai-surface-raised)] hover:text-[var(--uai-text)] active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uai-accent)] motion-reduce:transition-none motion-reduce:active:scale-100",
-        className,
-      ]
-        .filter(Boolean)
-        .join(" ")}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 6,
-        flexShrink: 0,
-        minWidth: 26,
-        height: 26,
-        padding: "0 10px",
-        border: 0,
-        borderRadius: 999,
-        fontSize: 12,
-        fontWeight: 500,
-        cursor: "pointer",
-        ...style,
-      }}
     />
   );
 }

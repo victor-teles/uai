@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { Columns3, Download, Search, X } from "lucide-react";
 import {
   type ComponentProps,
@@ -12,6 +13,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const DATA_TABLE_TOOLBAR_VARIANTS = ["toolbar", "stacked", "compact"] as const;
 export type DataTableToolbarVariant = (typeof DATA_TABLE_TOOLBAR_VARIANTS)[number];
@@ -42,43 +44,31 @@ function useToolbar(part: string) {
 type ColumnsContext = { value: string[]; toggle: (column: string, visible: boolean) => void };
 const ColumnsCtx = createContext<ColumnsContext | null>(null);
 
-const srOnly = {
-  position: "absolute",
-  width: 1,
-  height: 1,
-  margin: -1,
-  padding: 0,
-  overflow: "hidden",
-  clip: "rect(0, 0, 0, 0)",
-  whiteSpace: "nowrap",
-  border: 0,
-} as const;
-
-function controlStyle(variant: DataTableToolbarVariant) {
-  return {
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    height: variant === "compact" ? 24 : 28,
-    padding: variant === "compact" ? "0 10px" : "0 12px",
-    border: 0,
-    borderRadius: 999,
-    color: "var(--uai-text)",
-    fontSize: variant === "compact" ? 12 : 12.5,
-    lineHeight: "18px",
-    fontWeight: 500,
-    whiteSpace: "nowrap",
-    cursor: "pointer",
-  } as const;
-}
 const easeOut = "cubic-bezier(0.23, 1, 0.32, 1)";
-// Secondary pill: raised fill, lighter on hover, a small press. Inline styles own geometry.
-const controlClass =
-  "bg-[var(--uai-surface-raised)] [transition:background-color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-[color-mix(in_oklab,var(--uai-surface-raised)_85%,var(--uai-text))] active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uai-accent)] disabled:pointer-events-none disabled:opacity-50 aria-expanded:bg-[color-mix(in_oklab,var(--uai-surface-raised)_85%,var(--uai-text))] motion-reduce:transition-none motion-reduce:active:scale-100 [&>svg]:text-[var(--uai-muted)]";
-function classes(...values: (string | false | undefined)[]) {
-  return values.filter(Boolean).join(" ");
-}
+// Secondary pill: raised fill, lighter on hover, a small press.
+const controlVariants = cva(
+  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 bg-secondary font-medium whitespace-nowrap text-foreground [transition:background-color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 aria-expanded:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] motion-reduce:transition-none motion-reduce:active:scale-100 [&>svg]:text-muted-foreground",
+  {
+    variants: {
+      variant: {
+        toolbar: "h-7 px-3 text-[12.5px]/[18px]",
+        stacked: "h-7 px-3 text-[12.5px]/[18px]",
+        compact: "h-6 px-2.5 text-[12px]/[18px]",
+      },
+    },
+  },
+);
+
+const dataTableToolbarVariants = cva("flex min-w-0 text-[13px]/[18px] text-foreground", {
+  variants: {
+    variant: {
+      toolbar: "flex-row flex-wrap items-center gap-2 rounded-[14px] border bg-card p-2",
+      stacked:
+        "flex-col flex-nowrap items-stretch gap-2 rounded-[14px] border-0 bg-background p-2.5 inset-ring-1 inset-ring-border",
+      compact: "flex-row flex-wrap items-center gap-1.5 rounded-xl border bg-card p-1.5",
+    },
+  },
+});
 
 export function DataTableToolbar({
   variant = "toolbar",
@@ -87,7 +77,7 @@ export function DataTableToolbar({
   onSearchChange,
   selectedCount = 0,
   onClearSelection,
-  style,
+  className,
   children,
   ...props
 }: DataTableToolbarProps) {
@@ -110,28 +100,13 @@ export function DataTableToolbar({
       <div
         role="group"
         aria-label="Table controls"
-        {...props}
+        data-slot="data-table-toolbar"
         data-variant={variant}
-        style={{
-          display: "flex",
-          flexDirection: variant === "stacked" ? "column" : "row",
-          flexWrap: variant === "stacked" ? "nowrap" : "wrap",
-          alignItems: variant === "stacked" ? "stretch" : "center",
-          gap: variant === "compact" ? 6 : 8,
-          minWidth: 0,
-          padding: variant === "compact" ? 6 : variant === "stacked" ? 10 : 8,
-          border: variant === "stacked" ? 0 : "1px solid var(--uai-border)",
-          borderRadius: variant === "compact" ? 12 : 14,
-          background: variant === "stacked" ? "var(--uai-canvas)" : "var(--uai-surface)",
-          boxShadow: variant === "stacked" ? "inset 0 0 0 1px var(--uai-border)" : undefined,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
+        className={cn(dataTableToolbarVariants({ variant }), className)}
+        {...props}
       >
         {children}
-        <span role="status" style={srOnly}>
+        <span role="status" className="sr-only">
           {selectedCount > 0 ? `${selectedCount} selected` : ""}
         </span>
       </div>
@@ -139,25 +114,19 @@ export function DataTableToolbar({
   );
 }
 
-export function DataTableToolbarGroup({ style, ...props }: ComponentProps<"div">) {
+export function DataTableToolbarGroup({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="data-table-toolbar-group"
+      className={cn("flex min-w-0 flex-wrap items-center gap-1.5", className)}
       {...props}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        flexWrap: "wrap",
-        gap: 6,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
 export function DataTableToolbarSearch({
   label = "Search rows",
-  style,
+  className,
   onChange,
   onKeyDown,
   ...props
@@ -167,50 +136,34 @@ export function DataTableToolbarSearch({
   const compact = context.variant === "compact";
   return (
     <div
-      className="border-transparent [transition:border-color_120ms_ease-out,background-color_120ms_ease-out] focus-within:border-[var(--uai-border-strong)] motion-reduce:transition-none"
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 6,
-        flex: context.variant === "stacked" ? "0 0 auto" : "1 1 200px",
-        minWidth: 0,
-        height: compact ? 24 : context.variant === "stacked" ? 32 : 28,
-        padding: compact ? "0 3px 0 9px" : "0 4px 0 11px",
-        borderWidth: 1,
-        borderStyle: "solid",
-        borderRadius: 999,
-        background:
-          context.variant === "stacked" ? "var(--uai-surface)" : "var(--uai-surface-raised)",
-      }}
+      data-slot="data-table-toolbar-search"
+      className={cn(
+        "flex min-w-0 items-center gap-1.5 rounded-full border border-transparent [transition:border-color_120ms_ease-out,background-color_120ms_ease-out] focus-within:border-border-strong motion-reduce:transition-none",
+        compact ? "h-6 pr-0.75 pl-[9px]" : "pr-1 pl-[11px]",
+        context.variant === "stacked"
+          ? "h-8 flex-[0_0_auto] bg-card"
+          : cn("flex-[1_1_200px] bg-muted", !compact && "h-7"),
+      )}
     >
       <Search
         size={14}
         strokeWidth={1.75}
         aria-hidden="true"
-        style={{ flexShrink: 0, color: "var(--uai-subtle)" }}
+        className="shrink-0 text-subtle-foreground"
       />
       <input
         aria-label={label}
+        data-slot="data-table-toolbar-search-input"
+        className={cn(
+          "w-full min-w-0 flex-1 border-0 bg-transparent text-inherit outline-none placeholder:text-subtle-foreground [&::-webkit-search-cancel-button]:hidden",
+          compact ? "text-[12px]/[18px]" : "text-[12.5px]/[18px]",
+          className,
+        )}
         {...props}
         ref={inputRef}
         type="search"
         id={`${context.id}-search`}
         value={context.search}
-        className={classes(
-          "outline-none placeholder:text-[var(--uai-subtle)] [&::-webkit-search-cancel-button]:hidden",
-          props.className,
-        )}
-        style={{
-          flex: 1,
-          width: "100%",
-          minWidth: 0,
-          border: 0,
-          background: "transparent",
-          color: "inherit",
-          fontSize: compact ? 12 : 12.5,
-          lineHeight: "18px",
-          ...style,
-        }}
         onChange={(event) => {
           onChange?.(event);
           if (!event.defaultPrevented) context.setSearch(event.target.value);
@@ -231,8 +184,7 @@ export function DataTableToolbarSearch({
             context.setSearch("");
             inputRef.current?.focus();
           }}
-          className={classes(controlClass, "text-[var(--uai-muted)]")}
-          style={{ ...controlStyle(context.variant), width: 20, height: 20, padding: 0 }}
+          className={cn(controlVariants({ variant: context.variant }), "size-5 p-0")}
         >
           <X size={12} strokeWidth={2} aria-hidden="true" />
         </button>
@@ -241,14 +193,14 @@ export function DataTableToolbarSearch({
   );
 }
 
-export function DataTableToolbarButton({ style, className, ...props }: ComponentProps<"button">) {
+export function DataTableToolbarButton({ className, ...props }: ComponentProps<"button">) {
   const context = useToolbar("DataTableToolbarButton");
   return (
     <button
+      data-slot="data-table-toolbar-button"
+      className={cn(controlVariants({ variant: context.variant }), className)}
       {...props}
       type="button"
-      className={classes(controlClass, className)}
-      style={{ ...controlStyle(context.variant), ...style }}
     />
   );
 }
@@ -258,7 +210,7 @@ export function DataTableToolbarExport({
   ...props
 }: ComponentProps<"button">) {
   return (
-    <DataTableToolbarButton {...props}>
+    <DataTableToolbarButton data-slot="data-table-toolbar-export" {...props}>
       <Download size={14} strokeWidth={1.75} aria-hidden="true" />
       {children}
     </DataTableToolbarButton>
@@ -278,7 +230,7 @@ export function DataTableToolbarColumns({
   onValueChange,
   label = "Columns",
   children,
-  style,
+  className,
   ...props
 }: DataTableToolbarColumnsProps) {
   const context = useToolbar("DataTableToolbarColumns");
@@ -327,9 +279,10 @@ export function DataTableToolbarColumns({
     <ColumnsCtx.Provider value={columns}>
       {/* biome-ignore lint/a11y/noStaticElementInteractions: Escape from the trigger or any checkbox closes the panel. */}
       <div
+        data-slot="data-table-toolbar-columns"
+        className={cn("relative", className)}
         {...props}
         ref={rootRef}
-        style={{ position: "relative", ...style }}
         onKeyDown={(event) => {
           if (event.key === "Escape" && open) {
             event.preventDefault();
@@ -345,8 +298,7 @@ export function DataTableToolbarColumns({
           aria-expanded={open}
           aria-controls={panelId}
           onClick={() => setOpen((current) => !current)}
-          className={controlClass}
-          style={controlStyle(context.variant)}
+          className={controlVariants({ variant: context.variant })}
         >
           <Columns3 size={14} strokeWidth={1.75} aria-hidden="true" />
           {label}
@@ -355,25 +307,9 @@ export function DataTableToolbarColumns({
           <fieldset
             ref={panelRef}
             id={panelId}
-            style={{
-              margin: 0,
-              border: 0,
-              position: "absolute",
-              top: "calc(100% + 6px)",
-              right: 0,
-              zIndex: 20,
-              display: "grid",
-              gap: 1,
-              minWidth: 184,
-              padding: 4,
-              borderRadius: 14,
-              background: "var(--uai-surface)",
-              boxShadow:
-                "0 0 0 1px var(--uai-border-strong), 0 16px 32px -12px oklch(0 0 0 / 0.32), 0 4px 8px -4px oklch(0 0 0 / 0.12)",
-              transformOrigin: "top right",
-            }}
+            className="absolute top-[calc(100%+6px)] right-0 z-20 m-0 grid min-w-[184px] origin-top-right gap-px rounded-[14px] border-0 bg-popover p-1 text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_16px_32px_-12px_oklch(0_0_0/0.32),0_4px_8px_-4px_oklch(0_0_0/0.12)]"
           >
-            <legend style={srOnly}>{`Visible ${label.toLowerCase()}`}</legend>
+            <legend className="sr-only">{`Visible ${label.toLowerCase()}`}</legend>
             {children}
           </fieldset>
         ) : null}
@@ -386,47 +322,44 @@ export function DataTableToolbarColumn({
   value,
   children,
   disabled,
+  className,
 }: {
   value: string;
   children: ReactNode;
   disabled?: boolean;
+  className?: string;
 }) {
   const columns = useContext(ColumnsCtx);
   if (!columns)
     throw new Error("DataTableToolbarColumn must be used within DataTableToolbarColumns");
   return (
     <label
-      className={
+      data-slot="data-table-toolbar-column"
+      className={cn(
+        "flex min-h-[30px] items-center gap-2 rounded-lg px-2 py-1 text-[13px] font-medium",
         disabled
-          ? undefined
-          : "[transition:background-color_120ms_ease-out] hover:bg-[var(--uai-surface-raised)] motion-reduce:transition-none"
-      }
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        minHeight: 30,
-        padding: "4px 8px",
-        borderRadius: 8,
-        fontSize: 13,
-        fontWeight: 500,
-        cursor: disabled ? "default" : "pointer",
-        opacity: disabled ? 0.45 : 1,
-      }}
+          ? "cursor-default opacity-45"
+          : "cursor-pointer [transition:background-color_120ms_ease-out] hover:bg-accent motion-reduce:transition-none",
+        className,
+      )}
     >
       <input
         type="checkbox"
         disabled={disabled}
         checked={columns.value.includes(value)}
         onChange={(event) => columns.toggle(value, event.target.checked)}
-        style={{ width: 14, height: 14, margin: 0, accentColor: "var(--uai-accent)" }}
+        className="m-0 size-3.5 accent-primary"
       />
       {children}
     </label>
   );
 }
 
-export function DataTableToolbarBulkActions({ style, children, ...props }: ComponentProps<"div">) {
+export function DataTableToolbarBulkActions({
+  className,
+  children,
+  ...props
+}: ComponentProps<"div">) {
   const context = useToolbar("DataTableToolbarBulkActions");
   const visible = context.selectedCount > 0;
   const ref = useRef<HTMLDivElement>(null);
@@ -449,21 +382,15 @@ export function DataTableToolbarBulkActions({ style, children, ...props }: Compo
     <div
       role="group"
       aria-label="Bulk actions"
+      data-slot="data-table-toolbar-bulk-actions"
+      className={cn(
+        "flex min-w-0 flex-wrap items-center gap-1.5 rounded-full bg-primary/12 inset-ring-1 inset-ring-primary/22",
+        context.variant === "stacked" ? "basis-auto" : "basis-full",
+        context.variant === "compact" ? "py-0.75 pr-0.75 pl-2.5" : "py-1 pr-1 pl-3",
+        className,
+      )}
       {...props}
       ref={ref}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        flexWrap: "wrap",
-        gap: 6,
-        flexBasis: context.variant === "stacked" ? "auto" : "100%",
-        minWidth: 0,
-        padding: context.variant === "compact" ? "3px 3px 3px 10px" : "4px 4px 4px 12px",
-        borderRadius: 999,
-        background: "color-mix(in oklab, var(--uai-accent) 12%, transparent)",
-        boxShadow: "inset 0 0 0 1px color-mix(in oklab, var(--uai-accent) 22%, transparent)",
-        ...style,
-      }}
     >
       {children}
     </div>
@@ -471,23 +398,17 @@ export function DataTableToolbarBulkActions({ style, children, ...props }: Compo
 }
 
 export function DataTableToolbarSelectionCount({
-  style,
+  className,
   children,
   ...props
 }: ComponentProps<"span">) {
   const context = useToolbar("DataTableToolbarSelectionCount");
   return (
     <span
+      data-slot="data-table-toolbar-selection-count"
+      className={cn("mr-auto text-[12.5px] font-medium text-foreground tabular-nums", className)}
       {...props}
       aria-hidden="true"
-      style={{
-        marginRight: "auto",
-        color: "var(--uai-text)",
-        fontSize: 12.5,
-        fontWeight: 500,
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     >
       {children ?? `${context.selectedCount} selected`}
     </span>
@@ -502,6 +423,7 @@ export function DataTableToolbarClearSelection({
   const context = useToolbar("DataTableToolbarClearSelection");
   return (
     <DataTableToolbarButton
+      data-slot="data-table-toolbar-clear-selection"
       {...props}
       onClick={(event) => {
         onClick?.(event);

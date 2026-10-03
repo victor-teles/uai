@@ -36,7 +36,7 @@ test("announces a busy, labelled status and hides placeholder shapes", () => {
   const status = screen.getByRole("status");
   expect(status.getAttribute("aria-busy")).toBe("true");
   expect(screen.getByText("Loading invoices").parentElement).toBe(status);
-  const shapes = view.container.querySelectorAll(".uai-skeleton");
+  const shapes = view.container.querySelectorAll("[data-motion]");
   expect(shapes.length).toBe(4);
   for (const shape of shapes) expect(shape.closest("[aria-hidden='true']")).toBeTruthy();
 });
@@ -44,7 +44,7 @@ test("announces a busy, labelled status and hides placeholder shapes", () => {
 test("sizes shapes explicitly so loaded content can match them", () => {
   const view = render(<Fixture />);
   const [block, circle, line, small] = Array.from(
-    view.container.querySelectorAll<HTMLElement>(".uai-skeleton"),
+    view.container.querySelectorAll<HTMLElement>("[data-motion]"),
   );
   if (!block || !circle || !line || !small) throw new Error("Missing skeleton shapes");
   expect(block.style.height).toBe("72px");
@@ -59,12 +59,11 @@ test("applies motion per variant with a reduced-motion override", () => {
   for (const variant of SKELETON_GROUP_VARIANTS) {
     const view = render(<Fixture variant={variant} />);
     expect(view.container.firstElementChild?.getAttribute("data-variant")).toBe(variant);
-    expect(view.container.querySelector(".uai-skeleton")?.getAttribute("data-motion")).toBe(
-      variant,
-    );
-    expect(view.container.querySelector("style")?.textContent).toContain(
-      "prefers-reduced-motion: reduce",
-    );
+    const shape = view.container.querySelector("[data-slot='skeleton-group-block']");
+    expect(shape?.getAttribute("data-motion")).toBe(variant);
+    if (variant === "static") expect(shape?.className).not.toContain("animate-");
+    else expect(shape?.className).toContain("motion-reduce:animate-none");
+    expect(view.container.querySelector("style")).toBeNull();
     view.unmount();
   }
 });

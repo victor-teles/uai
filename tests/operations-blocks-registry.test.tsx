@@ -16,13 +16,13 @@ test("publishes every operations block without drift and keeps examples executab
     const entry = registry.items.find((candidate: { name: string }) => candidate.name === item.id);
     expect(item.category).toBe("Operations");
     expect(entry.type).toBe("registry:block");
-    expect(mirror).toBe(source);
+    expect(mirror).toBe(`export * from "@/registry/uai/blocks/${item.id}";\n`);
     expect(output.files[0].content).toBe(source);
     expect(item.usage).toBe(preview);
     expect(item.accessibility.length).toBeGreaterThanOrEqual(3);
     expect(source).not.toContain("@/registry/");
     for (const [, component] of source.matchAll(/from "@\/components\/ui\/uai\/([\w-]+)"/g)) {
-      expect(entry.registryDependencies).toContain(`http://localhost:3000/r/${component}.json`);
+      expect(entry.registryDependencies).toContain(`https://useuai.vercel.app/r/${component}.json`);
     }
   }
 });

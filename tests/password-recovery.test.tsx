@@ -230,16 +230,16 @@ test("renders card, split, and compact as distinct root layouts", () => {
 
   expect(PASSWORD_RECOVERY_VARIANTS).toEqual(["card", "split", "compact"]);
   expect(form?.dataset.variant).toBe("card");
-  expect(form?.style.padding).toBe("20px");
+  expect(form?.className).toContain("p-5");
 
   rerender(<PasswordRecoveryFixture variant="split" />);
   expect(form?.dataset.variant).toBe("split");
-  expect(form?.style.padding).toBe("0px");
+  expect(form?.className).toContain("p-0");
   expect(form?.className).toContain("sm:grid-cols");
 
   rerender(<PasswordRecoveryFixture variant="compact" />);
   expect(form?.dataset.variant).toBe("compact");
-  expect(form?.style.borderRadius).toBe("12px");
+  expect(form?.className).toContain("rounded-xl");
   expect(screen.getByRole("button", { name: "Send reset link" }).className).toContain("h-[34px]");
 });
 

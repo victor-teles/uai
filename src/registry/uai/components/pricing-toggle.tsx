@@ -1,8 +1,8 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import {
   type ComponentProps,
-  type CSSProperties,
   createContext,
   type KeyboardEvent,
   type ReactNode,
@@ -12,6 +12,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const PRICING_TOGGLE_VARIANTS = ["segmented", "pill", "compact"] as const;
 export type PricingToggleVariant = (typeof PRICING_TOGGLE_VARIANTS)[number];
@@ -34,51 +35,45 @@ function usePricing(part: string) {
 }
 
 const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
-const pricingCss = `
-.uai-pricing-list{position:relative;isolation:isolate}
-.uai-pricing-thumb{position:absolute;top:0;left:0;z-index:-1;pointer-events:none;opacity:0;transition:transform 220ms cubic-bezier(0.23,1,0.32,1),width 220ms cubic-bezier(0.23,1,0.32,1),opacity 120ms ease-out}
-.uai-pricing-list[data-ready] .uai-pricing-thumb{opacity:1}
-.uai-pricing-option{background:transparent;color:var(--uai-subtle);transition:color 120ms ease-out,background-color 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-pricing-option:hover{color:var(--uai-text)}
-.uai-pricing-option[aria-checked=true]{color:var(--uai-text)}
-.uai-pricing-list:not([data-ready]) .uai-pricing-option[aria-checked=true]{background:var(--uai-pricing-thumb)}
-.uai-pricing-option:active{transform:scale(0.97)}
-.uai-pricing-option:focus-visible{outline:2px solid var(--uai-accent);outline-offset:1px}
-@media (prefers-reduced-motion: reduce){
-.uai-pricing-thumb,.uai-pricing-option{transition:none}
-.uai-pricing-option:active{transform:none}
-}
-`;
-const tracks: Record<PricingToggleVariant, CSSProperties> = {
-  segmented: {
-    padding: 3,
-    borderRadius: 10,
-    background: "var(--uai-canvas)",
-    boxShadow: "inset 0 0 0 1px var(--uai-border)",
-    ["--uai-pricing-thumb" as string]: "var(--uai-surface)",
+const pricingToggleListVariants = cva(
+  "relative isolate inline-flex max-w-full items-center justify-self-start gap-0.5",
+  {
+    variants: {
+      variant: {
+        segmented: "rounded-[10px] bg-background p-0.75 shadow-[inset_0_0_0_1px_var(--border)]",
+        pill: "rounded-full bg-card p-0.75 shadow-[inset_0_0_0_1px_var(--border)]",
+        compact: "rounded-lg bg-transparent p-0",
+      },
+    },
   },
-  pill: {
-    padding: 3,
-    borderRadius: 999,
-    background: "var(--uai-surface)",
-    boxShadow: "inset 0 0 0 1px var(--uai-border)",
-    ["--uai-pricing-thumb" as string]: "var(--uai-surface-raised)",
+);
+const pricingToggleThumbVariants = cva(
+  "pointer-events-none absolute top-0 left-0 -z-1 opacity-0 [transition:transform_220ms_cubic-bezier(0.23,1,0.32,1),width_220ms_cubic-bezier(0.23,1,0.32,1),opacity_120ms_ease-out] group-data-ready/list:opacity-100 motion-reduce:transition-none",
+  {
+    variants: {
+      variant: {
+        segmented:
+          "rounded-[7px] bg-card shadow-[0_0_0_1px_var(--border),0_1px_2px_oklch(0_0_0/0.08)]",
+        pill: "rounded-full bg-accent",
+        compact: "rounded-md bg-card shadow-[0_0_0_1px_var(--border)]",
+      },
+    },
   },
-  compact: {
-    padding: 0,
-    borderRadius: 8,
-    background: "transparent",
-    ["--uai-pricing-thumb" as string]: "var(--uai-surface)",
+);
+const pricingToggleOptionVariants = cva(
+  "inline-flex cursor-pointer items-center gap-1.5 border-0 bg-transparent font-medium whitespace-nowrap text-subtle-foreground [transition:color_120ms_ease-out,background-color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring active:[transform:scale(0.97)] aria-checked:text-foreground motion-reduce:transition-none motion-reduce:active:[transform:none]",
+  {
+    variants: {
+      variant: {
+        segmented:
+          "h-7 rounded-[7px] px-3 text-[13px]/[18px] not-group-data-ready/list:aria-checked:bg-card",
+        pill: "h-7 rounded-full px-3.5 text-[13px]/[18px] not-group-data-ready/list:aria-checked:bg-accent",
+        compact:
+          "h-6 rounded-md px-2 text-xs/[18px] not-group-data-ready/list:aria-checked:bg-card",
+      },
+    },
   },
-};
-const thumbs: Record<PricingToggleVariant, CSSProperties> = {
-  segmented: {
-    borderRadius: 7,
-    boxShadow: "0 0 0 1px var(--uai-border), 0 1px 2px oklch(0 0 0 / 0.08)",
-  },
-  pill: { borderRadius: 999 },
-  compact: { borderRadius: 6, boxShadow: "0 0 0 1px var(--uai-border)" },
-};
+);
 
 /** Reads the selected billing period inside PricingToggle. */
 export function usePricingPeriod() {
@@ -91,7 +86,7 @@ export function PricingToggle({
   defaultValue = "",
   onValueChange,
   children,
-  style,
+  className,
   ...props
 }: PricingToggleProps) {
   const [internal, setInternal] = useState(defaultValue);
@@ -104,19 +99,15 @@ export function PricingToggle({
   return (
     <Context.Provider value={{ variant, value: current, select }}>
       <div
-        {...props}
+        data-slot="pricing-toggle"
         data-variant={variant}
-        style={{
-          display: "grid",
-          gap: variant === "compact" ? 12 : 16,
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
+        className={cn(
+          "grid min-w-0 text-[13px]/[18px] text-foreground",
+          variant === "compact" ? "gap-3" : "gap-4",
+          className,
+        )}
+        {...props}
       >
-        <style>{pricingCss}</style>
         {children}
       </div>
     </Context.Provider>
@@ -134,7 +125,6 @@ const MOVES: Record<string, (index: number, count: number) => number> = {
 
 export function PricingToggleList({
   className,
-  style,
   onKeyDown,
   children,
   ...props
@@ -178,30 +168,25 @@ export function PricingToggleList({
   return (
     <div
       role="radiogroup"
+      data-slot="pricing-toggle-list"
+      className={cn(
+        "group/list",
+        pricingToggleListVariants({ variant: context.variant }),
+        className,
+      )}
       {...props}
       ref={ref}
       data-ready={thumb ? "" : undefined}
-      className={["uai-pricing-list", className].filter(Boolean).join(" ")}
       onKeyDown={handleKeyDown}
-      style={{
-        display: "inline-flex",
-        justifySelf: "start",
-        alignItems: "center",
-        gap: 2,
-        maxWidth: "100%",
-        ...tracks[context.variant],
-        ...style,
-      }}
     >
       <span
         aria-hidden="true"
-        className="uai-pricing-thumb"
+        data-slot="pricing-toggle-thumb"
+        className={pricingToggleThumbVariants({ variant: context.variant })}
         style={{
           width: thumb?.width ?? 0,
           height: thumb?.height ?? 0,
           transform: thumb ? `translate(${thumb.x}px, ${thumb.y}px)` : undefined,
-          background: "var(--uai-pricing-thumb)",
-          ...thumbs[context.variant],
         }}
       />
       {children}
@@ -214,38 +199,21 @@ export function PricingToggleOption({
   children,
   onClick,
   className,
-  style,
   ...props
 }: Omit<ComponentProps<"button">, "value"> & { value: string }) {
   const context = usePricing("PricingToggleOption");
   const checked = context.value === value;
-  const compact = context.variant === "compact";
-  const pill = context.variant === "pill";
   return (
     // biome-ignore lint/a11y/useSemanticElements: APG radio group built from buttons for custom segmented styling.
     <button
+      data-slot="pricing-toggle-option"
+      className={cn(pricingToggleOptionVariants({ variant: context.variant }), className)}
       {...props}
       type="button"
       role="radio"
       aria-checked={checked}
       data-value={value}
       tabIndex={checked || context.value === "" ? 0 : -1}
-      className={["uai-pricing-option", className].filter(Boolean).join(" ")}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        height: compact ? 24 : 28,
-        padding: compact ? "0 8px" : pill ? "0 14px" : "0 12px",
-        border: 0,
-        borderRadius: pill ? 999 : compact ? 6 : 7,
-        fontSize: compact ? 12 : 13,
-        fontWeight: 500,
-        lineHeight: "18px",
-        whiteSpace: "nowrap",
-        cursor: "pointer",
-        ...style,
-      }}
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) context.select(value);
@@ -256,24 +224,15 @@ export function PricingToggleOption({
   );
 }
 
-export function PricingToggleSavings({ style, ...props }: ComponentProps<"span">) {
+export function PricingToggleSavings({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
+      data-slot="pricing-toggle-savings"
+      className={cn(
+        "inline-flex h-[18px] items-center rounded-full bg-success/14 px-1.5 text-[11px]/4 font-medium text-success tabular-nums",
+        className,
+      )}
       {...props}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        height: 18,
-        padding: "0 6px",
-        borderRadius: 999,
-        background: "color-mix(in oklab, var(--uai-success) 14%, transparent)",
-        color: "var(--uai-success)",
-        fontSize: 11,
-        fontWeight: 500,
-        lineHeight: "16px",
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     />
   );
 }
@@ -281,12 +240,18 @@ export function PricingToggleSavings({ style, ...props }: ComponentProps<"span">
 export function PricingTogglePrice({
   period,
   children,
+  className,
   ...props
 }: ComponentProps<"span"> & { period: string; children?: ReactNode }) {
   const context = usePricing("PricingTogglePrice");
   if (context.value !== period) return null;
   return (
-    <span {...props} data-period={period}>
+    <span
+      data-slot="pricing-toggle-price"
+      className={cn(className)}
+      {...props}
+      data-period={period}
+    >
       {children}
     </span>
   );

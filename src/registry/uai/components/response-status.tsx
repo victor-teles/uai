@@ -1,9 +1,9 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { Check, CircleAlert, CircleDashed, RotateCw, Square } from "lucide-react";
 import {
   type ComponentProps,
-  type CSSProperties,
   createContext,
   useContext,
   useEffect,
@@ -11,6 +11,7 @@ import {
   useLayoutEffect,
   useRef,
 } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const RESPONSE_STATUS_VARIANTS = ["inline", "pill", "bar"] as const;
 export const RESPONSE_STATUSES = ["queued", "streaming", "stopped", "complete", "failed"] as const;
@@ -40,7 +41,7 @@ function useResponseStatus(part: string) {
 }
 
 const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
-const dangerText = "color-mix(in oklab, var(--uai-danger) 75%, var(--uai-text))";
+const dangerText = "text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))]";
 const defaultLabels: Record<ResponseStatusValue, string> = {
   queued: "Waiting to start…",
   streaming: "Generating response…",
@@ -49,16 +50,40 @@ const defaultLabels: Record<ResponseStatusValue, string> = {
   failed: "Response failed",
 };
 
-const responseStatusCss = `
-@keyframes uai-response-status-shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
-[data-uai-response-status][data-status="streaming"] [data-uai-response-status-label],[data-uai-response-status][data-status="queued"] [data-uai-response-status-label]{background-image:linear-gradient(90deg,var(--uai-subtle) 0%,var(--uai-subtle) 35%,var(--uai-text) 50%,var(--uai-subtle) 65%,var(--uai-subtle) 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:uai-response-status-shimmer 2s linear infinite}
-[data-uai-response-status-action]{transition:background-color 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-[data-uai-response-status-action]:hover{background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text))!important}
-[data-uai-response-status][data-variant="pill"] [data-uai-response-status-action]:hover{background:var(--uai-surface-raised)!important}
-[data-uai-response-status-action]:active{transform:scale(0.97)}
-[data-uai-response-status-action]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-@media (prefers-reduced-motion:reduce){[data-uai-response-status] [data-uai-response-status-label]{animation:none!important;background:none!important;color:var(--uai-text)!important}[data-uai-response-status-action]{transition:none}[data-uai-response-status-action]:active{transform:none}}
-`;
+const responseStatusVariants = cva(
+  "max-w-full min-w-0 flex-wrap items-center text-[13px]/[18px] text-foreground outline-none",
+  {
+    variants: {
+      variant: {
+        inline: "inline-flex min-h-7 gap-2",
+        pill: "inline-flex min-h-8 gap-2 rounded-full bg-muted py-0.5 pr-0.5 pl-2.5 inset-ring-1 inset-ring-foreground/5",
+        bar: "flex min-h-11 gap-2.5 rounded-[14px] border bg-card py-1.5 pr-1.5 pl-3.5",
+      },
+      failed: { true: "", false: "" },
+    },
+    compoundVariants: [
+      {
+        variant: "bar",
+        failed: true,
+        className: "border-[color-mix(in_oklab,var(--destructive)_45%,var(--border))]",
+      },
+    ],
+  },
+);
+
+const responseStatusActionVariants = cva(
+  "inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-full border-0 px-3 text-[12.5px] font-medium text-foreground [transition:background-color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100",
+  {
+    variants: {
+      variant: {
+        inline:
+          "bg-secondary hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+        pill: "bg-card hover:bg-accent",
+        bar: "bg-secondary hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+      },
+    },
+  },
+);
 
 function prefersReducedMotion() {
   return (
@@ -71,7 +96,7 @@ export function ResponseStatus({
   variant = "inline",
   status = "queued",
   children,
-  style,
+  className,
   ...props
 }: ResponseStatusProps) {
   const id = useId();
@@ -91,31 +116,6 @@ export function ResponseStatus({
       next.focus();
     } else rootRef.current?.focus();
   }, [status]);
-  const layout: Record<ResponseStatusVariant, CSSProperties> = {
-    inline: { display: "inline-flex", gap: 8, minHeight: 28 },
-    pill: {
-      display: "inline-flex",
-      gap: 8,
-      minHeight: 32,
-      padding: "2px 2px 2px 10px",
-      borderRadius: 999,
-      background: "var(--uai-surface-raised)",
-      boxShadow: "inset 0 0 0 1px color-mix(in oklab, var(--uai-text) 5%, transparent)",
-    },
-    bar: {
-      display: "flex",
-      gap: 10,
-      minHeight: 44,
-      padding: "6px 6px 6px 14px",
-      borderRadius: 14,
-      border: `1px solid ${
-        status === "failed"
-          ? "color-mix(in oklab, var(--uai-danger) 45%, var(--uai-border))"
-          : "var(--uai-border)"
-      }`,
-      background: "var(--uai-surface)",
-    },
-  };
   return (
     <ResponseStatusContext.Provider
       value={{
@@ -134,28 +134,14 @@ export function ResponseStatus({
     >
       <div
         tabIndex={-1}
+        data-slot="response-status"
         {...props}
         ref={rootRef}
         aria-busy={active || undefined}
         data-variant={variant}
         data-status={status}
-        data-uai-response-status=""
-        style={{
-          alignItems: "center",
-          flexWrap: "wrap",
-          maxWidth: "100%",
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          outline: "none",
-          ...layout[variant],
-          ...style,
-        }}
+        className={cn(responseStatusVariants({ variant, failed: status === "failed" }), className)}
       >
-        <style href="uai-response-status" precedence="default">
-          {responseStatusCss}
-        </style>
         {children}
       </div>
     </ResponseStatusContext.Provider>
@@ -180,24 +166,15 @@ function StreamingDots() {
     };
   }, []);
   return (
-    <span ref={ref} style={{ display: "inline-flex", gap: 3 }}>
+    <span ref={ref} className="inline-flex gap-0.75">
       {[0, 1, 2].map((dot) => (
-        <span
-          key={dot}
-          style={{
-            width: 4,
-            height: 4,
-            borderRadius: 999,
-            background: "currentColor",
-            opacity: 0.6,
-          }}
-        />
+        <span key={dot} className="size-1 rounded-full bg-current opacity-60" />
       ))}
     </span>
   );
 }
 
-export function ResponseStatusIndicator({ children, style, ...props }: ComponentProps<"span">) {
+export function ResponseStatusIndicator({ children, className, ...props }: ComponentProps<"span">) {
   const context = useResponseStatus("ResponseStatusIndicator");
   const icon = {
     queued: <CircleDashed size={14} />,
@@ -207,97 +184,73 @@ export function ResponseStatusIndicator({ children, style, ...props }: Component
     failed: <CircleAlert size={14} />,
   }[context.status];
   const color = {
-    queued: "var(--uai-subtle)",
-    streaming: "var(--uai-text)",
-    stopped: "var(--uai-subtle)",
-    complete: "var(--uai-success)",
+    queued: "text-subtle-foreground",
+    streaming: "text-foreground",
+    stopped: "text-subtle-foreground",
+    complete: "text-success",
     failed: dangerText,
   }[context.status];
   return (
     <span
       aria-hidden="true"
-      {...props}
-      style={{
-        display: "grid",
-        placeItems: "center",
-        flex: "none",
-        width: 18,
-        height: 18,
+      data-slot="response-status-indicator"
+      className={cn(
+        "grid size-[18px] flex-none place-items-center transition-[color] duration-200 ease-out",
         color,
-        transition: "color 200ms ease-out",
-        ...style,
-      }}
+        className,
+      )}
+      {...props}
     >
       {children ?? icon}
     </span>
   );
 }
 
-export function ResponseStatusLabel({ children, style, ...props }: ComponentProps<"span">) {
+export function ResponseStatusLabel({ children, className, ...props }: ComponentProps<"span">) {
   const context = useResponseStatus("ResponseStatusLabel");
   return (
     <span
       role="status"
       aria-live="polite"
       aria-atomic="true"
+      data-slot="response-status-label"
+      className={cn(
+        "min-w-0 font-medium transition-[color] duration-200 ease-out",
+        context.active
+          ? "shimmer-text"
+          : context.status === "failed"
+            ? dangerText
+            : "text-foreground",
+        className,
+      )}
       {...props}
       id={`${context.id}-label`}
-      data-uai-response-status-label=""
-      style={{
-        minWidth: 0,
-        color: context.status === "failed" ? dangerText : "var(--uai-text)",
-        fontWeight: 500,
-        transition: "color 200ms ease-out",
-        ...style,
-      }}
     >
       {children ?? defaultLabels[context.status]}
     </span>
   );
 }
 
-export function ResponseStatusDetail({ style, ...props }: ComponentProps<"span">) {
+export function ResponseStatusDetail({ className, ...props }: ComponentProps<"span">) {
   useResponseStatus("ResponseStatusDetail");
   return (
     <span
+      data-slot="response-status-detail"
+      className={cn("min-w-0 text-[12px] text-subtle-foreground tabular-nums", className)}
       {...props}
-      style={{
-        minWidth: 0,
-        color: "var(--uai-subtle)",
-        fontSize: 12,
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     />
   );
 }
 
-export function ResponseStatusActions({ style, ...props }: ComponentProps<"div">) {
+export function ResponseStatusActions({ className, ...props }: ComponentProps<"div">) {
   useResponseStatus("ResponseStatusActions");
   return (
     <div
+      data-slot="response-status-actions"
+      className={cn("ml-auto flex items-center gap-1", className)}
       {...props}
-      style={{ display: "flex", alignItems: "center", gap: 4, marginLeft: "auto", ...style }}
     />
   );
-}
-
-function actionStyle(variant: ResponseStatusVariant): CSSProperties {
-  return {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 6,
-    height: 28,
-    padding: "0 12px",
-    border: 0,
-    borderRadius: 999,
-    background: variant === "pill" ? "var(--uai-surface)" : "var(--uai-surface-raised)",
-    color: "var(--uai-text)",
-    font: "inherit",
-    fontSize: 12.5,
-    fontWeight: 500,
-    cursor: "pointer",
-  };
 }
 
 function useAction(kind: ActionKind, part: string) {
@@ -318,7 +271,7 @@ export function ResponseStatusStop({
   children,
   onFocus,
   onBlur,
-  style,
+  className,
   ...props
 }: ComponentProps<"button">) {
   const { context, ref, onFocus: track, onBlur: untrack } = useAction("stop", "ResponseStatusStop");
@@ -327,9 +280,10 @@ export function ResponseStatusStop({
     <button
       type="button"
       aria-describedby={`${context.id}-label`}
+      data-slot="response-status-stop"
+      className={cn(responseStatusActionVariants({ variant: context.variant }), className)}
       {...props}
       ref={ref}
-      data-uai-response-status-action=""
       onFocus={(event) => {
         onFocus?.(event);
         track();
@@ -338,7 +292,6 @@ export function ResponseStatusStop({
         onBlur?.(event);
         untrack(event.currentTarget);
       }}
-      style={{ ...actionStyle(context.variant), ...style }}
     >
       {children ?? (
         <>
@@ -354,7 +307,7 @@ export function ResponseStatusRetry({
   children,
   onFocus,
   onBlur,
-  style,
+  className,
   ...props
 }: ComponentProps<"button">) {
   const {
@@ -368,9 +321,10 @@ export function ResponseStatusRetry({
     <button
       type="button"
       aria-describedby={`${context.id}-label`}
+      data-slot="response-status-retry"
+      className={cn(responseStatusActionVariants({ variant: context.variant }), className)}
       {...props}
       ref={ref}
-      data-uai-response-status-action=""
       onFocus={(event) => {
         onFocus?.(event);
         track();
@@ -379,7 +333,6 @@ export function ResponseStatusRetry({
         onBlur?.(event);
         untrack(event.currentTarget);
       }}
-      style={{ ...actionStyle(context.variant), ...style }}
     >
       {children ?? (
         <>

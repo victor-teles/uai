@@ -60,28 +60,30 @@ test("renders card, plain, compact, and page placement variants", () => {
 
   expect(EMPTY_STATE_VARIANTS).toEqual(["card", "plain", "compact", "page"]);
   expect(section?.dataset.variant).toBe("card");
-  expect(section?.style.borderRadius).toBe("14px");
-  expect(section?.style.padding).toBe("32px 28px");
+  expect(section?.className).toContain("rounded-[14px]");
+  expect(section?.className).toContain("px-7");
+  expect(section?.className).toContain("py-8");
 
   rerender(<EmptyStateFixture variant="plain" />);
   expect(section?.dataset.variant).toBe("plain");
-  expect(section?.style.borderRadius).toBe("0px");
+  expect(section?.className).toContain("rounded-none");
   expect(section?.className).toContain("bg-transparent");
 
   rerender(<EmptyStateFixture variant="compact" />);
   expect(section?.dataset.variant).toBe("compact");
-  expect(section?.style.borderRadius).toBe("12px");
-  expect(section?.style.padding).toBe("14px");
+  expect(section?.className).toContain("rounded-xl");
+  expect(section?.className).toContain("p-3.5");
   expect(section?.className).toContain("text-left");
   expect(screen.getByRole("heading").className).toContain("text-[13px]");
 
   rerender(<EmptyStateFixture variant="page" />);
   expect(section?.dataset.variant).toBe("page");
-  expect(section?.style.minHeight).toBe("400px");
-  expect(section?.style.padding).toBe("48px 32px");
+  expect(section?.className).toContain("min-h-[400px]");
+  expect(section?.className).toContain("px-8");
+  expect(section?.className).toContain("py-12");
   expect(section?.className).toContain("flex-wrap");
   expect(screen.getByRole("heading").className).toContain("text-xl");
-  expect(section?.firstElementChild?.getAttribute("style")).toContain("width: 160px");
+  expect(section?.firstElementChild?.className).toContain("size-40");
 });
 
 test("supports button and link actions without stealing consumer behavior", () => {
@@ -113,7 +115,7 @@ test("contains long localized copy without truncation", () => {
     </EmptyState>,
   );
 
-  expect(screen.getByRole("heading").className).toContain("[overflow-wrap:anywhere]");
+  expect(screen.getByRole("heading").className).toContain("wrap-anywhere");
   expect(screen.getByText(/Crie um projeto/).className).not.toContain("truncate");
 });
 

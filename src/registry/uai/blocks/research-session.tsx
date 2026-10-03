@@ -1,6 +1,6 @@
 "use client";
 
-import { type ComponentProps, type CSSProperties, createContext, useContext, useId } from "react";
+import { type ComponentProps, createContext, useContext, useId } from "react";
 import { Citation, type CitationProps, type CitationVariant } from "@/components/ui/uai/citation";
 import {
   ProgressSummary,
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/uai/response-status";
 import { TaskList, type TaskListProps, type TaskListVariant } from "@/components/ui/uai/task-list";
 import { Thinking, type ThinkingProps } from "@/components/ui/uai/thinking";
+import { cn } from "@/lib/uai-utils";
 
 export const RESEARCH_SESSION_VARIANTS = ["split", "stacked", "compact"] as const;
 export type ResearchSessionVariant = (typeof RESEARCH_SESSION_VARIANTS)[number];
@@ -51,26 +52,11 @@ const statusVariants: Record<ResearchSessionVariant, ResponseStatusVariant> = {
   compact: "inline",
 };
 
-const layoutCss = `
-[data-uai-research-layout]{display:grid;gap:16px;align-items:start;min-width:0}
-[data-uai-research="compact"]>[data-uai-research-layout]{gap:12px}
-@container (min-width: 760px){
-  [data-uai-research="split"]>[data-uai-research-layout]{grid-template-columns:minmax(240px,0.8fr) minmax(0,1.4fr);gap:20px}
-  [data-uai-research-layout]>[data-uai-research-region="header"]{grid-column:1/-1}
-}
-[data-uai-research-source]{transition:background-color 120ms ease-out}
-[data-uai-research-source="tile"]{background:color-mix(in oklab,var(--uai-surface-raised) 70%,var(--uai-surface))}
-[data-uai-research-source]:hover{background:var(--uai-surface-raised)}
-[data-uai-research-link]{text-decoration-line:none;text-decoration-color:var(--uai-border-strong);text-underline-offset:3px}
-[data-uai-research-link]:hover{text-decoration-line:underline}
-[data-uai-research-link]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px;border-radius:4px}
-@media (prefers-reduced-motion: reduce){[data-uai-research-source]{transition:none}}`;
-
 /** A research run: the plan, search activity, sources, and the synthesis. Split places the plan and activity beside the synthesis at 760px. */
 export function ResearchSession({
   variant = "split",
   children,
-  style,
+  className,
   ...props
 }: ResearchSessionProps) {
   const id = useId();
@@ -78,60 +64,67 @@ export function ResearchSession({
     <Context.Provider value={{ id, variant }}>
       <section
         aria-labelledby={`${id}-title`}
+        data-slot="research-session"
+        className={cn(
+          "@container box-border min-w-0 text-[13px]/[18px] text-foreground",
+          className,
+        )}
         {...props}
         data-variant={variant}
-        data-uai-research={variant}
-        style={{
-          boxSizing: "border-box",
-          containerType: "inline-size",
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
       >
-        <style>{layoutCss}</style>
-        <div data-uai-research-layout="">{children}</div>
+        <div
+          className={cn(
+            "grid min-w-0 items-start",
+            variant === "compact" ? "gap-3" : "gap-4",
+            variant === "split" &&
+              "@min-[760px]:grid-cols-[minmax(240px,0.8fr)_minmax(0,1.4fr)] @min-[760px]:gap-5",
+          )}
+        >
+          {children}
+        </div>
       </section>
     </Context.Provider>
   );
 }
 
-export function ResearchSessionHeader({ style, ...props }: ComponentProps<"header">) {
+export function ResearchSessionHeader({ className, ...props }: ComponentProps<"header">) {
   const { variant } = useSession("ResearchSessionHeader");
   return (
     <header
+      data-slot="research-session-header"
+      className={cn(
+        "grid min-w-0 @min-[760px]:col-span-full",
+        variant === "compact" ? "gap-2" : "gap-3",
+        className,
+      )}
       {...props}
-      data-uai-research-region="header"
-      style={{ display: "grid", gap: variant === "compact" ? 8 : 12, minWidth: 0, ...style }}
     />
   );
 }
 
-export function ResearchSessionTitle({ style, ...props }: ComponentProps<"h2">) {
+export function ResearchSessionTitle({ className, ...props }: ComponentProps<"h2">) {
   const { id, variant } = useSession("ResearchSessionTitle");
-  const compact = variant === "compact";
   return (
     <h2
+      data-slot="research-session-title"
+      className={cn(
+        "m-0 font-semibold tracking-[-0.01em] wrap-anywhere",
+        variant === "compact" ? "text-[15px]/5" : "text-lg/6",
+        className,
+      )}
       {...props}
       id={`${id}-title`}
-      style={{
-        margin: 0,
-        fontSize: compact ? 15 : 18,
-        lineHeight: compact ? "20px" : "24px",
-        fontWeight: 600,
-        letterSpacing: "-0.01em",
-        overflowWrap: "anywhere",
-        ...style,
-      }}
     />
   );
 }
 
-export function ResearchSessionDescription({ style, ...props }: ComponentProps<"p">) {
+export function ResearchSessionDescription({ className, ...props }: ComponentProps<"p">) {
   return (
-    <p {...props} style={{ margin: 0, color: "var(--uai-muted)", textWrap: "pretty", ...style }} />
+    <p
+      data-slot="research-session-description"
+      className={cn("m-0 text-pretty text-muted-foreground", className)}
+      {...props}
+    />
   );
 }
 
@@ -141,74 +134,79 @@ export function ResearchSessionProgress(props: Omit<ProgressSummaryProps, "varia
   return <ProgressSummary {...props} variant={progressVariants[variant]} />;
 }
 
-function Column({ part, style, ...props }: ComponentProps<"div"> & { part: string }) {
+function Column({
+  part,
+  slot,
+  className,
+  ...props
+}: ComponentProps<"div"> & { part: string; slot: string }) {
   const { variant } = useSession(part);
   return (
     <div
+      data-slot={slot}
+      className={cn(
+        "grid min-w-0 content-start",
+        variant === "compact" ? "gap-3" : "gap-4",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        alignContent: "start",
-        gap: variant === "compact" ? 12 : 16,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
 /** The working column: plan and search activity. */
 export function ResearchSessionAside(props: ComponentProps<"div">) {
-  return <Column {...props} part="ResearchSessionAside" />;
+  return <Column {...props} part="ResearchSessionAside" slot="research-session-aside" />;
 }
 
 /** The reading column: synthesis and sources. */
 export function ResearchSessionMain(props: ComponentProps<"div">) {
-  return <Column {...props} part="ResearchSessionMain" />;
+  return <Column {...props} part="ResearchSessionMain" slot="research-session-main" />;
 }
 
-function panelStyle(variant: ResearchSessionVariant): CSSProperties {
-  const compact = variant === "compact";
-  return {
-    display: "grid",
-    alignContent: "start",
-    gap: compact ? 8 : 12,
-    minWidth: 0,
-    padding: compact ? 12 : 16,
-    border: "1px solid var(--uai-border)",
-    borderRadius: compact ? 12 : 14,
-    background: "var(--uai-surface)",
-  };
-}
-
-function Panel({ part, style, ...props }: ComponentProps<"section"> & { part: string }) {
+function Panel({
+  part,
+  slot,
+  className,
+  ...props
+}: ComponentProps<"section"> & { part: string; slot: string }) {
   const { variant } = useSession(part);
   const id = useId();
+  const compact = variant === "compact";
   return (
     <PanelContext.Provider value={id}>
-      <section aria-labelledby={id} {...props} style={{ ...panelStyle(variant), ...style }} />
+      <section
+        aria-labelledby={id}
+        data-slot={slot}
+        className={cn(
+          "grid min-w-0 content-start border bg-card",
+          compact ? "gap-2 rounded-xl p-3" : "gap-3 rounded-[14px] p-4",
+          className,
+        )}
+        {...props}
+      />
     </PanelContext.Provider>
   );
 }
 
 /** The research plan. Compose ResearchSessionTasks inside it. */
 export function ResearchSessionPlan(props: ComponentProps<"section">) {
-  return <Panel {...props} part="ResearchSessionPlan" />;
+  return <Panel {...props} part="ResearchSessionPlan" slot="research-session-plan" />;
 }
 
 /** Search activity. Compose ResearchSessionSearches inside it. */
 export function ResearchSessionActivity(props: ComponentProps<"section">) {
-  return <Panel {...props} part="ResearchSessionActivity" />;
+  return <Panel {...props} part="ResearchSessionActivity" slot="research-session-activity" />;
 }
 
 /** The written answer. Compose citations and ResearchSessionStatus inside it. */
 export function ResearchSessionSynthesis(props: ComponentProps<"section">) {
-  return <Panel {...props} part="ResearchSessionSynthesis" />;
+  return <Panel {...props} part="ResearchSessionSynthesis" slot="research-session-synthesis" />;
 }
 
 /** Sources the synthesis draws from. */
 export function ResearchSessionSources(props: ComponentProps<"section">) {
-  return <Panel {...props} part="ResearchSessionSources" />;
+  return <Panel {...props} part="ResearchSessionSources" slot="research-session-sources" />;
 }
 
 function usePanel(part: string) {
@@ -217,13 +215,14 @@ function usePanel(part: string) {
   return id;
 }
 
-export function ResearchSessionPanelTitle({ style, ...props }: ComponentProps<"h3">) {
+export function ResearchSessionPanelTitle({ className, ...props }: ComponentProps<"h3">) {
   const id = usePanel("ResearchSessionPanelTitle");
   return (
     <h3
+      data-slot="research-session-panel-title"
+      className={cn("m-0 text-[13px]/[18px] font-medium", className)}
       {...props}
       id={id}
-      style={{ margin: 0, fontSize: 13, lineHeight: "18px", fontWeight: 500, ...style }}
     />
   );
 }
@@ -235,9 +234,9 @@ export function ResearchSessionTasks(props: Omit<TaskListProps, "variant">) {
 }
 
 /** Searches and reads as they happen. Compose Thinking parts inside it. */
-export function ResearchSessionSearches({ style, ...props }: ThinkingProps) {
+export function ResearchSessionSearches({ className, ...props }: ThinkingProps) {
   useSession("ResearchSessionSearches");
-  return <Thinking {...props} style={{ minWidth: 0, ...style }} />;
+  return <Thinking className={cn("min-w-0", className)} {...props} />;
 }
 
 /** Where the synthesis stands. Compose Response Status parts inside it. */
@@ -246,19 +245,17 @@ export function ResearchSessionStatus(props: Omit<ResponseStatusProps, "variant"
   return <ResponseStatus {...props} variant={statusVariants[variant]} />;
 }
 
-export function ResearchSessionText({ style, ...props }: ComponentProps<"div">) {
+export function ResearchSessionText({ className, ...props }: ComponentProps<"div">) {
   const { variant } = useSession("ResearchSessionText");
   return (
     <div
+      data-slot="research-session-text"
+      className={cn(
+        "grid max-w-[68ch] min-w-0 wrap-anywhere",
+        variant === "compact" ? "gap-2" : "gap-2.5",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gap: variant === "compact" ? 8 : 10,
-        maxWidth: "68ch",
-        minWidth: 0,
-        overflowWrap: "anywhere",
-        ...style,
-      }}
     />
   );
 }
@@ -269,26 +266,22 @@ export function ResearchSessionCitation(props: Omit<CitationProps, "variant">) {
   return <Citation {...props} variant={citationVariants[variant]} />;
 }
 
-export function ResearchSessionSourceList({ style, ...props }: ComponentProps<"ol">) {
+export function ResearchSessionSourceList({ className, ...props }: ComponentProps<"ol">) {
   const id = usePanel("ResearchSessionSourceList");
   const { variant } = useSession("ResearchSessionSourceList");
   return (
     <ol
       aria-labelledby={id}
+      data-slot="research-session-source-list"
+      className={cn(
+        "m-0 grid min-w-0 list-none p-0",
+        variant === "stacked"
+          ? "grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))]"
+          : "grid-cols-[minmax(0,1fr)]",
+        variant === "compact" ? "gap-1" : "gap-2",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gridTemplateColumns:
-          variant === "stacked"
-            ? "repeat(auto-fit, minmax(min(100%, 220px), 1fr))"
-            : "minmax(0, 1fr)",
-        gap: variant === "compact" ? 4 : 8,
-        margin: 0,
-        padding: 0,
-        listStyle: "none",
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
@@ -301,69 +294,56 @@ export type ResearchSessionSourceProps = ComponentProps<"li"> & {
 export function ResearchSessionSource({
   index,
   children,
-  style,
+  className,
   ...props
 }: ResearchSessionSourceProps) {
   const { variant } = useSession("ResearchSessionSource");
   const compact = variant === "compact";
   return (
     <li
+      data-slot="research-session-source"
+      className={cn(
+        "grid min-w-0 grid-cols-[20px_minmax(0,1fr)] items-start gap-2 [transition:background-color_120ms_ease-out] hover:bg-muted motion-reduce:transition-none",
+        compact
+          ? "rounded-lg px-0.5 py-1"
+          : "rounded-[10px] bg-[color-mix(in_oklab,var(--muted)_70%,var(--card))] px-2.5 py-2",
+        className,
+      )}
       {...props}
-      data-uai-research-source={compact ? "plain" : "tile"}
-      style={{
-        display: "grid",
-        gridTemplateColumns: "20px minmax(0, 1fr)",
-        alignItems: "start",
-        gap: 8,
-        minWidth: 0,
-        padding: compact ? "4px 2px" : "8px 10px",
-        borderRadius: compact ? 8 : 10,
-        ...style,
-      }}
     >
       <span
         aria-hidden="true"
-        style={{
-          display: "grid",
-          placeItems: "center",
-          height: 18,
-          marginTop: 1,
-          borderRadius: 999,
-          background: compact ? "var(--uai-surface-raised)" : "var(--uai-surface)",
-          color: "var(--uai-muted)",
-          fontSize: 11,
-          fontWeight: 500,
-          fontVariantNumeric: "tabular-nums",
-        }}
+        className={cn(
+          "mt-px grid h-4.5 place-items-center rounded-full text-[11px] font-medium text-muted-foreground tabular-nums",
+          compact ? "bg-muted" : "bg-card",
+        )}
       >
         {index}
       </span>
-      <span style={{ display: "grid", gap: 2, minWidth: 0 }}>{children}</span>
+      <span className="grid min-w-0 gap-0.5">{children}</span>
     </li>
   );
 }
 
-export function ResearchSessionSourceLink({ style, ...props }: ComponentProps<"a">) {
+export function ResearchSessionSourceLink({ className, ...props }: ComponentProps<"a">) {
   return (
     <a
+      data-slot="research-session-source-link"
+      className={cn(
+        "font-medium text-foreground no-underline decoration-border-strong underline-offset-3 wrap-anywhere hover:underline focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+        className,
+      )}
       {...props}
-      data-uai-research-link=""
-      style={{
-        color: "var(--uai-text)",
-        fontWeight: 500,
-
-        overflowWrap: "anywhere",
-        ...style,
-      }}
     />
   );
 }
 
-export function ResearchSessionSourceMeta({ style, ...props }: ComponentProps<"span">) {
+export function ResearchSessionSourceMeta({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
+      data-slot="research-session-source-meta"
+      className={cn("text-[12px] text-subtle-foreground wrap-anywhere", className)}
       {...props}
-      style={{ color: "var(--uai-subtle)", fontSize: 12, overflowWrap: "anywhere", ...style }}
     />
   );
 }

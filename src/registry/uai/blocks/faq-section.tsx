@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { ChevronDown } from "lucide-react";
 import {
   type ComponentProps,
@@ -17,6 +18,7 @@ import {
   type SearchFieldProps,
   type SearchFieldVariant,
 } from "@/components/ui/uai/search-field";
+import { cn } from "@/lib/uai-utils";
 
 export const FAQ_SECTION_VARIANTS = ["list", "cards", "split"] as const;
 export type FaqSectionVariant = (typeof FAQ_SECTION_VARIANTS)[number];
@@ -45,30 +47,34 @@ function useItem(part: string) {
 }
 const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-const layoutCss = `
-[data-uai-faq-layout]{display:grid;gap:20px;align-items:start;min-width:0}
-[data-uai-faq-chevron]{transition:transform 180ms cubic-bezier(0.23,1,0.32,1),color 120ms ease-out}
-[aria-expanded="true"]>[data-uai-faq-chevron]{transform:rotate(180deg)}
-[data-uai-faq-question]:hover>[data-uai-faq-chevron]{color:var(--uai-text)}
-[data-uai-faq-question]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px;border-radius:6px}
-[data-uai-faq-item][data-variant="cards"]{transition:border-color 120ms ease-out}
-[data-uai-faq-item][data-variant="cards"]:hover{border-color:var(--uai-border-strong)}
-[data-uai-faq-answer]{grid-template-rows:0fr;opacity:0;transition:grid-template-rows 300ms cubic-bezier(0.23,1,0.32,1),opacity 200ms ease-out}
-[data-uai-faq-answer][data-state="open"]{grid-template-rows:1fr;opacity:1;animation:uai-faq-expand 300ms cubic-bezier(0.23,1,0.32,1)}
-@keyframes uai-faq-expand{from{grid-template-rows:0fr;opacity:0}}
-@media (prefers-reduced-motion: reduce){[data-uai-faq-chevron],[data-uai-faq-answer],[data-uai-faq-item]{transition:none;animation:none}}
-@container (min-width: 720px){
-  [data-uai-faq="split"]>[data-uai-faq-layout]{grid-template-columns:minmax(0,1fr) minmax(0,1.7fr);column-gap:48px}
-  [data-uai-faq="split"]>[data-uai-faq-layout]>[data-uai-faq-header]{grid-row:1 / span 4;position:sticky;top:16px}
-  [data-uai-faq="split"]>[data-uai-faq-layout]>:not([data-uai-faq-header]):not(style){grid-column:2}
-}`;
+const faqSectionLayoutVariants = cva("grid min-w-0 items-start gap-5", {
+  variants: {
+    variant: {
+      list: "",
+      cards: "",
+      split:
+        "@min-[720px]:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)] @min-[720px]:gap-x-12 @min-[720px]:[&>:not([data-slot=faq-section-header])]:col-start-2",
+    },
+  },
+});
+
+const faqSectionItemVariants = cva("min-w-0 border-solid motion-reduce:transition-none", {
+  variants: {
+    variant: {
+      list: "rounded-none border-b bg-transparent p-0",
+      cards:
+        "rounded-[14px] border bg-card px-4 shadow-[0_1px_2px_oklch(0_0_0/0.04)] transition-[border-color] duration-120 ease-out hover:border-border-strong",
+      split: "rounded-none border-b bg-transparent p-0",
+    },
+  },
+});
 
 function normalize(text: string) {
   return text.toLowerCase().replace(/\s+/g, " ").trim();
 }
 
 /** Searchable questions with disclosure answers. Split moves the header beside the list from 720px. */
-export function FaqSection({ variant = "list", children, style, ...props }: FaqSectionProps) {
+export function FaqSection({ variant = "list", children, className, ...props }: FaqSectionProps) {
   const id = useId();
   const [query, setQuery] = useState("");
   const [matches, setMatches] = useState<Readonly<Record<string, boolean>>>({});
@@ -87,68 +93,56 @@ export function FaqSection({ variant = "list", children, style, ...props }: FaqS
     <Context.Provider value={{ id, variant, query, setQuery, visible, report }}>
       <section
         aria-labelledby={`${id}-title`}
-        {...props}
+        data-slot="faq-section"
         data-variant={variant}
-        data-uai-faq={variant}
-        style={{
-          boxSizing: "border-box",
-          containerType: "inline-size",
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
+        className={cn(
+          "@container box-border min-w-0 text-[13px]/[18px] text-foreground",
+          className,
+        )}
+        {...props}
       >
-        <style>{layoutCss}</style>
-        <div data-uai-faq-layout="">{children}</div>
+        <div className={faqSectionLayoutVariants({ variant })}>{children}</div>
       </section>
     </Context.Provider>
   );
 }
 
-export function FaqSectionHeader({ style, ...props }: ComponentProps<"header">) {
-  useSection("FaqSectionHeader");
+export function FaqSectionHeader({ className, ...props }: ComponentProps<"header">) {
+  const { variant } = useSection("FaqSectionHeader");
   return (
     <header
+      data-slot="faq-section-header"
+      className={cn(
+        "grid min-w-0 gap-2",
+        variant === "split" && "@min-[720px]:sticky @min-[720px]:top-4 @min-[720px]:row-[1/span_4]",
+        className,
+      )}
       {...props}
-      data-uai-faq-header=""
-      style={{ display: "grid", gap: 8, minWidth: 0, ...style }}
     />
   );
 }
 
-export function FaqSectionTitle({ style, ...props }: ComponentProps<"h2">) {
+export function FaqSectionTitle({ className, ...props }: ComponentProps<"h2">) {
   const { id } = useSection("FaqSectionTitle");
   return (
     <h2
+      data-slot="faq-section-title"
+      className={cn(
+        "m-0 text-[length:clamp(22px,2.5cqi_+_12px,30px)] leading-[1.15] font-medium tracking-[-0.025em] text-balance",
+        className,
+      )}
       {...props}
       id={`${id}-title`}
-      style={{
-        margin: 0,
-        fontSize: "clamp(22px, 2.5cqi + 12px, 30px)",
-        fontWeight: 500,
-        lineHeight: 1.15,
-        letterSpacing: "-0.025em",
-        textWrap: "balance",
-        ...style,
-      }}
     />
   );
 }
 
-export function FaqSectionDescription({ style, ...props }: ComponentProps<"p">) {
+export function FaqSectionDescription({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="faq-section-description"
+      className={cn("m-0 text-[15px]/[23px] text-pretty text-muted-foreground", className)}
       {...props}
-      style={{
-        margin: 0,
-        color: "var(--uai-muted)",
-        fontSize: 15,
-        lineHeight: "23px",
-        textWrap: "pretty",
-        ...style,
-      }}
     />
   );
 }
@@ -174,22 +168,17 @@ export function FaqSectionSearch({ variant, ...props }: FaqSectionSearchProps) {
   );
 }
 
-export function FaqSectionList({ style, ...props }: ComponentProps<"ul">) {
+export function FaqSectionList({ className, ...props }: ComponentProps<"ul">) {
   const { variant } = useSection("FaqSectionList");
   return (
     <ul
+      data-slot="faq-section-list"
+      className={cn(
+        "m-0 grid min-w-0 list-none p-0",
+        variant === "cards" ? "mt-0 gap-2 border-t-0" : "mt-1 gap-0 border-t",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gap: variant === "cards" ? 8 : 0,
-        minWidth: 0,
-        margin: 0,
-        padding: 0,
-        borderTop: variant === "cards" ? 0 : "1px solid var(--uai-border)",
-        marginTop: variant === "cards" ? 0 : 4,
-        listStyle: "none",
-        ...style,
-      }}
     />
   );
 }
@@ -205,7 +194,7 @@ export function FaqSectionItem({
   open,
   defaultOpen = false,
   onOpenChange,
-  style,
+  className,
   ...props
 }: FaqSectionItemProps) {
   const section = useSection("FaqSectionItem");
@@ -222,7 +211,6 @@ export function FaqSectionItem({
     report(id, match);
   }, [id, query, report]);
   useEffect(() => () => report(id, null), [id, report]);
-  const cards = section.variant === "cards";
   return (
     <ItemContext.Provider
       value={{
@@ -235,35 +223,29 @@ export function FaqSectionItem({
       }}
     >
       <li
+        data-slot="faq-section-item"
+        data-variant={section.variant}
+        className={cn(faqSectionItemVariants({ variant: section.variant }), className)}
         {...props}
         ref={ref}
         hidden={hidden}
-        data-uai-faq-item=""
-        data-variant={section.variant}
-        style={{
-          minWidth: 0,
-          padding: cards ? "0 16px" : 0,
-          borderStyle: "solid",
-          borderWidth: cards ? 1 : "0 0 1px",
-          borderColor: "var(--uai-border)",
-          borderRadius: cards ? 14 : 0,
-          background: cards ? "var(--uai-surface)" : "transparent",
-          boxShadow: cards ? "0 1px 2px oklch(0 0 0 / 0.04)" : undefined,
-          ...style,
-        }}
       />
     </ItemContext.Provider>
   );
 }
 
-export function FaqSectionQuestion({ children, style, ...props }: ComponentProps<"button">) {
+export function FaqSectionQuestion({ children, className, ...props }: ComponentProps<"button">) {
   const item = useItem("FaqSectionQuestion");
   return (
-    <h3 style={{ margin: 0, fontSize: 14, fontWeight: 500, lineHeight: "20px" }}>
+    <h3 className="m-0 text-sm/5 font-medium">
       <button
         type="button"
+        data-slot="faq-section-question"
+        className={cn(
+          "group/faq-question flex min-h-13 w-full cursor-pointer items-center justify-between gap-3 border-0 bg-transparent py-3.5 text-start text-foreground focus-visible:rounded-[6px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+          className,
+        )}
         {...props}
-        data-uai-faq-question=""
         id={`${item.id}-question`}
         aria-expanded={item.open}
         aria-controls={`${item.id}-answer`}
@@ -271,30 +253,13 @@ export function FaqSectionQuestion({ children, style, ...props }: ComponentProps
           props.onClick?.(event);
           if (!event.defaultPrevented) item.toggle();
         }}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-          width: "100%",
-          minHeight: 52,
-          padding: "14px 0",
-          border: 0,
-          background: "transparent",
-          color: "var(--uai-text)",
-          font: "inherit",
-          textAlign: "start",
-          cursor: "pointer",
-          ...style,
-        }}
       >
-        <span style={{ minWidth: 0 }}>{children}</span>
+        <span className="min-w-0">{children}</span>
         <ChevronDown
           size={16}
           strokeWidth={1.75}
           aria-hidden="true"
-          data-uai-faq-chevron=""
-          style={{ flex: "none", color: "var(--uai-subtle)" }}
+          className="flex-none text-subtle-foreground [transition:rotate_180ms_cubic-bezier(0.23,1,0.32,1),color_120ms_ease-out] group-hover/faq-question:text-foreground group-aria-expanded/faq-question:rotate-180 motion-reduce:transition-none"
         />
       </button>
     </h3>
@@ -302,7 +267,7 @@ export function FaqSectionQuestion({ children, style, ...props }: ComponentProps
 }
 
 /** The answer expands with its row height and stays in the DOM until the collapse finishes. */
-export function FaqSectionAnswer({ style, children, ...props }: ComponentProps<"div">) {
+export function FaqSectionAnswer({ className, children, ...props }: ComponentProps<"div">) {
   const item = useItem("FaqSectionAnswer");
   const [rendered, setRendered] = useState(item.open);
   useEffect(() => {
@@ -316,25 +281,19 @@ export function FaqSectionAnswer({ style, children, ...props }: ComponentProps<"
   const shown = item.open || rendered;
   return (
     <div
+      data-slot="faq-section-answer"
+      className="grid min-w-0 grid-rows-[0fr] opacity-0 [transition:grid-template-rows_300ms_cubic-bezier(0.23,1,0.32,1),opacity_200ms_ease-out] data-[state=open]:grid-rows-[1fr] data-[state=open]:opacity-100 data-[state=open]:starting:grid-rows-[0fr] data-[state=open]:starting:opacity-0 motion-reduce:transition-none"
       {...props}
       id={`${item.id}-answer`}
       hidden={!shown}
-      data-uai-faq-answer=""
       data-state={item.open ? "open" : "closed"}
-      style={{ display: shown ? "grid" : "none", minWidth: 0 }}
     >
-      <div style={{ minHeight: 0, overflow: "hidden" }}>
+      <div className="min-h-0 overflow-hidden">
         <div
-          style={{
-            display: "grid",
-            gap: 8,
-            maxWidth: "64ch",
-            paddingBottom: 16,
-            color: "var(--uai-muted)",
-            lineHeight: "20px",
-            textWrap: "pretty",
-            ...style,
-          }}
+          className={cn(
+            "grid max-w-[64ch] gap-2 pb-4 leading-5 text-pretty text-muted-foreground",
+            className,
+          )}
         >
           {children}
         </div>
@@ -344,22 +303,17 @@ export function FaqSectionAnswer({ style, children, ...props }: ComponentProps<"
 }
 
 /** Shown only while a search matches no questions. */
-export function FaqSectionEmpty({ style, ...props }: ComponentProps<"div">) {
+export function FaqSectionEmpty({ className, ...props }: ComponentProps<"div">) {
   const section = useSection("FaqSectionEmpty");
   if (!section.query.trim() || section.visible > 0) return null;
   return (
     <div
+      data-slot="faq-section-empty"
+      className={cn(
+        "grid justify-items-start gap-2 rounded-[14px] bg-muted/60 p-4 text-muted-foreground",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        justifyItems: "start",
-        gap: 8,
-        padding: 16,
-        borderRadius: 14,
-        background: "color-mix(in oklab, var(--uai-surface-raised) 60%, transparent)",
-        color: "var(--uai-muted)",
-        ...style,
-      }}
     />
   );
 }

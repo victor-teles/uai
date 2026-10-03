@@ -1,9 +1,9 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { ChevronLeft, ChevronRight, Maximize2, X, ZoomIn, ZoomOut } from "lucide-react";
 import {
   type ComponentProps,
-  type CSSProperties,
   createContext,
   type KeyboardEvent,
   useContext,
@@ -13,6 +13,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const PRODUCT_GALLERY_VARIANTS = ["stacked", "side", "compact"] as const;
 export type ProductGalleryVariant = (typeof PRODUCT_GALLERY_VARIANTS)[number];
@@ -41,54 +42,21 @@ function useGallery(part: string) {
   return context;
 }
 const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
-const visuallyHidden: CSSProperties = {
-  position: "absolute",
-  width: 1,
-  height: 1,
-  margin: -1,
-  padding: 0,
-  overflow: "hidden",
-  clip: "rect(0 0 0 0)",
-  whiteSpace: "nowrap",
-  border: 0,
-};
-const floatingControl: CSSProperties = {
-  display: "grid",
-  placeItems: "center",
-  width: 28,
-  height: 28,
-  padding: 0,
-  border: 0,
-  borderRadius: 999,
-  cursor: "pointer",
-};
-const CONTROL = "uai-product-gallery-control";
-const galleryCss = `
-.uai-product-gallery{grid-template-columns:minmax(0,1fr);grid-template-areas:"view" "thumbs"}
-.uai-product-gallery[data-variant=side]{grid-template-columns:72px minmax(0,1fr);grid-template-areas:"thumbs view"}
-.uai-product-gallery[data-variant=side] .uai-product-gallery-thumbs{flex-direction:column}
-@media (max-width:560px){
-.uai-product-gallery[data-variant=side]{grid-template-columns:minmax(0,1fr);grid-template-areas:"view" "thumbs"}
-.uai-product-gallery[data-variant=side] .uai-product-gallery-thumbs{flex-direction:row}
-}
-.uai-product-gallery-image{transition:transform 240ms cubic-bezier(0.23,1,0.32,1)}
-.uai-product-gallery-control{background:color-mix(in oklab,var(--uai-surface) 84%,transparent);box-shadow:0 0 0 1px var(--uai-border),0 1px 2px oklch(0 0 0 / 0.08);color:var(--uai-muted);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);transition:background-color 120ms ease-out,color 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-product-gallery-control:hover,.uai-product-gallery-control[aria-pressed=true]{background:var(--uai-surface-raised);color:var(--uai-text)}
-.uai-product-gallery-control:active{transform:scale(0.94)}
-.uai-product-gallery-control:focus-visible,.uai-product-gallery-thumb:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-.uai-product-gallery-thumb{opacity:0.62;box-shadow:inset 0 0 0 1px var(--uai-border);transition:opacity 120ms ease-out,box-shadow 160ms cubic-bezier(0.23,1,0.32,1),transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-product-gallery-thumb:hover{opacity:0.9}
-.uai-product-gallery-thumb[aria-current=true]{opacity:1;box-shadow:0 0 0 2px var(--uai-surface),0 0 0 3.5px var(--uai-text)}
-.uai-product-gallery-thumb:active{transform:scale(0.97)}
-.uai-product-gallery-dialog[open]{animation:uai-product-gallery-in 180ms cubic-bezier(0.16,1,0.3,1)}
-.uai-product-gallery-dialog::backdrop{background:color-mix(in oklab,var(--uai-canvas) 72%,transparent);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
-@keyframes uai-product-gallery-in{from{opacity:0;transform:scale(0.96)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion: reduce){
-.uai-product-gallery-image,.uai-product-gallery-control,.uai-product-gallery-thumb{transition:none}
-.uai-product-gallery-control:active,.uai-product-gallery-thumb:active{transform:none}
-.uai-product-gallery-dialog[open]{animation:none}
-}
-`;
+const controlClass =
+  "grid size-7 cursor-pointer place-items-center rounded-full border-0 bg-card/84 p-0 text-muted-foreground shadow-[0_0_0_1px_var(--border),0_1px_2px_oklch(0_0_0/0.08)] backdrop-blur-sm [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.94] aria-pressed:bg-accent aria-pressed:text-accent-foreground motion-reduce:transition-none motion-reduce:active:scale-100";
+
+const productGalleryVariants = cva(
+  "grid min-w-0 grid-cols-[minmax(0,1fr)] text-[13px]/[18px] text-foreground [grid-template-areas:'view'_'thumbs']",
+  {
+    variants: {
+      variant: {
+        stacked: "gap-3",
+        side: "gap-3 grid-cols-[72px_minmax(0,1fr)] [grid-template-areas:'thumbs_view'] max-[560px]:grid-cols-[minmax(0,1fr)] max-[560px]:[grid-template-areas:'view'_'thumbs']",
+        compact: "gap-2",
+      },
+    },
+  },
+);
 
 export function ProductGallery({
   variant = "stacked",
@@ -97,7 +65,6 @@ export function ProductGallery({
   onValueChange,
   className,
   children,
-  style,
   ...props
 }: ProductGalleryProps) {
   const id = useId();
@@ -133,46 +100,31 @@ export function ProductGallery({
       value={{ id, variant, items, value: current, select, step, register, zoomed, setZoomed }}
     >
       <div
+        data-slot="product-gallery"
+        className={cn(productGalleryVariants({ variant }), className)}
         {...props}
         data-variant={variant}
-        className={["uai-product-gallery", className].filter(Boolean).join(" ")}
-        style={{
-          display: "grid",
-          gap: variant === "compact" ? 8 : 12,
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
       >
-        <style>{galleryCss}</style>
         {children}
       </div>
     </Context.Provider>
   );
 }
 
-export function ProductGalleryViewport({ children, style, ...props }: ComponentProps<"div">) {
+export function ProductGalleryViewport({ children, className, ...props }: ComponentProps<"div">) {
   const context = useGallery("ProductGalleryViewport");
   const [origin, setOrigin] = useState("50% 50%");
   const index = context.items.findIndex((item) => item.value === context.value);
   const media = context.items[index];
   return (
     <div
+      data-slot="product-gallery-viewport"
+      className={cn(
+        "relative aspect-4/3 min-w-0 overflow-hidden bg-muted outline -outline-offset-1 outline-foreground/8 [grid-area:view]",
+        context.variant === "compact" ? "rounded-xl" : "rounded-[14px]",
+        className,
+      )}
       {...props}
-      style={{
-        gridArea: "view",
-        position: "relative",
-        aspectRatio: "4 / 3",
-        minWidth: 0,
-        overflow: "hidden",
-        borderRadius: context.variant === "compact" ? 12 : 14,
-        background: "var(--uai-surface-raised)",
-        outline: "1px solid color-mix(in oklab, var(--uai-text) 8%, transparent)",
-        outlineOffset: -1,
-        ...style,
-      }}
     >
       {media ? (
         // biome-ignore lint/a11y/useKeyWithClickEvents: ProductGalleryZoom is the keyboard control.
@@ -180,7 +132,10 @@ export function ProductGalleryViewport({ children, style, ...props }: ComponentP
         <img
           src={media.src}
           alt={media.alt}
-          className="uai-product-gallery-image"
+          className={cn(
+            "block size-full object-contain transition-[scale] duration-240 ease-out-quint motion-reduce:transition-none",
+            context.zoomed ? "scale-200 cursor-zoom-out" : "scale-none cursor-zoom-in",
+          )}
           draggable={false}
           onClick={() => context.setZoomed(!context.zoomed)}
           onPointerMove={(event) => {
@@ -191,44 +146,27 @@ export function ProductGalleryViewport({ children, style, ...props }: ComponentP
             const y = ((event.clientY - box.top) / box.height) * 100;
             setOrigin(`${x.toFixed(1)}% ${y.toFixed(1)}%`);
           }}
-          style={{
-            display: "block",
-            width: "100%",
-            height: "100%",
-            objectFit: "contain",
-            transform: context.zoomed ? "scale(2)" : "none",
-            transformOrigin: origin,
-            cursor: context.zoomed ? "zoom-out" : "zoom-in",
-          }}
+          style={{ transformOrigin: origin }}
         />
       ) : null}
-      <p id={`${context.id}-position`} aria-live="polite" style={visuallyHidden}>
+      <p id={`${context.id}-position`} aria-live="polite" className="sr-only">
         {media ? `Image ${index + 1} of ${context.items.length}: ${media.alt}` : ""}
       </p>
-      {children ? (
-        <div style={{ position: "absolute", top: 10, right: 10, display: "flex", gap: 6 }}>
-          {children}
-        </div>
-      ) : null}
+      {children ? <div className="absolute top-2.5 right-2.5 flex gap-1.5">{children}</div> : null}
     </div>
   );
 }
 
-export function ProductGalleryZoom({
-  onClick,
-  className,
-  style,
-  ...props
-}: ComponentProps<"button">) {
+export function ProductGalleryZoom({ onClick, className, ...props }: ComponentProps<"button">) {
   const context = useGallery("ProductGalleryZoom");
   return (
     <button
+      data-slot="product-gallery-zoom"
       aria-label="Zoom image"
+      className={cn(controlClass, className)}
       {...props}
       type="button"
       aria-pressed={context.zoomed}
-      className={[CONTROL, className].filter(Boolean).join(" ")}
-      style={{ ...floatingControl, ...style }}
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) context.setZoomed(!context.zoomed);
@@ -246,7 +184,6 @@ export function ProductGalleryZoom({
 export function ProductGalleryFullscreen({
   onClick,
   className,
-  style,
   "aria-label": label = "View fullscreen",
   ...props
 }: ComponentProps<"button">) {
@@ -281,13 +218,13 @@ export function ProductGalleryFullscreen({
   return (
     <>
       <button
+        data-slot="product-gallery-fullscreen"
         aria-label={label}
         aria-haspopup="dialog"
+        className={cn(controlClass, className)}
         {...props}
         ref={triggerRef}
         type="button"
-        className={[CONTROL, className].filter(Boolean).join(" ")}
-        style={{ ...floatingControl, ...style }}
         onClick={(event) => {
           onClick?.(event);
           if (!event.defaultPrevented) setOpen(true);
@@ -298,70 +235,33 @@ export function ProductGalleryFullscreen({
       <dialog
         ref={dialogRef}
         aria-label="Fullscreen product images"
-        className="uai-product-gallery-dialog"
+        className="m-auto box-border max-h-[calc(100%_-_32px)] w-[min(100%_-_32px,1040px)] max-w-full rounded-[14px] border-0 bg-popover p-1 text-[13px]/[18px] text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_16px_40px_-12px_oklch(0_0_0/0.32)] backdrop:bg-background/72 backdrop:backdrop-blur-xs open:animate-in open:fade-in-0 open:zoom-in-96 open:duration-180 open:ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:open:animate-none"
         onCancel={(event) => {
           event.preventDefault();
           setOpen(false);
         }}
         onKeyDown={handleKeyDown}
-        style={{
-          boxSizing: "border-box",
-          width: "min(100% - 32px, 1040px)",
-          maxWidth: "100%",
-          maxHeight: "calc(100% - 32px)",
-          margin: "auto",
-          padding: 4,
-          border: 0,
-          borderRadius: 14,
-          background: "var(--uai-surface)",
-          color: "var(--uai-text)",
-          boxShadow: "0 0 0 1px var(--uai-border-strong), 0 16px 40px -12px oklch(0 0 0 / 0.32)",
-          fontSize: 13,
-          lineHeight: "18px",
-        }}
       >
         {open && media ? (
-          <div style={{ display: "grid", gap: 4 }}>
+          <div className="grid gap-1">
             {/* biome-ignore lint/performance/noImgElement: registry source is framework-agnostic. */}
             <img
               src={media.src}
               alt={media.alt}
-              style={{
-                display: "block",
-                width: "100%",
-                maxHeight: "calc(100dvh - 120px)",
-                objectFit: "contain",
-                borderRadius: 10,
-                background: "var(--uai-surface-raised)",
-              }}
+              className="block max-h-[calc(100dvh_-_120px)] w-full rounded-[10px] bg-muted object-contain"
             />
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 4,
-                padding: "4px 4px 4px 10px",
-              }}
-            >
+            <div className="flex items-center gap-1 py-1 pr-1 pl-2.5">
               <p
                 aria-live="polite"
-                style={{
-                  flex: 1,
-                  minWidth: 0,
-                  margin: 0,
-                  color: "var(--uai-subtle)",
-                  fontSize: 12,
-                  fontVariantNumeric: "tabular-nums",
-                }}
+                className="m-0 min-w-0 flex-1 text-[12px] text-subtle-foreground tabular-nums"
               >
                 {index + 1} / {context.items.length}
-                <span style={visuallyHidden}>: {media.alt}</span>
+                <span className="sr-only">: {media.alt}</span>
               </p>
               <button
                 type="button"
                 aria-label="Previous image"
-                className={CONTROL}
-                style={floatingControl}
+                className={controlClass}
                 onClick={() => context.step(-1)}
               >
                 <ChevronLeft size={14} strokeWidth={1.75} aria-hidden="true" />
@@ -369,8 +269,7 @@ export function ProductGalleryFullscreen({
               <button
                 type="button"
                 aria-label="Next image"
-                className={CONTROL}
-                style={floatingControl}
+                className={controlClass}
                 onClick={() => context.step(1)}
               >
                 <ChevronRight size={14} strokeWidth={1.75} aria-hidden="true" />
@@ -379,8 +278,7 @@ export function ProductGalleryFullscreen({
                 ref={closeRef}
                 type="button"
                 aria-label="Close fullscreen"
-                className={CONTROL}
-                style={floatingControl}
+                className={controlClass}
                 onClick={() => setOpen(false)}
               >
                 <X size={14} strokeWidth={1.75} aria-hidden="true" />
@@ -405,7 +303,6 @@ const MOVES: Record<string, (index: number, count: number) => number> = {
 export function ProductGalleryThumbnails({
   className,
   onKeyDown,
-  style,
   "aria-label": label = "Product images",
   ...props
 }: ComponentProps<"div">) {
@@ -431,20 +328,16 @@ export function ProductGalleryThumbnails({
       role="group"
       aria-label={label}
       aria-describedby={`${context.id}-position`}
+      data-slot="product-gallery-thumbnails"
+      className={cn(
+        "-m-1 flex min-w-0 overflow-auto p-1 [grid-area:thumbs]",
+        context.variant === "compact" ? "gap-1.5" : "gap-2",
+        context.variant === "side" && "flex-col max-[560px]:flex-row",
+        className,
+      )}
       {...props}
       ref={ref}
-      className={["uai-product-gallery-thumbs", className].filter(Boolean).join(" ")}
       onKeyDown={handleKeyDown}
-      style={{
-        gridArea: "thumbs",
-        display: "flex",
-        gap: context.variant === "compact" ? 6 : 8,
-        minWidth: 0,
-        overflow: "auto",
-        padding: 4,
-        margin: -4,
-        ...style,
-      }}
     />
   );
 }
@@ -455,7 +348,6 @@ export function ProductGalleryItem({
   alt,
   onClick,
   className,
-  style,
   ...props
 }: Omit<ComponentProps<"button">, "value" | "children"> & ProductGalleryMedia) {
   const context = useGallery("ProductGalleryItem");
@@ -463,41 +355,29 @@ export function ProductGalleryItem({
   useIsomorphicLayoutEffect(() => register({ value, src, alt }), [value, src, alt]);
   const selected = context.value === value;
   const orphaned = !context.items.some((item) => item.value === context.value);
-  const size = context.variant === "compact" ? 48 : 64;
+  const compact = context.variant === "compact";
   return (
     <button
+      data-slot="product-gallery-item"
       aria-label={alt}
+      className={cn(
+        "flex-none cursor-pointer overflow-hidden border-0 bg-muted p-0 opacity-62 shadow-[inset_0_0_0_1px_var(--border)] [transition:opacity_120ms_ease-out,box-shadow_160ms_cubic-bezier(0.23,1,0.32,1),scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] aria-[current=true]:opacity-100 aria-[current=true]:shadow-[0_0_0_2px_var(--card),0_0_0_3.5px_var(--foreground)] motion-reduce:transition-none motion-reduce:active:scale-100",
+        compact ? "size-12 rounded-lg" : "size-16 rounded-[10px]",
+        className,
+      )}
       {...props}
       type="button"
       data-gallery-item=""
       data-value={value}
       aria-current={selected || undefined}
       tabIndex={selected || orphaned ? 0 : -1}
-      className={["uai-product-gallery-thumb", className].filter(Boolean).join(" ")}
-      style={{
-        flex: "none",
-        width: size,
-        height: size,
-        padding: 0,
-        overflow: "hidden",
-        border: 0,
-        borderRadius: context.variant === "compact" ? 8 : 10,
-        background: "var(--uai-surface-raised)",
-        cursor: "pointer",
-        ...style,
-      }}
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) context.select(value);
       }}
     >
       {/* biome-ignore lint/performance/noImgElement: registry source is framework-agnostic. */}
-      <img
-        src={src}
-        alt=""
-        draggable={false}
-        style={{ display: "block", width: "100%", height: "100%", objectFit: "cover" }}
-      />
+      <img src={src} alt="" draggable={false} className="block size-full object-cover" />
     </button>
   );
 }

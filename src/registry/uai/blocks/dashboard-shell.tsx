@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, useContext, useId } from "react";
 import {
   AppSidebar,
@@ -16,6 +17,7 @@ import {
   type MetricCardProps,
   type MetricCardVariant,
 } from "@/components/ui/uai/metric-card";
+import { cn } from "@/lib/uai-utils";
 
 export const DASHBOARD_SHELL_VARIANTS = ["split", "inset", "compact"] as const;
 export type DashboardShellVariant = (typeof DASHBOARD_SHELL_VARIANTS)[number];
@@ -46,45 +48,52 @@ const metricVariants: Record<DashboardShellVariant, MetricCardVariant> = {
   compact: "compact",
 };
 
-const interactionCss = `
-[data-uai-dashboard-action]{transition:background-color 120ms ease-out,filter 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-[data-uai-dashboard-action="primary"]{background:var(--uai-accent);color:var(--uai-accent-foreground)}
-[data-uai-dashboard-action="secondary"]{background:var(--uai-surface-raised);color:var(--uai-text)}
-[data-uai-dashboard-action="primary"]:hover:not(:disabled){filter:brightness(1.08)}
-[data-uai-dashboard-action="secondary"]:hover:not(:disabled){background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text))}
-[data-uai-dashboard-action]:active:not(:disabled){transform:scale(0.97)}
-[data-uai-dashboard-action]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-@media (prefers-reduced-motion: reduce){[data-uai-dashboard-action]{transition:none}[data-uai-dashboard-action]:active:not(:disabled){transform:none}}`;
+const dashboardShellVariants = cva(
+  "flex min-w-0 flex-wrap items-stretch text-[13px]/[18px] text-foreground",
+  {
+    variants: {
+      variant: {
+        split: "gap-4 rounded-none bg-transparent p-0",
+        inset: "gap-2 rounded-[20px] bg-muted p-1.5",
+        compact: "gap-2 rounded-none bg-transparent p-0",
+      },
+    },
+  },
+);
+
+const dashboardShellActionVariants = cva(
+  "inline-flex cursor-pointer items-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap [transition:background-color_120ms_ease-out,filter_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.97] motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
+  {
+    variants: {
+      emphasis: {
+        primary: "bg-primary text-primary-foreground enabled:hover:brightness-108",
+        secondary:
+          "bg-secondary text-secondary-foreground enabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+      },
+      compact: {
+        true: "h-[26px] px-2.5 text-[12px]",
+        false: "h-7.5 px-[13px] text-[12.5px]",
+      },
+    },
+  },
+);
 
 /** Page frame: global navigation beside a labelled main region. Wraps below the sidebar on narrow screens. */
 export function DashboardShell({
   variant = "split",
+  className,
   children,
-  style,
   ...props
 }: DashboardShellProps) {
   const id = useId();
   return (
     <Context.Provider value={{ id, variant }}>
       <div
+        data-slot="dashboard-shell"
+        className={cn(dashboardShellVariants({ variant }), className)}
         {...props}
         data-variant={variant}
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "stretch",
-          gap: variant === "split" ? 16 : 8,
-          minWidth: 0,
-          padding: variant === "inset" ? 6 : 0,
-          borderRadius: variant === "inset" ? 20 : 0,
-          background: variant === "inset" ? "var(--uai-surface-raised)" : "transparent",
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
       >
-        <style>{interactionCss}</style>
         {children}
       </div>
     </Context.Provider>
@@ -92,68 +101,61 @@ export function DashboardShell({
 }
 
 /** Global navigation. Compose App Sidebar parts inside it. */
-export function DashboardShellSidebar({ style, ...props }: Omit<AppSidebarProps, "variant">) {
+export function DashboardShellSidebar({ className, ...props }: Omit<AppSidebarProps, "variant">) {
   const context = useShell("DashboardShellSidebar");
   return (
     <AppSidebar
       {...props}
       variant={sidebarVariants[context.variant]}
-      style={{ flexShrink: 0, height: "auto", ...style }}
+      className={cn("h-auto shrink-0", className)}
     />
   );
 }
 
-export function DashboardShellMain({ style, ...props }: ComponentProps<"section">) {
+export function DashboardShellMain({ className, ...props }: ComponentProps<"section">) {
   const context = useShell("DashboardShellMain");
   const { variant } = context;
   return (
     <section
+      data-slot="dashboard-shell-main"
       aria-labelledby={`${context.id}-title`}
+      className={cn(
+        "grid min-w-0 flex-[1_1_360px] content-start border-0",
+        variant === "compact" ? "gap-3" : "gap-5",
+        variant === "inset"
+          ? "rounded-[14px] bg-card px-[22px] py-5 ring-1 ring-border"
+          : cn("rounded-none bg-transparent px-0", variant === "compact" ? "py-1" : "py-2"),
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        alignContent: "start",
-        gap: variant === "compact" ? 12 : 20,
-        flex: "1 1 360px",
-        minWidth: 0,
-        padding: variant === "inset" ? "20px 22px" : variant === "compact" ? "4px 0" : "8px 0",
-        border: 0,
-        borderRadius: variant === "inset" ? 14 : 0,
-        background: variant === "inset" ? "var(--uai-surface)" : "transparent",
-        boxShadow: variant === "inset" ? "0 0 0 1px var(--uai-border)" : undefined,
-        ...style,
-      }}
     />
   );
 }
 
 /** Page hierarchy and page actions. Actions wrap below the heading on narrow widths. */
-export function DashboardShellHeader({ style, ...props }: ComponentProps<"div">) {
+export function DashboardShellHeader({ className, ...props }: ComponentProps<"div">) {
   useShell("DashboardShellHeader");
   return (
     <div
+      data-slot="dashboard-shell-header"
+      className={cn("flex min-w-0 flex-wrap items-end justify-between gap-3", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "flex-end",
-        justifyContent: "space-between",
-        gap: 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function DashboardShellHeading({ style, ...props }: ComponentProps<"div">) {
+export function DashboardShellHeading({ className, ...props }: ComponentProps<"div">) {
   return (
-    <div {...props} style={{ display: "grid", gap: 4, flex: "1 1 240px", minWidth: 0, ...style }} />
+    <div
+      data-slot="dashboard-shell-heading"
+      className={cn("grid min-w-0 flex-[1_1_240px] gap-1", className)}
+      {...props}
+    />
   );
 }
 
 export function DashboardShellBreadcrumb({
-  style,
+  className,
   ...props
 }: Omit<BreadcrumbTrailProps, "variant">) {
   const context = useShell("DashboardShellBreadcrumb");
@@ -161,42 +163,43 @@ export function DashboardShellBreadcrumb({
     <BreadcrumbTrail
       {...props}
       variant={breadcrumbVariants[context.variant]}
-      style={{ marginLeft: -6, ...style }}
+      className={cn("-ml-1.5", className)}
     />
   );
 }
 
-export function DashboardShellTitle({ style, ...props }: ComponentProps<"h2">) {
+export function DashboardShellTitle({ className, ...props }: ComponentProps<"h2">) {
   const context = useShell("DashboardShellTitle");
-  const compact = context.variant === "compact";
   return (
     <h2
+      data-slot="dashboard-shell-title"
+      className={cn(
+        "m-0 font-semibold tracking-[-0.01em] wrap-anywhere",
+        context.variant === "compact" ? "text-[15px]/5" : "text-[18px]/6",
+        className,
+      )}
       {...props}
       id={`${context.id}-title`}
-      style={{
-        margin: 0,
-        fontSize: compact ? 15 : 18,
-        lineHeight: compact ? "20px" : "24px",
-        fontWeight: 600,
-        letterSpacing: "-0.01em",
-        overflowWrap: "anywhere",
-        ...style,
-      }}
     />
   );
 }
 
-export function DashboardShellDescription({ style, ...props }: ComponentProps<"p">) {
+export function DashboardShellDescription({ className, ...props }: ComponentProps<"p">) {
   return (
-    <p {...props} style={{ margin: 0, color: "var(--uai-muted)", textWrap: "pretty", ...style }} />
+    <p
+      data-slot="dashboard-shell-description"
+      className={cn("m-0 text-pretty text-muted-foreground", className)}
+      {...props}
+    />
   );
 }
 
-export function DashboardShellActions({ style, ...props }: ComponentProps<"div">) {
+export function DashboardShellActions({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="dashboard-shell-actions"
+      className={cn("flex flex-wrap items-center gap-1.5", className)}
       {...props}
-      style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6, ...style }}
     />
   );
 }
@@ -204,49 +207,39 @@ export function DashboardShellActions({ style, ...props }: ComponentProps<"div">
 export function DashboardShellAction({
   emphasis = "secondary",
   type = "button",
-  style,
+  className,
   ...props
 }: ComponentProps<"button"> & { emphasis?: "primary" | "secondary" }) {
   const context = useShell("DashboardShellAction");
-  const primary = emphasis === "primary";
   return (
     <button
+      data-slot="dashboard-shell-action"
+      data-emphasis={emphasis}
+      className={cn(
+        dashboardShellActionVariants({ emphasis, compact: context.variant === "compact" }),
+        className,
+      )}
       {...props}
       type={type}
-      data-uai-dashboard-action={primary ? "primary" : "secondary"}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        height: context.variant === "compact" ? 26 : 30,
-        padding: context.variant === "compact" ? "0 10px" : "0 13px",
-        border: 0,
-        borderRadius: 999,
-        font: "inherit",
-        fontSize: context.variant === "compact" ? 12 : 12.5,
-        fontWeight: 500,
-        whiteSpace: "nowrap",
-        cursor: "pointer",
-        ...style,
-      }}
     />
   );
 }
 
 /** Key figures. Cards reflow from four columns to one without media queries. */
-export function DashboardShellMetrics({ style, ...props }: ComponentProps<"div">) {
+export function DashboardShellMetrics({ className, ...props }: ComponentProps<"div">) {
   const context = useShell("DashboardShellMetrics");
   const compact = context.variant === "compact";
   return (
     <div
+      data-slot="dashboard-shell-metrics"
+      className={cn(
+        "grid min-w-0",
+        compact
+          ? "grid-cols-[repeat(auto-fit,minmax(min(100%,150px),1fr))] gap-2"
+          : "grid-cols-[repeat(auto-fit,minmax(min(100%,180px),1fr))] gap-3",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, ${compact ? 150 : 180}px), 1fr))`,
-        gap: compact ? 8 : 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
@@ -256,59 +249,53 @@ export function DashboardShellMetric(props: Omit<MetricCardProps, "variant">) {
   return <MetricCard {...props} variant={metricVariants[context.variant]} />;
 }
 
-export function DashboardShellContent({ style, ...props }: ComponentProps<"div">) {
+export function DashboardShellContent({ className, ...props }: ComponentProps<"div">) {
   const context = useShell("DashboardShellContent");
   return (
     <div
+      data-slot="dashboard-shell-content"
+      className={cn(
+        "grid min-w-0 grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))]",
+        context.variant === "compact" ? "gap-2" : "gap-3",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))",
-        gap: context.variant === "compact" ? 8 : 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function DashboardShellPanel({ style, ...props }: ComponentProps<"section">) {
+export function DashboardShellPanel({ className, ...props }: ComponentProps<"section">) {
   const context = useShell("DashboardShellPanel");
   const labelId = useId();
   const compact = context.variant === "compact";
   return (
     <PanelContext.Provider value={labelId}>
       <section
+        data-slot="dashboard-shell-panel"
         aria-labelledby={labelId}
+        className={cn(
+          "grid min-w-0 content-start border-0",
+          compact ? "gap-2 rounded-xl p-3" : "gap-3 rounded-[14px] p-4",
+          context.variant === "inset"
+            ? "bg-[color-mix(in_oklab,var(--muted)_55%,var(--card))]"
+            : "bg-card ring-1 ring-border",
+          className,
+        )}
         {...props}
-        style={{
-          display: "grid",
-          alignContent: "start",
-          gap: compact ? 8 : 12,
-          minWidth: 0,
-          padding: compact ? 12 : 16,
-          border: 0,
-          borderRadius: compact ? 12 : 14,
-          background:
-            context.variant === "inset"
-              ? "color-mix(in oklab, var(--uai-surface-raised) 55%, var(--uai-surface))"
-              : "var(--uai-surface)",
-          boxShadow: context.variant === "inset" ? undefined : "0 0 0 1px var(--uai-border)",
-          ...style,
-        }}
       />
     </PanelContext.Provider>
   );
 }
 
-export function DashboardShellPanelTitle({ style, ...props }: ComponentProps<"h3">) {
+export function DashboardShellPanelTitle({ className, ...props }: ComponentProps<"h3">) {
   const labelId = useContext(PanelContext);
   if (!labelId) throw new Error("DashboardShellPanelTitle must be used within DashboardShellPanel");
   return (
     <h3
+      data-slot="dashboard-shell-panel-title"
+      className={cn("m-0 text-[13px]/[18px] font-medium", className)}
       {...props}
       id={labelId}
-      style={{ margin: 0, fontSize: 13, lineHeight: "18px", fontWeight: 500, ...style }}
     />
   );
 }

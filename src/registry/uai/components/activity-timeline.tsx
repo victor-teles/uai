@@ -1,6 +1,8 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, useContext, useId } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const ACTIVITY_TIMELINE_VARIANTS = ["rail", "card", "compact"] as const;
 export type ActivityTimelineVariant = (typeof ACTIVITY_TIMELINE_VARIANTS)[number];
@@ -12,241 +14,184 @@ function useVariant(part: string) {
   return variant;
 }
 
-const railCss = `
-.uai-activity-timeline__event:last-child .uai-activity-timeline__rail{display:none}
-@keyframes uai-activity-timeline-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-.uai-activity-timeline__event{animation:uai-activity-timeline-in 240ms cubic-bezier(0.23,1,0.32,1) both}
-.uai-activity-timeline__event:nth-child(2){animation-delay:40ms}
-.uai-activity-timeline__event:nth-child(3){animation-delay:80ms}
-.uai-activity-timeline__event:nth-child(4){animation-delay:120ms}
-.uai-activity-timeline__event:nth-child(5){animation-delay:160ms}
-.uai-activity-timeline__event:nth-child(6){animation-delay:200ms}
-.uai-activity-timeline a{color:var(--uai-text);text-decoration:underline;text-decoration-color:var(--uai-border-strong);text-underline-offset:3px;transition:text-decoration-color 120ms ease-out}
-.uai-activity-timeline a:hover{text-decoration-color:currentColor}
-@media (prefers-reduced-motion: reduce){.uai-activity-timeline__event{animation:none}.uai-activity-timeline a{transition:none}}
-`;
+const activityTimelineVariants = cva(
+  "grid min-w-0 text-[13px]/[18px] text-foreground [&_a]:text-foreground [&_a]:underline [&_a]:decoration-border-strong [&_a]:underline-offset-3 [&_a]:transition-[text-decoration-color] [&_a]:duration-120 [&_a]:ease-out [&_a]:hover:decoration-current motion-reduce:[&_a]:transition-none",
+  {
+    variants: {
+      variant: {
+        rail: "gap-5",
+        card: "gap-5",
+        compact: "gap-3.5",
+      },
+    },
+  },
+);
 
 export function ActivityTimeline({
   variant = "rail",
   children,
   className,
-  style,
   ...props
 }: ComponentProps<"div"> & { variant?: ActivityTimelineVariant }) {
   return (
     <VariantContext.Provider value={variant}>
       <div
-        {...props}
-        className={["uai-activity-timeline", className].filter(Boolean).join(" ")}
+        data-slot="activity-timeline"
         data-variant={variant}
-        style={{
-          display: "grid",
-          gap: variant === "compact" ? 14 : 20,
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
+        className={cn(activityTimelineVariants({ variant }), className)}
+        {...props}
       >
-        <style>{railCss}</style>
         {children}
       </div>
     </VariantContext.Provider>
   );
 }
 
-export function ActivityTimelineGroup({ style, ...props }: ComponentProps<"section">) {
+export function ActivityTimelineGroup({ className, ...props }: ComponentProps<"section">) {
   const variant = useVariant("ActivityTimelineGroup");
   const id = useId();
   return (
     <GroupContext.Provider value={id}>
       <section
         aria-labelledby={id}
+        data-slot="activity-timeline-group"
+        className={cn(
+          "grid min-w-0 rounded-[14px]",
+          variant === "compact" ? "gap-1.5" : "gap-3",
+          variant === "card" ? "border bg-card p-4" : "border-0 bg-transparent p-0",
+          className,
+        )}
         {...props}
-        style={{
-          display: "grid",
-          gap: variant === "compact" ? 6 : 12,
-          minWidth: 0,
-          padding: variant === "card" ? 16 : 0,
-          border: variant === "card" ? "1px solid var(--uai-border)" : 0,
-          borderRadius: 14,
-          background: variant === "card" ? "var(--uai-surface)" : "transparent",
-          ...style,
-        }}
       />
     </GroupContext.Provider>
   );
 }
 
-export function ActivityTimelineDate({ style, ...props }: ComponentProps<"h3">) {
+export function ActivityTimelineDate({ className, ...props }: ComponentProps<"h3">) {
   const id = useContext(GroupContext);
   if (!id) throw new Error("ActivityTimelineDate must be used within ActivityTimelineGroup");
   return (
     <h3
+      data-slot="activity-timeline-date"
+      className={cn("m-0 text-[11.5px]/4 font-medium text-subtle-foreground", className)}
       {...props}
       id={id}
-      style={{
-        margin: 0,
-        color: "var(--uai-subtle)",
-        fontSize: 11.5,
-        lineHeight: "16px",
-        fontWeight: 500,
-        ...style,
-      }}
     />
   );
 }
 
-export function ActivityTimelineEvents({ style, ...props }: ComponentProps<"ol">) {
+export function ActivityTimelineEvents({ className, ...props }: ComponentProps<"ol">) {
   return (
     <ol
+      data-slot="activity-timeline-events"
+      className={cn("m-0 grid list-none gap-0 p-0", className)}
       {...props}
-      style={{ display: "grid", gap: 0, margin: 0, padding: 0, listStyle: "none", ...style }}
     />
   );
 }
 
-export function ActivityTimelineEvent({ className, style, ...props }: ComponentProps<"li">) {
+export function ActivityTimelineEvent({ className, ...props }: ComponentProps<"li">) {
   const variant = useVariant("ActivityTimelineEvent");
   return (
     <li
+      data-slot="activity-timeline-event"
+      className={cn(
+        "group/event relative grid min-w-0 animate-in fade-in-0 slide-in-from-bottom-1 duration-240 ease-out-quint fill-mode-both nth-2:[animation-delay:40ms] nth-3:[animation-delay:80ms] nth-4:[animation-delay:120ms] nth-5:[animation-delay:160ms] nth-6:[animation-delay:200ms] motion-reduce:animate-none",
+        variant === "compact"
+          ? "grid-cols-[16px_minmax(0,1fr)] gap-x-2 pb-2"
+          : "grid-cols-[28px_minmax(0,1fr)] gap-x-3 pb-3.5",
+        className,
+      )}
       {...props}
-      className={["uai-activity-timeline__event", className].filter(Boolean).join(" ")}
-      style={{
-        position: "relative",
-        display: "grid",
-        gridTemplateColumns: variant === "compact" ? "16px minmax(0, 1fr)" : "28px minmax(0, 1fr)",
-        columnGap: variant === "compact" ? 8 : 12,
-        paddingBottom: variant === "compact" ? 8 : 14,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function ActivityTimelineMarker({ children, style, ...props }: ComponentProps<"span">) {
+export function ActivityTimelineMarker({ children, className, ...props }: ComponentProps<"span">) {
   const variant = useVariant("ActivityTimelineMarker");
-  const size = variant === "compact" ? 16 : 28;
+  const compact = variant === "compact";
   return (
     <span
       aria-hidden="true"
+      data-slot="activity-timeline-marker"
+      className={cn("relative grid justify-items-center self-stretch", className)}
       {...props}
-      style={{
-        position: "relative",
-        display: "grid",
-        justifyItems: "center",
-        alignSelf: "stretch",
-        ...style,
-      }}
     >
       <span
-        className="uai-activity-timeline__rail"
-        style={{
-          position: "absolute",
-          top: size,
-          bottom: variant === "compact" ? -8 : -14,
-          left: "50%",
-          width: 1,
-          transform: "translateX(-0.5px)",
-          background: "var(--uai-border)",
-        }}
+        className={cn(
+          "absolute left-1/2 w-px -translate-x-[0.5px] bg-border group-last/event:hidden",
+          compact ? "top-4 -bottom-2" : "top-7 -bottom-3.5",
+        )}
       />
       <span
-        style={{
-          display: "grid",
-          placeItems: "center",
-          width: size,
-          height: size,
-          borderRadius: 999,
-          background: children ? "var(--uai-surface-raised)" : "transparent",
-          boxShadow: children
-            ? "0 0 0 1px color-mix(in oklab, var(--uai-text) 6%, transparent)"
-            : undefined,
-          color: "var(--uai-muted)",
-        }}
+        className={cn(
+          "grid place-items-center rounded-full text-muted-foreground",
+          compact ? "size-4" : "size-7",
+          children ? "bg-muted ring-1 ring-foreground/6" : "bg-transparent",
+        )}
       >
         {children ?? (
-          <span
-            style={{
-              width: 7,
-              height: 7,
-              borderRadius: 999,
-              background: "var(--uai-border-strong)",
-              boxShadow: "0 0 0 3px var(--uai-surface-raised)",
-            }}
-          />
+          <span className="size-[7px] rounded-full bg-border-strong ring-3 ring-muted" />
         )}
       </span>
     </span>
   );
 }
 
-export function ActivityTimelineContent({ style, ...props }: ComponentProps<"div">) {
+export function ActivityTimelineContent({ className, ...props }: ComponentProps<"div">) {
   const variant = useVariant("ActivityTimelineContent");
   return (
     <div
+      data-slot="activity-timeline-content"
+      className={cn(
+        "grid min-w-0",
+        variant === "compact" ? "gap-0.5 pt-0" : "gap-0.75 pt-1.25",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gap: variant === "compact" ? 2 : 3,
-        minWidth: 0,
-        paddingTop: variant === "compact" ? 0 : 5,
-        ...style,
-      }}
     />
   );
 }
 
-export function ActivityTimelineTitle({ style, ...props }: ComponentProps<"p">) {
+export function ActivityTimelineTitle({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="activity-timeline-title"
+      className={cn("m-0 text-pretty wrap-anywhere text-muted-foreground", className)}
       {...props}
-      style={{
-        margin: 0,
-        color: "var(--uai-muted)",
-        overflowWrap: "anywhere",
-        textWrap: "pretty",
-        ...style,
-      }}
     />
   );
 }
 
-export function ActivityTimelineActor({ style, ...props }: ComponentProps<"strong">) {
-  return <strong {...props} style={{ color: "var(--uai-text)", fontWeight: 500, ...style }} />;
+export function ActivityTimelineActor({ className, ...props }: ComponentProps<"strong">) {
+  return (
+    <strong
+      data-slot="activity-timeline-actor"
+      className={cn("font-medium text-foreground", className)}
+      {...props}
+    />
+  );
 }
 
-export function ActivityTimelineTime({ style, ...props }: ComponentProps<"time">) {
+export function ActivityTimelineTime({ className, ...props }: ComponentProps<"time">) {
   return (
     <time
+      data-slot="activity-timeline-time"
+      className={cn("text-[11.5px]/4 text-subtle-foreground tabular-nums", className)}
       {...props}
-      style={{
-        color: "var(--uai-subtle)",
-        fontSize: 11.5,
-        lineHeight: "16px",
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     />
   );
 }
 
-export function ActivityTimelineMeta({ style, ...props }: ComponentProps<"div">) {
+export function ActivityTimelineMeta({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="activity-timeline-meta"
+      className={cn(
+        "flex flex-wrap items-center gap-1.5 text-[11.5px]/4 text-subtle-foreground",
+        className,
+      )}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        gap: 6,
-        color: "var(--uai-subtle)",
-        fontSize: 11.5,
-        lineHeight: "16px",
-        ...style,
-      }}
     />
   );
 }

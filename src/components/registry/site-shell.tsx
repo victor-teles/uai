@@ -74,6 +74,13 @@ function SidebarNav({ pathname }: { pathname: string }) {
       >
         Overview
       </Link>
+      <Link
+        href="/theming"
+        className="uai-site-nav__link"
+        aria-current={pathname === "/theming" ? "page" : undefined}
+      >
+        Theming
+      </Link>
       {registryGroups.map((group) => (
         <section key={group.category} className="uai-site-nav__group" aria-label={group.category}>
           <h2>{group.category}</h2>

@@ -75,8 +75,13 @@ For Prompt Composer and other installed AI chrome:
   (`0 0 0 1px var(--uai-border-strong)`), an offset shadow, and a pop-in from
   `scale(0.96)` in 180ms `cubic-bezier(0.23, 1, 0.32, 1)`.
 - Field type is 13px / 18px. The model label is 12px.
-- Prefer inline styles for new visual values in registry source. Tailwind JIT
-  often misses utilities used only under `src/registry/uai`.
+- Style registry source the shadcn way: Tailwind classes merged with `cn()` so a
+  consumer's `className` always wins, `cva` for variants, `data-slot` on every
+  exported part, and the standard shadcn tokens (`bg-card`, `text-muted-foreground`,
+  `bg-primary`, `border-border-strong`, `text-subtle-foreground`, `bg-success/14`).
+  The `uai-theme` registry item fills those tokens with the Uai palette. Never write
+  `var(--uai-*)`, inline style objects, or injected `<style>` strings; keep `style`
+  for runtime-computed values only. See `plans/shadcn-migration.md`.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

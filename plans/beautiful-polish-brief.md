@@ -7,6 +7,10 @@ instead of hard borders, pill controls, and small purposeful motion.
 
 ## Tokens (already live in `src/app/global.css` and the `uai-theme` registry item)
 
+These are the palette roles. Registry source never reads `--uai-*` directly; it uses
+the shadcn token classes they map to (see Theme tokens in `DESIGN.md` and
+`plans/shadcn-migration.md`).
+
 | Token | Dark | Use |
 | --- | --- | --- |
 | `--uai-canvas` | `oklch(0.226 0.004 264)` | Page / stage background. Insets (inputs, code wells) may use it inside a surface. |

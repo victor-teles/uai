@@ -1,8 +1,10 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { Check, Minus } from "lucide-react";
-import { type ComponentProps, type CSSProperties, createContext, useContext, useId } from "react";
+import { type ComponentProps, createContext, useContext, useId } from "react";
 import { PricingToggle, type PricingToggleVariant } from "@/components/ui/uai/pricing-toggle";
+import { cn } from "@/lib/uai-utils";
 
 export const PRICING_SECTION_VARIANTS = ["cards", "joined", "compact"] as const;
 export type PricingSectionVariant = (typeof PRICING_SECTION_VARIANTS)[number];
@@ -34,35 +36,14 @@ const toggleVariants: Record<PricingSectionVariant, PricingToggleVariant> = {
   joined: "pill",
   compact: "compact",
 };
-const visuallyHidden: CSSProperties = {
-  position: "absolute",
-  width: 1,
-  height: 1,
-  margin: -1,
-  padding: 0,
-  overflow: "hidden",
-  clip: "rect(0 0 0 0)",
-  whiteSpace: "nowrap",
-  border: 0,
-};
-
-const pricingCss = `
-[data-uai-pricing-action]{transition:filter 120ms ease-out,box-shadow 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-[data-uai-pricing-action="secondary"]:hover{box-shadow:inset 0 0 0 999px color-mix(in oklab,var(--uai-text) 9%,transparent)}
-[data-uai-pricing-action="primary"]:hover{filter:brightness(1.08)}
-[data-uai-pricing-action]:active{transform:scale(0.97)}
-[data-uai-pricing-action]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-@media (prefers-reduced-motion:reduce){[data-uai-pricing-action]{transition:none}[data-uai-pricing-action]:active{transform:none}}
-`;
-
 /** Plans, billing periods, limits, and purchase actions. The root owns the billing period through PricingToggle. */
 export function PricingSection({
   variant = "cards",
   value,
   defaultValue,
   onValueChange,
+  className,
   children,
-  style,
   ...props
 }: PricingSectionProps) {
   const id = useId();
@@ -70,24 +51,17 @@ export function PricingSection({
     <Context.Provider value={{ id, variant }}>
       <section
         aria-labelledby={`${id}-title`}
+        data-slot="pricing-section"
+        className={cn("box-border min-w-0 text-[13px]/[18px] text-foreground", className)}
         {...props}
         data-variant={variant}
-        style={{
-          boxSizing: "border-box",
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
       >
-        <style>{pricingCss}</style>
         <PricingToggle
           variant={toggleVariants[variant]}
           value={value}
           defaultValue={defaultValue}
           onValueChange={onValueChange}
-          style={{ gap: variant === "compact" ? 20 : 32 }}
+          className={variant === "compact" ? "gap-5" : "gap-8"}
         >
           {children}
         </PricingToggle>
@@ -96,220 +70,172 @@ export function PricingSection({
   );
 }
 
-export function PricingSectionHeader({ style, ...props }: ComponentProps<"header">) {
+export function PricingSectionHeader({ className, ...props }: ComponentProps<"header">) {
   return (
     <header
+      data-slot="pricing-section-header"
+      className={cn("mx-auto grid max-w-[600px] justify-items-center gap-3 text-center", className)}
       {...props}
-      style={{
-        display: "grid",
-        justifyItems: "center",
-        gap: 12,
-        maxWidth: 600,
-        margin: "0 auto",
-        textAlign: "center",
-        ...style,
-      }}
     />
   );
 }
 
-export function PricingSectionTitle({ style, ...props }: ComponentProps<"h2">) {
+export function PricingSectionTitle({ className, ...props }: ComponentProps<"h2">) {
   const { id, variant } = useSection("PricingSectionTitle");
   return (
     <h2
+      data-slot="pricing-section-title"
+      className={cn(
+        "m-0 font-medium tracking-[-0.025em] text-balance",
+        variant === "compact" ? "text-[22px]/[1.15]" : "text-[30px]/[1.15]",
+        className,
+      )}
       {...props}
       id={`${id}-title`}
-      style={{
-        margin: 0,
-        fontSize: variant === "compact" ? 22 : 30,
-        fontWeight: 500,
-        lineHeight: 1.15,
-        letterSpacing: "-0.025em",
-        textWrap: "balance",
-        ...style,
-      }}
     />
   );
 }
 
-export function PricingSectionDescription({ style, ...props }: ComponentProps<"p">) {
+export function PricingSectionDescription({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="pricing-section-description"
+      className={cn("m-0 text-[15px]/[23px] text-pretty text-muted-foreground", className)}
       {...props}
-      style={{
-        margin: 0,
-        color: "var(--uai-muted)",
-        fontSize: 15,
-        lineHeight: "23px",
-        textWrap: "pretty",
-        ...style,
-      }}
     />
   );
 }
 
-export function PricingSectionPlans({ style, ...props }: ComponentProps<"ul">) {
+const pricingSectionPlansVariants = cva("m-0 grid list-none p-0", {
+  variants: {
+    variant: {
+      cards: "grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))] gap-3",
+      joined:
+        "grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))] gap-px overflow-hidden rounded-[14px] border bg-border",
+      compact: "grid-cols-[repeat(auto-fit,minmax(min(100%,180px),1fr))] gap-2",
+    },
+  },
+});
+
+export function PricingSectionPlans({ className, ...props }: ComponentProps<"ul">) {
   const { variant } = useSection("PricingSectionPlans");
-  const joined = variant === "joined";
   return (
     <ul
+      data-slot="pricing-section-plans"
+      className={cn(pricingSectionPlansVariants({ variant }), className)}
       {...props}
-      style={{
-        display: "grid",
-        gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, ${variant === "compact" ? 180 : 220}px), 1fr))`,
-        gap: joined ? 1 : variant === "compact" ? 8 : 12,
-        margin: 0,
-        padding: 0,
-        overflow: joined ? "hidden" : undefined,
-        border: joined ? "1px solid var(--uai-border)" : 0,
-        borderRadius: joined ? 14 : 0,
-        background: joined ? "var(--uai-border)" : "transparent",
-        listStyle: "none",
-        ...style,
-      }}
     />
   );
 }
 
 export type PricingSectionPlanProps = ComponentProps<"li"> & { featured?: boolean };
 
-export function PricingSectionPlan({ featured = false, style, ...props }: PricingSectionPlanProps) {
+const pricingSectionPlanVariants = cva("box-border flex min-w-0 flex-col", {
+  variants: {
+    variant: {
+      cards: "gap-3.5 rounded-[14px] border p-5 shadow-[0_1px_2px_oklch(0_0_0/0.04)]",
+      joined: "gap-3.5 rounded-none border-0 p-5 shadow-none",
+      compact: "gap-2.5 rounded-xl border p-3.5 shadow-[0_1px_2px_oklch(0_0_0/0.04)]",
+    },
+    featured: {
+      true: "border-border-strong bg-[color-mix(in_oklab,var(--muted)_60%,var(--card))]",
+      false: "bg-card",
+    },
+  },
+});
+
+export function PricingSectionPlan({
+  featured = false,
+  className,
+  ...props
+}: PricingSectionPlanProps) {
   const { variant } = useSection("PricingSectionPlan");
   const id = useId();
-  const joined = variant === "joined";
-  const compact = variant === "compact";
   return (
     <PlanContext.Provider value={{ id, featured }}>
       <li
         aria-labelledby={`${id}-name`}
+        data-slot="pricing-section-plan"
+        className={cn(pricingSectionPlanVariants({ variant, featured }), className)}
         {...props}
         data-featured={featured || undefined}
-        style={{
-          boxSizing: "border-box",
-          display: "flex",
-          flexDirection: "column",
-          gap: compact ? 10 : 14,
-          minWidth: 0,
-          padding: compact ? 14 : 20,
-          border: joined
-            ? 0
-            : `1px solid var(${featured ? "--uai-border-strong" : "--uai-border"})`,
-          borderRadius: joined ? 0 : compact ? 12 : 14,
-          background: featured
-            ? "color-mix(in oklab, var(--uai-surface-raised) 60%, var(--uai-surface))"
-            : "var(--uai-surface)",
-          boxShadow: joined ? "none" : "0 1px 2px oklch(0 0 0 / 0.04)",
-          ...style,
-        }}
       />
     </PlanContext.Provider>
   );
 }
 
-export function PricingSectionPlanName({ style, ...props }: ComponentProps<"h3">) {
+export function PricingSectionPlanName({ className, ...props }: ComponentProps<"h3">) {
   const plan = usePlan("PricingSectionPlanName");
   return (
     <h3
+      data-slot="pricing-section-plan-name"
+      className={cn("m-0 flex flex-wrap items-center gap-2 text-sm/5 font-medium", className)}
       {...props}
       id={`${plan.id}-name`}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        gap: 8,
-        margin: 0,
-        fontSize: 14,
-        fontWeight: 500,
-        lineHeight: "20px",
-        ...style,
-      }}
     />
   );
 }
 
-export function PricingSectionPlanBadge({ style, ...props }: ComponentProps<"span">) {
+export function PricingSectionPlanBadge({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
+      data-slot="pricing-section-plan-badge"
+      className={cn(
+        "inline-flex h-5 items-center rounded-full bg-primary/16 px-2 text-[11.5px]/4 font-medium text-[color-mix(in_oklab,var(--primary)_70%,var(--foreground))]",
+        className,
+      )}
       {...props}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        height: 20,
-        padding: "0 8px",
-        borderRadius: 999,
-        background: "color-mix(in oklab, var(--uai-accent) 16%, transparent)",
-        color: "color-mix(in oklab, var(--uai-accent) 70%, var(--uai-text))",
-        fontSize: 11.5,
-        fontWeight: 500,
-        lineHeight: "16px",
-        ...style,
-      }}
     />
   );
 }
 
-export function PricingSectionPlanPrice({ style, ...props }: ComponentProps<"p">) {
+export function PricingSectionPlanPrice({ className, ...props }: ComponentProps<"p">) {
   const { variant } = useSection("PricingSectionPlanPrice");
   return (
     <p
+      data-slot="pricing-section-plan-price"
+      className={cn(
+        "m-0 font-medium tracking-[-0.03em] tabular-nums",
+        variant === "compact" ? "text-[22px]/[1.1]" : "text-[30px]/[1.1]",
+        className,
+      )}
       {...props}
-      style={{
-        margin: 0,
-        fontSize: variant === "compact" ? 22 : 30,
-        fontWeight: 500,
-        lineHeight: 1.1,
-        letterSpacing: "-0.03em",
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     />
   );
 }
 
-export function PricingSectionPlanPeriod({ style, ...props }: ComponentProps<"span">) {
+export function PricingSectionPlanPeriod({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
+      data-slot="pricing-section-plan-period"
+      className={cn(
+        "ml-1 text-[12px] font-normal tracking-normal text-subtle-foreground",
+        className,
+      )}
       {...props}
-      style={{
-        marginLeft: 4,
-        color: "var(--uai-subtle)",
-        fontSize: 12,
-        fontWeight: 400,
-        letterSpacing: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function PricingSectionPlanDescription({ style, ...props }: ComponentProps<"p">) {
+export function PricingSectionPlanDescription({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="pricing-section-plan-description"
+      className={cn("m-0 leading-[19px] text-pretty text-muted-foreground", className)}
       {...props}
-      style={{
-        margin: 0,
-        color: "var(--uai-muted)",
-        lineHeight: "19px",
-        textWrap: "pretty",
-        ...style,
-      }}
     />
   );
 }
 
-export function PricingSectionPlanFeatures({ style, ...props }: ComponentProps<"ul">) {
+export function PricingSectionPlanFeatures({ className, ...props }: ComponentProps<"ul">) {
   return (
     <ul
+      data-slot="pricing-section-plan-features"
+      className={cn(
+        "m-0 grid list-none gap-[9px] border-t border-border/70 px-0 pt-3.5 pb-0.5",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gap: 9,
-        margin: 0,
-        padding: "14px 0 2px",
-        borderTop: "1px solid color-mix(in oklab, var(--uai-border) 70%, transparent)",
-        listStyle: "none",
-        ...style,
-      }}
     />
   );
 }
@@ -322,80 +248,83 @@ export type PricingSectionPlanFeatureProps = ComponentProps<"li"> & {
 export function PricingSectionPlanFeature({
   included = true,
   children,
-  style,
+  className,
   ...props
 }: PricingSectionPlanFeatureProps) {
   const Icon = included ? Check : Minus;
   return (
     <li
+      data-slot="pricing-section-plan-feature"
+      className={cn(
+        "flex items-start gap-2",
+        included ? "text-foreground" : "text-subtle-foreground",
+        className,
+      )}
       {...props}
       data-included={included}
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        gap: 8,
-        color: included ? "var(--uai-text)" : "var(--uai-subtle)",
-        ...style,
-      }}
     >
       <Icon
         size={14}
         strokeWidth={2}
         aria-hidden="true"
-        style={{
-          flex: "none",
-          marginTop: 2,
-          color: included ? "var(--uai-muted)" : "var(--uai-border-strong)",
-        }}
+        className={cn(
+          "mt-0.5 flex-none",
+          included ? "text-muted-foreground" : "text-border-strong",
+        )}
       />
       <span>
-        {included ? null : <span style={visuallyHidden}>Not included: </span>}
+        {included ? null : <span className="sr-only">Not included: </span>}
         {children}
       </span>
     </li>
   );
 }
 
+const pricingSectionPlanActionVariants = cva(
+  [
+    "mt-auto inline-flex items-center justify-center rounded-full px-3.5 font-medium whitespace-nowrap no-underline",
+    "[transition:filter_120ms_ease-out,box-shadow_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)]",
+    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-97",
+    "motion-reduce:transition-none motion-reduce:active:scale-100",
+  ],
+  {
+    variants: {
+      featured: {
+        true: "bg-primary text-primary-foreground hover:brightness-108",
+        false:
+          "bg-secondary text-secondary-foreground hover:shadow-[inset_0_0_0_999px_color-mix(in_oklab,var(--foreground)_9%,transparent)]",
+      },
+      compact: { true: "h-[30px] text-[12.5px]", false: "h-[34px] text-[13px]" },
+    },
+  },
+);
+
 /** Purchase action. The featured plan uses the accent fill; other plans use a raised pill. */
-export function PricingSectionPlanAction({ style, ...props }: ComponentProps<"a">) {
+export function PricingSectionPlanAction({ className, ...props }: ComponentProps<"a">) {
   const plan = usePlan("PricingSectionPlanAction");
   const { variant } = useSection("PricingSectionPlanAction");
   return (
     <a
+      data-slot="pricing-section-plan-action"
+      className={cn(
+        pricingSectionPlanActionVariants({
+          featured: plan.featured,
+          compact: variant === "compact",
+        }),
+        className,
+      )}
       {...props}
-      data-uai-pricing-action={plan.featured ? "primary" : "secondary"}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        height: variant === "compact" ? 30 : 34,
-        marginTop: "auto",
-        padding: "0 14px",
-        borderRadius: 999,
-        background: plan.featured ? "var(--uai-accent)" : "var(--uai-surface-raised)",
-        color: plan.featured ? "var(--uai-accent-foreground)" : "var(--uai-text)",
-        fontSize: variant === "compact" ? 12.5 : 13,
-        fontWeight: 500,
-        textDecoration: "none",
-        whiteSpace: "nowrap",
-        ...style,
-      }}
+      data-emphasis={plan.featured ? "primary" : "secondary"}
     />
   );
 }
 
-export function PricingSectionFootnote({ style, ...props }: ComponentProps<"p">) {
+export function PricingSectionFootnote({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="pricing-section-footnote"
+      className={cn("m-0 text-center text-xs/4 text-subtle-foreground", className)}
       {...props}
-      style={{
-        margin: 0,
-        color: "var(--uai-subtle)",
-        fontSize: 12,
-        lineHeight: "16px",
-        textAlign: "center",
-        ...style,
-      }}
     />
   );
 }

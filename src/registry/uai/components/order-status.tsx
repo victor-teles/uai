@@ -1,3 +1,4 @@
+import { cva } from "class-variance-authority";
 import { Check, Circle, CircleAlert } from "lucide-react";
 import { type ComponentProps, createContext, type ReactNode, useContext, useId } from "react";
 
@@ -19,35 +20,35 @@ function orderStatusChrome(variant: OrderStatusVariant) {
   const compact = variant === "compact";
 
   return {
-    rootClass:
-      variant === "plain"
-        ? "bg-transparent"
-        : "border border-[color-mix(in_oklab,var(--uai-border)_60%,transparent)] bg-[var(--uai-surface)]",
-    rootStyle: {
-      borderRadius: compact ? 12 : variant === "card" ? 14 : 0,
-      padding: compact ? 12 : variant === "card" ? 18 : 0,
-    },
     headerClass: compact ? "mb-4" : "mb-5",
-    titleClass: compact ? "text-[13px] leading-[18px]" : "text-[15px] leading-5",
-    descriptionClass: compact
-      ? "mt-0.5 text-[11.5px] leading-4"
-      : "mt-1 text-[12.5px] leading-[18px]",
+    titleClass: compact ? "text-[13px]/[18px]" : "text-[15px]/5",
+    descriptionClass: compact ? "mt-0.5 text-[11.5px]/4" : "mt-1 text-[12.5px]/[18px]",
     stepClass: compact
       ? "grid-cols-[18px_minmax(0,1fr)] gap-2.5 pb-3.5"
       : "grid-cols-[22px_minmax(0,1fr)] gap-3 pb-4",
     markerClass: compact ? "size-[18px]" : "size-[22px]",
     markerIconClass: compact ? "size-2.5" : "size-3",
     connectorClass: compact ? "left-[8.5px] top-[22px]" : "left-[10.5px] top-[26px]",
-    stepLabelClass: compact ? "text-[10.5px] leading-3" : "text-[11px] leading-4",
-    stepTitleClass: compact ? "text-[12.5px] leading-4" : "text-[13px] leading-[18px]",
-    stepDescriptionClass: compact ? "mt-0.5 text-[11px] leading-4" : "mt-0.5 text-[12px] leading-4",
+    stepLabelClass: compact ? "text-[10.5px]/3" : "text-[11px]/4",
+    stepTitleClass: compact ? "text-[12.5px]/4" : "text-[13px]/[18px]",
+    stepDescriptionClass: compact ? "mt-0.5 text-[11px]/4" : "mt-0.5 text-xs/4",
     detailsClass: compact ? "mt-4 gap-2.5 pt-3.5" : "mt-5 gap-3 pt-4",
-    detailClass: compact ? "text-[12px] leading-4" : "text-[12.5px] leading-[18px]",
-    detailLabelClass: compact ? "text-[11px] leading-4" : "text-[11.5px] leading-4",
+    detailClass: compact ? "text-xs/4" : "text-[12.5px]/[18px]",
+    detailLabelClass: compact ? "text-[11px]/4" : "text-[11.5px]/4",
     actionsClass: compact ? "mt-4 gap-1.5" : "mt-5 gap-2",
     actionClass: compact ? "h-7 px-3 text-[12px]" : "h-8 px-3.5 text-[12.5px]",
   };
 }
+
+const orderStatusVariants = cva("w-full text-card-foreground", {
+  variants: {
+    variant: {
+      card: "rounded-[14px] border border-border/60 bg-card p-[18px]",
+      plain: "rounded-none bg-transparent p-0",
+      compact: "rounded-xl border border-border/60 bg-card p-3",
+    },
+  },
+});
 
 type OrderStatusContextValue = {
   titleId: string;
@@ -66,7 +67,6 @@ export function OrderStatus({
   variant = "card",
   children,
   className,
-  style,
   "aria-labelledby": ariaLabelledby,
   ...props
 }: OrderStatusProps) {
@@ -76,9 +76,9 @@ export function OrderStatus({
   return (
     <OrderStatusContext.Provider value={{ titleId, chrome }}>
       <section
+        data-slot="order-status"
+        className={cn(orderStatusVariants({ variant }), className)}
         {...props}
-        className={cn("w-full text-[var(--uai-text)]", chrome.rootClass, className)}
-        style={{ ...chrome.rootStyle, ...style }}
         data-variant={variant}
         aria-labelledby={ariaLabelledby ?? titleId}
       >
@@ -95,6 +95,7 @@ export function OrderStatusHeader({ children, className, ...props }: OrderStatus
 
   return (
     <header
+      data-slot="order-status-header"
       className={cn(
         "flex items-start justify-between gap-4",
         context.chrome.headerClass,
@@ -114,9 +115,10 @@ export function OrderStatusTitle({ children, className, ...props }: OrderStatusT
 
   return (
     <h2
-      id={context.titleId}
+      data-slot="order-status-title"
       className={cn("font-medium tracking-[-0.01em]", context.chrome.titleClass, className)}
       {...props}
+      id={context.titleId}
     >
       {children}
     </h2>
@@ -134,8 +136,9 @@ export function OrderStatusDescription({
 
   return (
     <p
+      data-slot="order-status-description"
       className={cn(
-        "max-w-[48ch] text-[var(--uai-muted)] text-pretty [overflow-wrap:anywhere]",
+        "max-w-[48ch] text-muted-foreground text-pretty wrap-anywhere",
         context.chrome.descriptionClass,
         className,
       )}
@@ -151,11 +154,10 @@ export type OrderStatusBadgeProps = ComponentProps<"span"> & {
 };
 
 const orderStatusBadgeToneClass: Record<OrderStatusBadgeTone, string> = {
-  neutral: "bg-[var(--uai-surface-raised)] text-[var(--uai-muted)]",
-  progress:
-    "bg-[color-mix(in_oklab,var(--uai-accent)_16%,transparent)] text-[color-mix(in_oklab,var(--uai-accent)_72%,var(--uai-text))]",
-  success: "bg-[color-mix(in_oklab,var(--uai-success)_14%,transparent)] text-[var(--uai-success)]",
-  warning: "bg-[color-mix(in_oklab,var(--uai-warning)_14%,transparent)] text-[var(--uai-warning)]",
+  neutral: "bg-muted text-muted-foreground",
+  progress: "bg-primary/16 text-[color-mix(in_oklab,var(--primary)_72%,var(--foreground))]",
+  success: "bg-success/14 text-success",
+  warning: "bg-warning/14 text-warning",
 };
 
 export function OrderStatusBadge({
@@ -168,8 +170,10 @@ export function OrderStatusBadge({
 
   return (
     <span
+      data-slot="order-status-badge"
+      data-tone={tone}
       className={cn(
-        "inline-flex h-[22px] shrink-0 items-center gap-1.5 rounded-full px-2 text-[11.5px] leading-4 font-medium whitespace-nowrap tabular-nums before:size-1.5 before:shrink-0 before:rounded-full before:bg-current before:content-['']",
+        "inline-flex h-[22px] shrink-0 items-center gap-1.5 rounded-full px-2 text-[11.5px]/4 font-medium whitespace-nowrap tabular-nums before:size-1.5 before:shrink-0 before:rounded-full before:bg-current before:content-['']",
         orderStatusBadgeToneClass[tone],
         className,
       )}
@@ -191,7 +195,12 @@ export function OrderStatusProgress({
   useOrderStatus("OrderStatusProgress");
 
   return (
-    <ol aria-label={ariaLabel} className={cn("grid list-none p-0", className)} {...props}>
+    <ol
+      data-slot="order-status-progress"
+      aria-label={ariaLabel}
+      className={cn("grid list-none p-0", className)}
+      {...props}
+    >
       {children}
     </ol>
   );
@@ -209,17 +218,17 @@ const orderStatusStepLabel: Record<OrderStatusStepStatus, string> = {
 };
 
 const orderStatusStepTextClass: Record<OrderStatusStepStatus, string> = {
-  complete: "text-[var(--uai-subtle)]",
-  current: "text-[color-mix(in_oklab,var(--uai-accent)_72%,var(--uai-text))]",
-  upcoming: "text-[var(--uai-subtle)]",
-  issue: "text-[var(--uai-danger)]",
+  complete: "text-subtle-foreground",
+  current: "text-[color-mix(in_oklab,var(--primary)_72%,var(--foreground))]",
+  upcoming: "text-subtle-foreground",
+  issue: "text-destructive",
 };
 
 const orderStatusStepTitleClass: Record<OrderStatusStepStatus, string> = {
-  complete: "[&_h3]:text-[var(--uai-muted)]",
-  current: "[&_h3]:text-[var(--uai-text)]",
-  upcoming: "[&_h3]:text-[var(--uai-muted)]",
-  issue: "[&_h3]:text-[var(--uai-text)]",
+  complete: "[&_h3]:text-muted-foreground",
+  current: "[&_h3]:text-card-foreground",
+  upcoming: "[&_h3]:text-muted-foreground",
+  issue: "[&_h3]:text-card-foreground",
 };
 
 function OrderStatusMarker({
@@ -233,12 +242,12 @@ function OrderStatusMarker({
 }) {
   const markerClass = {
     complete:
-      "border-transparent bg-[color-mix(in_oklab,var(--uai-success)_16%,var(--uai-surface))] text-[var(--uai-success)]",
+      "border-transparent bg-[color-mix(in_oklab,var(--success)_16%,var(--card))] text-success",
     current:
-      "border-transparent bg-[color-mix(in_oklab,var(--uai-accent)_18%,var(--uai-surface))] text-[var(--uai-accent)] shadow-[0_0_0_3px_color-mix(in_oklab,var(--uai-accent)_10%,transparent)]",
-    upcoming: "border-[var(--uai-border)] bg-[var(--uai-surface)] text-[var(--uai-subtle)]",
+      "border-transparent bg-[color-mix(in_oklab,var(--primary)_18%,var(--card))] text-primary ring-3 ring-primary/10",
+    upcoming: "border-border bg-card text-subtle-foreground",
     issue:
-      "border-transparent bg-[color-mix(in_oklab,var(--uai-danger)_16%,var(--uai-surface))] text-[var(--uai-danger)]",
+      "border-transparent bg-[color-mix(in_oklab,var(--destructive)_16%,var(--card))] text-destructive",
   }[status];
   const Icon = status === "complete" ? Check : status === "issue" ? CircleAlert : Circle;
 
@@ -275,6 +284,7 @@ export function OrderStatusStep({
 
   return (
     <li
+      data-slot="order-status-step"
       className={cn(
         "relative grid last:pb-0 [&:last-child>span:first-child]:hidden",
         context.chrome.stepClass,
@@ -289,9 +299,7 @@ export function OrderStatusStep({
         className={cn(
           "absolute bottom-0.5 w-px -translate-x-1/2 rounded-full",
           context.chrome.connectorClass,
-          complete
-            ? "bg-[color-mix(in_oklab,var(--uai-success)_55%,var(--uai-border))]"
-            : "bg-[var(--uai-border)]",
+          complete ? "bg-[color-mix(in_oklab,var(--success)_55%,var(--border))]" : "bg-border",
         )}
         aria-hidden="true"
       />
@@ -322,7 +330,11 @@ export function OrderStatusStepTitle({ children, className, ...props }: OrderSta
   const context = useOrderStatus("OrderStatusStepTitle");
 
   return (
-    <h3 className={cn("font-medium", context.chrome.stepTitleClass, className)} {...props}>
+    <h3
+      data-slot="order-status-step-title"
+      className={cn("font-medium", context.chrome.stepTitleClass, className)}
+      {...props}
+    >
       {children}
     </h3>
   );
@@ -339,8 +351,9 @@ export function OrderStatusStepDescription({
 
   return (
     <p
+      data-slot="order-status-step-description"
       className={cn(
-        "text-[var(--uai-muted)] [overflow-wrap:anywhere]",
+        "text-muted-foreground wrap-anywhere",
         context.chrome.stepDescriptionClass,
         className,
       )}
@@ -358,8 +371,9 @@ export function OrderStatusDetails({ children, className, ...props }: OrderStatu
 
   return (
     <dl
+      data-slot="order-status-details"
       className={cn(
-        "grid grid-cols-2 border-t border-[color-mix(in_oklab,var(--uai-border)_60%,transparent)] max-[420px]:grid-cols-1",
+        "grid grid-cols-2 border-t border-border/60 max-[420px]:grid-cols-1",
         context.chrome.detailsClass,
         className,
       )}
@@ -383,9 +397,13 @@ export function OrderStatusDetail({
   const context = useOrderStatus("OrderStatusDetail");
 
   return (
-    <div className={cn("min-w-0", context.chrome.detailClass, className)} {...props}>
-      <dt className={cn("text-[var(--uai-subtle)]", context.chrome.detailLabelClass)}>{label}</dt>
-      <dd className="mt-0.5 font-medium tabular-nums [overflow-wrap:anywhere]">{children}</dd>
+    <div
+      data-slot="order-status-detail"
+      className={cn("min-w-0", context.chrome.detailClass, className)}
+      {...props}
+    >
+      <dt className={cn("text-subtle-foreground", context.chrome.detailLabelClass)}>{label}</dt>
+      <dd className="mt-0.5 font-medium tabular-nums wrap-anywhere">{children}</dd>
     </div>
   );
 }
@@ -396,7 +414,11 @@ export function OrderStatusActions({ children, className, ...props }: OrderStatu
   const context = useOrderStatus("OrderStatusActions");
 
   return (
-    <div className={cn("flex flex-wrap", context.chrome.actionsClass, className)} {...props}>
+    <div
+      data-slot="order-status-actions"
+      className={cn("flex flex-wrap", context.chrome.actionsClass, className)}
+      {...props}
+    >
       {children}
     </div>
   );
@@ -416,12 +438,14 @@ export function OrderStatusAction({
 
   return (
     <a
+      data-slot="order-status-action"
+      data-emphasis={emphasis}
       className={cn(
-        "inline-flex items-center justify-center rounded-full font-medium no-underline transition-[transform,background-color,filter] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uai-accent)] active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100",
+        "inline-flex items-center justify-center rounded-full font-medium no-underline transition-[scale,background-color,filter] duration-140 ease-out-quint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-97 motion-reduce:transition-none motion-reduce:active:scale-100",
         context.chrome.actionClass,
         emphasis === "primary"
-          ? "bg-[var(--uai-accent)] text-[var(--uai-accent-foreground)] hover:brightness-[1.08]"
-          : "bg-[var(--uai-surface-raised)] text-[var(--uai-text)] hover:bg-[color-mix(in_oklab,var(--uai-surface-raised)_85%,var(--uai-text))]",
+          ? "bg-primary text-primary-foreground hover:brightness-[1.08]"
+          : "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
         className,
       )}
       {...props}
