@@ -833,6 +833,115 @@ a {
   stroke-width: 3;
 }
 
+.uai-theming__text {
+  margin: 0 0 12px;
+  color: var(--uai-muted);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+.uai-theming .uai-install-command + .uai-theming__text {
+  margin-top: 14px;
+}
+
+.uai-theming__steps {
+  display: grid;
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: uai-step;
+}
+
+.uai-theming__steps > li {
+  position: relative;
+  min-width: 0;
+  padding-left: 32px;
+  counter-increment: uai-step;
+}
+
+.uai-theming__steps > li::before {
+  content: counter(uai-step);
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--uai-surface-raised);
+  color: var(--uai-text);
+  font-family: "Geist Mono Variable", ui-monospace, monospace;
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.uai-theming__code {
+  position: relative;
+  min-width: 0;
+}
+
+.uai-theming__code + .uai-theming__text {
+  margin-top: 20px;
+}
+
+.uai-theming__code-copy {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+}
+
+.uai-theming__code .uai-syntax-codeblock {
+  max-height: 420px;
+}
+
+.uai-theming__table-wrap {
+  overflow-x: auto;
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 1px var(--uai-border);
+}
+
+.uai-theming__table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.uai-theming__table th,
+.uai-theming__table td {
+  padding: 10px 14px;
+  border-top: 1px solid var(--uai-border);
+  color: var(--uai-muted);
+  text-align: left;
+  font-weight: 400;
+  vertical-align: middle;
+}
+
+.uai-theming__table thead th {
+  border-top: 0;
+  color: var(--uai-subtle);
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.uai-theming__table tbody th {
+  white-space: nowrap;
+}
+
+.uai-theming__swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 8px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--uai-text) 14%, transparent);
+  vertical-align: -1px;
+}
+
 .uai-doc__pager {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

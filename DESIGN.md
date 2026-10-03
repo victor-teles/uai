@@ -400,7 +400,7 @@ The theme also ships `ease-out-quint`, the `shimmer-text` utility for live label
 
 ## Layout
 
-The desktop frame is a 272px sticky sidebar and a flexible main column, centered at 1280px with 1px side rules over the plain canvas. The main column holds one 960px document: header, specimen, then Code example, Installation, and Accessibility sections. Dashed hairlines separate the sections, and a previous/next pager ends the page. The overview page shows the intro, a live Prompt Composer specimen, and a grid of cards for every item, grouped by category.
+The desktop frame is a 272px sticky sidebar and a flexible main column, centered at 1280px with 1px side rules over the plain canvas. The main column holds one 960px document: header, specimen, then Code example, Installation, and Accessibility sections. Dashed hairlines separate the sections, and a previous/next pager ends the page. The overview page shows the intro, a live Prompt Composer specimen, and a grid of cards for every item, grouped by category. The Theming page follows Overview in the sidebar and uses the same document layout: Install the theme, Manual installation as numbered steps with copyable code, a token table with live swatches, and Customize.
 
 Below 900px, a sticky top bar holds the brand, search, and a menu button. The menu opens the same grouped navigation as a full-screen drawer. Below 640px, the pager stacks and the header metadata hides. The page never scrolls horizontally.
 
