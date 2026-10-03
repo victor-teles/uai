@@ -30,7 +30,8 @@
     "upgrade": "remotion upgrade",
     "lint": "eslint src && tsc",
     "render:thinking": "remotion render Thinking out/thinking-component.mp4",
-    "render:thinking-v2": "remotion render ThinkingV2 out/thinking-component-v2.mp4"
+    "render:thinking-v2": "remotion render ThinkingV2 out/thinking-component-v2.mp4",
+    "render:response-status": "remotion render ResponseStatus out/response-status-component.mp4"
   },
   "sideEffects": [
     "*.css"

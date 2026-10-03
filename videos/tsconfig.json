@@ -10,7 +10,11 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "noUnusedLocals": true
+    "noUnusedLocals": true,
+    "paths": {
+      "@uai/*": ["../src/registry/uai/*"],
+      "*": ["./node_modules/@types/*", "./node_modules/*"]
+    }
   },
   "exclude": ["remotion.config.ts"]
 }
