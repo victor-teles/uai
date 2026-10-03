@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 const designContract = `<!--
 THESIS: Uai is a calm, browsable registry; every component reads like a specimen on a quiet page.
-OWN-WORLD: Warm graphite canvas in a hatched frame, dashed hairlines, numbered specimens, raised pill selection.
+OWN-WORLD: Warm graphite canvas in a ruled frame, dashed hairlines, numbered specimens, raised pill selection.
 STORY: Developers scan a grouped sidebar or press Cmd+K, open a component at its own URL, switch variants inside the stage, then copy usage or install.
 FIRST VIEWPORT: Sidebar with brand, tagline, search, and grouped navigation; the main column shows the numbered specimen with an in-stage variant pill.
 FORM: Beautiful UI direction; seed uai-registry-docs-v2.
