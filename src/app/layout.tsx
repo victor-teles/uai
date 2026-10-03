@@ -16,11 +16,11 @@ export const metadata: Metadata = {
 };
 
 const designContract = `<!--
-THESIS: Uai is a calm, browsable registry; every component reads like a specimen on a quiet page.
-OWN-WORLD: Warm graphite canvas in a ruled frame, dashed hairlines, numbered specimens, raised pill selection.
-STORY: Developers scan a grouped sidebar or press Cmd+K, open a component at its own URL, switch variants inside the stage, then copy usage or install.
-FIRST VIEWPORT: Sidebar with brand, tagline, search, and grouped navigation; the main column shows the numbered specimen with an in-stage variant pill.
-FORM: Beautiful UI direction; seed uai-registry-docs-v2.
+THESIS: Uai is a component workbench; every component sits on a ruled canvas beside an inspector.
+OWN-WORLD: Graphite surfaces, solid hairlines, Geist Mono chrome, crop-marked canvas, a site-only lime signal.
+STORY: Developers browse the file tree or press Cmd+K, open a component at its own URL, switch variants from the pill floating on the canvas, then copy usage or install.
+FIRST VIEWPORT: Top bar with brand tile, breadcrumb, and search; file tree; the canvas with the live specimen and floating variant pill; the inspector with title, install, anatomy, and accessibility.
+FORM: Workbench direction; seed uai-registry-docs-v3.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->`;
 
@@ -35,7 +35,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <div
           hidden
           aria-hidden="true"
-          data-design-contract="uai-registry-docs-v2"
+          data-design-contract="uai-registry-docs-v3"
           {...designContractMarkup}
         />
         <RootProvider theme={{ defaultTheme: "dark" }} search={{ enabled: false }}>

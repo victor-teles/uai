@@ -12,7 +12,7 @@ import {
   Plus,
   ShoppingBag,
 } from "lucide-react";
-import { type FormEvent, type ReactNode, useEffect, useRef, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import {
   APP_HEADER_VARIANTS,
   AppHeader,
@@ -250,6 +250,7 @@ import {
   getOperationsBlocksPreviewControl,
   OperationsBlocksPreview,
 } from "./operations-blocks/preview";
+import { PannableCanvas } from "./pannable-canvas";
 import { type PreviewControl, PreviewStage, SegmentedControl } from "./preview-chrome";
 
 const composerModels = [
@@ -1570,7 +1571,7 @@ const groupPreviews = [
   { getControl: getAiBlocksPreviewControl, Preview: AiBlocksPreview },
 ] as const;
 
-function getPreviewControl(itemId: RegistryItemId): PreviewControl | undefined {
+export function getPreviewControl(itemId: RegistryItemId): PreviewControl | undefined {
   const formsControl = getFormsPreviewControl(itemId);
   if (formsControl) return formsControl;
   for (const group of groupPreviews) {
@@ -1784,23 +1785,51 @@ function renderPreview(itemId: RegistryItemId, selection: string) {
   return null;
 }
 
+export function RegistryPreviewCanvas({
+  itemId,
+  selection,
+}: {
+  itemId: RegistryItemId;
+  selection: string;
+}) {
+  return (
+    <PannableCanvas resetKey={`${itemId}:${selection}`}>
+      {renderPreview(itemId, selection)}
+    </PannableCanvas>
+  );
+}
+
+export function RegistryVariants({
+  control,
+  value,
+  onChange,
+}: {
+  control: PreviewControl;
+  value: string;
+  onChange: (id: string) => void;
+}) {
+  return (
+    <div className="uai-registry-variants">
+      <SegmentedControl
+        ariaLabel={control.ariaLabel}
+        value={value}
+        onChange={onChange}
+        options={control.options}
+      />
+    </div>
+  );
+}
+
+/** Self-contained specimen with its variant switch underneath, used on the overview. */
 export function RegistryPreview({ itemId }: { itemId: RegistryItemId }) {
   const control = getPreviewControl(itemId);
   const [selection, setSelection] = useState(control?.defaultValue ?? "");
 
   return (
-    <div className="uai-registry-specimen" data-has-variants={control ? "true" : undefined}>
-      {renderPreview(itemId, selection)}
-
+    <div className="uai-registry-showcase">
+      <RegistryPreviewCanvas itemId={itemId} selection={selection} />
       {control ? (
-        <div className="uai-registry-variants">
-          <SegmentedControl
-            ariaLabel={control.ariaLabel}
-            value={selection}
-            onChange={setSelection}
-            options={control.options}
-          />
-        </div>
+        <RegistryVariants control={control} value={selection} onChange={setSelection} />
       ) : null}
     </div>
   );

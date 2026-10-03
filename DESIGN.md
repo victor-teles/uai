@@ -1,9 +1,13 @@
 ---
 name: Uai
-description: A calm, browsable registry of source-owned components in the Beautiful UI language.
+description: A component workbench for source-owned components. Graphite surfaces with a lime site signal; installed components keep the blue accent.
 colors:
   accent: "oklch(0.57 0.185 257)"
   accent-foreground: "oklch(1 0 0)"
+  signal: "oklch(0.91 0.2 122)"
+  signal-foreground: "oklch(0.2 0.02 122)"
+  signal-ink-light: "oklch(0.5 0.13 128)"
+  signal-ink-dark: "oklch(0.91 0.2 122)"
   canvas-light: "oklch(0.975 0.001 260)"
   surface-light: "oklch(1 0 0)"
   surface-raised-light: "oklch(0.94 0.003 260)"
@@ -87,16 +91,25 @@ components:
   nav-item-active:
     backgroundColor: "{colors.surface-raised-dark}"
     textColor: "{colors.text-dark}"
-    rounded: "7px"
-    height: "29px"
+    rounded: "0"
+    height: "28px"
   specimen:
     backgroundColor: "color-mix(in oklab, canvas 97%, text)"
-    rounded: "{rounded.composer}"
-    minHeight: "440px"
+    rounded: "0"
+    minHeight: "480px"
   segmented-pill:
     backgroundColor: "color-mix(in oklab, surface-raised 65%, transparent)"
     rounded: "{rounded.pill}"
     height: "24px"
+  segmented-thumb:
+    backgroundColor: "{colors.signal}"
+    textColor: "{colors.signal-foreground}"
+    rounded: "{rounded.pill}"
+  site-install:
+    backgroundColor: "{colors.signal}"
+    textColor: "{colors.signal-foreground}"
+    rounded: "{rounded.pill}"
+    height: "34px"
   primary-action:
     backgroundColor: "{colors.accent}"
     textColor: "{colors.accent-foreground}"
@@ -324,25 +337,32 @@ components:
 
 ## Overview
 
-**Creative North Star: "Specimens on a quiet page"**
+**Creative North Star: "A component workbench"**
 
-Uai follows the Beautiful UI language (beautifului.dev): warm graphite, soft medium-weight type, tonal surfaces in place of hard borders, pill controls, and small, purposeful motion. The documentation site and the distributed components share one palette, so a component looks the same in the catalog and in a consumer's app.
+The site is laid out like a developer tool: a file tree on the left, a ruled canvas in the middle, and an inspector on the right. Graphite neutrals carry structure, Geist Mono carries the chrome, and one lime **signal** marks what is active or actionable on the site. The site does not borrow the layout of other component galleries; its identity comes from the workbench.
+
+The distributed components keep their own language: warm graphite, soft medium-weight type, tonal surfaces before borders, pill controls, and a blue accent. The signal never reaches the shadcn tokens, so the specimen on the canvas looks exactly like the installed component.
 
 **Key Characteristics:**
 
-- A centered 1280px frame on a plain canvas, split by dashed hairlines.
-- A sidebar with brand, theme toggle, tagline, search, and navigation grouped by category.
+- A full-width shell: a 48px top bar, a 248px file-tree sidebar, and the page. Solid 1px hairlines divide the regions.
 - One URL per registry item (`/components/<id>`), numbered in reading order with previous and next links.
-- Variants switch from a segmented pill inside the specimen, not from a side rail.
+- Component pages pair a ruled canvas with crop marks and a sticky inspector holding the title, install command, anatomy, and accessibility checks. The variant switch floats over the bottom of the canvas.
+- Lime is site-only: the brand tile, the install pill, the active variant, the active file marker, and focus. Installed components keep accent blue for their single primary action.
 - Medium weight (500) carries emphasis. 600 is reserved for page titles and one headline per card. Never 700.
-- Accent blue fills the single primary affirmative action. Prompt Composer send stays ink.
 - Ninety-eight registry items (57 components and 41 blocks) with live specimens, usage, installation, and accessibility notes.
 
 ## Colors
 
-Warm graphite neutrals carry structure. One accent blue marks the primary action, links, selection, and focus.
+Warm graphite neutrals carry structure on both layers. The site adds a lime signal; distributed components use one accent blue for the primary action, links, and selection.
 
-### Accent
+### Signal (site only)
+
+- **Signal** (`oklch(0.91 0.2 122)` in both themes): Fills on the docs site only: the brand tile, the install pill, the segmented thumb, and the a11y check marks. Text on it is **Signal Foreground** (`oklch(0.2 0.02 122)`).
+- **Signal Ink** (`oklch(0.5 0.13 128)` light, `oklch(0.91 0.2 122)` dark): The same hue for text and strokes: the active file marker, crop marks, the canvas `variant="…"` label, focus outlines, and text selection. Bright lime fails contrast as text on the light canvas, so light mode uses the darker olive.
+- Signal lives in `--uai-signal*` site variables. It never feeds `--primary`, `--ring`, or the `uai-theme` registry item.
+
+### Accent (distributed components)
 
 - **Accent** (`oklch(0.57 0.185 257)` in both themes): Primary affirmative buttons (Approve, Continue, Save, Apply, Checkout), selected checkboxes and radios, links, and focus rings. White text on it meets AA.
 
@@ -391,8 +411,9 @@ The theme also ships `ease-out-quint`, the `shimmer-text` utility for live label
 ### Hierarchy
 
 - **Display** (600, `1.75rem`, `-0.025em`): The overview headline only.
-- **Title** (600, `1.25rem`, `-0.015em`): The component name, preceded by its mono reading-order number.
-- **Section** (600, `0.84rem`): Code example, Installation, Accessibility, and category headings.
+- **Title** (600, `1.375rem`, `-0.02em`): The component name at the top of the inspector, under a mono `component · 20/98` eyebrow. The Theming page title uses `1.25rem`.
+- **Section** (600, `0.84rem`): Category headings on the overview and Theming sections. Workbench panel titles (Code example) use 500 at `0.78rem`.
+- **Chrome** (Geist Mono, 400, 11–12px): The file tree, breadcrumbs, the canvas toolbar, inspector labels (lowercase), the anatomy tree, and segmented labels.
 - **Body** (400, 13px / 18px): Descriptions and fields.
 - **Emphasis** (500, 13px): Row titles, buttons, tabs, and labels.
 - **Navigation** (400, 12.5px; 500 when active).
@@ -400,9 +421,17 @@ The theme also ships `ease-out-quint`, the `shimmer-text` utility for live label
 
 ## Layout
 
-The desktop frame is a 272px sticky sidebar and a flexible main column, centered at 1280px with 1px side rules over the plain canvas. The main column holds one 960px document: header, specimen, then Code example, Installation, and Accessibility sections. Dashed hairlines separate the sections, and a previous/next pager ends the page. The overview page shows the intro, a live Prompt Composer specimen, and a grid of cards for every item, grouped by category. The Theming page follows Overview in the sidebar and uses the same document layout: Install the theme, Manual installation as numbered steps with copyable code, a token table with live swatches, and Customize.
+The desktop shell is full width. A sticky 48px top bar holds the brand tile, a mono breadcrumb (`forms / prompt-composer.tsx`), the ⌘K search pill, and the theme toggle. Below it, a 248px sticky sidebar holds the file tree, and the page fills the rest.
 
-Below 900px, a sticky top bar holds the brand, search, and a menu button. The menu opens the same grouped navigation as a full-screen drawer. Below 640px, the pager stacks and the header metadata hides. The page never scrolls horizontally.
+Component pages are a workbench that fills the viewport like an editor: the workspace column on the left and a 316px inspector on the right. Each pane scrolls on its own; the page itself does not scroll on desktop.
+
+- **Workspace:** A 36px mono toolbar (`canvas`, the current `variant="…"` in Signal Ink, the category), the ruled specimen with the floating variant switch, and a 320px bottom dock. The dock scrolls and holds the Code example panel, then the Manual installation panel. Panel heads stick to the top of the dock.
+- **Inspector:** The header (eyebrow, title, description), then Install (with an "Install manually" link that jumps to the dock panel), Anatomy (Composes for blocks), and Accessibility sections, and the previous/next pager at the bottom.
+- **Resizing:** The sidebar (200–420px), the inspector (260–560px), and the dock (120–960px, always leaving 200px of canvas) resize from handles on their edges. Sizes persist per browser.
+
+The overview and Theming pages use a 1040px document column with 48px top padding: the overview intro, a live Prompt Composer showcase, and a grid of cards for every item, grouped by category.
+
+Below 1180px, the page scrolls as one document again and the inspector and dock handles hide. The inspector dissolves into the flow: title and Install come first, then the canvas, code, and manual installation, then Anatomy, Accessibility, and the pager. Below 900px, the sidebar becomes a full-screen drawer opened from a menu button in the top bar, its handle hides, and the breadcrumb and search label hide. The page never scrolls horizontally.
 
 Navigation: ⌘K or `/` opens the command palette from anywhere. It searches by name, category, and description, supports arrow keys and Enter, and routes to the item's URL.
 
@@ -411,11 +440,12 @@ Navigation: ⌘K or `/` opens the command palette from anywhere. It searches by 
 Depth comes from tone. Cards are Surface on Canvas, and specimens are a 3% tint of Canvas. Lifted exceptions:
 
 - **Floating menu / palette** (a 1px Border Strong ring plus `0 10px 28px` black at 42%): Popovers, composer menus, and the command palette.
-- **Segmented thumb** (a 1px Border Strong ring): The active pill.
+- **Floating variant switch** (a 1px Border Strong ring plus `0 10px 28px` black at 28%, over an 88% Surface track with a 12px backdrop blur): The variant pill over the canvas.
+- **Segmented thumb** (a Signal fill): The active pill. Flat, no ring.
 
 ## Shapes
 
-- Specimens, cards, code blocks, and menus: 14px (12px compact).
+- Site regions (sidebar, canvas, panels, inspector): square, divided by 1px hairlines. The overview showcase, cards, code blocks, and menus: 14px (12px compact).
 - Rows, inputs, and nav items: 7–10px. Chips and tags: 5–6px.
 - Buttons, badges, segmented controls, and the theme toggle: full pill.
 
@@ -425,28 +455,61 @@ Depth comes from tone. Cards are Surface on Canvas, and specimens are a 3% tint 
 - Press: `scale(0.97)` (0.92–0.96 for icon buttons), 140ms `cubic-bezier(0.23, 1, 0.32, 1)`.
 - Pop-in (menus, palette): from `scale(0.96)` and opacity 0, 180ms `cubic-bezier(0.16, 1, 0.3, 1)`, origin at the trigger.
 - Expand: `grid-template-rows` 0fr → 1fr with opacity, 300ms `cubic-bezier(0.23, 1, 0.32, 1)`. Chevrons rotate in 180ms.
-- Page enter: 4px fade-up, 280ms.
+- Page enter: 4px fade-up, 280ms, for documents. The workbench fades in over 200ms without movement.
+- File-tree folders rotate their chevron 90° in 160ms.
 - Live labels (thinking, running, uploading) shimmer from Subtle to Text.
 - Reduced motion removes transforms, pop-ins, and shimmers.
 
 ## Components
 
-### Sidebar navigation
+### File tree
 
-- **Groups:** One group per category, with a Subtle caption. Components come before blocks, and blocks carry a hairline "Block" tag.
-- **Rows:** 29px, 7px corners, Muted text. Active rows get a Raised fill, Text color, and weight 500, and scroll to the center of the list on navigation.
-- **Search:** A field-styled button with a ⌘K hint that opens the command palette.
+- **Root files:** `overview` and `theming` sit above the folders.
+- **Folders:** One per category, named in kebab case with a mono item count. Folders toggle open; the folder holding the current page opens on navigation. Components come before blocks.
+- **Files:** Each item by its id, in Geist Mono at 12px. Components use a file icon and blocks use a layout icon, with "(block)" for screen readers.
+- **Active row:** Raised fill, Text color, and a 2px Signal Ink marker on the left edge. The list scrolls the active row to its center on navigation.
+- **Search:** A Raised pill in the top bar with a mono "Jump to…" label and a ⌘K hint that opens the command palette.
 
 ### Segmented pills
 
 - **Shape:** Full pill track with 2px inset on a 65% Raised tint. The thumb slides with `transform` and `width` in 200ms `cubic-bezier(0.16, 1, 0.3, 1)`.
-- **Active state:** Raised (dark) or Surface (light) thumb with a Border Strong ring. Labels go from Subtle to Text.
-- **Uses:** Variant choice centered at the bottom of each specimen. The track scrolls horizontally when space runs out.
+- **Active state:** A Signal thumb with Signal Foreground text. Inactive labels are Muted mono.
+- **Uses:** The variant switch, floating centered 16px above the bottom edge of the canvas on component pages and on the overview showcase. It is sticky, so it stays in reach while a tall specimen scrolls, and the specimen reserves 56px below its content so the pill never covers it at rest. The track scrolls horizontally when space runs out.
 
 ### Specimen
 
-- **Shape:** 14px radius, a 3% tint of Canvas, and a 1px inset Border ring. The stage inside is transparent, with a minimum height of 440px.
-- **Content:** The component centered. An optional Subtle caption sits top-left.
+- **Canvas:** A 3% tint of Canvas ruled with a 24px grid of 55% Border lines. Signal Ink crop marks (12px) sit 14px inside each corner of the artboard. The stage inside is transparent.
+- **Content:** The component centered on the artboard. An optional mono Subtle scene caption sits top-left, inside the crop marks. The floating variant switch sits bottom-center.
+- **Panning:** The canvas is a viewport over the artboard, like a design tool. Drag any empty or non-interactive area (cursor `grab`, `grabbing` while moving), scroll with a wheel or trackpad, or focus the canvas and use the arrow keys (40px, 160px with Shift; Home recenters). Drags under 4px stay clicks, and pointer-downs on controls never pan. Scroll areas inside a component scroll first until they reach their edge. The grid, crop marks, and caption move with the artboard, which can pan until 40% of the viewport still overlaps it.
+- **Zoom:** 25–400%, applied as a `scale` on the artboard, so component layout and menus behave exactly as at 100%. ⌘/Ctrl + wheel and trackpad pinch (Safari gesture events too) zoom about the pointer; the controls and keyboard zoom about the viewport center through the steps 25, 33, 50, 67, 75, 100, 125, 150, 200, 300, and 400%. Keyboard on the focused canvas: `+` and `-` step, `0` resets to 100%, `1` fits. Fit shrinks the whole artboard into view and never zooms past the content. The grid follows the zoom, halving or doubling its 24px unit so lines stay 12–48px apart on screen.
+- **Canvas controls:** A floating pill bottom-right (top-right on phones, clear of the variant pill): Recenter (a Signal Ink locate icon, shown only once the view has moved), zoom out, the mono zoom percentage (resets to 100%), zoom in, and fit. 26px round buttons with Raised hover, matching the variant pill's 88% Surface, Border Strong ring, and shadow.
+- **Recenter:** Centers the artboard at the current zoom; content taller than the viewport at 100% starts at its top edge instead. Clicking Recenter, double-clicking empty canvas, pressing Home, or switching variants recenters. Switching variants keeps the zoom.
+- **Focus:** Tabbing to an offscreen control pans it into view; native scrolling of the viewport is converted into pan offset, so find-in-page and focus never leave the canvas scrolled out of sync.
+
+### Resize handles
+
+- **Shape:** A 9px hit area centered on the pane's 1px hairline, with a col-resize or row-resize cursor. The hairline turns Border Strong on hover and Signal Ink while dragging or focused (3px when focused).
+- **Input:** Drag with a pointer, or focus the handle and use the arrow keys (16px, 64px with Shift), Home and End for the limits, and Enter or a double-click to reset.
+- **Semantics:** A focusable `separator` with an accessible name, orientation, and current, minimum, and maximum values.
+- **Behavior:** While dragging, the whole page keeps the resize cursor and text selection is off. Sizes are saved to `localStorage` and load after mount, so the server render always uses the defaults.
+
+### Manual installation
+
+- **Panel:** A dock panel with the target path (`components/ui/uai/<id>.tsx`, or `components/uai/<id>.tsx` for blocks) and a copy-source button in its sticky head.
+- **Steps:** Numbered: install the npm packages (a copyable `bun add` command), add the Uai items it builds on (mono chips linking to each item's page, or Theming for `uai-theme` and `uai-utils`), then create the file and paste the highlighted source.
+- **Loading:** The registry JSON loads when the panel nears the viewport, or right away when "Install manually" is used; the dock then aligns the panel to its top.
+
+### Pão de queijo
+
+A triple click on the brand serves pão de queijo: sixteen golden cheese breads arc out of the logo under gravity, spinning, and fall off-screen over about two seconds, while a caption pill reads "Pão de queijo quentinho, sô!". The layer never takes pointer input. Reduced motion keeps only the caption.
+
+### Inspector
+
+- **Sections:** Lowercase mono labels with an optional count on the right (`accessibility 6 checks`), separated by hairlines.
+- **Install:** The install command as a Signal pill with a copy button. This is the one Signal fill per page that reads as an action.
+- **Anatomy:** For components, the JSX nesting of the named parts from the usage example, drawn as a mono tree with Border Strong guides. For blocks, a Composes list of source files with part counts.
+- **Accessibility:** The item's checks as a compact checklist with Success marks.
+- **Pager:** Previous and next names with arrows, as pill links.
 
 ### Prompt Composer
 
@@ -823,10 +886,12 @@ step without owning data detection, navigation, dialogs, or persistence.
 
 - **Do** give every registry item its own URL and keep the sidebar, palette, and pager in one reading order.
 - **Do** keep the catalog limited to the verified ninety-eight items.
-- **Do** use dashed hairlines and tone, not boxes, to create hierarchy.
-- **Do** place variant choice inside the specimen as a segmented pill.
+- **Do** divide site regions with solid 1px hairlines and use tone, not boxes, inside them.
+- **Do** float variant choice over the bottom of the canvas it drives, as a segmented pill.
+- **Do** keep the lime signal on the site. Never route it into `--primary`, `--ring`, or the `uai-theme` item.
+- **Do** use Signal Ink, not Signal, for lime text and strokes so they keep contrast in light mode.
 - **Do** use highlighted TSX for both usage examples and manual source.
-- **Do** reserve accent blue for one primary action per surface, plus selection, links, and focus.
+- **Do** reserve accent blue in distributed components for one primary action per surface, plus selection and links.
 - **Do** use ink send, 14px composer corners, and 28px ghost controls on Prompt Composer. Use ghost for docks and compact for sidebars.
 - **Do** give plus and model menus a visible rounded outline and a compact width.
 - **Do** keep Thinking disclosure user-controlled and preserve its chronological activity history across status changes.

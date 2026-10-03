@@ -34,7 +34,7 @@ motion, and visual implementation.
 ## Operating context
 
 Developers browse a grouped catalog or search with ⌘K, open each item at its own
-URL, switch variants inside the live specimen, read the usage example, and install
+URL, switch variants from the pill floating over the live specimen, read the usage example, and install
 with the shadcn CLI or by copying the distributable source manually. Installed code becomes part of the developer's application.
 
 ## Capabilities and constraints
@@ -56,13 +56,21 @@ with the shadcn CLI or by copying the distributable source manually. Installed c
   live-demo principles used by shadcn/ui.
 - Distributed interfaces use named compound components: roots retain shared
   behavior and accessibility while consumers compose replaceable regions.
-- The site and the components share the Beautiful UI language: warm graphite, soft
-  medium-weight type, tonal surfaces, pill controls, dashed hairlines, and small,
-  purposeful motion.
-- The site is easy to navigate: a sidebar grouped by category, a ⌘K command palette,
-  one numbered URL per item, and previous and next links in reading order.
-- Each item page shows the live specimen with an in-stage variant pill, then the
-  usage example, installation (CLI plus manual source), and accessibility notes.
+- The site has its own identity, a component workbench: graphite surfaces, Geist
+  Mono chrome, solid hairlines, and a lime signal that is used only on the site.
+  It must not read as a copy of another component gallery.
+- The distributed components keep the Beautiful UI language: warm graphite, soft
+  medium-weight type, tonal surfaces, pill controls, a blue accent, and small,
+  purposeful motion. The site signal never changes how an installed component looks.
+- The site is easy to navigate: a top bar with breadcrumb and ⌘K search, a file-tree
+  sidebar with one folder per category, one numbered URL per item, and previous and
+  next links in reading order.
+- Each item page is a workbench: a pannable, zoomable, ruled canvas with the live specimen and a
+  floating variant switch above a dock with the usage example and step-by-step manual
+  installation; an inspector with the title, install command, anatomy, and
+  accessibility checks on the right. The sidebar, inspector, and dock resize, and the
+  sizes persist.
+- Uai is from Minas Gerais. A triple click on the logo serves pão de queijo.
 - A Theming page, right after Overview, covers installing the theme with the CLI or by
   hand, the token reference, and how to customize tokens and instances.
 - Distributed components use 14px surfaces, 28px ghost controls, pill buttons, and

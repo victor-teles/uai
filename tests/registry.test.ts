@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { registryCatalog } from "@/components/registry/catalog";
+import { getAnatomyModules, getAnatomyTree } from "@/components/registry/anatomy";
+import { getRegistryItem, registryCatalog } from "@/components/registry/catalog";
 
 type RegistryItem = {
   name: string;
@@ -371,6 +372,27 @@ describe("Uai registry", () => {
       ).text();
       expect(source).not.toContain("var(--uai-");
       expect(source).not.toContain("<style");
+    }
+  });
+
+  test("derives the inspector anatomy from each usage example", () => {
+    const composer = getRegistryItem("prompt-composer");
+
+    expect(getAnatomyTree(composer.usage)).toEqual([
+      { name: "PromptComposer", depth: 0, guide: "" },
+      { name: "PromptComposerAdd", depth: 1, guide: "├ " },
+      { name: "PromptComposerFileItem", depth: 2, guide: "│ └ " },
+      { name: "PromptComposerInput", depth: 1, guide: "├ " },
+      { name: "PromptComposerActions", depth: 1, guide: "└ " },
+      { name: "PromptComposerModelSelect", depth: 2, guide: "  ├ " },
+      { name: "PromptComposerSubmit", depth: 2, guide: "  └ " },
+    ]);
+    expect(getAnatomyModules(composer.usage)).toEqual([
+      { file: "prompt-composer.tsx", parts: expect.arrayContaining(["PromptComposerSubmit"]) },
+    ]);
+
+    for (const item of registryCatalog) {
+      expect(getAnatomyModules(item.usage).length).toBeGreaterThan(0);
     }
   });
 });
