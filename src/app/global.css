@@ -1488,13 +1488,15 @@ a {
 }
 
 /* ---------- Specimen ---------- */
-/* The specimen is a pannable, ruled canvas. The viewport clips; the world
-   inside it moves by --uai-pan-x/y, and the grid moves with it. Crop marks
-   frame the world, so they travel with the component. */
+/* The specimen is a pannable, zoomable, ruled canvas. The viewport clips; the
+   world inside it moves by --uai-pan-x/y and scales by --uai-zoom, and the grid
+   follows. Crop marks frame the world, so they travel with the component. */
 .uai-registry-specimen {
   --uai-grid-line: color-mix(in oklab, var(--uai-border) 55%, transparent);
   --uai-pan-x: 0px;
   --uai-pan-y: 0px;
+  --uai-zoom: 1;
+  --uai-grid-size: 24px;
   position: relative;
   min-width: 0;
   min-height: 460px;
@@ -1504,7 +1506,7 @@ a {
     linear-gradient(var(--uai-grid-line) 1px, transparent 1px),
     linear-gradient(90deg, var(--uai-grid-line) 1px, transparent 1px);
   background-position: calc(var(--uai-pan-x) - 1px) calc(var(--uai-pan-y) - 1px);
-  background-size: 24px 24px;
+  background-size: var(--uai-grid-size) var(--uai-grid-size);
   cursor: grab;
   outline-offset: -2px;
   /* Touch keeps vertical page scrolling on narrow layouts; desktop owns all axes. */
@@ -1525,7 +1527,8 @@ a {
   width: 100%;
   min-height: 100%;
   flex-direction: column;
-  transform: translate3d(var(--uai-pan-x), var(--uai-pan-y), 0);
+  transform: translate(var(--uai-pan-x), var(--uai-pan-y)) scale(var(--uai-zoom));
+  transform-origin: 0 0;
 }
 
 .uai-registry-specimen__world > .uai-preview-stage {
@@ -1533,45 +1536,64 @@ a {
   padding-top: 48px;
 }
 
-.uai-registry-specimen__recenter {
+.uai-canvas-controls {
   position: absolute;
   right: 16px;
   bottom: 16px;
   z-index: 3;
-  display: inline-flex;
-  height: 32px;
+  display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 0 12px 0 10px;
+  gap: 2px;
+  padding: 3px;
   border-radius: 999px;
   background: color-mix(in oklab, var(--uai-surface) 88%, transparent);
   box-shadow:
     0 0 0 1px var(--uai-border-strong),
     0 10px 28px color-mix(in oklab, black 28%, transparent);
   backdrop-filter: blur(12px);
+  cursor: default;
+}
+
+.uai-canvas-controls button {
+  display: grid;
+  min-width: 26px;
+  height: 26px;
+  place-items: center;
+  border-radius: 999px;
   color: var(--uai-muted);
-  font-family: var(--uai-mono);
-  font-size: 0.7rem;
-  font-variant-numeric: tabular-nums;
-  cursor: pointer;
-  animation: uai-pop-in 180ms var(--uai-ease-pop) both;
   transition:
+    background-color 120ms ease-out,
     color 120ms ease-out,
     transform 140ms var(--uai-ease-out);
 }
 
-.uai-registry-specimen__recenter svg {
+.uai-canvas-controls button:disabled {
+  opacity: 0.4;
+}
+
+.uai-canvas-controls button svg {
   width: 14px;
   height: 14px;
+}
+
+.uai-canvas-controls button[aria-label="Recenter canvas"] svg {
   color: var(--uai-signal-ink);
 }
 
-.uai-registry-specimen__recenter:active {
-  transform: scale(0.96);
+.uai-canvas-controls .uai-canvas-controls__zoom {
+  min-width: 48px;
+  padding: 0 6px;
+  font-family: var(--uai-mono);
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Safe centering keeps the top of a specimen taller than the canvas reachable
-   by scrolling, instead of splitting the overflow above and below. */
+.uai-canvas-controls button:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+/* Safe centering lets a specimen taller than the canvas grow the artboard
+   downward instead of overflowing above its top edge, out of reach of panning. */
 .uai-registry-specimen .uai-preview-stage,
 .uai-registry-specimen .uai-preview-stage__canvas {
   justify-content: safe center;
@@ -2131,7 +2153,8 @@ html[data-uai-resizing="y"] * {
     background: var(--uai-border-strong);
   }
 
-  .uai-registry-specimen__recenter:hover {
+  .uai-canvas-controls button:hover:not(:disabled) {
+    background: var(--uai-surface-raised);
     color: var(--uai-text);
   }
 
@@ -2310,6 +2333,12 @@ html[data-uai-resizing="y"] * {
 }
 
 @media (max-width: 640px) {
+  /* Clear the centered variant pill on phones. */
+  .uai-canvas-controls {
+    top: 12px;
+    bottom: auto;
+  }
+
   .uai-doc__header {
     grid-template-columns: auto minmax(0, 1fr);
   }
@@ -2355,7 +2384,6 @@ html[data-uai-resizing="y"] * {
 
   .uai-doc,
   .uai-bench,
-  .uai-registry-specimen__recenter,
   .uai-prompt-pop,
   .uai-palette__panel,
   .uai-palette::backdrop {
@@ -2377,6 +2405,7 @@ html[data-uai-resizing="y"] * {
   .uai-copy-button,
   .uai-manual__deps a,
   .uai-inspector__link,
+  .uai-canvas-controls button,
   .uai-resize-handle::after,
   .uai-doc__pager-link,
   .uai-doc__pager-link svg,
