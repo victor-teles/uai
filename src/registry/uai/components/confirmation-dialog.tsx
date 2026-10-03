@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import {
   type ComponentProps,
   createContext,
@@ -10,6 +11,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const CONFIRMATION_DIALOG_VARIANTS = ["centered", "sheet", "compact"] as const;
 export type ConfirmationDialogVariant = (typeof CONFIRMATION_DIALOG_VARIANTS)[number];
@@ -38,29 +40,40 @@ function useConfirmation(part: string) {
   if (!context) throw new Error(`${part} must be used within ConfirmationDialog`);
   return context;
 }
-const motionCss = `
-.uai-confirmation-dialog[open]{animation:uai-confirmation-in 180ms cubic-bezier(0.16,1,0.3,1)}
-.uai-confirmation-dialog[open][data-variant="sheet"]{animation:uai-confirmation-sheet-in 300ms cubic-bezier(0.23,1,0.32,1)}
-.uai-confirmation-dialog::backdrop{background:color-mix(in oklab,var(--uai-canvas) 62%,transparent);backdrop-filter:blur(2px);animation:uai-confirmation-fade 180ms ease-out}
-@keyframes uai-confirmation-in{from{opacity:0;transform:scale(0.96)}to{opacity:1;transform:none}}
-@keyframes uai-confirmation-sheet-in{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
-@keyframes uai-confirmation-fade{from{opacity:0}to{opacity:1}}
-.uai-confirmation-dialog__button{height:32px;padding:0 14px;border:0;border-radius:999px;font:inherit;font-size:13px;font-weight:500;line-height:18px;white-space:nowrap;cursor:pointer;transition:background-color 120ms ease-out,filter 120ms ease-out,color 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-confirmation-dialog__button:active:not(:disabled){transform:scale(0.97)}
-.uai-confirmation-dialog__button:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-.uai-confirmation-dialog__button[data-tone="secondary"]{background:var(--uai-surface-raised);color:var(--uai-text)}
-.uai-confirmation-dialog__button[data-tone="secondary"]:hover{background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text))}
-.uai-confirmation-dialog__button[data-tone="trigger"]{height:28px;padding:0 12px;font-size:12.5px;background:color-mix(in oklab,var(--uai-danger) 12%,transparent);color:var(--uai-danger)}
-.uai-confirmation-dialog__button[data-tone="trigger"]:hover{background:color-mix(in oklab,var(--uai-danger) 18%,transparent)}
-.uai-confirmation-dialog__button[data-tone="danger"]{background:var(--uai-danger);color:oklch(0.99 0 0)}
-.uai-confirmation-dialog__button[data-tone="danger"]:hover:not(:disabled){filter:brightness(1.08)}
-.uai-confirmation-dialog__button[data-tone="danger"]:disabled{background:var(--uai-surface-raised);color:var(--uai-subtle);cursor:not-allowed}
-.uai-confirmation-dialog[data-variant="compact"] .uai-confirmation-dialog__button{height:28px;padding:0 12px;font-size:12.5px}
-.uai-confirmation-dialog__input{transition:border-color 120ms ease-out,box-shadow 120ms ease-out}
-.uai-confirmation-dialog__input:hover{border-color:var(--uai-border-strong)!important}
-.uai-confirmation-dialog__input:focus{outline:none;border-color:var(--uai-border-strong)!important;box-shadow:0 0 0 3px color-mix(in oklab,var(--uai-accent) 18%,transparent)}
-@media (prefers-reduced-motion: reduce){.uai-confirmation-dialog[open],.uai-confirmation-dialog::backdrop{animation:none}.uai-confirmation-dialog__button,.uai-confirmation-dialog__input{transition:none}.uai-confirmation-dialog__button:active:not(:disabled){transform:none}}
-`;
+const buttonTones = cva(
+  "cursor-pointer whitespace-nowrap rounded-full border-0 font-medium transition-[background-color,filter,color,transform] duration-[120ms,120ms,120ms,140ms] ease-[ease-out,ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.97] motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
+  {
+    variants: {
+      tone: {
+        trigger: "bg-destructive/12 text-destructive hover:bg-destructive/18",
+        secondary:
+          "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+        danger:
+          "bg-destructive text-[oklch(0.99_0_0)] enabled:hover:brightness-108 disabled:cursor-not-allowed disabled:bg-muted disabled:text-subtle-foreground",
+      },
+      size: {
+        default: "h-8 px-3.5 text-[13px]/[18px]",
+        compact: "h-7 px-3 text-[12.5px]/[18px]",
+      },
+    },
+  },
+);
+
+const dialogVariants = cva(
+  "box-border max-w-full border-0 bg-popover text-[13px]/[18px] text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_18px_48px_-16px_oklch(0_0_0/0.36)] open:animate-in open:fade-in-0 backdrop:bg-background/62 backdrop:backdrop-blur-[2px] backdrop:animate-in backdrop:fade-in-0 backdrop:duration-180 backdrop:ease-out motion-reduce:open:animate-none motion-reduce:backdrop:animate-none",
+  {
+    variants: {
+      variant: {
+        centered:
+          "m-auto w-[min(100%_-_32px,440px)] rounded-[14px] p-5 open:zoom-in-96 open:duration-180 open:ease-[cubic-bezier(0.16,1,0.3,1)]",
+        sheet:
+          "mx-auto mt-auto mb-0 w-[min(100%,560px)] rounded-t-3xl rounded-b-none px-5 pt-5 pb-6 open:slide-in-from-bottom-[24px] open:duration-300 open:ease-out-quint",
+        compact:
+          "m-auto w-[min(100%_-_32px,360px)] rounded-xl p-4 open:zoom-in-96 open:duration-180 open:ease-[cubic-bezier(0.16,1,0.3,1)]",
+      },
+    },
+  },
+);
 
 export function ConfirmationDialog({
   variant = "centered",
@@ -97,7 +110,7 @@ export function ConfirmationDialog({
         cancelRef,
       }}
     >
-      <div data-variant={variant} style={{ display: "contents" }}>
+      <div data-slot="confirmation-dialog" data-variant={variant} className="contents">
         {children}
       </div>
     </Context.Provider>
@@ -114,9 +127,10 @@ export function ConfirmationDialogTrigger({
     <button
       type="button"
       aria-haspopup="dialog"
+      data-slot="confirmation-dialog-trigger"
+      className={cn(buttonTones({ tone: "trigger", size: "compact" }), className)}
       {...props}
       ref={context.triggerRef}
-      className={["uai-confirmation-dialog__button", className].filter(Boolean).join(" ")}
       data-tone="trigger"
       onClick={(event) => {
         onClick?.(event);
@@ -128,7 +142,7 @@ export function ConfirmationDialogTrigger({
 
 export function ConfirmationDialogContent({
   children,
-  style,
+  className,
   onKeyDown,
   ...props
 }: Omit<ComponentProps<"dialog">, "open">) {
@@ -154,15 +168,15 @@ export function ConfirmationDialogContent({
     }
   }, [open, cancelRef, triggerRef]);
   const compact = context.variant === "compact";
-  const sheet = context.variant === "sheet";
   return (
     <dialog
       role="alertdialog"
       aria-labelledby={`${context.id}-title`}
       aria-describedby={`${context.id}-description`}
+      data-slot="confirmation-dialog-content"
+      className={cn(dialogVariants({ variant: context.variant }), className)}
       {...props}
       ref={ref}
-      className={["uai-confirmation-dialog", props.className].filter(Boolean).join(" ")}
       data-variant={context.variant}
       onCancel={(event) => {
         event.preventDefault();
@@ -175,79 +189,51 @@ export function ConfirmationDialogContent({
           context.setOpen(false);
         }
       }}
-      style={{
-        boxSizing: "border-box",
-        width: sheet
-          ? "min(100%, 560px)"
-          : compact
-            ? "min(100% - 32px, 360px)"
-            : "min(100% - 32px, 440px)",
-        maxWidth: "100%",
-        margin: sheet ? "auto auto 0" : "auto",
-        padding: compact ? 16 : sheet ? "20px 20px 24px" : 20,
-        border: 0,
-        borderRadius: sheet ? "24px 24px 0 0" : compact ? 12 : 14,
-        background: "var(--uai-surface)",
-        color: "var(--uai-text)",
-        boxShadow: "0 0 0 1px var(--uai-border-strong), 0 18px 48px -16px oklch(0 0 0 / 0.36)",
-        fontSize: 13,
-        lineHeight: "18px",
-        ...style,
-      }}
     >
-      <style>{motionCss}</style>
       {context.open ? (
-        <div style={{ display: "grid", gap: compact ? 12 : 16 }}>{children}</div>
+        <div className={cn("grid", compact ? "gap-3" : "gap-4")}>{children}</div>
       ) : null}
     </dialog>
   );
 }
 
-export function ConfirmationDialogTitle({ style, ...props }: ComponentProps<"h2">) {
+export function ConfirmationDialogTitle({ className, ...props }: ComponentProps<"h2">) {
   const context = useConfirmation("ConfirmationDialogTitle");
   return (
     <h2
+      data-slot="confirmation-dialog-title"
+      className={cn(
+        "m-0 font-semibold tracking-[-0.01em]",
+        context.variant === "compact" ? "text-[14px]/5" : "text-[15px]/5",
+        className,
+      )}
       {...props}
       id={`${context.id}-title`}
-      style={{
-        margin: 0,
-        fontSize: context.variant === "compact" ? 14 : 15,
-        lineHeight: "20px",
-        fontWeight: 600,
-        letterSpacing: "-0.01em",
-        ...style,
-      }}
     />
   );
 }
 
-export function ConfirmationDialogDescription({ style, ...props }: ComponentProps<"div">) {
+export function ConfirmationDialogDescription({ className, ...props }: ComponentProps<"div">) {
   const context = useConfirmation("ConfirmationDialogDescription");
   return (
     <div
+      data-slot="confirmation-dialog-description"
+      className={cn("grid gap-2.5 text-pretty text-muted-foreground", className)}
       {...props}
       id={`${context.id}-description`}
-      style={{ display: "grid", gap: 10, color: "var(--uai-muted)", textWrap: "pretty", ...style }}
     />
   );
 }
 
-export function ConfirmationDialogImpact({ style, ...props }: ComponentProps<"ul">) {
+export function ConfirmationDialogImpact({ className, ...props }: ComponentProps<"ul">) {
   return (
     <ul
+      data-slot="confirmation-dialog-impact"
+      className={cn(
+        "m-0 grid list-disc gap-1 rounded-[10px] bg-muted py-2.5 pr-3 pl-7 text-[12.5px] text-foreground",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gap: 4,
-        margin: 0,
-        padding: "10px 12px 10px 28px",
-        listStyle: "disc",
-        borderRadius: 10,
-        background: "var(--uai-surface-raised)",
-        color: "var(--uai-text)",
-        fontSize: 12.5,
-        ...style,
-      }}
     />
   );
 }
@@ -255,7 +241,7 @@ export function ConfirmationDialogImpact({ style, ...props }: ComponentProps<"ul
 export function ConfirmationDialogInput({
   match,
   children,
-  style,
+  className,
   onChange,
   ...props
 }: Omit<ComponentProps<"input">, "value" | "defaultValue" | "id"> & {
@@ -270,22 +256,12 @@ export function ConfirmationDialogInput({
   }, [match, setPhrase]);
   const inputId = `${context.id}-input`;
   return (
-    <div style={{ display: "grid", gap: 6 }}>
-      <label htmlFor={inputId} style={{ fontSize: 12, color: "var(--uai-muted)" }}>
+    <div className="grid gap-1.5">
+      <label htmlFor={inputId} className="text-[12px] text-muted-foreground">
         {children ?? (
           <>
             Type{" "}
-            <strong
-              style={{
-                padding: "1px 5px",
-                borderRadius: 6,
-                background: "var(--uai-surface-raised)",
-                color: "var(--uai-text)",
-                fontWeight: 500,
-                fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-                fontSize: 11.5,
-              }}
-            >
+            <strong className="rounded-md bg-muted px-1.25 py-px [font-family:ui-monospace,SFMono-Regular,Menlo,monospace] text-[11.5px] font-medium text-foreground">
               {match}
             </strong>{" "}
             to confirm
@@ -295,41 +271,29 @@ export function ConfirmationDialogInput({
       <input
         autoComplete="off"
         spellCheck={false}
+        data-slot="confirmation-dialog-input"
+        className={cn(
+          "h-8 rounded-[10px] border bg-background px-2.5 text-[13px] text-inherit transition-[border-color,box-shadow] duration-120 ease-out hover:border-border-strong focus:border-border-strong focus:outline-none focus:ring-3 focus:ring-primary/18 motion-reduce:transition-none",
+          className,
+        )}
         {...props}
         id={inputId}
-        className={["uai-confirmation-dialog__input", props.className].filter(Boolean).join(" ")}
         value={context.typed}
         onChange={(event) => {
           onChange?.(event);
           if (!event.defaultPrevented) context.setTyped(event.target.value);
-        }}
-        style={{
-          height: 32,
-          padding: "0 10px",
-          border: "1px solid var(--uai-border)",
-          borderRadius: 10,
-          background: "var(--uai-canvas)",
-          color: "inherit",
-          font: "inherit",
-          fontSize: 13,
-          ...style,
         }}
       />
     </div>
   );
 }
 
-export function ConfirmationDialogActions({ style, ...props }: ComponentProps<"div">) {
+export function ConfirmationDialogActions({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="confirmation-dialog-actions"
+      className={cn("flex flex-wrap-reverse justify-end gap-2", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap-reverse",
-        justifyContent: "flex-end",
-        gap: 8,
-        ...style,
-      }}
     />
   );
 }
@@ -343,10 +307,17 @@ export function ConfirmationDialogCancel({
   const context = useConfirmation("ConfirmationDialogCancel");
   return (
     <button
+      data-slot="confirmation-dialog-cancel"
+      className={cn(
+        buttonTones({
+          tone: "secondary",
+          size: context.variant === "compact" ? "compact" : "default",
+        }),
+        className,
+      )}
       {...props}
       ref={context.cancelRef}
       type="button"
-      className={["uai-confirmation-dialog__button", className].filter(Boolean).join(" ")}
       data-tone="secondary"
       onClick={(event) => {
         onClick?.(event);
@@ -368,10 +339,17 @@ export function ConfirmationDialogConfirm({
   const blocked = disabled || (context.phrase !== null && context.typed !== context.phrase);
   return (
     <button
+      data-slot="confirmation-dialog-confirm"
+      className={cn(
+        buttonTones({
+          tone: "danger",
+          size: context.variant === "compact" ? "compact" : "default",
+        }),
+        className,
+      )}
       {...props}
       type="button"
       disabled={blocked}
-      className={["uai-confirmation-dialog__button", className].filter(Boolean).join(" ")}
       data-tone="danger"
       onClick={(event) => {
         onClick?.(event);

@@ -117,16 +117,16 @@ test("renders rounded, pill, and compact chrome from the root variant", () => {
 
   expect(QUANTITY_PICKER_VARIANTS).toEqual(["rounded", "pill", "compact"]);
   expect(container.querySelector('[data-variant="rounded"]')).not.toBeNull();
-  expect(input.parentElement?.style.borderRadius).toBe("14px");
+  expect(input.parentElement?.className).toContain("rounded-[14px]");
 
   rerender(<QuantityPickerFixture variant="pill" />);
   expect(container.querySelector('[data-variant="pill"]')).not.toBeNull();
-  expect(input.parentElement?.style.borderRadius).toBe("999px");
-  expect(decrease.style.borderRadius).toBe("999px");
+  expect(input.parentElement?.className).toContain("rounded-full");
+  expect(decrease.className).toContain("rounded-full");
 
   rerender(<QuantityPickerFixture variant="compact" />);
   expect(container.querySelector('[data-variant="compact"]')).not.toBeNull();
-  expect(input.parentElement?.style.borderRadius).toBe("12px");
+  expect(input.parentElement?.className).toContain("rounded-xl");
   expect(input.className).toContain("h-7");
   expect(decrease.className).toContain("size-7");
 });

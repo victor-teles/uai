@@ -1,8 +1,8 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import {
   type ComponentProps,
-  type CSSProperties,
   createContext,
   type KeyboardEvent,
   useContext,
@@ -29,6 +29,7 @@ import {
   type EmptyStateProps,
   type EmptyStateVariant,
 } from "@/components/ui/uai/empty-state";
+import { cn } from "@/lib/uai-utils";
 
 export const RESOURCE_MANAGER_VARIANTS = ["split", "stacked", "compact"] as const;
 export type ResourceManagerVariant = (typeof RESOURCE_MANAGER_VARIANTS)[number];
@@ -74,56 +75,24 @@ const dialogVariants: Record<ResourceManagerVariant, ConfirmationDialogVariant> 
   stacked: "sheet",
   compact: "compact",
 };
-const toneColors: Record<ResourceManagerRecordTone, string> = {
-  neutral: "var(--uai-muted)",
-  success: "var(--uai-success)",
-  warning: "var(--uai-warning)",
-  danger: "var(--uai-danger)",
-};
-const toneFills: Record<ResourceManagerRecordTone, string> = {
-  neutral: "var(--uai-surface-raised)",
-  success: "color-mix(in oklab, var(--uai-success) 14%, transparent)",
-  warning: "color-mix(in oklab, var(--uai-warning) 14%, transparent)",
-  danger: "color-mix(in oklab, var(--uai-danger) 14%, transparent)",
-};
-const managerCss = `
-[data-uai-resource-manager-action]{transition:filter 120ms ease-out,box-shadow 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-[data-uai-resource-manager-action]:hover:not(:disabled){box-shadow:inset 0 0 0 999px color-mix(in oklab,var(--uai-text) 9%,transparent)}
-[data-uai-resource-manager-action="primary"]:hover:not(:disabled){box-shadow:none;filter:brightness(1.08)}
-[data-uai-resource-manager-action]:active:not(:disabled){transform:scale(0.97)}
-[data-uai-resource-manager-action]:focus-visible,[data-uai-resource-manager-record]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-[data-uai-resource-manager-record]{transition:background-color 120ms ease-out,box-shadow 120ms ease-out;animation:uai-resource-manager-in 240ms cubic-bezier(0.23,1,0.32,1) both}
-[data-uai-resource-manager-record]:not([aria-current]):hover{box-shadow:inset 0 0 0 999px color-mix(in oklab,var(--uai-text) 4%,transparent)}
-li:nth-child(2)>[data-uai-resource-manager-record]{animation-delay:40ms}
-li:nth-child(3)>[data-uai-resource-manager-record]{animation-delay:80ms}
-li:nth-child(4)>[data-uai-resource-manager-record]{animation-delay:120ms}
-li:nth-child(5)>[data-uai-resource-manager-record]{animation-delay:160ms}
-li:nth-child(n+6)>[data-uai-resource-manager-record]{animation-delay:200ms}
-[data-uai-resource-manager-inspector]{animation:uai-resource-manager-in 240ms cubic-bezier(0.23,1,0.32,1) both}
-@keyframes uai-resource-manager-in{from{opacity:0;transform:translateY(4px)}}
-@media (prefers-reduced-motion:reduce){[data-uai-resource-manager-action],[data-uai-resource-manager-record],[data-uai-resource-manager-inspector]{transition:none;animation:none}[data-uai-resource-manager-action]:active:not(:disabled){transform:none}}
-`;
+const recordStatusVariants = cva(
+  "inline-flex h-5 items-center rounded-full px-2 text-[11.5px]/4 font-medium whitespace-nowrap",
+  {
+    variants: {
+      tone: {
+        neutral: "bg-muted text-muted-foreground",
+        success: "bg-success/14 text-success",
+        warning: "bg-warning/14 text-warning",
+        danger: "bg-destructive/14 text-destructive",
+      },
+    },
+  },
+);
 
-function actionStyle(compact: boolean, primary: boolean, disabled?: boolean): CSSProperties {
-  return {
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    height: compact ? 26 : 30,
-    padding: compact ? "0 11px" : "0 13px",
-    border: 0,
-    borderRadius: 999,
-    background: primary ? "var(--uai-accent)" : "var(--uai-surface-raised)",
-    color: primary ? "var(--uai-accent-foreground)" : "var(--uai-text)",
-    fontSize: compact ? 12 : 12.5,
-    fontWeight: 500,
-    lineHeight: "16px",
-    whiteSpace: "nowrap",
-    cursor: disabled ? "not-allowed" : "pointer",
-    opacity: disabled ? 0.5 : 1,
-  };
-}
+const resourceManagerVariants = cva(
+  "grid min-w-0 content-start text-[13px]/[18px] text-foreground",
+  { variants: { variant: { split: "gap-4", stacked: "gap-4", compact: "gap-2.5" } } },
+);
 
 /** Record management surface: a list of domain records beside an inspector. */
 export function ResourceManager({
@@ -131,7 +100,7 @@ export function ResourceManager({
   value,
   defaultValue = "",
   onValueChange,
-  style,
+  className,
   children,
   ...props
 }: ResourceManagerProps) {
@@ -153,104 +122,114 @@ export function ResourceManager({
     >
       <section
         aria-labelledby={`${id}-title`}
+        data-slot="resource-manager"
+        className={cn(resourceManagerVariants({ variant }), className)}
         {...props}
         data-variant={variant}
-        style={{
-          display: "grid",
-          alignContent: "start",
-          gap: variant === "compact" ? 10 : 16,
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
       >
-        <style>{managerCss}</style>
         {children}
       </section>
     </Context.Provider>
   );
 }
 
-export function ResourceManagerHeader({ style, ...props }: ComponentProps<"div">) {
+export function ResourceManagerHeader({ className, ...props }: ComponentProps<"div">) {
   useManager("ResourceManagerHeader");
   return (
     <div
+      data-slot="resource-manager-header"
+      className={cn("flex min-w-0 flex-wrap items-end justify-between gap-3", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "flex-end",
-        justifyContent: "space-between",
-        gap: 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function ResourceManagerHeading({ style, ...props }: ComponentProps<"div">) {
-  return (
-    <div {...props} style={{ display: "grid", gap: 4, flex: "1 1 240px", minWidth: 0, ...style }} />
-  );
-}
-
-export function ResourceManagerTitle({ style, ...props }: ComponentProps<"h2">) {
-  const context = useManager("ResourceManagerTitle");
-  const compact = context.variant === "compact";
-  return (
-    <h2
-      {...props}
-      id={`${context.id}-title`}
-      style={{
-        margin: 0,
-        fontSize: compact ? 15 : 18,
-        lineHeight: compact ? "20px" : "24px",
-        fontWeight: 600,
-        letterSpacing: "-0.015em",
-        overflowWrap: "anywhere",
-        ...style,
-      }}
-    />
-  );
-}
-
-export function ResourceManagerDescription({ style, ...props }: ComponentProps<"p">) {
-  return (
-    <p
-      {...props}
-      style={{ margin: 0, color: "var(--uai-muted)", fontVariantNumeric: "tabular-nums", ...style }}
-    />
-  );
-}
-
-export function ResourceManagerActions({ style, ...props }: ComponentProps<"div">) {
+export function ResourceManagerHeading({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="resource-manager-heading"
+      className={cn("grid min-w-0 flex-[1_1_240px] gap-1", className)}
       {...props}
-      style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6, ...style }}
     />
   );
 }
+
+export function ResourceManagerTitle({ className, ...props }: ComponentProps<"h2">) {
+  const context = useManager("ResourceManagerTitle");
+  return (
+    <h2
+      data-slot="resource-manager-title"
+      className={cn(
+        "m-0 font-semibold tracking-[-0.015em] wrap-anywhere",
+        context.variant === "compact" ? "text-[15px]/5" : "text-[18px]/6",
+        className,
+      )}
+      {...props}
+      id={`${context.id}-title`}
+    />
+  );
+}
+
+export function ResourceManagerDescription({ className, ...props }: ComponentProps<"p">) {
+  return (
+    <p
+      data-slot="resource-manager-description"
+      className={cn("m-0 text-muted-foreground tabular-nums", className)}
+      {...props}
+    />
+  );
+}
+
+export function ResourceManagerActions({ className, ...props }: ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="resource-manager-actions"
+      className={cn("flex flex-wrap items-center gap-1.5", className)}
+      {...props}
+    />
+  );
+}
+
+const resourceManagerActionVariants = cva(
+  [
+    "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap",
+    "[transition:filter_120ms_ease-out,box-shadow_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)]",
+    "enabled:active:scale-97 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+    "disabled:cursor-not-allowed disabled:opacity-50",
+    "motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
+  ],
+  {
+    variants: {
+      emphasis: {
+        primary: "bg-primary text-primary-foreground enabled:hover:brightness-108",
+        secondary:
+          "bg-secondary text-secondary-foreground enabled:hover:shadow-[inset_0_0_0_999px_color-mix(in_oklab,var(--foreground)_9%,transparent)]",
+      },
+      compact: {
+        true: "h-[26px] px-[11px] text-[12px]/4",
+        false: "h-[30px] px-[13px] text-[12.5px]/4",
+      },
+    },
+  },
+);
 
 export function ResourceManagerAction({
   emphasis = "secondary",
   type = "button",
-  style,
+  className,
   ...props
 }: ComponentProps<"button"> & { emphasis?: "primary" | "secondary" }) {
   const context = useManager("ResourceManagerAction");
   return (
     <button
+      data-slot="resource-manager-action"
+      className={cn(
+        resourceManagerActionVariants({ emphasis, compact: context.variant === "compact" }),
+        className,
+      )}
       {...props}
       type={type}
-      data-uai-resource-manager-action={emphasis}
-      style={{
-        ...actionStyle(context.variant === "compact", emphasis === "primary", props.disabled),
-        ...style,
-      }}
+      data-emphasis={emphasis}
     />
   );
 }
@@ -258,24 +237,28 @@ export function ResourceManagerAction({
 /** Search, column, and bulk controls. Compose Data Table Toolbar parts inside it. */
 export function ResourceManagerToolbar(props: Omit<DataTableToolbarProps, "variant">) {
   const context = useManager("ResourceManagerToolbar");
-  return <DataTableToolbar {...props} variant={toolbarVariants[context.variant]} />;
+  return (
+    <DataTableToolbar
+      data-slot="resource-manager-toolbar"
+      {...props}
+      variant={toolbarVariants[context.variant]}
+    />
+  );
 }
 
 /** Places the record list and inspector side by side, stacking when space runs out. */
-export function ResourceManagerBody({ style, ...props }: ComponentProps<"div">) {
+export function ResourceManagerBody({ className, ...props }: ComponentProps<"div">) {
   const context = useManager("ResourceManagerBody");
-  const split = context.variant === "split";
   return (
     <div
+      data-slot="resource-manager-body"
+      className={cn(
+        "min-w-0 flex-wrap items-start",
+        context.variant === "split" ? "flex" : "grid",
+        context.variant === "compact" ? "gap-2" : "gap-3",
+        className,
+      )}
       {...props}
-      style={{
-        display: split ? "flex" : "grid",
-        flexWrap: "wrap",
-        alignItems: "flex-start",
-        gap: context.variant === "compact" ? 8 : 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
@@ -283,7 +266,7 @@ export function ResourceManagerBody({ style, ...props }: ComponentProps<"div">) 
 /** The record list. Arrow keys, Home, and End move between records. */
 export function ResourceManagerList({
   "aria-label": label = "Records",
-  style,
+  className,
   onKeyDown,
   ...props
 }: ComponentProps<"ul">) {
@@ -308,24 +291,16 @@ export function ResourceManagerList({
   return (
     <ul
       aria-label={label}
+      data-slot="resource-manager-list"
+      className={cn(
+        "m-0 grid min-w-0 flex-[999_1_320px] list-none border bg-card shadow-[0_1px_2px_oklch(0_0_0/0.04)]",
+        compact ? "gap-0.5 rounded-xl p-1" : "gap-1 rounded-[14px] p-1.5",
+        className,
+      )}
       {...props}
       onKeyDown={(event) => {
         onKeyDown?.(event);
         if (!event.defaultPrevented) move(event);
-      }}
-      style={{
-        display: "grid",
-        gap: compact ? 2 : 4,
-        flex: "999 1 320px",
-        minWidth: 0,
-        margin: 0,
-        padding: compact ? 4 : 6,
-        listStyle: "none",
-        border: "1px solid var(--uai-border)",
-        borderRadius: compact ? 12 : 14,
-        background: "var(--uai-surface)",
-        boxShadow: "0 1px 2px oklch(0 0 0 / 0.04)",
-        ...style,
       }}
     />
   );
@@ -335,41 +310,38 @@ export function ResourceManagerRecord({
   value,
   children,
   onClick,
-  style,
+  className,
   ...props
 }: Omit<ComponentProps<"button">, "value"> & { value: string }) {
   const context = useManager("ResourceManagerRecord");
   const selected = context.value === value;
   const compact = context.variant === "compact";
   return (
-    <li style={{ minWidth: 0 }}>
+    <li
+      className={cn(
+        "min-w-0 animate-in fade-in-0 slide-in-from-bottom-1 duration-240 ease-out-quint fill-mode-both motion-reduce:animate-none",
+        "nth-2:[animation-delay:40ms] nth-3:[animation-delay:80ms] nth-4:[animation-delay:120ms] nth-5:[animation-delay:160ms] nth-[n+6]:[animation-delay:200ms]",
+      )}
+    >
       <button
+        data-slot="resource-manager-record"
+        className={cn(
+          "flex w-full cursor-pointer flex-wrap items-center gap-x-3 gap-y-0.5 border-0 text-left text-inherit",
+          "[transition:background-color_120ms_ease-out,box-shadow_120ms_ease-out] motion-reduce:transition-none",
+          "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+          compact ? "min-h-8 rounded-lg px-2 py-1" : "min-h-11 rounded-[10px] px-3 py-2",
+          selected
+            ? "bg-accent"
+            : "bg-transparent hover:shadow-[inset_0_0_0_999px_color-mix(in_oklab,var(--foreground)_4%,transparent)]",
+          className,
+        )}
         {...props}
         type="button"
         data-record=""
-        data-uai-resource-manager-record=""
         aria-current={selected ? "true" : undefined}
         onClick={(event) => {
           onClick?.(event);
           if (!event.defaultPrevented) context.select(value);
-        }}
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          columnGap: 12,
-          rowGap: 2,
-          width: "100%",
-          minHeight: compact ? 32 : 44,
-          padding: compact ? "4px 8px" : "8px 12px",
-          border: 0,
-          borderRadius: compact ? 8 : 10,
-          background: selected ? "var(--uai-surface-raised)" : "transparent",
-          color: "inherit",
-          font: "inherit",
-          textAlign: "left",
-          cursor: "pointer",
-          ...style,
         }}
       >
         {children}
@@ -378,123 +350,89 @@ export function ResourceManagerRecord({
   );
 }
 
-export function ResourceManagerRecordTitle({ style, ...props }: ComponentProps<"span">) {
+export function ResourceManagerRecordTitle({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
+      data-slot="resource-manager-record-title"
+      className={cn("min-w-0 flex-[1_1_160px] font-medium wrap-anywhere", className)}
       {...props}
-      style={{
-        flex: "1 1 160px",
-        minWidth: 0,
-        fontWeight: 500,
-        overflowWrap: "anywhere",
-        ...style,
-      }}
     />
   );
 }
 
-export function ResourceManagerRecordMeta({ style, ...props }: ComponentProps<"span">) {
+export function ResourceManagerRecordMeta({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
+      data-slot="resource-manager-record-meta"
+      className={cn("text-[12px] text-subtle-foreground tabular-nums", className)}
       {...props}
-      style={{
-        color: "var(--uai-subtle)",
-        fontSize: 12,
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     />
   );
 }
 
 export function ResourceManagerRecordStatus({
   tone = "neutral",
-  style,
+  className,
   ...props
 }: ComponentProps<"span"> & { tone?: ResourceManagerRecordTone }) {
   return (
     <span
+      data-slot="resource-manager-record-status"
+      className={cn(recordStatusVariants({ tone }), className)}
       {...props}
       data-tone={tone}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        height: 20,
-        padding: "0 8px",
-        borderRadius: 999,
-        background: toneFills[tone],
-        color: toneColors[tone],
-        fontSize: 11.5,
-        fontWeight: 500,
-        lineHeight: "16px",
-        whiteSpace: "nowrap",
-        ...style,
-      }}
     />
   );
 }
 
+const inspectorVariants = cva(
+  [
+    "grid min-w-0 flex-[1_1_280px] content-start shadow-[0_1px_2px_oklch(0_0_0/0.04)]",
+    "animate-in fade-in-0 slide-in-from-bottom-1 duration-240 ease-out-quint fill-mode-both motion-reduce:animate-none",
+  ],
+  {
+    variants: {
+      variant: {
+        split: "gap-3 rounded-[14px] border bg-card p-4",
+        stacked:
+          "gap-3 rounded-[14px] border-0 bg-[color-mix(in_oklab,var(--muted)_70%,var(--card))] p-4",
+        compact: "gap-2 rounded-xl border bg-card p-3",
+      },
+    },
+  },
+);
+
 /** Details for the selected record. Labelled by its title. */
-export function ResourceManagerInspector({ style, ...props }: ComponentProps<"section">) {
+export function ResourceManagerInspector({ className, ...props }: ComponentProps<"section">) {
   const context = useManager("ResourceManagerInspector");
-  const compact = context.variant === "compact";
   return (
     <section
       aria-labelledby={`${context.id}-inspector-title`}
+      data-slot="resource-manager-inspector"
+      className={cn(inspectorVariants({ variant: context.variant }), className)}
       {...props}
-      data-uai-resource-manager-inspector=""
-      style={{
-        display: "grid",
-        alignContent: "start",
-        gap: compact ? 8 : 12,
-        flex: "1 1 280px",
-        minWidth: 0,
-        padding: compact ? 12 : 16,
-        border: context.variant === "stacked" ? 0 : "1px solid var(--uai-border)",
-        borderRadius: compact ? 12 : 14,
-        background:
-          context.variant === "stacked"
-            ? "color-mix(in oklab, var(--uai-surface-raised) 70%, var(--uai-surface))"
-            : "var(--uai-surface)",
-        boxShadow: "0 1px 2px oklch(0 0 0 / 0.04)",
-        ...style,
-      }}
     />
   );
 }
 
-export function ResourceManagerInspectorHeader({ style, ...props }: ComponentProps<"div">) {
+export function ResourceManagerInspectorHeader({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="resource-manager-inspector-header"
+      className={cn("flex min-w-0 flex-wrap items-center justify-between gap-2", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 8,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function ResourceManagerInspectorTitle({ style, ...props }: ComponentProps<"h3">) {
+export function ResourceManagerInspectorTitle({ className, ...props }: ComponentProps<"h3">) {
   const context = useManager("ResourceManagerInspectorTitle");
   return (
     <h3
+      data-slot="resource-manager-inspector-title"
+      className={cn("m-0 text-[15px]/5 font-medium tracking-[-0.01em] wrap-anywhere", className)}
       {...props}
       id={`${context.id}-inspector-title`}
-      style={{
-        margin: 0,
-        fontSize: 15,
-        lineHeight: "20px",
-        fontWeight: 500,
-        letterSpacing: "-0.01em",
-        overflowWrap: "anywhere",
-        ...style,
-      }}
     />
   );
 }
@@ -502,22 +440,27 @@ export function ResourceManagerInspectorTitle({ style, ...props }: ComponentProp
 /** Record facts. Compose Description List parts inside it. */
 export function ResourceManagerDetails(props: Omit<DescriptionListProps, "variant">) {
   const context = useManager("ResourceManagerDetails");
-  return <DescriptionList {...props} variant={detailsVariants[context.variant]} />;
+  return (
+    <DescriptionList
+      data-slot="resource-manager-details"
+      {...props}
+      variant={detailsVariants[context.variant]}
+    />
+  );
 }
 
 /** Edit form for the selected record. Saving stays with the consumer. */
-export function ResourceManagerForm({ style, ...props }: ComponentProps<"form">) {
+export function ResourceManagerForm({ className, ...props }: ComponentProps<"form">) {
   const context = useManager("ResourceManagerForm");
   return (
     <form
+      data-slot="resource-manager-form"
+      className={cn(
+        "m-0 grid min-w-0",
+        context.variant === "compact" ? "gap-2" : "gap-3",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gap: context.variant === "compact" ? 8 : 12,
-        minWidth: 0,
-        margin: 0,
-        ...style,
-      }}
     />
   );
 }
@@ -525,11 +468,23 @@ export function ResourceManagerForm({ style, ...props }: ComponentProps<"form">)
 /** Shown when no record matches. Compose Empty State parts inside it. */
 export function ResourceManagerEmpty(props: Omit<EmptyStateProps, "variant">) {
   const context = useManager("ResourceManagerEmpty");
-  return <EmptyState {...props} variant={emptyVariants[context.variant]} />;
+  return (
+    <EmptyState
+      data-slot="resource-manager-empty"
+      {...props}
+      variant={emptyVariants[context.variant]}
+    />
+  );
 }
 
 /** Destructive confirmation. Compose Confirmation Dialog parts inside it. */
 export function ResourceManagerDelete(props: Omit<ConfirmationDialogProps, "variant">) {
   const context = useManager("ResourceManagerDelete");
-  return <ConfirmationDialog {...props} variant={dialogVariants[context.variant]} />;
+  return (
+    <ConfirmationDialog
+      data-slot="resource-manager-delete"
+      {...props}
+      variant={dialogVariants[context.variant]}
+    />
+  );
 }

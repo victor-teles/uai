@@ -55,18 +55,18 @@ test("renders card, plain, and compact chrome from the root variant", () => {
 
   expect(PRICE_SUMMARY_VARIANTS).toEqual(["card", "plain", "compact"]);
   expect(section?.dataset.variant).toBe("card");
-  expect(section?.style.borderRadius).toBe("14px");
-  expect(section?.style.padding).toBe("18px");
+  expect(section?.className).toContain("rounded-[14px]");
+  expect(section?.className).toContain("p-[18px]");
 
   rerender(<PriceSummaryFixture variant="plain" />);
   expect(section?.dataset.variant).toBe("plain");
-  expect(section?.style.borderRadius).toBe("0px");
+  expect(section?.className).toContain("rounded-none");
   expect(section?.className).toContain("bg-transparent");
 
   rerender(<PriceSummaryFixture variant="compact" />);
   expect(section?.dataset.variant).toBe("compact");
-  expect(section?.style.borderRadius).toBe("12px");
-  expect(section?.style.padding).toBe("12px");
+  expect(section?.className).toContain("rounded-xl");
+  expect(section?.className).toContain("p-3");
   expect(screen.getByRole("heading").className).toContain("text-[13px]");
 });
 
@@ -75,7 +75,7 @@ test("keeps discount meaning visible in text and semantic markup", () => {
 
   const discountValue = screen.getByText("−$20.00");
   expect(discountValue.tagName).toBe("DD");
-  expect(discountValue.className).toContain("text-[var(--uai-success)]");
+  expect(discountValue.className).toContain("text-success");
   expect(screen.getByText("WELCOME20").tagName).toBe("DT");
 });
 
@@ -97,7 +97,7 @@ test("contains long localized labels and totals", () => {
   );
 
   expect(screen.getByText("International priority shipping and handling").className).toContain(
-    "[overflow-wrap:anywhere]",
+    "wrap-anywhere",
   );
   expect(screen.getByText("R$ 123.456.789,00").className).toContain("max-w-[58%]");
   expect(screen.getByText("R$ 123.456.789,00").className).not.toContain("shrink-0");

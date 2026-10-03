@@ -89,18 +89,19 @@ test("renders card, plain, and compact chrome from the root variant", () => {
 
   expect(CART_ITEM_VARIANTS).toEqual(["card", "plain", "compact"]);
   expect(article?.dataset.variant).toBe("card");
-  expect(article?.style.borderRadius).toBe("14px");
-  expect(article?.style.padding).toBe("16px");
+  expect(article?.dataset.slot).toBe("cart-item");
+  expect(article?.className).toContain("rounded-[14px]");
+  expect(article?.className).toContain("p-4");
 
   rerender(<CartItemFixture variant="plain" />);
   expect(article?.dataset.variant).toBe("plain");
-  expect(article?.style.borderRadius).toBe("0px");
+  expect(article?.className).toContain("rounded-none");
   expect(article?.className).toContain("bg-transparent");
 
   rerender(<CartItemFixture variant="compact" />);
   expect(article?.dataset.variant).toBe("compact");
-  expect(article?.style.borderRadius).toBe("12px");
-  expect(article?.style.padding).toBe("12px");
+  expect(article?.className).toContain("rounded-xl");
+  expect(article?.className).toContain("p-3");
   expect(screen.getByRole("heading").className).toContain("text-[13px]");
 });
 
@@ -112,7 +113,7 @@ test("keeps availability meaning visible for every tone", () => {
     </CartItem>,
   );
 
-  expect(screen.getByText("In stock").className).toContain("text-[var(--uai-success)]");
+  expect(screen.getByText("In stock").className).toContain("text-success");
 
   rerender(
     <CartItem>
@@ -120,7 +121,7 @@ test("keeps availability meaning visible for every tone", () => {
       <CartItemAvailability tone="low">Only 2 left</CartItemAvailability>
     </CartItem>,
   );
-  expect(screen.getByText("Only 2 left").className).toContain("text-[var(--uai-warning)]");
+  expect(screen.getByText("Only 2 left").className).toContain("text-warning");
 
   rerender(
     <CartItem>
@@ -128,7 +129,7 @@ test("keeps availability meaning visible for every tone", () => {
       <CartItemAvailability tone="unavailable">Unavailable</CartItemAvailability>
     </CartItem>,
   );
-  expect(screen.getByText("Unavailable").className).toContain("text-[var(--uai-danger)]");
+  expect(screen.getByText("Unavailable").className).toContain("text-destructive");
 });
 
 test("keeps removal consumer-controlled and blocks duplicate actions", async () => {
@@ -158,9 +159,9 @@ test("contains long localized product content", () => {
     </CartItem>,
   );
 
-  expect(screen.getByRole("heading").className).toContain("[overflow-wrap:anywhere]");
+  expect(screen.getByRole("heading").className).toContain("wrap-anywhere");
   expect(screen.getByText("Azul petróleo com alças reforçadas").className).toContain(
-    "[overflow-wrap:anywhere]",
+    "wrap-anywhere",
   );
   expect(screen.getByText("R$ 123.456.789,00").className).not.toContain("truncate");
 });

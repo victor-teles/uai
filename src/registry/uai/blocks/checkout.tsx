@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { Check, LoaderCircle, LockKeyhole } from "lucide-react";
 import {
   type ComponentProps,
@@ -28,6 +29,7 @@ import {
   StepIndicatorStep,
   type StepIndicatorVariant,
 } from "@/components/ui/uai/step-indicator";
+import { cn } from "@/lib/uai-utils";
 
 export const CHECKOUT_VARIANTS = ["split", "single", "compact"] as const;
 export type CheckoutVariant = (typeof CHECKOUT_VARIANTS)[number];
@@ -73,27 +75,6 @@ function useSection(part: string) {
   return context;
 }
 
-const layoutCss = `
-[data-uai-checkout-layout]{display:grid;gap:20px;align-items:start;min-width:0}
-[data-uai-checkout="compact"]>[data-uai-checkout-layout]{gap:12px}
-@container (min-width: 760px){
-  [data-uai-checkout="split"]>[data-uai-checkout-layout]{grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);column-gap:32px}
-  [data-uai-checkout="split"] [data-uai-checkout-full]{grid-column:1 / -1}
-  [data-uai-checkout="split"] [data-uai-checkout-summary]{position:sticky;top:16px}
-}
-.uai-checkout-spin{animation:uai-checkout-spin 900ms linear infinite}
-@keyframes uai-checkout-spin{to{transform:rotate(360deg)}}
-[data-uai-checkout-section]{transition:background-color 180ms ease-out,box-shadow 180ms ease-out}
-[data-uai-checkout-enter]{animation:uai-checkout-enter 240ms cubic-bezier(0.23,1,0.32,1)}
-@keyframes uai-checkout-enter{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-.uai-checkout-button{transition:background-color 120ms ease-out,filter 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-checkout-button:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-.uai-checkout-button:active:not(:disabled){transform:scale(0.97)}
-.uai-checkout-button[data-kind=primary]:hover:not(:disabled){filter:brightness(1.08)}
-.uai-checkout-button[data-kind=secondary]:hover{background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text))}
-@media (prefers-reduced-motion: reduce){.uai-checkout-spin,[data-uai-checkout-enter]{animation:none}.uai-checkout-button,[data-uai-checkout-section]{transition:none}.uai-checkout-button:active:not(:disabled){transform:none}}
-`;
-
 const progressVariants: Record<CheckoutVariant, StepIndicatorVariant> = {
   split: "horizontal",
   single: "horizontal",
@@ -105,6 +86,22 @@ const summaryVariants: Record<CheckoutVariant, PriceSummaryVariant> = {
   compact: "compact",
 };
 
+const checkoutVariants = cva("@container box-border min-w-0 text-[13px]/[18px] text-foreground", {
+  variants: {
+    variant: { split: "", single: "mx-auto max-w-[640px]", compact: "mx-auto max-w-[520px]" },
+  },
+});
+const checkoutLayoutVariants = cva("grid min-w-0 items-start", {
+  variants: {
+    variant: {
+      split: "gap-5 @min-[760px]:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)] @min-[760px]:gap-x-8",
+      single: "gap-5",
+      compact: "gap-3",
+    },
+  },
+});
+const fullWidth = "@min-[760px]:col-span-full";
+
 /** Guided checkout: contact, delivery, payment, review, and confirmation. */
 export function Checkout({
   variant = "split",
@@ -114,8 +111,8 @@ export function Checkout({
   onStepChange,
   onStepComplete,
   onPlaceOrder,
+  className,
   children,
-  style,
   ...props
 }: CheckoutProps) {
   const id = useId();
@@ -176,78 +173,70 @@ export function Checkout({
     >
       <section
         aria-labelledby={`${id}-title`}
+        data-slot="checkout"
+        className={cn(checkoutVariants({ variant }), className)}
         {...props}
         data-variant={variant}
-        data-uai-checkout={variant}
         data-status={status}
-        style={{
-          boxSizing: "border-box",
-          containerType: "inline-size",
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...(variant === "single" ? { maxWidth: 640, margin: "0 auto" } : null),
-          ...(variant === "compact" ? { maxWidth: 520, margin: "0 auto" } : null),
-          ...style,
-        }}
       >
-        <style>{layoutCss}</style>
-        <div data-uai-checkout-layout="">{children}</div>
+        <div data-slot="checkout-layout" className={checkoutLayoutVariants({ variant })}>
+          {children}
+        </div>
       </section>
     </Context.Provider>
   );
 }
 
-export function CheckoutHeader({ style, ...props }: ComponentProps<"header">) {
-  useCheckout("CheckoutHeader");
+export function CheckoutHeader({ className, ...props }: ComponentProps<"header">) {
+  const { variant } = useCheckout("CheckoutHeader");
   return (
     <header
+      data-slot="checkout-header"
+      className={cn("grid min-w-0 gap-1.5", variant === "split" && fullWidth, className)}
       {...props}
-      data-uai-checkout-full=""
-      style={{ display: "grid", gap: 6, minWidth: 0, ...style }}
     />
   );
 }
 
-export function CheckoutTitle({ style, ...props }: ComponentProps<"h2">) {
+export function CheckoutTitle({ className, ...props }: ComponentProps<"h2">) {
   const { id, variant } = useCheckout("CheckoutTitle");
   return (
     <h2
+      data-slot="checkout-title"
+      className={cn(
+        "m-0 font-semibold tracking-[-0.015em]",
+        variant === "compact" ? "text-[18px]/[1.2]" : "text-[22px]/[1.2]",
+        className,
+      )}
       {...props}
       id={`${id}-title`}
-      style={{
-        margin: 0,
-        fontSize: variant === "compact" ? 18 : 22,
-        fontWeight: 600,
-        lineHeight: 1.2,
-        letterSpacing: "-0.015em",
-        ...style,
-      }}
     />
   );
 }
 
-export function CheckoutDescription({ style, ...props }: ComponentProps<"p">) {
+export function CheckoutDescription({ className, ...props }: ComponentProps<"p">) {
   return (
-    <p {...props} style={{ margin: 0, color: "var(--uai-muted)", textWrap: "pretty", ...style }} />
+    <p
+      data-slot="checkout-description"
+      className={cn("m-0 text-pretty text-muted-foreground", className)}
+      {...props}
+    />
   );
 }
 
 /** Step progress. Compose CheckoutProgressStep for each value in `steps`. */
 export function CheckoutProgress({
   "aria-label": ariaLabel = "Checkout progress",
-  style,
   ...props
 }: ComponentProps<"ol">) {
   const { variant } = useCheckout("CheckoutProgress");
   return (
-    <div data-uai-checkout-full="" style={{ minWidth: 0 }}>
+    <div className={cn("min-w-0", variant === "split" && fullWidth)}>
       <StepIndicator
         aria-label={ariaLabel}
+        data-slot="checkout-progress"
         {...props}
         variant={progressVariants[variant]}
-        style={style}
       />
     </div>
   );
@@ -259,22 +248,24 @@ export function CheckoutProgressStep({
   ...props
 }: Omit<ComponentProps<typeof StepIndicatorStep>, "status"> & { value: string }) {
   const context = useCheckout("CheckoutProgressStep");
-  return <StepIndicatorStep {...props} status={context.statusOf(value)} />;
+  return (
+    <StepIndicatorStep
+      data-slot="checkout-progress-step"
+      {...props}
+      status={context.statusOf(value)}
+    />
+  );
 }
 
 /** The step sections. Replaced by CheckoutConfirmation once the order is placed. */
-export function CheckoutMain({ style, ...props }: ComponentProps<"div">) {
+export function CheckoutMain({ className, ...props }: ComponentProps<"div">) {
   const context = useCheckout("CheckoutMain");
   if (context.status === "placed") return null;
   return (
     <div
+      data-slot="checkout-main"
+      className={cn("grid min-w-0", context.variant === "compact" ? "gap-2" : "gap-3", className)}
       {...props}
-      style={{
-        display: "grid",
-        gap: context.variant === "compact" ? 8 : 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
@@ -282,7 +273,7 @@ export function CheckoutMain({ style, ...props }: ComponentProps<"div">) {
 export type CheckoutSectionProps = ComponentProps<"section"> & { value: string };
 
 /** One checkout step. Shows its form while current and its summary once complete. */
-export function CheckoutSection({ value, style, ...props }: CheckoutSectionProps) {
+export function CheckoutSection({ value, className, ...props }: CheckoutSectionProps) {
   const context = useCheckout("CheckoutSection");
   const id = useId();
   const status = context.statusOf(value);
@@ -291,46 +282,34 @@ export function CheckoutSection({ value, style, ...props }: CheckoutSectionProps
     <SectionContext.Provider value={{ id, value, status }}>
       <section
         aria-labelledby={`${id}-title`}
+        data-slot="checkout-section"
+        className={cn(
+          "grid min-w-0 [transition:background-color_180ms_ease-out,box-shadow_180ms_ease-out] motion-reduce:transition-none",
+          compact ? "gap-2.5 rounded-xl px-3 py-2.5" : "gap-3.5 rounded-[14px] px-4 py-3.5",
+          status === "upcoming" ? "bg-card/50" : "bg-card",
+          status === "current" ? "shadow-[inset_0_0_0_1px_var(--border)]" : "shadow-none",
+          className,
+        )}
         {...props}
         data-status={status}
-        data-uai-checkout-section=""
-        style={{
-          display: "grid",
-          gap: compact ? 10 : 14,
-          minWidth: 0,
-          padding: compact ? "10px 12px" : "14px 16px",
-          borderRadius: compact ? 12 : 14,
-          background:
-            status === "upcoming"
-              ? "color-mix(in oklab, var(--uai-surface) 50%, transparent)"
-              : "var(--uai-surface)",
-          boxShadow: status === "current" ? "inset 0 0 0 1px var(--uai-border)" : "none",
-          ...style,
-        }}
       />
     </SectionContext.Provider>
   );
 }
 
-export function CheckoutSectionHeader({ style, ...props }: ComponentProps<"header">) {
+export function CheckoutSectionHeader({ className, ...props }: ComponentProps<"header">) {
   useSection("CheckoutSectionHeader");
   return (
     <header
+      data-slot="checkout-section-header"
+      className={cn("flex min-w-0 items-center justify-between gap-3", className)}
       {...props}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
 /** Step heading. Receives focus when the step becomes current through Continue or Edit. */
-export function CheckoutSectionTitle({ children, style, ...props }: ComponentProps<"h3">) {
+export function CheckoutSectionTitle({ children, className, ...props }: ComponentProps<"h3">) {
   const checkout = useCheckout("CheckoutSectionTitle");
   const section = useSection("CheckoutSectionTitle");
   const ref = useRef<HTMLHeadingElement>(null);
@@ -345,49 +324,59 @@ export function CheckoutSectionTitle({ children, style, ...props }: ComponentPro
   return (
     <h3
       tabIndex={-1}
+      data-slot="checkout-section-title"
+      className={cn(
+        "m-0 flex items-center gap-2 text-sm/5 font-medium outline-offset-4",
+        section.status === "upcoming" ? "text-subtle-foreground" : "text-foreground",
+        className,
+      )}
       {...props}
       ref={ref}
       id={`${section.id}-title`}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        margin: 0,
-        fontSize: 14,
-        fontWeight: 500,
-        lineHeight: "20px",
-        color: section.status === "upcoming" ? "var(--uai-subtle)" : "var(--uai-text)",
-        outlineOffset: 4,
-        ...style,
-      }}
     >
       {complete ? (
         <span
           aria-hidden="true"
-          style={{
-            display: "grid",
-            placeItems: "center",
-            width: 18,
-            height: 18,
-            borderRadius: 999,
-            background: "color-mix(in oklab, var(--uai-success) 16%, transparent)",
-            color: "var(--uai-success)",
-          }}
+          className="grid size-[18px] place-items-center rounded-full bg-success/16 text-success"
         >
           <Check size={11} strokeWidth={2.5} />
         </span>
       ) : null}
       {children}
-      {complete ? <span style={visuallyHidden}>, complete</span> : null}
+      {complete ? <span className="sr-only">, complete</span> : null}
     </h3>
   );
 }
+
+const checkoutButtonBase = [
+  "cursor-pointer border-0 font-medium rounded-full",
+  "[transition:background-color_120ms_ease-out,filter_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)]",
+  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-97",
+  "motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
+];
+
+const checkoutPrimaryVariants = cva(
+  [
+    ...checkoutButtonBase,
+    "inline-flex items-center justify-center justify-self-start gap-2 px-[18px] text-[13px] text-primary-foreground enabled:hover:brightness-108",
+  ],
+  {
+    variants: {
+      compact: { true: "h-8", false: "h-10" },
+      blocked: {
+        true: "cursor-not-allowed bg-[color-mix(in_oklab,var(--primary)_55%,var(--card))]",
+        false: "bg-primary",
+      },
+    },
+    defaultVariants: { blocked: false },
+  },
+);
 
 /** Reopens a completed step. Hidden while the step is current or upcoming. */
 export function CheckoutSectionEdit({
   children = "Edit",
   onClick,
-  style,
+  className,
   ...props
 }: ComponentProps<"button">) {
   const checkout = useCheckout("CheckoutSectionEdit");
@@ -397,25 +386,16 @@ export function CheckoutSectionEdit({
     <button
       type="button"
       aria-describedby={`${section.id}-title`}
+      data-slot="checkout-section-edit"
+      className={cn(
+        checkoutButtonBase,
+        "h-[26px] flex-none bg-secondary px-3 text-[12.5px] text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+        className,
+      )}
       {...props}
-      className={joinClass("uai-checkout-button", props.className)}
-      data-kind="secondary"
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) checkout.goTo(section.value);
-      }}
-      style={{
-        flex: "none",
-        height: 26,
-        padding: "0 12px",
-        border: 0,
-        borderRadius: 999,
-        background: "var(--uai-surface-raised)",
-        color: "var(--uai-text)",
-        fontSize: 12.5,
-        fontWeight: 500,
-        cursor: "pointer",
-        ...style,
       }}
     >
       {children}
@@ -424,101 +404,78 @@ export function CheckoutSectionEdit({
 }
 
 /** What the shopper entered, shown once the step is complete. */
-export function CheckoutSectionSummary({ style, ...props }: ComponentProps<"div">) {
+export function CheckoutSectionSummary({ className, ...props }: ComponentProps<"div">) {
   const section = useSection("CheckoutSectionSummary");
   if (section.status !== "complete") return null;
   return (
     <div
+      data-slot="checkout-section-summary"
+      className={cn("-mt-1.5 min-w-0 pl-[26px] text-[12.5px] text-muted-foreground", className)}
       {...props}
-      style={{
-        marginTop: -6,
-        paddingLeft: 26,
-        color: "var(--uai-muted)",
-        fontSize: 12.5,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
+const enter =
+  "animate-in fade-in-0 slide-in-from-bottom-1 duration-240 ease-out-quint motion-reduce:animate-none";
+
 /** The step's fields. Native validation runs before the step completes. */
-export function CheckoutSectionForm({ onSubmit, style, ...props }: ComponentProps<"form">) {
+export function CheckoutSectionForm({ onSubmit, className, ...props }: ComponentProps<"form">) {
   const checkout = useCheckout("CheckoutSectionForm");
   const section = useSection("CheckoutSectionForm");
   if (section.status !== "current") return null;
   return (
     <form
       aria-labelledby={`${section.id}-title`}
+      data-slot="checkout-section-form"
+      className={cn(
+        "grid min-w-0",
+        checkout.variant === "compact" ? "gap-2.5" : "gap-3.5",
+        enter,
+        className,
+      )}
       {...props}
-      data-uai-checkout-enter=""
       onSubmit={(event) => {
         onSubmit?.(event);
         if (event.defaultPrevented) return;
         event.preventDefault();
         checkout.complete(section.value, new FormData(event.currentTarget));
       }}
-      style={{
-        display: "grid",
-        gap: checkout.variant === "compact" ? 10 : 14,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
 /** Two fields side by side on wide containers; one column when narrow. */
-export function CheckoutFieldRow({ style, ...props }: ComponentProps<"div">) {
+export function CheckoutFieldRow({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="checkout-field-row"
+      className={cn(
+        "grid min-w-0 grid-cols-[repeat(auto-fit,minmax(min(100%,180px),1fr))] gap-3",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 180px), 1fr))",
-        gap: 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-const primaryStyle = (compact: boolean, blocked = false) =>
-  ({
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    justifySelf: "start",
-    height: compact ? 32 : 40,
-    padding: "0 18px",
-    border: 0,
-    borderRadius: 999,
-    background: blocked
-      ? "color-mix(in oklab, var(--uai-accent) 55%, var(--uai-surface))"
-      : "var(--uai-accent)",
-    color: "var(--uai-accent-foreground)",
-    fontSize: 13,
-    fontWeight: 500,
-    cursor: blocked ? "not-allowed" : "pointer",
-  }) as const;
-
 /** Submits the current step and moves to the next one. */
 export function CheckoutSectionContinue({
   children = "Continue",
-  style,
+  className,
   ...props
 }: ComponentProps<"button">) {
   const checkout = useCheckout("CheckoutSectionContinue");
   useSection("CheckoutSectionContinue");
   return (
     <button
+      data-slot="checkout-section-continue"
+      className={cn(
+        checkoutPrimaryVariants({ compact: checkout.variant === "compact" }),
+        className,
+      )}
       {...props}
       type="submit"
-      className={joinClass("uai-checkout-button", props.className)}
-      data-kind="primary"
-      style={{ ...primaryStyle(checkout.variant === "compact"), ...style }}
     >
       {children}
     </button>
@@ -532,53 +489,34 @@ export function CheckoutSectionContinue({
 export function CheckoutPayment({
   "aria-label": ariaLabel = "Payment details",
   children,
-  style,
+  className,
   ...props
 }: ComponentProps<"fieldset">) {
   const { variant } = useCheckout("CheckoutPayment");
   return (
     <fieldset
       aria-label={ariaLabel}
+      data-slot="checkout-payment"
+      className={cn(
+        "m-0 grid min-w-0 gap-2.5 border-0 bg-background",
+        variant === "compact" ? "rounded-lg p-2.5" : "rounded-[10px] p-3",
+        className,
+      )}
       {...props}
-      style={{
-        margin: 0,
-        minInlineSize: 0,
-        display: "grid",
-        gap: 10,
-        minWidth: 0,
-        padding: variant === "compact" ? 10 : 12,
-        border: 0,
-        borderRadius: variant === "compact" ? 8 : 10,
-        background: "var(--uai-canvas)",
-        ...style,
-      }}
     >
       {children}
     </fieldset>
   );
 }
 
-export function CheckoutPaymentNote({ children, style, ...props }: ComponentProps<"p">) {
+export function CheckoutPaymentNote({ children, className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="checkout-payment-note"
+      className={cn("m-0 flex items-start gap-1.5 text-xs/4 text-subtle-foreground", className)}
       {...props}
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        gap: 6,
-        margin: 0,
-        color: "var(--uai-subtle)",
-        fontSize: 12,
-        lineHeight: "16px",
-        ...style,
-      }}
     >
-      <LockKeyhole
-        size={12}
-        strokeWidth={1.75}
-        aria-hidden="true"
-        style={{ flex: "none", marginTop: 2 }}
-      />
+      <LockKeyhole size={12} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 flex-none" />
       <span>{children}</span>
     </p>
   );
@@ -592,7 +530,7 @@ export function CheckoutPlaceOrder({
   pendingLabel = "Placing order…",
   disabled,
   onClick,
-  style,
+  className,
   ...props
 }: CheckoutPlaceOrderProps) {
   const checkout = useCheckout("CheckoutPlaceOrder");
@@ -601,20 +539,26 @@ export function CheckoutPlaceOrder({
   return (
     <button
       type="button"
+      data-slot="checkout-place-order"
+      className={cn(
+        checkoutPrimaryVariants({ compact: checkout.variant === "compact", blocked }),
+        className,
+      )}
       {...props}
       disabled={blocked}
       aria-busy={placing || undefined}
-      className={joinClass("uai-checkout-button", props.className)}
-      data-kind="primary"
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) checkout.placeOrder();
       }}
-      style={{ ...primaryStyle(checkout.variant === "compact", blocked), ...style }}
     >
       {placing ? (
         <>
-          <LoaderCircle size={14} aria-hidden="true" className="uai-checkout-spin" />
+          <LoaderCircle
+            size={14}
+            aria-hidden="true"
+            className="animate-spin [animation-duration:900ms] motion-reduce:animate-none"
+          />
           {pendingLabel}
         </>
       ) : (
@@ -629,7 +573,7 @@ export function CheckoutError({ children, ...props }: Omit<StatusBannerProps, "t
   const checkout = useCheckout("CheckoutError");
   if (checkout.status !== "error") return null;
   return (
-    <StatusBanner variant="tinted" {...props} tone="error">
+    <StatusBanner variant="tinted" data-slot="checkout-error" {...props} tone="error">
       <StatusBannerIcon />
       <StatusBannerContent>{children}</StatusBannerContent>
     </StatusBanner>
@@ -637,28 +581,25 @@ export function CheckoutError({ children, ...props }: Omit<StatusBannerProps, "t
 }
 
 /** Replaces the steps once the order is placed. Its heading receives focus. */
-export function CheckoutConfirmation({ style, ...props }: ComponentProps<"div">) {
+export function CheckoutConfirmation({ className, ...props }: ComponentProps<"div">) {
   const checkout = useCheckout("CheckoutConfirmation");
   if (checkout.status !== "placed") return null;
   return (
     <div
       role="status"
+      data-slot="checkout-confirmation"
+      className={cn(
+        "grid min-w-0 gap-2.5 bg-[color-mix(in_oklab,var(--success)_10%,var(--card))]",
+        checkout.variant === "compact" ? "rounded-xl p-3.5" : "rounded-[14px] p-5",
+        enter,
+        className,
+      )}
       {...props}
-      data-uai-checkout-enter=""
-      style={{
-        display: "grid",
-        gap: 10,
-        minWidth: 0,
-        padding: checkout.variant === "compact" ? 14 : 20,
-        borderRadius: checkout.variant === "compact" ? 12 : 14,
-        background: "color-mix(in oklab, var(--uai-success) 10%, var(--uai-surface))",
-        ...style,
-      }}
     />
   );
 }
 
-export function CheckoutConfirmationTitle({ style, ...props }: ComponentProps<"h3">) {
+export function CheckoutConfirmationTitle({ className, ...props }: ComponentProps<"h3">) {
   const { focusRequest } = useCheckout("CheckoutConfirmationTitle");
   const ref = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -670,17 +611,13 @@ export function CheckoutConfirmationTitle({ style, ...props }: ComponentProps<"h
   return (
     <h3
       tabIndex={-1}
+      data-slot="checkout-confirmation-title"
+      className={cn(
+        "m-0 text-base/[22px] font-semibold tracking-[-0.01em] text-[color-mix(in_oklab,var(--success)_70%,var(--foreground))]",
+        className,
+      )}
       {...props}
       ref={ref}
-      style={{
-        margin: 0,
-        fontSize: 16,
-        fontWeight: 600,
-        lineHeight: "22px",
-        letterSpacing: "-0.01em",
-        color: "color-mix(in oklab, var(--uai-success) 70%, var(--uai-text))",
-        ...style,
-      }}
     />
   );
 }
@@ -688,16 +625,20 @@ export function CheckoutConfirmationTitle({ style, ...props }: ComponentProps<"h
 /** Order summary column. Sticky beside the steps in the split layout. */
 export function CheckoutSummary({
   "aria-label": ariaLabel = "Order summary",
-  style,
+  className,
   ...props
 }: ComponentProps<"aside">) {
-  useCheckout("CheckoutSummary");
+  const { variant } = useCheckout("CheckoutSummary");
   return (
     <aside
       aria-label={ariaLabel}
+      data-slot="checkout-summary"
+      className={cn(
+        "grid min-w-0 gap-3",
+        variant === "split" && "@min-[760px]:sticky @min-[760px]:top-4",
+        className,
+      )}
       {...props}
-      data-uai-checkout-summary=""
-      style={{ display: "grid", gap: 12, minWidth: 0, ...style }}
     />
   );
 }
@@ -705,21 +646,11 @@ export function CheckoutSummary({
 /** Totals. Compose PriceSummary parts inside; the block picks the summary style. */
 export function CheckoutSummaryTotals(props: Omit<PriceSummaryProps, "variant">) {
   const { variant } = useCheckout("CheckoutSummaryTotals");
-  return <PriceSummary {...props} variant={summaryVariants[variant]} />;
-}
-
-const visuallyHidden = {
-  position: "absolute",
-  width: 1,
-  height: 1,
-  margin: -1,
-  padding: 0,
-  overflow: "hidden",
-  clip: "rect(0 0 0 0)",
-  whiteSpace: "nowrap",
-  border: 0,
-} as const;
-
-function joinClass(base: string, extra?: string) {
-  return extra ? `${base} ${extra}` : base;
+  return (
+    <PriceSummary
+      data-slot="checkout-summary-totals"
+      {...props}
+      variant={summaryVariants[variant]}
+    />
+  );
 }

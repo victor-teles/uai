@@ -28,8 +28,14 @@ Keep the Uai development server running. In a shadcn project, run:
 bunx shadcn@latest add http://localhost:3000/r/prompt-composer.json
 ```
 
-Prompt Composer installs the Uai theme tokens and the shared class-name utility.
+Prompt Composer installs the Uai theme and the shared class-name utility.
 Replace `prompt-composer` with another registry item name to install that component.
+
+Components are styled with Tailwind classes and the standard shadcn theme tokens
+(`background`, `card`, `muted-foreground`, `primary`, …). The `uai-theme` item fills
+those tokens with the Uai palette and adds `subtle-foreground`, `border-strong`,
+`success`, and `warning`. Entrance motion uses `tw-animate-css`, which `shadcn init`
+imports by default. Restyle any part by passing `className`.
 
 Set `NEXT_PUBLIC_REGISTRY_URL` to the deployed `/r` URL before publishing the
 site. Update the `homepage` and dependency URLs in `registry.json` at the same
@@ -41,8 +47,8 @@ time. shadcn requires full URLs for custom registry dependencies.
 - `src/components/registry`: site shell, command palette, catalog, previews, and
   install workflow.
 - `src/app/(home)/components/[id]`: the statically generated page for each item.
-- `src/components/ui/uai`: local component copies used by the browser.
-- `src/components/uai`: local block copies used by the browser.
+- `src/components/ui/uai`: re-exports of registry components at their install path.
+- `src/components/uai`: re-exports of registry blocks.
 - `registry.json`: the registry catalog and dependency graph.
 - `public/r`: generated registry documents.
 

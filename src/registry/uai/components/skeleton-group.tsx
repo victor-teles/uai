@@ -1,6 +1,8 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { type ComponentProps, type CSSProperties, createContext, useContext } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const SKELETON_GROUP_VARIANTS = ["shimmer", "pulse", "static"] as const;
 export type SkeletonGroupVariant = (typeof SKELETON_GROUP_VARIANTS)[number];
@@ -16,19 +18,12 @@ function useVariant(part: string) {
   if (!variant) throw new Error(`${part} must be used within SkeletonGroup`);
   return variant;
 }
-const motionCss = `
-@keyframes uai-skeleton-shimmer{from{background-position:150% 0}to{background-position:-50% 0}}
-@keyframes uai-skeleton-pulse{50%{opacity:0.5}}
-.uai-skeleton[data-motion="shimmer"]{background-image:linear-gradient(90deg,transparent 0%,color-mix(in oklab,var(--uai-text) 7%,transparent) 50%,transparent 100%);background-size:200% 100%;background-repeat:no-repeat;animation:uai-skeleton-shimmer 1.8s cubic-bezier(0.4,0,0.6,1) infinite}
-.uai-skeleton[data-motion="pulse"]{animation:uai-skeleton-pulse 1.6s ease-in-out infinite}
-@media (prefers-reduced-motion: reduce){.uai-skeleton{animation:none!important;background-image:none!important}}
-`;
 
 export function SkeletonGroup({
   variant = "shimmer",
   label = "Loading…",
+  className,
   children,
-  style,
   ...props
 }: SkeletonGroupProps) {
   return (
@@ -37,24 +32,13 @@ export function SkeletonGroup({
         role="status"
         aria-busy="true"
         aria-live="polite"
+        data-slot="skeleton-group"
+        className={cn("relative grid min-w-0 gap-3", className)}
         {...props}
         data-variant={variant}
-        style={{ position: "relative", display: "grid", gap: 12, minWidth: 0, ...style }}
       >
-        <style>{motionCss}</style>
-        <span
-          style={{
-            position: "absolute",
-            width: 1,
-            height: 1,
-            overflow: "hidden",
-            clip: "rect(0 0 0 0)",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {label}
-        </span>
-        <div aria-hidden="true" style={{ display: "contents" }}>
+        <span className="sr-only">{label}</span>
+        <div aria-hidden="true" className="contents">
           {children}
         </div>
       </div>
@@ -62,30 +46,34 @@ export function SkeletonGroup({
   );
 }
 
+const shapeVariants = cva("block max-w-full flex-none bg-muted", {
+  variants: {
+    motion: {
+      shimmer:
+        "animate-[skeleton-shimmer_1.8s_cubic-bezier(0.4,0,0.6,1)_infinite] bg-[linear-gradient(90deg,transparent_0%,color-mix(in_oklab,var(--foreground)_7%,transparent)_50%,transparent_100%)] bg-size-[200%_100%] bg-no-repeat motion-reduce:animate-none motion-reduce:bg-none",
+      pulse: "animate-[pulse_1.6s_ease-in-out_infinite] motion-reduce:animate-none",
+      static: "",
+    },
+  },
+});
+
 function Shape({
   part,
+  slot,
   width,
   height,
-  radius,
+  className,
   style,
   ...props
-}: ComponentProps<"span"> & { part: string; width: Size; height: Size; radius: number }) {
+}: ComponentProps<"span"> & { part: string; slot: string; width: Size; height: Size }) {
   const variant = useVariant(part);
   return (
     <span
+      data-slot={slot}
+      className={cn(shapeVariants({ motion: variant }), className)}
       {...props}
-      className="uai-skeleton"
       data-motion={variant}
-      style={{
-        display: "block",
-        flex: "none",
-        width,
-        maxWidth: "100%",
-        height,
-        borderRadius: radius,
-        backgroundColor: "var(--uai-surface-raised)",
-        ...style,
-      }}
+      style={{ width, height, ...style }}
     />
   );
 }
@@ -93,55 +81,82 @@ function Shape({
 export function SkeletonGroupLine({
   width = "100%",
   height = 10,
+  className,
   ...props
 }: ComponentProps<"span"> & { width?: Size; height?: Size }) {
-  return <Shape {...props} part="SkeletonGroupLine" width={width} height={height} radius={999} />;
+  return (
+    <Shape
+      {...props}
+      part="SkeletonGroupLine"
+      slot="skeleton-group-line"
+      width={width}
+      height={height}
+      className={cn("rounded-full", className)}
+    />
+  );
 }
 
 export function SkeletonGroupCircle({
   size = 28,
+  className,
   ...props
 }: ComponentProps<"span"> & { size?: number }) {
-  return <Shape {...props} part="SkeletonGroupCircle" width={size} height={size} radius={999} />;
+  return (
+    <Shape
+      {...props}
+      part="SkeletonGroupCircle"
+      slot="skeleton-group-circle"
+      width={size}
+      height={size}
+      className={cn("rounded-full", className)}
+    />
+  );
 }
 
 export function SkeletonGroupBlock({
   width = "100%",
   height = 96,
+  className,
   ...props
 }: ComponentProps<"span"> & { width?: Size; height?: Size }) {
-  return <Shape {...props} part="SkeletonGroupBlock" width={width} height={height} radius={10} />;
-}
-
-export function SkeletonGroupRow({ style, ...props }: ComponentProps<"div">) {
   return (
-    <div
+    <Shape
       {...props}
-      style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0, ...style }}
+      part="SkeletonGroupBlock"
+      slot="skeleton-group-block"
+      width={width}
+      height={height}
+      className={cn("rounded-[10px]", className)}
     />
   );
 }
 
-export function SkeletonGroupStack({ style, ...props }: ComponentProps<"div">) {
+export function SkeletonGroupRow({ className, ...props }: ComponentProps<"div">) {
   return (
-    <div {...props} style={{ display: "grid", gap: 8, flex: "1 1 0", minWidth: 0, ...style }} />
+    <div
+      data-slot="skeleton-group-row"
+      className={cn("flex min-w-0 items-center gap-3", className)}
+      {...props}
+    />
   );
 }
 
-export function SkeletonGroupCard({ style, ...props }: ComponentProps<"div">) {
+export function SkeletonGroupStack({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="skeleton-group-stack"
+      className={cn("grid min-w-0 flex-[1_1_0] gap-2", className)}
       {...props}
-      style={{
-        display: "grid",
-        gap: 14,
-        padding: 16,
-        border: "1px solid var(--uai-border)",
-        borderRadius: 14,
-        background: "var(--uai-surface)",
-        minWidth: 0,
-        ...style,
-      }}
+    />
+  );
+}
+
+export function SkeletonGroupCard({ className, ...props }: ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="skeleton-group-card"
+      className={cn("grid min-w-0 gap-3.5 rounded-[14px] border bg-card p-4", className)}
+      {...props}
     />
   );
 }

@@ -9,6 +9,7 @@ import {
   useId,
   useState,
 } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const COMPARISON_TABLE_VARIANTS = ["bordered", "plain", "compact"] as const;
 export type ComparisonTableVariant = (typeof COMPARISON_TABLE_VARIANTS)[number];
@@ -38,32 +39,24 @@ function useRow(part: string) {
   return context;
 }
 
-const marked = "color-mix(in oklab, var(--uai-accent) 9%, var(--uai-surface))";
+const marked = "bg-[color-mix(in_oklab,var(--primary)_9%,var(--card))]";
 // Rows tint on hover; the sticky row header follows so the tint spans the full row.
-const rowHover = "hover:bg-[color-mix(in_oklab,var(--uai-surface-raised)_55%,var(--uai-surface))]";
-const headerHover =
-  "bg-[var(--uai-surface)] [tr:hover>&]:bg-[color-mix(in_oklab,var(--uai-surface-raised)_55%,var(--uai-surface))]";
+const rowHover = "hover:bg-[color-mix(in_oklab,var(--muted)_55%,var(--card))]";
+const headerHover = "bg-card [tr:hover>&]:bg-[color-mix(in_oklab,var(--muted)_55%,var(--card))]";
 // Hairlines between rows only; the last row sits on the container edge.
-const cellRule = "border-b border-[var(--uai-border)] [tr:last-child>&]:border-b-0";
+const cellRule = "border-b [tr:last-child>&]:border-b-0";
+const badge = "bg-primary/16 text-[11px]/4 font-medium text-primary";
 
-const srOnly = {
-  position: "absolute",
-  width: 1,
-  height: 1,
-  margin: -1,
-  padding: 0,
-  overflow: "hidden",
-  clip: "rect(0, 0, 0, 0)",
-  whiteSpace: "nowrap",
-  border: 0,
-} as const;
+function cellPadding(variant: ComparisonTableVariant) {
+  return variant === "compact" ? "px-3 py-1.75" : "px-4 py-2.75";
+}
 
 export function ComparisonTable({
   variant = "bordered",
   highlightDifferences,
   defaultHighlightDifferences = false,
   onHighlightDifferencesChange,
-  style,
+  className,
   children,
   ...props
 }: ComparisonTableProps) {
@@ -77,18 +70,11 @@ export function ComparisonTable({
   return (
     <Context.Provider value={{ id, variant, highlight, setHighlight }}>
       <div
-        {...props}
+        data-slot="comparison-table"
         data-variant={variant}
         data-highlight-differences={highlight || undefined}
-        style={{
-          display: "grid",
-          gap: 12,
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
+        className={cn("grid min-w-0 gap-3 text-[13px]/[18px] text-foreground", className)}
+        {...props}
       >
         {children}
       </div>
@@ -96,66 +82,48 @@ export function ComparisonTable({
   );
 }
 
-export function ComparisonTableHeader({ style, ...props }: ComponentProps<"div">) {
+export function ComparisonTableHeader({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="comparison-table-header"
+      className={cn("flex flex-wrap items-center justify-between gap-3", className)}
       {...props}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        flexWrap: "wrap",
-        gap: 12,
-        ...style,
-      }}
     />
   );
 }
 
-export function ComparisonTableTitle({ style, ...props }: ComponentProps<"h3">) {
+export function ComparisonTableTitle({ className, ...props }: ComponentProps<"h3">) {
   const context = useTable("ComparisonTableTitle");
   return (
     <h3
+      data-slot="comparison-table-title"
+      className={cn("m-0 text-sm/5 font-semibold tracking-[-0.01em]", className)}
       {...props}
       id={`${context.id}-title`}
-      style={{
-        margin: 0,
-        fontSize: 14,
-        lineHeight: "20px",
-        fontWeight: 600,
-        letterSpacing: "-0.01em",
-        ...style,
-      }}
     />
   );
 }
 
 export function ComparisonTableDifferencesToggle({
   children = "Highlight differences",
-  style,
+  className,
   ...props
 }: Omit<ComponentProps<"input">, "type" | "checked" | "onChange">) {
   const context = useTable("ComparisonTableDifferencesToggle");
   return (
     <label
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 8,
-        minHeight: 28,
-        color: "var(--uai-muted)",
-        fontSize: 12.5,
-        fontWeight: 500,
-        cursor: "pointer",
-        ...style,
-      }}
+      data-slot="comparison-table-differences-toggle"
+      className={cn(
+        "inline-flex min-h-7 cursor-pointer items-center gap-2 text-[12.5px] font-medium text-muted-foreground",
+        className,
+      )}
     >
       <input
         {...props}
         type="checkbox"
         checked={context.highlight}
         onChange={(event) => context.setHighlight(event.target.checked)}
-        style={{ width: 14, height: 14, margin: 0, accentColor: "var(--uai-accent)" }}
+        className="m-0 size-3.5 accent-primary"
       />
       {children}
     </label>
@@ -163,7 +131,7 @@ export function ComparisonTableDifferencesToggle({
 }
 
 export function ComparisonTableContent({
-  style,
+  className,
   children,
   ...props
 }: Omit<ComponentProps<"section">, "children"> & { children: ReactNode }) {
@@ -174,28 +142,21 @@ export function ComparisonTableContent({
       aria-labelledby={`${context.id}-title`}
       // biome-ignore lint/a11y/noNoninteractiveTabindex: horizontally scrollable regions must be keyboard reachable.
       tabIndex={0}
+      data-slot="comparison-table-content"
+      className={cn(
+        "max-w-full overflow-x-auto bg-card outline-offset-2",
+        context.variant === "plain" ? "border-0" : "border",
+        compact ? "rounded-xl" : "rounded-[14px]",
+        className,
+      )}
       {...props}
-      style={{
-        maxWidth: "100%",
-        overflowX: "auto",
-        border: context.variant === "plain" ? 0 : "1px solid var(--uai-border)",
-        borderRadius: compact ? 12 : 14,
-        outlineOffset: 2,
-        background: "var(--uai-surface)",
-        ...style,
-      }}
     >
       <table
         aria-labelledby={`${context.id}-title`}
-        style={{
-          width: "100%",
-          minWidth: 520,
-          borderCollapse: "separate",
-          borderSpacing: 0,
-          fontSize: compact ? 12.5 : 13,
-          lineHeight: "18px",
-          fontVariantNumeric: "tabular-nums",
-        }}
+        className={cn(
+          "w-full min-w-[520px] border-separate border-spacing-0 tabular-nums",
+          compact ? "text-[12.5px]/[18px]" : "text-[13px]/[18px]",
+        )}
       >
         {children}
       </table>
@@ -206,37 +167,24 @@ export function ComparisonTableContent({
 export function ComparisonTableHead({ children, ...props }: ComponentProps<"thead">) {
   useTable("ComparisonTableHead");
   return (
-    <thead {...props}>
+    <thead data-slot="comparison-table-head" {...props}>
       <tr>{children}</tr>
     </thead>
   );
 }
 
-function cellPadding(variant: ComparisonTableVariant) {
-  return variant === "compact" ? "7px 12px" : "11px 16px";
-}
-
-export function ComparisonTableCorner({ style, ...props }: ComponentProps<"th">) {
+export function ComparisonTableCorner({ className, ...props }: ComponentProps<"th">) {
   const context = useTable("ComparisonTableCorner");
   return (
     <th
       scope="col"
+      data-slot="comparison-table-corner"
+      className={cn(
+        "sticky top-0 left-0 z-2 border-b bg-card text-left align-bottom text-[12px] font-medium text-subtle-foreground",
+        cellPadding(context.variant),
+        className,
+      )}
       {...props}
-      style={{
-        position: "sticky",
-        left: 0,
-        top: 0,
-        zIndex: 2,
-        padding: cellPadding(context.variant),
-        borderBottom: "1px solid var(--uai-border)",
-        background: "var(--uai-surface)",
-        color: "var(--uai-subtle)",
-        fontSize: 12,
-        fontWeight: 500,
-        textAlign: "left",
-        verticalAlign: "bottom",
-        ...style,
-      }}
     />
   );
 }
@@ -245,47 +193,28 @@ export function ComparisonTableColumn({
   recommended = false,
   recommendedLabel = "Recommended",
   children,
-  style,
+  className,
   ...props
 }: ComponentProps<"th"> & { recommended?: boolean; recommendedLabel?: string }) {
   const context = useTable("ComparisonTableColumn");
   return (
     <th
       scope="col"
-      {...props}
+      data-slot="comparison-table-column"
       data-recommended={recommended || undefined}
-      style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 1,
-        padding: cellPadding(context.variant),
-        borderBottom: "1px solid var(--uai-border)",
-        background: recommended
-          ? "color-mix(in oklab, var(--uai-accent) 7%, var(--uai-surface))"
-          : "var(--uai-surface)",
-        boxShadow: recommended ? "inset 0 2px 0 var(--uai-accent)" : undefined,
-        fontSize: context.variant === "compact" ? 12.5 : 13,
-        fontWeight: 500,
-        textAlign: "left",
-        verticalAlign: "bottom",
-        ...style,
-      }}
+      className={cn(
+        "sticky top-0 z-1 border-b text-left align-bottom font-medium",
+        cellPadding(context.variant),
+        context.variant === "compact" ? "text-[12.5px]" : "text-[13px]",
+        recommended
+          ? "bg-[color-mix(in_oklab,var(--primary)_7%,var(--card))] shadow-[inset_0_2px_0_var(--primary)]"
+          : "bg-card",
+        className,
+      )}
+      {...props}
     >
       {recommended ? (
-        <span
-          style={{
-            display: "block",
-            width: "fit-content",
-            marginBottom: 6,
-            padding: "1px 8px",
-            borderRadius: 999,
-            background: "color-mix(in oklab, var(--uai-accent) 16%, transparent)",
-            color: "var(--uai-accent)",
-            fontSize: 11,
-            lineHeight: "16px",
-            fontWeight: 500,
-          }}
-        >
+        <span className={cn("mb-1.5 block w-fit rounded-full px-2 py-px", badge)}>
           {recommendedLabel}
         </span>
       ) : null}
@@ -296,12 +225,11 @@ export function ComparisonTableColumn({
 
 export function ComparisonTableBody(props: ComponentProps<"tbody">) {
   useTable("ComparisonTableBody");
-  return <tbody {...props} />;
+  return <tbody data-slot="comparison-table-body" {...props} />;
 }
 
 export function ComparisonTableRow({
   different = false,
-  style,
   className,
   ...props
 }: ComponentProps<"tr"> & { different?: boolean }) {
@@ -310,67 +238,41 @@ export function ComparisonTableRow({
   return (
     <RowContext.Provider value={{ different }}>
       <tr
-        {...props}
+        data-slot="comparison-table-row"
         data-different={different || undefined}
-        className={[isMarked ? undefined : rowHover, className].filter(Boolean).join(" ")}
-        style={{
-          background: isMarked ? marked : undefined,
-          color: context.highlight && !different ? "var(--uai-subtle)" : undefined,
-          transition: "background-color 120ms ease-out, color 120ms ease-out",
-          ...style,
-        }}
+        className={cn(
+          "[transition:background-color_120ms_ease-out,color_120ms_ease-out] motion-reduce:transition-none",
+          isMarked ? marked : rowHover,
+          context.highlight && !different && "text-subtle-foreground",
+          className,
+        )}
+        {...props}
       />
     </RowContext.Provider>
   );
 }
 
-export function ComparisonTableRowHeader({
-  children,
-  style,
-  className,
-  ...props
-}: ComponentProps<"th">) {
+export function ComparisonTableRowHeader({ children, className, ...props }: ComponentProps<"th">) {
   const context = useTable("ComparisonTableRowHeader");
   const row = useRow("ComparisonTableRowHeader");
   const isMarked = context.highlight && row.different;
   return (
     <th
       scope="row"
+      data-slot="comparison-table-row-header"
+      className={cn(
+        "sticky left-0 z-1 min-w-[140px] text-left font-medium [transition:background-color_120ms_ease-out] motion-reduce:transition-none",
+        cellPadding(context.variant),
+        cellRule,
+        isMarked ? cn(marked, "shadow-[inset_2px_0_0_var(--primary)]") : headerHover,
+        !(context.highlight && !row.different) && "text-muted-foreground",
+        className,
+      )}
       {...props}
-      className={[cellRule, isMarked ? undefined : headerHover, className]
-        .filter(Boolean)
-        .join(" ")}
-      style={{
-        position: "sticky",
-        left: 0,
-        zIndex: 1,
-        minWidth: 140,
-        padding: cellPadding(context.variant),
-        boxShadow: isMarked ? "inset 2px 0 0 var(--uai-accent)" : undefined,
-        background: isMarked ? marked : undefined,
-        color: context.highlight && !row.different ? undefined : "var(--uai-muted)",
-        fontWeight: 500,
-        textAlign: "left",
-        transition: "background-color 120ms ease-out",
-        ...style,
-      }}
     >
       {children}
       {isMarked ? (
-        <span
-          style={{
-            display: "inline-block",
-            marginLeft: 8,
-            padding: "0 6px",
-            borderRadius: 6,
-            background: "color-mix(in oklab, var(--uai-accent) 16%, transparent)",
-            color: "var(--uai-accent)",
-            fontSize: 11,
-            lineHeight: "16px",
-            fontWeight: 500,
-            verticalAlign: "1px",
-          }}
-        >
+        <span className={cn("ml-2 inline-block rounded-md px-1.5 align-[1px]", badge)}>
           Differs
         </span>
       ) : null}
@@ -378,18 +280,13 @@ export function ComparisonTableRowHeader({
   );
 }
 
-export function ComparisonTableCell({ style, className, ...props }: ComponentProps<"td">) {
+export function ComparisonTableCell({ className, ...props }: ComponentProps<"td">) {
   const context = useTable("ComparisonTableCell");
   return (
     <td
+      data-slot="comparison-table-cell"
+      className={cn("align-top font-medium", cellPadding(context.variant), cellRule, className)}
       {...props}
-      className={[cellRule, className].filter(Boolean).join(" ")}
-      style={{
-        padding: cellPadding(context.variant),
-        fontWeight: 500,
-        verticalAlign: "top",
-        ...style,
-      }}
     />
   );
 }
@@ -398,26 +295,23 @@ export function ComparisonTableCheck({
   value,
   includedLabel = "Included",
   excludedLabel = "Not included",
+  className,
   ...props
 }: ComponentProps<"span"> & { value: boolean; includedLabel?: string; excludedLabel?: string }) {
   const Icon = value ? Check : Minus;
   return (
     <span
-      {...props}
+      data-slot="comparison-table-check"
       data-value={value}
-      style={{
-        display: "inline-grid",
-        placeItems: "center",
-        width: 20,
-        height: 20,
-        borderRadius: 999,
-        background: value ? "color-mix(in oklab, var(--uai-success) 14%, transparent)" : undefined,
-        color: value ? "var(--uai-success)" : "var(--uai-subtle)",
-        ...props.style,
-      }}
+      className={cn(
+        "inline-grid size-5 place-items-center rounded-full",
+        value ? "bg-success/14 text-success" : "text-subtle-foreground",
+        className,
+      )}
+      {...props}
     >
       <Icon size={value ? 13 : 14} strokeWidth={value ? 2.25 : 1.75} aria-hidden="true" />
-      <span style={srOnly}>{value ? includedLabel : excludedLabel}</span>
+      <span className="sr-only">{value ? includedLabel : excludedLabel}</span>
     </span>
   );
 }

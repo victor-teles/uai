@@ -1,14 +1,8 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { Check, Circle, Eye, EyeOff, LoaderCircle, MailCheck } from "lucide-react";
-import {
-  type ComponentProps,
-  type CSSProperties,
-  createContext,
-  useContext,
-  useId,
-  useState,
-} from "react";
+import { type ComponentProps, createContext, useContext, useId, useState } from "react";
 
 import { cn } from "@/lib/uai-utils";
 
@@ -24,15 +18,13 @@ export type SignUpCardProps = ComponentProps<"form"> & {
 };
 
 type SignUpCardChrome = {
-  rootClass: string;
-  rootStyle: CSSProperties;
   headerClass: string;
   titleClass: string;
   descriptionClass: string;
   bodyClass: string;
   groupGapClass: string;
   controlClass: string;
-  controlStyle: CSSProperties;
+  controlRadiusClass: string;
   footerClass: string;
 };
 
@@ -40,11 +32,6 @@ function signUpCardChrome(variant: SignUpCardVariant): SignUpCardChrome {
   const compact = variant === "compact";
 
   return {
-    rootClass: "border border-[var(--uai-border)] bg-[var(--uai-surface)]",
-    rootStyle: {
-      borderRadius: compact ? 12 : 14,
-      padding: compact ? 14 : variant === "split" ? 24 : 20,
-    },
     headerClass: compact ? "mb-4" : "mb-5",
     titleClass: compact ? "text-[15px] leading-5" : "text-[17px] leading-6",
     descriptionClass: compact
@@ -56,10 +43,20 @@ function signUpCardChrome(variant: SignUpCardVariant): SignUpCardChrome {
         : "grid gap-4",
     groupGapClass: compact ? "gap-2.5" : "gap-3",
     controlClass: compact ? "h-[34px] text-[12.5px]" : "h-[38px] text-[13px]",
-    controlStyle: { borderRadius: compact ? 8 : 10 },
+    controlRadiusClass: compact ? "rounded-lg" : "rounded-[10px]",
     footerClass: compact ? "mt-4 pt-3.5" : "mt-5 pt-4",
   };
 }
+
+const signUpCardVariants = cva("w-full border bg-card text-card-foreground", {
+  variants: {
+    variant: {
+      card: "rounded-[14px] p-5",
+      split: "rounded-[14px] p-6",
+      compact: "rounded-xl p-3.5",
+    },
+  },
+});
 
 type SignUpCardContextValue = {
   status: SignUpCardStatus;
@@ -83,7 +80,6 @@ export function SignUpCard({
   status = "idle",
   children,
   className,
-  style,
   "aria-labelledby": ariaLabelledby,
   "aria-describedby": ariaDescribedby,
   ...props
@@ -96,9 +92,9 @@ export function SignUpCard({
   return (
     <SignUpCardContext.Provider value={{ status, submitting, variant, titleId, errorId, chrome }}>
       <form
+        data-slot="sign-up-card"
+        className={cn(signUpCardVariants({ variant }), className)}
         {...props}
-        className={cn("w-full text-[var(--uai-text)]", chrome.rootClass, className)}
-        style={{ ...chrome.rootStyle, ...style }}
         data-variant={variant}
         aria-busy={submitting || undefined}
         aria-labelledby={ariaLabelledby ?? titleId}
@@ -115,7 +111,11 @@ export type SignUpCardHeaderProps = ComponentProps<"header">;
 export function SignUpCardHeader({ children, className, ...props }: SignUpCardHeaderProps) {
   const { chrome } = useSignUpCard("SignUpCardHeader");
   return (
-    <header className={cn(chrome.headerClass, className)} {...props}>
+    <header
+      data-slot="sign-up-card-header"
+      className={cn(chrome.headerClass, className)}
+      {...props}
+    >
       {children}
     </header>
   );
@@ -128,6 +128,7 @@ export function SignUpCardTitle({ children, className, ...props }: SignUpCardTit
   return (
     <h2
       id={titleId}
+      data-slot="sign-up-card-title"
       className={cn("font-semibold tracking-[-0.015em] text-balance", chrome.titleClass, className)}
       {...props}
     >
@@ -146,8 +147,9 @@ export function SignUpCardDescription({
   const { chrome } = useSignUpCard("SignUpCardDescription");
   return (
     <p
+      data-slot="sign-up-card-description"
       className={cn(
-        "max-w-[52ch] text-[var(--uai-muted)] [overflow-wrap:anywhere]",
+        "max-w-[52ch] text-muted-foreground wrap-anywhere",
         chrome.descriptionClass,
         className,
       )}
@@ -163,7 +165,7 @@ export type SignUpCardBodyProps = ComponentProps<"div">;
 export function SignUpCardBody({ children, className, ...props }: SignUpCardBodyProps) {
   const { chrome } = useSignUpCard("SignUpCardBody");
   return (
-    <div className={cn(chrome.bodyClass, className)} {...props}>
+    <div data-slot="sign-up-card-body" className={cn(chrome.bodyClass, className)} {...props}>
       {children}
     </div>
   );
@@ -180,6 +182,7 @@ export function SignUpCardProviders({
   const { chrome } = useSignUpCard("SignUpCardProviders");
   return (
     <fieldset
+      data-slot="sign-up-card-providers"
       className={cn("m-0 grid min-w-0 content-start border-0 p-0", chrome.groupGapClass, className)}
       {...props}
     >
@@ -194,7 +197,6 @@ export type SignUpCardProviderProps = ComponentProps<"button">;
 export function SignUpCardProvider({
   children,
   className,
-  style,
   type = "button",
   disabled,
   ...props
@@ -202,15 +204,15 @@ export function SignUpCardProvider({
   const { chrome, submitting } = useSignUpCard("SignUpCardProvider");
   return (
     <button
-      {...props}
-      type={type}
-      disabled={disabled || submitting}
+      data-slot="sign-up-card-provider"
       className={cn(
-        "inline-flex w-full items-center justify-center gap-2 rounded-full border-0 bg-[var(--uai-surface-raised)] px-3.5 font-medium text-[var(--uai-text)] transition-[background-color,transform] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-[color-mix(in_oklab,var(--uai-surface-raised)_85%,var(--uai-text))] active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uai-accent)] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 motion-reduce:transform-none motion-reduce:transition-none [&_svg]:size-4 [&_svg]:shrink-0",
+        "inline-flex w-full items-center justify-center gap-2 rounded-full border-0 bg-secondary px-3.5 font-medium text-foreground transition-[background-color,transform] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 motion-reduce:transform-none motion-reduce:transition-none [&_svg]:size-4 [&_svg]:shrink-0",
         chrome.controlClass,
         className,
       )}
-      style={style}
+      {...props}
+      type={type}
+      disabled={disabled || submitting}
     >
       {children}
     </button>
@@ -224,8 +226,9 @@ export function SignUpCardDivider({ children, className, ...props }: SignUpCardD
   const label = children ?? (variant === "split" ? "or" : "or create with email");
   return (
     <div
+      data-slot="sign-up-card-divider"
       className={cn(
-        "flex items-center gap-3 text-center text-[11.5px] leading-4 text-[var(--uai-subtle)]",
+        "flex items-center gap-3 text-center text-[11.5px] leading-4 text-subtle-foreground",
         variant === "split" && "sm:flex-col sm:gap-2",
         className,
       )}
@@ -233,7 +236,7 @@ export function SignUpCardDivider({ children, className, ...props }: SignUpCardD
     >
       <span
         className={cn(
-          "h-px flex-1 bg-[var(--uai-border)]",
+          "h-px flex-1 bg-border",
           variant === "split" && "sm:h-auto sm:min-h-6 sm:w-px",
         )}
         aria-hidden="true"
@@ -241,7 +244,7 @@ export function SignUpCardDivider({ children, className, ...props }: SignUpCardD
       <span className="shrink-0">{label}</span>
       <span
         className={cn(
-          "h-px flex-1 bg-[var(--uai-border)]",
+          "h-px flex-1 bg-border",
           variant === "split" && "sm:h-auto sm:min-h-6 sm:w-px",
         )}
         aria-hidden="true"
@@ -255,7 +258,11 @@ export type SignUpCardFieldsProps = ComponentProps<"div">;
 export function SignUpCardFields({ children, className, ...props }: SignUpCardFieldsProps) {
   const { chrome } = useSignUpCard("SignUpCardFields");
   return (
-    <div className={cn("grid content-start", chrome.groupGapClass, className)} {...props}>
+    <div
+      data-slot="sign-up-card-fields"
+      className={cn("grid content-start", chrome.groupGapClass, className)}
+      {...props}
+    >
       {children}
     </div>
   );
@@ -288,7 +295,7 @@ export function SignUpCardField({
   const messageId = useId();
   return (
     <SignUpCardFieldContext.Provider value={{ controlId, messageId, invalid }}>
-      <div className={cn("grid gap-1.5", className)} {...props}>
+      <div data-slot="sign-up-card-field" className={cn("grid gap-1.5", className)} {...props}>
         {children}
       </div>
     </SignUpCardFieldContext.Provider>
@@ -303,6 +310,7 @@ export function SignUpCardLabel({ children, className, htmlFor, ...props }: Sign
   return (
     <label
       htmlFor={htmlFor ?? controlId}
+      data-slot="sign-up-card-label"
       className={cn("text-[12.5px] leading-4 font-medium", className)}
       {...props}
     >
@@ -319,7 +327,6 @@ export function SignUpCardInput({
   revealable = false,
   className,
   id,
-  style,
   disabled,
   "aria-describedby": ariaDescribedby,
   "aria-invalid": ariaInvalid,
@@ -333,22 +340,23 @@ export function SignUpCardInput({
   const describedBy = [ariaDescribedby, invalid ? messageId : undefined].filter(Boolean).join(" ");
   const input = (
     <input
-      {...props}
-      id={id ?? controlId}
-      type={inputType}
-      disabled={disabled || submitting}
+      data-slot="sign-up-card-input"
       className={cn(
-        "min-w-0 w-full bg-transparent px-3 text-[var(--uai-text)] outline-none placeholder:text-[var(--uai-subtle)] disabled:cursor-not-allowed disabled:opacity-50",
+        "min-w-0 w-full bg-transparent px-3 text-foreground outline-none placeholder:text-subtle-foreground disabled:cursor-not-allowed disabled:opacity-50",
         !revealable &&
-          "border border-[var(--uai-border)] bg-[var(--uai-canvas)] transition-[border-color,box-shadow] duration-[120ms] ease-out hover:border-[var(--uai-border-strong)] focus:border-[var(--uai-border-strong)] focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--uai-accent)_24%,transparent)] motion-reduce:transition-none",
+          "border bg-background transition-[border-color,box-shadow] duration-[120ms] ease-out hover:border-border-strong focus:border-border-strong focus:ring-3 focus:ring-primary/24 motion-reduce:transition-none",
         !revealable &&
           invalid &&
-          "border-[color-mix(in_oklab,var(--uai-danger)_70%,transparent)] hover:border-[var(--uai-danger)] focus:border-[var(--uai-danger)] focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--uai-danger)_22%,transparent)]",
+          "border-destructive/70 hover:border-destructive focus:border-destructive focus:ring-destructive/22",
+        !revealable && chrome.controlRadiusClass,
         revealable && "pr-10",
         chrome.controlClass,
         className,
       )}
-      style={!revealable ? { ...chrome.controlStyle, ...style } : style}
+      {...props}
+      id={id ?? controlId}
+      type={inputType}
+      disabled={disabled || submitting}
       aria-describedby={describedBy || undefined}
       aria-invalid={ariaInvalid ?? (invalid || undefined)}
     />
@@ -359,16 +367,16 @@ export function SignUpCardInput({
   return (
     <div
       className={cn(
-        "relative border border-[var(--uai-border)] bg-[var(--uai-canvas)] transition-[border-color,box-shadow] duration-[120ms] ease-out hover:border-[var(--uai-border-strong)] focus-within:border-[var(--uai-border-strong)] focus-within:shadow-[0_0_0_3px_color-mix(in_oklab,var(--uai-accent)_24%,transparent)] motion-reduce:transition-none",
+        "relative border bg-background transition-[border-color,box-shadow] duration-[120ms] ease-out hover:border-border-strong focus-within:border-border-strong focus-within:ring-3 focus-within:ring-primary/24 motion-reduce:transition-none",
         invalid &&
-          "border-[color-mix(in_oklab,var(--uai-danger)_70%,transparent)] hover:border-[var(--uai-danger)] focus-within:border-[var(--uai-danger)] focus-within:shadow-[0_0_0_3px_color-mix(in_oklab,var(--uai-danger)_22%,transparent)]",
+          "border-destructive/70 hover:border-destructive focus-within:border-destructive focus-within:ring-destructive/22",
+        chrome.controlRadiusClass,
       )}
-      style={chrome.controlStyle}
     >
       {input}
       <button
         type="button"
-        className="absolute inset-y-0 right-0 inline-flex w-10 items-center justify-center rounded-[inherit] text-[var(--uai-subtle)] transition-colors duration-[120ms] ease-out hover:text-[var(--uai-text)] focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-[var(--uai-accent)] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none [&_svg]:size-4 [&_svg]:stroke-[1.75]"
+        className="absolute inset-y-0 right-0 inline-flex w-10 items-center justify-center rounded-[inherit] text-subtle-foreground transition-colors duration-[120ms] ease-out hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none [&_svg]:size-4 [&_svg]:stroke-[1.75]"
         disabled={disabled || submitting}
         aria-label={revealed ? "Hide password" : "Show password"}
         aria-pressed={revealed}
@@ -394,11 +402,12 @@ export function SignUpCardFieldMessage({
   return (
     <p
       id={id ?? messageId}
+      data-slot="sign-up-card-field-message"
       className={cn(
-        "text-[11.5px] leading-4 [overflow-wrap:anywhere]",
+        "text-[11.5px] leading-4 wrap-anywhere",
         invalid
-          ? "text-[color-mix(in_oklab,var(--uai-danger)_80%,var(--uai-text))]"
-          : "text-[var(--uai-subtle)]",
+          ? "text-[color-mix(in_oklab,var(--destructive)_80%,var(--foreground))]"
+          : "text-subtle-foreground",
         className,
       )}
       role={role ?? (invalid ? "alert" : undefined)}
@@ -421,7 +430,8 @@ export function SignUpCardPasswordGuide({
   return (
     <ul
       aria-label={ariaLabel}
-      className={cn("grid gap-1 text-[11.5px] leading-4 text-[var(--uai-subtle)]", className)}
+      data-slot="sign-up-card-password-guide"
+      className={cn("grid gap-1 text-[11.5px] leading-4 text-subtle-foreground", className)}
       {...props}
     >
       {children}
@@ -441,9 +451,10 @@ export function SignUpCardPasswordRequirement({
   const Icon = met ? Check : Circle;
   return (
     <li
+      data-slot="sign-up-card-password-requirement"
       className={cn(
         "flex items-start gap-1.5 transition-colors duration-[120ms] ease-out motion-reduce:transition-none",
-        met && "text-[var(--uai-muted)] [&_svg]:text-[var(--uai-success)]",
+        met && "text-muted-foreground [&_svg]:text-success",
         className,
       )}
       {...props}
@@ -479,8 +490,9 @@ export function SignUpCardConsent({
     <SignUpCardConsentContext.Provider value={{ controlId }}>
       <label
         htmlFor={htmlFor ?? controlId}
+        data-slot="sign-up-card-consent"
         className={cn(
-          "flex items-start gap-2 text-[12px] leading-4 text-[var(--uai-muted)] [&_a]:font-medium [&_a]:text-[var(--uai-accent)] [&_a]:underline-offset-4 [&_a:hover]:underline",
+          "flex items-start gap-2 text-[12px] leading-4 text-muted-foreground [&_a]:font-medium [&_a]:text-primary [&_a]:underline-offset-4 [&_a:hover]:underline",
           className,
         )}
         {...props}
@@ -498,14 +510,15 @@ export function SignUpCardCheckbox({ className, disabled, id, ...props }: SignUp
   const { controlId } = useSignUpCardConsent("SignUpCardCheckbox");
   return (
     <input
+      data-slot="sign-up-card-checkbox"
+      className={cn(
+        "mt-px size-3.5 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50",
+        className,
+      )}
       {...props}
       id={id ?? controlId}
       type="checkbox"
       disabled={disabled || submitting}
-      className={cn(
-        "mt-px size-3.5 shrink-0 accent-[var(--uai-accent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uai-accent)] disabled:cursor-not-allowed disabled:opacity-50",
-        className,
-      )}
     />
   );
 }
@@ -518,11 +531,11 @@ export function SignUpCardError({ children, className, id, ...props }: SignUpCar
   return (
     <div
       id={id ?? errorId}
+      data-slot="sign-up-card-error"
       className={cn(
-        "bg-[color-mix(in_oklab,var(--uai-danger)_10%,transparent)] px-3 py-2.5 text-[12px] leading-4 text-[color-mix(in_oklab,var(--uai-danger)_80%,var(--uai-text))] shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--uai-danger)_24%,transparent)] [overflow-wrap:anywhere]",
+        "rounded-[10px] bg-destructive/10 px-3 py-2.5 text-[12px] leading-4 text-[color-mix(in_oklab,var(--destructive)_80%,var(--foreground))] inset-ring inset-ring-destructive/24 wrap-anywhere",
         className,
       )}
-      style={{ borderRadius: 10 }}
       role="alert"
       {...props}
     >
@@ -536,7 +549,6 @@ export type SignUpCardSubmitProps = ComponentProps<"button">;
 export function SignUpCardSubmit({
   children = "Create account",
   className,
-  style,
   disabled,
   type = "submit",
   ...props
@@ -544,15 +556,15 @@ export function SignUpCardSubmit({
   const { chrome, submitting } = useSignUpCard("SignUpCardSubmit");
   return (
     <button
-      {...props}
-      type={type}
-      disabled={disabled || submitting}
+      data-slot="sign-up-card-submit"
       className={cn(
-        "inline-flex w-full items-center justify-center gap-2 rounded-full border-0 bg-[var(--uai-accent)] px-4 font-medium text-[var(--uai-accent-foreground)] transition-[filter,transform] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:brightness-[1.08] active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uai-accent)] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100 motion-reduce:transform-none motion-reduce:transition-none",
+        "inline-flex w-full items-center justify-center gap-2 rounded-full border-0 bg-primary px-4 font-medium text-primary-foreground transition-[filter,transform] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:brightness-108 active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100 motion-reduce:transform-none motion-reduce:transition-none",
         chrome.controlClass,
         className,
       )}
-      style={style}
+      {...props}
+      type={type}
+      disabled={disabled || submitting}
       aria-busy={submitting || undefined}
     >
       {submitting ? (
@@ -574,20 +586,15 @@ export function SignUpCardVerification({
   if (status !== "verification") return null;
   return (
     <div
+      data-slot="sign-up-card-verification"
       className={cn(
-        "grid justify-items-center gap-3 bg-[var(--uai-surface-raised)] px-4 py-5 text-center text-[12.5px] leading-[18px] text-[var(--uai-muted)] motion-safe:animate-[uai-sign-up-in_240ms_cubic-bezier(0.23,1,0.32,1)] [&_strong]:font-medium [&_strong]:text-[var(--uai-text)]",
+        "grid justify-items-center gap-3 rounded-xl bg-muted px-4 py-5 text-center text-[12.5px] leading-[18px] text-muted-foreground animate-in fade-in-0 slide-in-from-bottom-1 duration-240 ease-out-quint motion-reduce:animate-none [&_strong]:font-medium [&_strong]:text-foreground",
         className,
       )}
-      style={{ borderRadius: 12 }}
       role="status"
       {...props}
     >
-      <style>
-        {
-          "@keyframes uai-sign-up-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}"
-        }
-      </style>
-      <span className="flex size-9 items-center justify-center rounded-full bg-[color-mix(in_oklab,var(--uai-accent)_16%,transparent)] text-[var(--uai-accent)]">
+      <span className="flex size-9 items-center justify-center rounded-full bg-primary/16 text-primary">
         <MailCheck className="size-[18px]" strokeWidth={1.8} aria-hidden="true" />
       </span>
       {children}
@@ -601,8 +608,9 @@ export function SignUpCardFooter({ children, className, ...props }: SignUpCardFo
   const { chrome } = useSignUpCard("SignUpCardFooter");
   return (
     <footer
+      data-slot="sign-up-card-footer"
       className={cn(
-        "border-t border-[var(--uai-border)] text-center text-[12px] leading-4 text-[var(--uai-muted)] [&_a]:font-medium [&_a]:text-[var(--uai-accent)] [&_a]:underline-offset-4 [&_a:hover]:underline",
+        "border-t text-center text-[12px] leading-4 text-muted-foreground [&_a]:font-medium [&_a]:text-primary [&_a]:underline-offset-4 [&_a:hover]:underline",
         chrome.footerClass,
         className,
       )}

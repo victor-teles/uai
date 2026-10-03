@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { EyeOff, Flag, Pencil } from "lucide-react";
 import {
   type ComponentProps,
@@ -10,6 +11,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const COMMENT_VARIANTS = ["thread", "card", "compact"] as const;
 export type CommentVariant = (typeof COMMENT_VARIANTS)[number];
@@ -37,54 +39,40 @@ function useComment(part: string) {
   if (!context) throw new Error(`${part} must be used within Comment`);
   return context;
 }
-const muted = "var(--uai-muted)";
-const subtle = "var(--uai-subtle)";
-const controlStyle = (compact: boolean): React.CSSProperties => ({
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: 6,
-  height: compact ? 24 : 28,
-  padding: compact ? "0 8px" : "0 10px",
-  border: 0,
-  borderRadius: 999,
-  fontSize: compact ? 12 : 12.5,
-  fontWeight: 500,
-  whiteSpace: "nowrap",
-  cursor: "pointer",
+type ControlTone = "ghost" | "secondary" | "primary" | "link";
+const controlVariants = cva(
+  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap [transition:background-color_120ms_ease-out,color_120ms_ease-out,filter_120ms_ease-out,scale_140ms_var(--ease-out-quint)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.97] motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
+  {
+    variants: {
+      compact: { true: "h-6 px-2 text-[12px]", false: "h-7 px-2.5 text-[12.5px]" },
+      tone: {
+        ghost: "bg-transparent text-muted-foreground hover:bg-accent hover:text-foreground",
+        secondary:
+          "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+        primary:
+          "bg-primary text-primary-foreground enabled:hover:brightness-[1.08] disabled:cursor-not-allowed disabled:opacity-45",
+        link: "h-auto bg-transparent p-0 text-foreground underline decoration-border-strong underline-offset-2 hover:decoration-current",
+      },
+    },
+    defaultVariants: { compact: false, tone: "ghost" },
+  },
+);
+const controlClasses = (compact: boolean, tone: ControlTone = "ghost") =>
+  cn(controlVariants({ compact, tone }));
+
+const commentVariants = cva("grid min-w-0 rounded-[14px] text-[13px]/[18px] text-foreground", {
+  variants: {
+    variant: { thread: "gap-1.5", card: "gap-1.5", compact: "gap-1" },
+    card: {
+      true: "border bg-card px-4 py-3.5 text-card-foreground",
+      false: "border-0 bg-transparent p-0",
+    },
+  },
 });
-const commentCss = `
-.uai-comment-control{background:transparent;color:var(--uai-muted);transition:background-color 120ms ease-out,color 120ms ease-out,filter 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-comment-control:hover{background:var(--uai-surface-raised);color:var(--uai-text)}
-.uai-comment-control[data-tone=secondary]{background:var(--uai-surface-raised);color:var(--uai-text)}
-.uai-comment-control[data-tone=secondary]:hover{background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text))}
-.uai-comment-control[data-tone=primary]{background:var(--uai-accent);color:var(--uai-accent-foreground)}
-.uai-comment-control[data-tone=primary]:hover{filter:brightness(1.08)}
-.uai-comment-control[data-tone=primary]:disabled{opacity:0.45;filter:none;cursor:not-allowed}
-.uai-comment-control[data-tone=link]{color:var(--uai-text);text-decoration:underline;text-decoration-color:var(--uai-border-strong);text-underline-offset:2px}
-.uai-comment-control[data-tone=link]:hover{background:transparent;text-decoration-color:currentColor}
-.uai-comment-control:not(:disabled):active{transform:scale(0.97)}
-.uai-comment-control:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-.uai-comment-editor{transition:box-shadow 120ms ease-out}
-.uai-comment-editor:focus-visible{outline:none;box-shadow:0 0 0 1px var(--uai-border-strong),0 0 0 4px color-mix(in oklab,var(--uai-accent) 14%,transparent)}
-.uai-comment-editor::placeholder{color:var(--uai-subtle)}
-.uai-comment-actions{margin-inline-start:-8px}
-.uai-comment-actions:has(>:first-child:not(.uai-comment-control)){margin-inline-start:0}
-.uai-comment-replies>*{animation:uai-comment-in 240ms cubic-bezier(0.23,1,0.32,1) both}
-.uai-comment-replies>:nth-child(2){animation-delay:40ms}
-.uai-comment-replies>:nth-child(3){animation-delay:80ms}
-.uai-comment-replies>:nth-child(4){animation-delay:120ms}
-.uai-comment-replies>:nth-child(n+5){animation-delay:160ms}
-@keyframes uai-comment-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion: reduce){
-.uai-comment-control,.uai-comment-editor{transition:none}
-.uai-comment-control:not(:disabled):active{transform:none}
-.uai-comment-actions{margin-inline-start:-8px}
-.uai-comment-actions:has(>:first-child:not(.uai-comment-control)){margin-inline-start:0}
-.uai-comment-replies>*{animation:none}
-}
-`;
-const CONTROL = "uai-comment-control";
+
+const noticeClasses =
+  "m-0 flex flex-wrap items-center gap-1.5 text-[12.5px]/[18px] text-muted-foreground";
+
 function initials(name: string) {
   return name
     .trim()
@@ -101,7 +89,7 @@ export function Comment({
   editing,
   defaultEditing = false,
   onEditingChange,
-  style,
+  className,
   children,
   ...props
 }: CommentProps) {
@@ -130,44 +118,25 @@ export function Comment({
     >
       <article
         aria-labelledby={`${id}-author`}
+        data-slot="comment"
+        className={cn(commentVariants({ variant, card }), className)}
         {...props}
         data-variant={variant}
         data-moderation={moderation}
-        style={{
-          display: "grid",
-          gap: variant === "compact" ? 4 : 6,
-          minWidth: 0,
-          padding: card ? "14px 16px" : 0,
-          border: card ? "1px solid var(--uai-border)" : 0,
-          borderRadius: 14,
-          background: card ? "var(--uai-surface)" : "transparent",
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
       >
-        {nested ? null : <style>{commentCss}</style>}
         {children}
       </article>
     </Context.Provider>
   );
 }
 
-export function CommentHeader({ style, ...props }: ComponentProps<"header">) {
+export function CommentHeader({ className, ...props }: ComponentProps<"header">) {
   useComment("CommentHeader");
   return (
     <header
+      data-slot="comment-header"
+      className={cn("flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        columnGap: 8,
-        rowGap: 2,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
@@ -175,40 +144,25 @@ export function CommentHeader({ style, ...props }: ComponentProps<"header">) {
 export function CommentAvatar({
   name,
   src,
-  style,
+  className,
   ...props
 }: Omit<ComponentProps<"span">, "children"> & { name: string; src?: string }) {
   const { variant } = useComment("CommentAvatar");
   const [failed, setFailed] = useState(false);
-  const size = variant === "compact" ? 20 : 24;
   return (
     <span
       aria-hidden="true"
+      data-slot="comment-avatar"
+      className={cn(
+        "grid shrink-0 place-items-center overflow-hidden rounded-full bg-muted font-medium text-muted-foreground shadow-[0_0_0_1px_oklch(1_0_0/0.08)]",
+        variant === "compact" ? "size-5 text-[9.5px]" : "size-6 text-[10.5px]",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        placeItems: "center",
-        width: size,
-        height: size,
-        flexShrink: 0,
-        overflow: "hidden",
-        borderRadius: 999,
-        background: "var(--uai-surface-raised)",
-        boxShadow: "0 0 0 1px oklch(1 0 0 / 0.08)",
-        color: muted,
-        fontSize: size >= 24 ? 10.5 : 9.5,
-        fontWeight: 500,
-        ...style,
-      }}
     >
       {src && !failed ? (
         // biome-ignore lint/performance/noImgElement: distributed source cannot depend on next/image.
-        <img
-          src={src}
-          alt=""
-          onError={() => setFailed(true)}
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-        />
+        <img src={src} alt="" onError={() => setFailed(true)} className="size-full object-cover" />
       ) : (
         initials(name)
       )}
@@ -216,61 +170,61 @@ export function CommentAvatar({
   );
 }
 
-export function CommentAuthor({ style, ...props }: ComponentProps<"span">) {
+export function CommentAuthor({ className, ...props }: ComponentProps<"span">) {
   const { id } = useComment("CommentAuthor");
-  return <span {...props} id={`${id}-author`} style={{ fontWeight: 500, ...style }} />;
+  return (
+    <span
+      data-slot="comment-author"
+      className={cn("font-medium", className)}
+      {...props}
+      id={`${id}-author`}
+    />
+  );
 }
 
-export function CommentTime({ style, ...props }: ComponentProps<"time"> & { dateTime: string }) {
+export function CommentTime({
+  className,
+  ...props
+}: ComponentProps<"time"> & { dateTime: string }) {
   useComment("CommentTime");
   return (
     <time
+      data-slot="comment-time"
+      className={cn("text-[12px] text-subtle-foreground tabular-nums", className)}
       {...props}
-      style={{ color: subtle, fontSize: 12, fontVariantNumeric: "tabular-nums", ...style }}
     />
   );
 }
 
 /** Shows "Edited" once a comment has been changed. */
-export function CommentEdited({ children = "Edited", style, ...props }: ComponentProps<"span">) {
+export function CommentEdited({
+  children = "Edited",
+  className,
+  ...props
+}: ComponentProps<"span">) {
   useComment("CommentEdited");
   return (
-    <span {...props} style={{ color: subtle, fontSize: 12, ...style }}>
+    <span
+      data-slot="comment-edited"
+      className={cn("text-[12px] text-subtle-foreground", className)}
+      {...props}
+    >
       · {children}
     </span>
   );
 }
 
-const notice: React.CSSProperties = {
-  display: "flex",
-  flexWrap: "wrap",
-  alignItems: "center",
-  gap: 6,
-  margin: 0,
-  color: muted,
-  fontSize: 12.5,
-  lineHeight: "18px",
-};
-const flagBadge: React.CSSProperties = {
-  display: "inline-flex",
-  alignItems: "center",
-  gap: 5,
-  padding: "2px 8px",
-  borderRadius: 999,
-  background: "color-mix(in oklab, var(--uai-warning) 14%, transparent)",
-  color: "var(--uai-warning)",
-  fontSize: 11.5,
-  fontWeight: 500,
-  lineHeight: "16px",
-};
-
-export function CommentBody({ style, children, ...props }: ComponentProps<"div">) {
+export function CommentBody({ className, children, ...props }: ComponentProps<"div">) {
   const context = useComment("CommentBody");
   const bodyId = `${context.id}-body`;
   if (context.editing) return null;
   if (context.moderation === "removed")
     return (
-      <p {...props} style={{ ...notice, color: subtle, fontStyle: "italic", ...style }}>
+      <p
+        data-slot="comment-body"
+        className={cn(noticeClasses, "text-subtle-foreground italic", className)}
+        {...props}
+      >
         This comment was removed by a moderator.
       </p>
     );
@@ -278,29 +232,23 @@ export function CommentBody({ style, children, ...props }: ComponentProps<"div">
   const text = (
     <div
       id={bodyId}
-      style={{
-        minWidth: 0,
-        color: "var(--uai-text)",
-        textWrap: "pretty",
-        overflowWrap: "anywhere",
-        whiteSpace: "pre-line",
-      }}
+      className="min-w-0 text-pretty whitespace-pre-line text-foreground wrap-anywhere"
     >
       {children}
     </div>
   );
   return (
-    <div {...props} style={{ display: "grid", gap: 6, minWidth: 0, ...style }}>
+    <div data-slot="comment-body" className={cn("grid min-w-0 gap-1.5", className)} {...props}>
       {context.moderation === "flagged" && (
-        <p style={notice}>
-          <span style={flagBadge}>
+        <p className={noticeClasses}>
+          <span className="inline-flex items-center gap-1.25 rounded-full bg-warning/14 px-2 py-0.5 text-[11.5px]/4 font-medium text-warning">
             <Flag size={12} strokeWidth={2} aria-hidden="true" />
             Flagged for review
           </span>
         </p>
       )}
       {hidden && (
-        <p style={notice}>
+        <p className={noticeClasses}>
           <EyeOff size={13} strokeWidth={1.75} aria-hidden="true" />
           This comment is hidden.
           <button
@@ -308,9 +256,7 @@ export function CommentBody({ style, children, ...props }: ComponentProps<"div">
             aria-expanded={context.revealed}
             aria-controls={context.revealed ? bodyId : undefined}
             onClick={() => context.setRevealed(!context.revealed)}
-            className={CONTROL}
-            data-tone="link"
-            style={{ ...controlStyle(true), height: "auto", padding: 0 }}
+            className={controlClasses(true, "link")}
           >
             {context.revealed ? "Hide" : "Show"}
           </button>
@@ -330,7 +276,7 @@ export function CommentEditor({
   defaultValue,
   onSave,
   label = "Edit comment",
-  style,
+  className,
   ...props
 }: CommentEditorProps) {
   const context = useComment("CommentEditor");
@@ -355,14 +301,16 @@ export function CommentEditor({
     onSave(value.trim());
     finish();
   };
+  const buttonPadding = compact ? "px-2.5" : "px-3";
   return (
     <form
+      data-slot="comment-editor"
+      className={cn("grid min-w-0 gap-2", className)}
       {...props}
       onSubmit={(event) => {
         event.preventDefault();
         save();
       }}
-      style={{ display: "grid", gap: 8, minWidth: 0, ...style }}
     >
       <textarea
         ref={textareaRef}
@@ -379,39 +327,24 @@ export function CommentEditor({
             save();
           }
         }}
-        className="uai-comment-editor"
-        style={{
-          boxSizing: "border-box",
-          width: "100%",
-          minWidth: 0,
-          padding: "8px 10px",
-          border: 0,
-          borderRadius: compact ? 8 : 10,
-          background: context.variant === "card" ? "var(--uai-canvas)" : "var(--uai-surface)",
-          boxShadow: "0 0 0 1px var(--uai-border)",
-          color: "inherit",
-          font: "inherit",
-          fontSize: 13,
-          lineHeight: "18px",
-          resize: "vertical",
-        }}
+        className={cn(
+          "box-border w-full min-w-0 resize-y border-0 px-2.5 py-2 text-[13px]/[18px] text-inherit shadow-[0_0_0_1px_var(--border)] transition-shadow duration-120 ease-[ease-out] placeholder:text-subtle-foreground focus-visible:shadow-[0_0_0_1px_var(--border-strong),0_0_0_4px_color-mix(in_oklab,var(--primary)_14%,transparent)] focus-visible:outline-none motion-reduce:transition-none",
+          compact ? "rounded-lg" : "rounded-[10px]",
+          context.variant === "card" ? "bg-background" : "bg-card",
+        )}
       />
-      <div style={{ display: "flex", justifyContent: "flex-end", gap: 6 }}>
+      <div className="flex justify-end gap-1.5">
         <button
           type="button"
           onClick={finish}
-          className={CONTROL}
-          data-tone="secondary"
-          style={{ ...controlStyle(compact), paddingInline: compact ? 10 : 12 }}
+          className={cn(controlClasses(compact, "secondary"), buttonPadding)}
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={!value.trim()}
-          className={CONTROL}
-          data-tone="primary"
-          style={{ ...controlStyle(compact), paddingInline: compact ? 10 : 12 }}
+          className={cn(controlClasses(compact, "primary"), buttonPadding)}
         >
           Save
         </button>
@@ -423,7 +356,6 @@ export function CommentEditor({
 export function CommentActions({
   "aria-label": label = "Comment actions",
   className,
-  style,
   ...props
 }: ComponentProps<"div">) {
   const context = useComment("CommentActions");
@@ -433,27 +365,24 @@ export function CommentActions({
     <div
       role="group"
       aria-label={label}
+      data-slot="comment-actions"
+      className={cn(
+        "-ms-2 flex flex-wrap items-center gap-1 has-[>:first-child:not([data-slot=comment-action],[data-slot=comment-edit-trigger])]:ms-0",
+        className,
+      )}
       {...props}
-      className={["uai-comment-actions", className].filter(Boolean).join(" ")}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        gap: 4,
-        ...style,
-      }}
     />
   );
 }
 
-export function CommentAction({ className, style, ...props }: ComponentProps<"button">) {
+export function CommentAction({ className, ...props }: ComponentProps<"button">) {
   const context = useComment("CommentAction");
   return (
     <button
       type="button"
+      data-slot="comment-action"
+      className={cn(controlClasses(context.variant === "compact"), className)}
       {...props}
-      className={[CONTROL, className].filter(Boolean).join(" ")}
-      style={{ ...controlStyle(context.variant === "compact"), ...style }}
     />
   );
 }
@@ -462,21 +391,20 @@ export function CommentEditTrigger({
   children = "Edit",
   onClick,
   className,
-  style,
   ...props
 }: ComponentProps<"button">) {
   const context = useComment("CommentEditTrigger");
   return (
     <button
       ref={context.editTriggerRef}
+      data-slot="comment-edit-trigger"
+      className={cn(controlClasses(context.variant === "compact"), className)}
       {...props}
       type="button"
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) context.setEditing(true);
       }}
-      className={[CONTROL, className].filter(Boolean).join(" ")}
-      style={{ ...controlStyle(context.variant === "compact"), ...style }}
     >
       <Pencil size={12} strokeWidth={1.75} aria-hidden="true" />
       {children}
@@ -487,7 +415,6 @@ export function CommentEditTrigger({
 export function CommentReplies({
   "aria-label": label = "Replies",
   className,
-  style,
   ...props
 }: ComponentProps<"section">) {
   const context = useComment("CommentReplies");
@@ -495,17 +422,13 @@ export function CommentReplies({
   return (
     <section
       aria-label={label}
+      data-slot="comment-replies"
+      className={cn(
+        "grid border-s *:animate-in *:fill-mode-both *:fade-in-0 *:slide-in-from-bottom-1 *:duration-240 *:ease-out-quint motion-reduce:*:animate-none [&>:nth-child(2)]:[animation-delay:40ms] [&>:nth-child(3)]:[animation-delay:80ms] [&>:nth-child(4)]:[animation-delay:120ms] [&>:nth-child(n+5)]:[animation-delay:160ms]",
+        compact ? "ms-[9.5px] mt-1 gap-3 ps-3.5" : "ms-[11.5px] mt-1.5 gap-4 ps-4.5",
+        className,
+      )}
       {...props}
-      className={["uai-comment-replies", className].filter(Boolean).join(" ")}
-      style={{
-        display: "grid",
-        gap: compact ? 12 : 16,
-        marginTop: compact ? 4 : 6,
-        marginInlineStart: compact ? 9.5 : 11.5,
-        paddingInlineStart: compact ? 14 : 18,
-        borderInlineStart: "1px solid var(--uai-border)",
-        ...style,
-      }}
     />
   );
 }

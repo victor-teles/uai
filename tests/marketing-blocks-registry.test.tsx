@@ -23,7 +23,7 @@ test("publishes every marketing block without drift and keeps examples executabl
     ).text();
     expect(item.category).toBe("Marketing");
     expect(output.type).toBe("registry:block");
-    expect(mirror).toBe(source);
+    expect(mirror).toBe(`export * from "@/registry/uai/blocks/${item.id}";\n`);
     expect(output.files[0].content).toBe(source);
     expect(item.usage).toBe(preview);
     expect(item.accessibility.length).toBeGreaterThanOrEqual(3);

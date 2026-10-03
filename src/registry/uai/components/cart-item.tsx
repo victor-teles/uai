@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { LoaderCircle, Trash2 } from "lucide-react";
 import { type ComponentProps, createContext, type ReactNode, useContext, useId } from "react";
 
@@ -15,31 +16,29 @@ export type CartItemProps = ComponentProps<"article"> & {
   variant?: CartItemVariant;
 };
 
+const cartItemVariants = cva("grid w-full items-start border-border/60 text-foreground", {
+  variants: {
+    variant: {
+      card: "grid-cols-[96px_minmax(0,1fr)] gap-4 rounded-[14px] border bg-card p-4 max-[420px]:grid-cols-[76px_minmax(0,1fr)]",
+      plain:
+        "grid-cols-[88px_minmax(0,1fr)] gap-4 rounded-none border-b bg-transparent pb-4.5 max-[420px]:grid-cols-[76px_minmax(0,1fr)]",
+      compact:
+        "grid-cols-[72px_minmax(0,1fr)] gap-3 rounded-xl border bg-card p-3 max-[420px]:grid-cols-[68px_minmax(0,1fr)]",
+    },
+  },
+});
+
 function cartItemChrome(variant: CartItemVariant) {
   const compact = variant === "compact";
-  const rootStyle =
-    variant === "plain"
-      ? { borderRadius: 0, paddingBottom: 18 }
-      : { borderRadius: compact ? 12 : 14, padding: compact ? 12 : 16 };
 
   return {
-    rootClass:
-      variant === "plain"
-        ? "grid-cols-[88px_minmax(0,1fr)] border-b border-[color-mix(in_oklab,var(--uai-border)_60%,transparent)] bg-transparent max-[420px]:grid-cols-[76px_minmax(0,1fr)]"
-        : compact
-          ? "grid-cols-[72px_minmax(0,1fr)] border border-[color-mix(in_oklab,var(--uai-border)_60%,transparent)] bg-[var(--uai-surface)] max-[420px]:grid-cols-[68px_minmax(0,1fr)]"
-          : "grid-cols-[96px_minmax(0,1fr)] border border-[color-mix(in_oklab,var(--uai-border)_60%,transparent)] bg-[var(--uai-surface)] max-[420px]:grid-cols-[76px_minmax(0,1fr)]",
-    rootStyle,
-    gapClass: compact ? "gap-3" : "gap-4",
-    mediaRadius: compact ? 8 : 10,
-    titleClass: compact ? "text-[13px] leading-[18px]" : "text-[14px] leading-5",
-    descriptionClass: compact
-      ? "mt-0.5 text-[11.5px] leading-4"
-      : "mt-0.5 text-[12.5px] leading-[18px]",
-    priceClass: compact ? "text-[13px] leading-[18px]" : "text-[14px] leading-5",
+    mediaClass: compact ? "rounded-lg" : "rounded-[10px]",
+    titleClass: compact ? "text-[13px]/[18px]" : "text-sm/5",
+    descriptionClass: compact ? "mt-0.5 text-[11.5px]/4" : "mt-0.5 text-[12.5px]/[18px]",
+    priceClass: compact ? "text-[13px]/[18px]" : "text-sm/5",
     optionsClass: compact ? "mt-2 gap-1" : "mt-2.5 gap-1.5",
-    optionClass: compact ? "h-5 px-1.5 text-[11px]" : "h-[22px] px-2 text-[11.5px]",
-    availabilityClass: compact ? "mt-2 px-1.5 text-[11px]" : "mt-2.5 px-2 text-[11.5px]",
+    optionClass: compact ? "h-5 px-1.5 text-[11px]" : "h-5.5 px-2 text-[11.5px]",
+    availabilityClass: compact ? "mt-2 px-1.5 text-[11px]/4" : "mt-2.5 px-2 text-[11.5px]/4",
     actionsClass: compact ? "mt-3 gap-2.5" : "mt-4 gap-3",
     removeClass: compact ? "h-7 px-2.5 text-[12px]" : "h-8 px-3 text-[12.5px]",
   };
@@ -62,7 +61,6 @@ export function CartItem({
   variant = "card",
   children,
   className,
-  style,
   "aria-labelledby": ariaLabelledby,
   ...props
 }: CartItemProps) {
@@ -72,15 +70,10 @@ export function CartItem({
   return (
     <CartItemContext.Provider value={{ titleId, chrome }}>
       <article
-        {...props}
-        className={cn(
-          "grid w-full items-start text-[var(--uai-text)]",
-          chrome.rootClass,
-          chrome.gapClass,
-          className,
-        )}
-        style={{ ...chrome.rootStyle, ...style }}
+        data-slot="cart-item"
         data-variant={variant}
+        className={cn(cartItemVariants({ variant }), className)}
+        {...props}
         aria-labelledby={ariaLabelledby ?? titleId}
       >
         {children}
@@ -91,16 +84,17 @@ export function CartItem({
 
 export type CartItemMediaProps = ComponentProps<"div">;
 
-export function CartItemMedia({ children, className, style, ...props }: CartItemMediaProps) {
+export function CartItemMedia({ children, className, ...props }: CartItemMediaProps) {
   const context = useCartItem("CartItemMedia");
 
   return (
     <div
+      data-slot="cart-item-media"
       className={cn(
-        "relative aspect-square min-w-0 overflow-hidden bg-[var(--uai-surface-raised)] after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--uai-text)_8%,transparent)] after:content-[''] [&>img]:size-full [&>img]:object-cover",
+        "relative aspect-square min-w-0 overflow-hidden bg-muted after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--foreground)_8%,transparent)] after:content-[''] [&>img]:size-full [&>img]:object-cover",
+        context.chrome.mediaClass,
         className,
       )}
-      style={{ borderRadius: context.chrome.mediaRadius, ...style }}
       {...props}
     >
       {children}
@@ -114,7 +108,7 @@ export function CartItemContent({ children, className, ...props }: CartItemConte
   useCartItem("CartItemContent");
 
   return (
-    <div className={cn("min-w-0", className)} {...props}>
+    <div data-slot="cart-item-content" className={cn("min-w-0", className)} {...props}>
       {children}
     </div>
   );
@@ -126,7 +120,11 @@ export function CartItemHeader({ children, className, ...props }: CartItemHeader
   useCartItem("CartItemHeader");
 
   return (
-    <header className={cn("flex min-w-0 items-start justify-between gap-3", className)} {...props}>
+    <header
+      data-slot="cart-item-header"
+      className={cn("flex min-w-0 items-start justify-between gap-3", className)}
+      {...props}
+    >
       {children}
     </header>
   );
@@ -139,13 +137,14 @@ export function CartItemTitle({ children, className, ...props }: CartItemTitlePr
 
   return (
     <h2
-      id={context.titleId}
+      data-slot="cart-item-title"
       className={cn(
-        "font-medium tracking-[-0.01em] [overflow-wrap:anywhere]",
+        "font-medium tracking-[-0.01em] wrap-anywhere",
         context.chrome.titleClass,
         className,
       )}
       {...props}
+      id={context.titleId}
     >
       {children}
     </h2>
@@ -159,8 +158,9 @@ export function CartItemDescription({ children, className, ...props }: CartItemD
 
   return (
     <p
+      data-slot="cart-item-description"
       className={cn(
-        "text-[var(--uai-muted)] [overflow-wrap:anywhere]",
+        "text-muted-foreground wrap-anywhere",
         context.chrome.descriptionClass,
         className,
       )}
@@ -178,6 +178,7 @@ export function CartItemPrice({ children, className, ...props }: CartItemPricePr
 
   return (
     <p
+      data-slot="cart-item-price"
       className={cn(
         "shrink-0 text-right font-medium tracking-[-0.01em] tabular-nums",
         context.chrome.priceClass,
@@ -197,6 +198,7 @@ export function CartItemOptions({ children, className, ...props }: CartItemOptio
 
   return (
     <dl
+      data-slot="cart-item-options"
       className={cn("flex min-w-0 flex-wrap leading-4", context.chrome.optionsClass, className)}
       {...props}
     >
@@ -214,17 +216,16 @@ export function CartItemOption({ label, children, className, ...props }: CartIte
 
   return (
     <div
+      data-slot="cart-item-option"
       className={cn(
-        "inline-flex min-w-0 items-center gap-1 rounded-[6px] bg-[var(--uai-surface-raised)]",
+        "inline-flex min-w-0 items-center gap-1 rounded-[6px] bg-muted",
         context.chrome.optionClass,
         className,
       )}
       {...props}
     >
-      <dt className="text-[var(--uai-subtle)]">{label}</dt>
-      <dd className="min-w-0 font-medium text-[var(--uai-text)] [overflow-wrap:anywhere]">
-        {children}
-      </dd>
+      <dt className="text-subtle-foreground">{label}</dt>
+      <dd className="min-w-0 font-medium text-foreground wrap-anywhere">{children}</dd>
     </div>
   );
 }
@@ -234,11 +235,9 @@ export type CartItemAvailabilityProps = ComponentProps<"p"> & {
 };
 
 const availabilityToneClass: Record<CartItemAvailabilityTone, string> = {
-  available:
-    "bg-[color-mix(in_oklab,var(--uai-success)_14%,transparent)] text-[var(--uai-success)]",
-  low: "bg-[color-mix(in_oklab,var(--uai-warning)_14%,transparent)] text-[var(--uai-warning)]",
-  unavailable:
-    "bg-[color-mix(in_oklab,var(--uai-danger)_14%,transparent)] text-[var(--uai-danger)]",
+  available: "bg-success/14 text-success",
+  low: "bg-warning/14 text-warning",
+  unavailable: "bg-destructive/14 text-destructive",
 };
 
 export function CartItemAvailability({
@@ -251,8 +250,9 @@ export function CartItemAvailability({
 
   return (
     <p
+      data-slot="cart-item-availability"
       className={cn(
-        "flex w-fit max-w-full items-center gap-1.5 rounded-full py-0.5 leading-4 font-medium [overflow-wrap:anywhere] before:size-1.5 before:shrink-0 before:rounded-full before:bg-current before:content-['']",
+        "flex w-fit max-w-full items-center gap-1.5 rounded-full py-0.5 font-medium wrap-anywhere before:size-1.5 before:shrink-0 before:rounded-full before:bg-current before:content-['']",
         context.chrome.availabilityClass,
         availabilityToneClass[tone],
         className,
@@ -271,6 +271,7 @@ export function CartItemActions({ children, className, ...props }: CartItemActio
 
   return (
     <footer
+      data-slot="cart-item-actions"
       className={cn(
         "flex min-w-0 flex-wrap items-center justify-between",
         context.chrome.actionsClass,
@@ -301,13 +302,14 @@ export function CartItemRemove({
 
   return (
     <button
-      {...props}
+      data-slot="cart-item-remove"
       type={type}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full font-medium text-[var(--uai-muted)] transition-[transform,color,background-color] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-[color-mix(in_oklab,var(--uai-danger)_12%,transparent)] hover:text-[var(--uai-danger)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uai-accent)] active:scale-[0.97] disabled:pointer-events-none disabled:opacity-60 motion-reduce:transition-none motion-reduce:active:scale-100",
+        "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full font-medium text-muted-foreground transition-[scale,color,background-color] duration-140 ease-out-quint hover:bg-destructive/12 hover:text-destructive focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] disabled:pointer-events-none disabled:opacity-60 motion-reduce:transition-none motion-reduce:active:scale-100",
         context.chrome.removeClass,
         className,
       )}
+      {...props}
       disabled={disabled || removing}
       aria-busy={removing || undefined}
     >

@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, useContext, useId, useState } from "react";
 import {
   ConfirmationDialog,
@@ -16,6 +17,7 @@ import {
   type EmptyStateProps,
   type EmptyStateVariant,
 } from "@/components/ui/uai/empty-state";
+import { cn } from "@/lib/uai-utils";
 
 export const TEAM_MANAGEMENT_VARIANTS = ["table", "cards", "compact"] as const;
 export type TeamManagementVariant = (typeof TEAM_MANAGEMENT_VARIANTS)[number];
@@ -50,45 +52,30 @@ const emptyVariants: Record<TeamManagementVariant, EmptyStateVariant> = {
   cards: "card",
   compact: "compact",
 };
-const srOnly = {
-  position: "absolute",
-  width: 1,
-  height: 1,
-  overflow: "hidden",
-  clip: "rect(0 0 0 0)",
-  whiteSpace: "nowrap",
-} as const;
+const transitionClass =
+  "transition-[background-color,box-shadow,filter,transform] duration-[120ms,120ms,120ms,140ms] ease-[ease-out,ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none";
+const focusClass =
+  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
+const secondaryHover =
+  "enabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]";
 
-const interactionCss = `
-[data-uai-team-button],[data-uai-team-select],[data-uai-team-member]{transition:background-color 120ms ease-out,box-shadow 120ms ease-out,filter 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-[data-uai-team-button="primary"]{background:var(--uai-accent);color:var(--uai-accent-foreground)}
-[data-uai-team-button="secondary"]{background:var(--uai-surface-raised);color:var(--uai-text)}
-[data-uai-team-button="danger"]{background:color-mix(in oklab,var(--uai-danger) 12%,transparent);color:var(--uai-danger)}
-[data-uai-team-button="primary"]:hover:not(:disabled){filter:brightness(1.08)}
-[data-uai-team-button="secondary"]:hover:not(:disabled){background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text))}
-[data-uai-team-button="danger"]:hover:not(:disabled){background:color-mix(in oklab,var(--uai-danger) 20%,transparent)}
-[data-uai-team-button]:active:not(:disabled){transform:scale(0.97)}
-[data-uai-team-select]{background:var(--uai-surface-raised)}
-[data-uai-team-select]:hover:not(:disabled){background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text))}
-[data-uai-team-select]:disabled{background:transparent;color:var(--uai-subtle)}
-[data-uai-team-button]:focus-visible,[data-uai-team-select]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-[data-uai-team-members]>[data-uai-team-member]+[data-uai-team-member]{box-shadow:inset 0 1px 0 var(--uai-border)}
-[data-uai-team-members]>[data-uai-team-member]:hover{background:color-mix(in oklab,var(--uai-surface-raised) 45%,var(--uai-surface))}
-[data-uai-team-member="card"]{background:var(--uai-surface);box-shadow:0 0 0 1px var(--uai-border)}
-[data-uai-team-member="card"]:hover{box-shadow:0 0 0 1px var(--uai-border-strong)}
-@keyframes uai-team-enter{from{opacity:0;transform:translateY(4px)}}
-[data-uai-team-member]{animation:uai-team-enter 240ms cubic-bezier(0.23,1,0.32,1) both}
-[data-uai-team-member]:nth-child(2){animation-delay:40ms}
-[data-uai-team-member]:nth-child(3){animation-delay:80ms}
-[data-uai-team-member]:nth-child(4){animation-delay:120ms}
-[data-uai-team-member]:nth-child(5){animation-delay:160ms}
-[data-uai-team-member]:nth-child(n+6){animation-delay:200ms}
-@media (prefers-reduced-motion: reduce){[data-uai-team-button],[data-uai-team-select],[data-uai-team-member]{transition:none;animation:none}[data-uai-team-button]:active:not(:disabled){transform:none}}`;
+const teamManagementVariants = cva(
+  "grid min-w-0 content-start text-[13px]/[18px] text-foreground",
+  {
+    variants: {
+      variant: {
+        table: "gap-4",
+        cards: "gap-4",
+        compact: "gap-2.5",
+      },
+    },
+  },
+);
 
 export function TeamManagement({
   variant = "table",
   children,
-  style,
+  className,
   ...props
 }: TeamManagementProps) {
   const id = useId();
@@ -96,111 +83,102 @@ export function TeamManagement({
     <Context.Provider value={{ id, variant }}>
       <section
         aria-labelledby={`${id}-title`}
-        {...props}
+        data-slot="team-management"
         data-variant={variant}
-        style={{
-          display: "grid",
-          alignContent: "start",
-          gap: variant === "compact" ? 10 : 16,
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
+        className={cn(teamManagementVariants({ variant }), className)}
+        {...props}
       >
-        <style>{interactionCss}</style>
         {children}
       </section>
     </Context.Provider>
   );
 }
 
-export function TeamManagementHeader({ style, ...props }: ComponentProps<"div">) {
+export function TeamManagementHeader({ className, ...props }: ComponentProps<"div">) {
   useTeam("TeamManagementHeader");
   return (
     <div
+      data-slot="team-management-header"
+      className={cn("flex min-w-0 flex-wrap items-end justify-between gap-3", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "flex-end",
-        justifyContent: "space-between",
-        gap: 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function TeamManagementHeading({ style, ...props }: ComponentProps<"div">) {
-  return (
-    <div {...props} style={{ display: "grid", gap: 4, flex: "1 1 240px", minWidth: 0, ...style }} />
-  );
-}
-
-export function TeamManagementTitle({ style, ...props }: ComponentProps<"h2">) {
-  const context = useTeam("TeamManagementTitle");
-  const compact = context.variant === "compact";
-  return (
-    <h2
-      {...props}
-      id={`${context.id}-title`}
-      style={{
-        margin: 0,
-        fontSize: compact ? 15 : 18,
-        lineHeight: compact ? "20px" : "24px",
-        fontWeight: 600,
-        letterSpacing: "-0.01em",
-        ...style,
-      }}
-    />
-  );
-}
-
-export function TeamManagementDescription({ style, ...props }: ComponentProps<"p">) {
-  return <p {...props} style={{ margin: 0, color: "var(--uai-muted)", ...style }} />;
-}
-
-export function TeamManagementActions({ style, ...props }: ComponentProps<"div">) {
+export function TeamManagementHeading({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="team-management-heading"
+      className={cn("grid min-w-0 flex-[1_1_240px] gap-1", className)}
       {...props}
-      style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6, ...style }}
     />
   );
 }
+
+export function TeamManagementTitle({ className, ...props }: ComponentProps<"h2">) {
+  const context = useTeam("TeamManagementTitle");
+  return (
+    <h2
+      data-slot="team-management-title"
+      className={cn(
+        "m-0 font-semibold tracking-[-0.01em]",
+        context.variant === "compact" ? "text-[15px]/5" : "text-[18px]/6",
+        className,
+      )}
+      {...props}
+      id={`${context.id}-title`}
+    />
+  );
+}
+
+export function TeamManagementDescription({ className, ...props }: ComponentProps<"p">) {
+  return (
+    <p
+      data-slot="team-management-description"
+      className={cn("m-0 text-muted-foreground", className)}
+      {...props}
+    />
+  );
+}
+
+export function TeamManagementActions({ className, ...props }: ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="team-management-actions"
+      className={cn("flex flex-wrap items-center gap-1.5", className)}
+      {...props}
+    />
+  );
+}
+
+const teamButtonEmphasis = {
+  primary: "bg-primary text-primary-foreground enabled:hover:brightness-108",
+  secondary: cn("bg-secondary text-secondary-foreground", secondaryHover),
+  danger: "bg-destructive/12 text-destructive enabled:hover:bg-destructive/20",
+};
 
 export function TeamManagementButton({
   emphasis = "secondary",
   type = "button",
-  style,
+  className,
   ...props
 }: ComponentProps<"button"> & { emphasis?: "primary" | "secondary" | "danger" }) {
   const context = useTeam("TeamManagementButton");
   const compact = context.variant === "compact";
   return (
     <button
+      data-slot="team-management-button"
+      className={cn(
+        transitionClass,
+        focusClass,
+        "inline-flex cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-full border-0 font-medium enabled:active:scale-[0.97] motion-reduce:enabled:active:scale-100",
+        compact ? "h-6.5 px-2.5 text-[12px]" : "h-7.5 px-[13px] text-[12.5px]",
+        teamButtonEmphasis[emphasis],
+        className,
+      )}
       {...props}
       type={type}
-      data-uai-team-button={emphasis}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 6,
-        height: compact ? 26 : 30,
-        padding: compact ? "0 10px" : "0 13px",
-        border: 0,
-        borderRadius: 999,
-        font: "inherit",
-        fontSize: compact ? 12 : 12.5,
-        fontWeight: 500,
-        whiteSpace: "nowrap",
-        cursor: "pointer",
-        ...style,
-      }}
+      data-emphasis={emphasis}
     />
   );
 }
@@ -212,42 +190,39 @@ export function TeamManagementToolbar({
 }: Omit<DataTableToolbarProps, "variant">) {
   const context = useTeam("TeamManagementToolbar");
   return (
-    <DataTableToolbar {...props} aria-label={label} variant={toolbarVariants[context.variant]} />
+    <DataTableToolbar
+      data-slot="team-management-toolbar"
+      {...props}
+      aria-label={label}
+      variant={toolbarVariants[context.variant]}
+    />
   );
 }
 
 /** An invitation form. The consumer owns submission and validation. */
 export function TeamManagementInvite({
   "aria-label": label = "Invite members",
-  style,
+  className,
   ...props
 }: ComponentProps<"form">) {
   const context = useTeam("TeamManagementInvite");
-  const compact = context.variant === "compact";
   return (
     <form
       aria-label={label}
+      data-slot="team-management-invite"
+      className={cn(
+        "flex min-w-0 flex-wrap items-end gap-2 border-0 bg-card shadow-[0_0_0_1px_var(--border)]",
+        context.variant === "compact" ? "rounded-xl p-2.5" : "rounded-[14px] px-4 py-3.5",
+        className,
+      )}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "flex-end",
-        gap: 8,
-        minWidth: 0,
-        padding: compact ? 10 : "14px 16px",
-        border: 0,
-        borderRadius: compact ? 12 : 14,
-        background: "var(--uai-surface)",
-        boxShadow: "0 0 0 1px var(--uai-border)",
-        ...style,
-      }}
     />
   );
 }
 
 /** A native role select. Inside a member row it is named "Role for" plus the member name. */
 export function TeamManagementRoleSelect({
-  style,
+  className,
   "aria-labelledby": labelledBy,
   ...props
 }: ComponentProps<"select">) {
@@ -258,26 +233,22 @@ export function TeamManagementRoleSelect({
   return (
     <>
       {memberId && !labelledBy && !props["aria-label"] ? (
-        <span id={labelId} style={srOnly}>
+        <span id={labelId} className="sr-only">
           Role for
         </span>
       ) : null}
       <select
         aria-labelledby={labelledBy ?? (memberId ? `${labelId} ${memberId}-name` : undefined)}
+        data-slot="team-management-role-select"
+        className={cn(
+          transitionClass,
+          focusClass,
+          "cursor-pointer rounded-lg border-0 bg-secondary py-0 pr-1.5 pl-2.5 font-medium text-foreground disabled:cursor-not-allowed disabled:bg-transparent disabled:text-subtle-foreground",
+          secondaryHover,
+          compact ? "h-6.5 text-[12px]" : "h-7.5 text-[12.5px]",
+          className,
+        )}
         {...props}
-        data-uai-team-select=""
-        style={{
-          height: compact ? 26 : 30,
-          padding: "0 6px 0 10px",
-          border: 0,
-          borderRadius: 8,
-          color: "var(--uai-text)",
-          font: "inherit",
-          fontSize: compact ? 12 : 12.5,
-          fontWeight: 500,
-          cursor: props.disabled ? "not-allowed" : "pointer",
-          ...style,
-        }}
       />
     </>
   );
@@ -285,81 +256,72 @@ export function TeamManagementRoleSelect({
 
 export function TeamManagementMembers({
   "aria-label": label = "Members",
-  style,
+  className,
   ...props
 }: ComponentProps<"ul">) {
   const { variant } = useTeam("TeamManagementMembers");
   return (
     <ul
       aria-label={label}
-      {...props}
-      data-uai-team-members={variant === "cards" ? undefined : ""}
-      style={
+      data-slot="team-management-members"
+      className={cn(
+        "m-0 grid list-none p-0",
         variant === "cards"
-          ? {
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 260px), 1fr))",
-              gap: 8,
-              margin: 0,
-              padding: 0,
-              listStyle: "none",
-              ...style,
-            }
-          : {
-              display: "grid",
-              margin: 0,
-              padding: 0,
-              listStyle: "none",
-              overflow: "hidden",
-              border: "1px solid var(--uai-border)",
-              borderRadius: variant === "compact" ? 12 : 14,
-              background: "var(--uai-surface)",
-              ...style,
-            }
-      }
+          ? "grid-cols-[repeat(auto-fill,minmax(min(100%,260px),1fr))] gap-2"
+          : "overflow-hidden border bg-card",
+        variant === "table" && "rounded-[14px]",
+        variant === "compact" && "rounded-xl",
+        className,
+      )}
+      {...props}
     />
   );
 }
 
-export function TeamManagementMember({ style, ...props }: ComponentProps<"li">) {
+const memberVariants = cva(
+  cn(
+    transitionClass,
+    "flex min-w-0 flex-wrap items-center border-0 animate-[enter_240ms_cubic-bezier(0.23,1,0.32,1)_both] fade-in-0 slide-in-from-bottom-1 motion-reduce:animate-none",
+    "nth-2:[animation-delay:40ms] nth-3:[animation-delay:80ms] nth-4:[animation-delay:120ms] nth-5:[animation-delay:160ms] nth-[n+6]:[animation-delay:200ms]",
+  ),
+  {
+    variants: {
+      variant: {
+        table:
+          "gap-3 rounded-none px-3.5 py-2.5 hover:bg-[color-mix(in_oklab,var(--muted)_45%,var(--card))] [[data-slot=team-management-member]+&]:shadow-[inset_0_1px_0_var(--border)]",
+        cards:
+          "gap-3 rounded-[14px] bg-card p-3.5 shadow-[0_0_0_1px_var(--border)] hover:shadow-[0_0_0_1px_var(--border-strong)]",
+        compact:
+          "gap-2 rounded-none px-2.5 py-2 hover:bg-[color-mix(in_oklab,var(--muted)_45%,var(--card))] [[data-slot=team-management-member]+&]:shadow-[inset_0_1px_0_var(--border)]",
+      },
+    },
+  },
+);
+
+export function TeamManagementMember({ className, ...props }: ComponentProps<"li">) {
   const { variant } = useTeam("TeamManagementMember");
   const id = useId();
   return (
     <MemberContext.Provider value={id}>
       <li
+        data-slot="team-management-member"
+        className={cn(memberVariants({ variant }), className)}
         {...props}
-        data-uai-team-member={variant === "cards" ? "card" : "row"}
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          gap: variant === "compact" ? 8 : 12,
-          minWidth: 0,
-          padding: variant === "cards" ? 14 : variant === "compact" ? "8px 10px" : "10px 14px",
-          border: 0,
-          borderRadius: variant === "cards" ? 14 : 0,
-
-          ...style,
-        }}
       />
     </MemberContext.Provider>
   );
 }
 
-export function TeamManagementMemberIdentity({ style, ...props }: ComponentProps<"div">) {
+export function TeamManagementMemberIdentity({ className, ...props }: ComponentProps<"div">) {
   useMember("TeamManagementMemberIdentity");
   return (
     <div
+      data-slot="team-management-member-identity"
+      className={cn(
+        "grid min-w-0 flex-[1_1_220px] grid-cols-[auto_minmax(0,1fr)] items-center gap-x-2.5",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gridTemplateColumns: "auto minmax(0, 1fr)",
-        alignItems: "center",
-        columnGap: 10,
-        flex: "1 1 220px",
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
@@ -377,41 +339,26 @@ function initials(name: string) {
 export function TeamManagementMemberAvatar({
   name,
   src,
-  style,
+  className,
   ...props
 }: Omit<ComponentProps<"span">, "children"> & { name: string; src?: string }) {
   const { variant } = useTeam("TeamManagementMemberAvatar");
   useMember("TeamManagementMemberAvatar");
   const [failed, setFailed] = useState(false);
-  const size = variant === "compact" ? 24 : 32;
   return (
     <span
       aria-hidden="true"
+      data-slot="team-management-member-avatar"
+      className={cn(
+        "row-span-2 grid place-items-center overflow-hidden rounded-full bg-muted font-medium text-muted-foreground shadow-[0_0_0_1px_oklch(1_0_0/0.08)]",
+        variant === "compact" ? "size-6 text-[10px]" : "size-8 text-[11.5px]",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        placeItems: "center",
-        gridRow: "span 2",
-        width: size,
-        height: size,
-        overflow: "hidden",
-        borderRadius: 999,
-        background: "var(--uai-surface-raised)",
-        boxShadow: "0 0 0 1px oklch(1 0 0 / 0.08)",
-        color: "var(--uai-muted)",
-        fontSize: variant === "compact" ? 10 : 11.5,
-        fontWeight: 500,
-        ...style,
-      }}
     >
       {src && !failed ? (
         // biome-ignore lint/performance/noImgElement: distributed source cannot depend on next/image.
-        <img
-          src={src}
-          alt=""
-          onError={() => setFailed(true)}
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-        />
+        <img src={src} alt="" onError={() => setFailed(true)} className="size-full object-cover" />
       ) : (
         initials(name)
       )}
@@ -419,90 +366,64 @@ export function TeamManagementMemberAvatar({
   );
 }
 
-export function TeamManagementMemberName({ style, ...props }: ComponentProps<"p">) {
+export function TeamManagementMemberName({ className, ...props }: ComponentProps<"p">) {
   const id = useMember("TeamManagementMemberName");
   return (
     <p
+      data-slot="team-management-member-name"
+      className={cn("m-0 truncate font-medium", className)}
       {...props}
       id={`${id}-name`}
-      style={{
-        margin: 0,
-        fontWeight: 500,
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: "nowrap",
-        ...style,
-      }}
     />
   );
 }
 
-export function TeamManagementMemberEmail({ style, ...props }: ComponentProps<"p">) {
+export function TeamManagementMemberEmail({ className, ...props }: ComponentProps<"p">) {
   useMember("TeamManagementMemberEmail");
   return (
     <p
+      data-slot="team-management-member-email"
+      className={cn("m-0 truncate text-[12px] text-muted-foreground", className)}
       {...props}
-      style={{
-        margin: 0,
-        color: "var(--uai-muted)",
-        fontSize: 12,
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: "nowrap",
-        ...style,
-      }}
     />
   );
 }
 
 const statusTones = {
-  neutral: "var(--uai-muted)",
-  accent: "var(--uai-accent)",
-  success: "var(--uai-success)",
-  warning: "var(--uai-warning)",
+  neutral: "bg-muted-foreground/16 text-muted-foreground",
+  accent: "bg-primary/14 text-[color-mix(in_oklab,var(--primary)_70%,var(--foreground))]",
+  success: "bg-success/14 text-success",
+  warning: "bg-warning/14 text-warning",
 } as const;
 
 /** Access or invitation status, such as "Pending invite" or "Owner". `tone` tints the badge. */
 export function TeamManagementMemberStatus({
   tone = "neutral",
-  style,
+  className,
   ...props
 }: ComponentProps<"span"> & { tone?: keyof typeof statusTones }) {
   useMember("TeamManagementMemberStatus");
-  const color = statusTones[tone];
   return (
     <span
+      data-slot="team-management-member-status"
+      className={cn(
+        "whitespace-nowrap rounded-full px-2 text-[11.5px]/5 font-medium",
+        statusTones[tone],
+        className,
+      )}
       {...props}
       data-tone={tone}
-      style={{
-        padding: "0 8px",
-        borderRadius: 999,
-        background: `color-mix(in oklab, ${color} ${tone === "neutral" ? 16 : 14}%, transparent)`,
-        color:
-          tone === "accent" ? "color-mix(in oklab, var(--uai-accent) 70%, var(--uai-text))" : color,
-        fontSize: 11.5,
-        lineHeight: "20px",
-        fontWeight: 500,
-        whiteSpace: "nowrap",
-        ...style,
-      }}
     />
   );
 }
 
-export function TeamManagementMemberActions({ style, ...props }: ComponentProps<"div">) {
+export function TeamManagementMemberActions({ className, ...props }: ComponentProps<"div">) {
   useMember("TeamManagementMemberActions");
   return (
     <div
+      data-slot="team-management-member-actions"
+      className={cn("ml-auto flex flex-wrap items-center gap-1.5", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        gap: 6,
-        marginLeft: "auto",
-        ...style,
-      }}
     />
   );
 }
@@ -516,5 +437,11 @@ export function TeamManagementRemove(props: Omit<ConfirmationDialogProps, "varia
 /** Shown when no member matches. Compose Empty State parts inside it. */
 export function TeamManagementEmpty(props: Omit<EmptyStateProps, "variant">) {
   const context = useTeam("TeamManagementEmpty");
-  return <EmptyState {...props} variant={emptyVariants[context.variant]} />;
+  return (
+    <EmptyState
+      data-slot="team-management-empty"
+      {...props}
+      variant={emptyVariants[context.variant]}
+    />
+  );
 }

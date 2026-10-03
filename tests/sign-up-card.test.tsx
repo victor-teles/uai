@@ -171,16 +171,16 @@ test("renders card, split, and compact chrome from the root variant", () => {
 
   expect(SIGN_UP_CARD_VARIANTS).toEqual(["card", "split", "compact"]);
   expect(form?.dataset.variant).toBe("card");
-  expect(form?.style.padding).toBe("20px");
+  expect(form?.className).toContain("p-5");
 
   rerender(<SignUpCardFixture variant="split" />);
   expect(form?.dataset.variant).toBe("split");
-  expect(form?.style.padding).toBe("24px");
+  expect(form?.className).toContain("p-6");
   expect(screen.getByText("or").parentElement?.className).toContain("sm:flex-col");
 
   rerender(<SignUpCardFixture variant="compact" />);
   expect(form?.dataset.variant).toBe("compact");
-  expect(form?.style.borderRadius).toBe("12px");
+  expect(form?.className).toContain("rounded-xl");
   expect(screen.getByRole("button", { name: "Create account" }).className).toContain("h-[34px]");
 });
 

@@ -10,6 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const CITATION_VARIANTS = ["number", "chip", "underline"] as const;
 export type CitationVariant = (typeof CITATION_VARIANTS)[number];
@@ -41,16 +42,6 @@ function useCitation(part: string) {
 
 const CLOSE_DELAY = 120;
 
-const citationCss = `
-[data-uai-citation-trigger]{transition:background-color 120ms ease-out,color 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-[data-uai-citation-trigger]:hover,[data-uai-citation-trigger][aria-expanded="true"]{background:color-mix(in oklab,var(--uai-surface-raised) 80%,var(--uai-text))!important;color:var(--uai-text)!important}
-[data-uai-citation-trigger]:active{transform:scale(0.94)}
-[data-uai-citation-trigger]:focus-visible,[data-uai-citation-link]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:1px}
-[data-uai-citation-link]{transition:background-color 120ms ease-out}
-[data-uai-citation-link]:hover{background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text))!important}
-@media (prefers-reduced-motion:reduce){[data-uai-citation-trigger],[data-uai-citation-link]{transition:none}[data-uai-citation-trigger]:active{transform:none}}
-`;
-
 export function Citation({
   variant = "number",
   index,
@@ -58,7 +49,7 @@ export function Citation({
   defaultOpen = false,
   onOpenChange,
   children,
-  style,
+  className,
   onPointerEnter,
   onPointerLeave,
   onBlur,
@@ -81,10 +72,11 @@ export function Citation({
     <CitationContext.Provider value={{ id, index, variant, open: visible, setOpen, triggerRef }}>
       {/* biome-ignore lint/a11y/noStaticElementInteractions: hover and focus-out handlers coordinate the preview; the trigger is the interactive element. */}
       <span
+        data-slot="citation"
+        className={cn("relative inline", className)}
         {...props}
         data-variant={variant}
         data-state={visible ? "open" : "closed"}
-        style={{ position: "relative", display: "inline", ...style }}
         onPointerEnter={(event) => {
           onPointerEnter?.(event);
           if (event.pointerType !== "touch") setOpen(true);
@@ -108,40 +100,27 @@ export function Citation({
           triggerRef.current?.focus();
         }}
       >
-        <style href="uai-citation" precedence="default">
-          {citationCss}
-        </style>
         {children}
       </span>
     </CitationContext.Provider>
   );
 }
 
-export function CitationClaim({ style, ...props }: ComponentProps<"span">) {
+export function CitationClaim({ className, ...props }: ComponentProps<"span">) {
   const context = useCitation("CitationClaim");
   const underline = context.variant === "underline";
   return (
     <span
+      data-slot="citation-claim"
+      className={cn(
+        "rounded-[4px] decoration-dotted decoration-[1.5px] underline-offset-4",
+        "[transition:background-color_120ms_ease-out,box-shadow_120ms_ease-out,text-decoration-color_120ms_ease-out]",
+        underline && "underline",
+        context.open ? "decoration-muted-foreground" : "decoration-border-strong",
+        underline && context.open && "bg-foreground/7 ring-2 ring-foreground/7",
+        className,
+      )}
       {...props}
-      style={{
-        borderRadius: 4,
-        textDecorationLine: underline ? "underline" : undefined,
-        textDecorationStyle: "dotted",
-        textDecorationColor: context.open ? "var(--uai-muted)" : "var(--uai-border-strong)",
-        textDecorationThickness: 1.5,
-        textUnderlineOffset: 4,
-        background:
-          underline && context.open
-            ? "color-mix(in oklab, var(--uai-text) 7%, transparent)"
-            : undefined,
-        boxShadow:
-          underline && context.open
-            ? "0 0 0 2px color-mix(in oklab, var(--uai-text) 7%, transparent)"
-            : undefined,
-        transition:
-          "background-color 120ms ease-out, box-shadow 120ms ease-out, text-decoration-color 120ms ease-out",
-        ...style,
-      }}
     />
   );
 }
@@ -151,7 +130,7 @@ export function CitationTrigger({
   onClick,
   onFocus,
   onPointerDown,
-  style,
+  className,
   ...props
 }: ComponentProps<"button">) {
   const context = useCitation("CitationTrigger");
@@ -160,10 +139,21 @@ export function CitationTrigger({
   return (
     <button
       type="button"
+      data-slot="citation-trigger"
       aria-label={children === undefined ? `Source ${context.index ?? ""}`.trim() : undefined}
+      className={cn(
+        "mx-0.5 inline-flex cursor-pointer items-center justify-center gap-1 border-0 bg-muted font-medium text-muted-foreground tabular-nums",
+        "[transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)]",
+        "hover:bg-[color-mix(in_oklab,var(--muted)_80%,var(--foreground))] hover:text-foreground aria-expanded:bg-[color-mix(in_oklab,var(--muted)_80%,var(--foreground))] aria-expanded:text-foreground",
+        "focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring active:scale-94",
+        "motion-reduce:transition-none motion-reduce:active:scale-100",
+        chip
+          ? "h-5 rounded-md px-[7px] align-[1px] font-mono text-[11px]/none"
+          : "h-[17px] min-w-[17px] rounded-full px-[5px] align-[2px] text-[10.5px]/none",
+        className,
+      )}
       {...props}
       ref={context.triggerRef}
-      data-uai-citation-trigger=""
       aria-expanded={context.open}
       aria-controls={`${context.id}-source`}
       onFocus={(event) => {
@@ -184,179 +174,96 @@ export function CitationTrigger({
         else if (pointer) context.setOpen(!pointer.wasOpen);
         else context.setOpen(!context.open);
       }}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 4,
-        minWidth: chip ? undefined : 17,
-        height: chip ? 20 : 17,
-        margin: "0 2px",
-        padding: chip ? "0 7px" : "0 5px",
-        justifyContent: "center",
-        verticalAlign: chip ? "1px" : "2px",
-        border: 0,
-        borderRadius: chip ? 6 : 999,
-        background: "var(--uai-surface-raised)",
-        color: "var(--uai-muted)",
-        fontFamily: chip ? "var(--font-mono, ui-monospace, monospace)" : "inherit",
-        fontSize: chip ? 11 : 10.5,
-        fontWeight: 500,
-        lineHeight: 1,
-        fontVariantNumeric: "tabular-nums",
-        cursor: "pointer",
-        ...style,
-      }}
     >
       {children ?? context.index}
     </button>
   );
 }
 
-export function CitationPopover({ children, style, ...props }: ComponentProps<"span">) {
+export function CitationPopover({ children, className, ...props }: ComponentProps<"span">) {
   const context = useCitation("CitationPopover");
-  const ref = useRef<HTMLSpanElement>(null);
-  useEffect(() => {
-    if (!context.open) return;
-    const reduce =
-      typeof window.matchMedia === "function" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) return;
-    ref.current?.animate?.(
-      [
-        { opacity: 0, transform: "scale(0.96)" },
-        { opacity: 1, transform: "scale(1)" },
-      ],
-      { duration: 180, easing: "cubic-bezier(0.23, 1, 0.32, 1)" },
-    );
-  }, [context.open]);
   return (
     // biome-ignore lint/a11y/useSemanticElements: the preview sits inside phrasing content, where a fieldset is invalid.
     <span
       role="group"
       aria-labelledby={`${context.id}-title`}
+      data-slot="citation-popover"
+      className={cn(
+        "absolute top-[calc(100%+8px)] left-0 z-20 w-[300px] max-w-[calc(100vw-32px)] origin-top-left gap-1 rounded-[14px] bg-popover p-1 text-left text-[13px]/[18px] font-normal whitespace-normal text-popover-foreground",
+        "shadow-[0_0_0_1px_var(--border-strong),0_16px_32px_-12px_rgb(0_0_0/0.28),0_4px_8px_-4px_rgb(0_0_0/0.12)]",
+        context.open
+          ? "grid animate-in fade-in-0 zoom-in-96 duration-180 ease-out-quint motion-reduce:animate-none"
+          : "hidden",
+        className,
+      )}
       {...props}
-      ref={ref}
       id={`${context.id}-source`}
       hidden={!context.open}
-      style={{
-        position: "absolute",
-        zIndex: 20,
-        top: "calc(100% + 8px)",
-        left: 0,
-        display: context.open ? "grid" : "none",
-        gap: 4,
-        width: 300,
-        maxWidth: "calc(100vw - 32px)",
-        padding: 4,
-        borderRadius: 14,
-        background: "var(--uai-surface)",
-        boxShadow:
-          "0 0 0 1px var(--uai-border-strong), 0 16px 32px -12px rgb(0 0 0 / 0.28), 0 4px 8px -4px rgb(0 0 0 / 0.12)",
-        transformOrigin: "top left",
-        color: "var(--uai-text)",
-        fontSize: 13,
-        lineHeight: "18px",
-        fontWeight: 400,
-        textAlign: "left",
-        whiteSpace: "normal",
-        ...style,
-      }}
     >
       {children}
     </span>
   );
 }
 
-export function CitationSource({ style, ...props }: ComponentProps<"span">) {
+export function CitationSource({ className, ...props }: ComponentProps<"span">) {
   useCitation("CitationSource");
   return (
     <span
+      data-slot="citation-source"
+      className={cn(
+        "flex items-center gap-1.5 px-2 pt-2 text-[11.5px]/4 text-subtle-foreground tabular-nums",
+        className,
+      )}
       {...props}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 6,
-        padding: "8px 8px 0",
-        color: "var(--uai-subtle)",
-        fontSize: 11.5,
-        lineHeight: "16px",
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     />
   );
 }
 
-export function CitationTitle({ style, ...props }: ComponentProps<"span">) {
+export function CitationTitle({ className, ...props }: ComponentProps<"span">) {
   const context = useCitation("CitationTitle");
   return (
     <span
+      data-slot="citation-title"
+      className={cn("block px-2 text-[13px]/[18px] font-medium text-balance", className)}
       {...props}
       id={`${context.id}-title`}
-      style={{
-        display: "block",
-        padding: "0 8px",
-        fontSize: 13,
-        lineHeight: "18px",
-        fontWeight: 500,
-        textWrap: "balance",
-        ...style,
-      }}
     />
   );
 }
 
-export function CitationExcerpt({ style, ...props }: ComponentProps<"span">) {
+export function CitationExcerpt({ className, ...props }: ComponentProps<"span">) {
   useCitation("CitationExcerpt");
   return (
     <span
+      data-slot="citation-excerpt"
+      className={cn(
+        "mx-2 mb-1.5 line-clamp-3 max-h-[54px] text-[12.5px]/[18px] text-muted-foreground",
+        className,
+      )}
       {...props}
-      style={{
-        display: "-webkit-box",
-        WebkitLineClamp: 3,
-        WebkitBoxOrient: "vertical",
-        overflow: "hidden",
-        margin: "0 8px 6px",
-        color: "var(--uai-muted)",
-        fontSize: 12.5,
-        lineHeight: "18px",
-        maxHeight: 54,
-        ...style,
-      }}
     />
   );
 }
 
-export function CitationLink({ children, style, ...props }: ComponentProps<"a">) {
+export function CitationLink({ children, className, ...props }: ComponentProps<"a">) {
   useCitation("CitationLink");
   return (
     <a
-      data-uai-citation-link=""
+      data-slot="citation-link"
+      className={cn(
+        "flex min-h-8 items-center justify-between gap-2 rounded-[10px] bg-secondary pr-2 pl-2.5 text-[12.5px] font-medium text-secondary-foreground no-underline",
+        "transition-[background-color] duration-120 ease-[ease-out] hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+        "focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring motion-reduce:transition-none",
+        className,
+      )}
       {...props}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 8,
-        minHeight: 32,
-        padding: "0 8px 0 10px",
-        borderRadius: 10,
-        background: "var(--uai-surface-raised)",
-        color: "var(--uai-text)",
-        fontSize: 12.5,
-        fontWeight: 500,
-        textDecoration: "none",
-        ...style,
-      }}
     >
-      <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
-        {children ?? "Open source"}
-      </span>
+      <span className="min-w-0 overflow-hidden text-ellipsis">{children ?? "Open source"}</span>
       <ArrowUpRight
         size={14}
         strokeWidth={1.75}
         aria-hidden="true"
-        style={{ flex: "none", color: "var(--uai-muted)" }}
+        className="flex-none text-muted-foreground"
       />
     </a>
   );

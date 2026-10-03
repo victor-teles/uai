@@ -1,46 +1,153 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry.json",
   "name": "uai",
-  "homepage": "http://localhost:3000",
+  "homepage": "https://useuai.vercel.app",
   "items": [
     {
       "name": "uai-theme",
       "type": "registry:theme",
       "title": "Uai Theme",
-      "description": "The warm graphite surface, accent, and state-color tokens used by Uai components.",
+      "description": "The warm graphite Uai palette mapped onto the standard shadcn theme tokens, plus the shared motion utilities Uai components use.",
       "cssVars": {
+        "theme": {
+          "color-background": "var(--background)",
+          "color-foreground": "var(--foreground)",
+          "color-card": "var(--card)",
+          "color-card-foreground": "var(--card-foreground)",
+          "color-popover": "var(--popover)",
+          "color-popover-foreground": "var(--popover-foreground)",
+          "color-primary": "var(--primary)",
+          "color-primary-foreground": "var(--primary-foreground)",
+          "color-secondary": "var(--secondary)",
+          "color-secondary-foreground": "var(--secondary-foreground)",
+          "color-muted": "var(--muted)",
+          "color-muted-foreground": "var(--muted-foreground)",
+          "color-subtle-foreground": "var(--subtle-foreground)",
+          "color-accent": "var(--accent)",
+          "color-accent-foreground": "var(--accent-foreground)",
+          "color-destructive": "var(--destructive)",
+          "color-success": "var(--success)",
+          "color-warning": "var(--warning)",
+          "color-border": "var(--border)",
+          "color-border-strong": "var(--border-strong)",
+          "color-input": "var(--input)",
+          "color-ring": "var(--ring)",
+          "ease-out-quint": "cubic-bezier(0.23, 1, 0.32, 1)",
+          "animate-shimmer": "shimmer 2s linear infinite",
+          "animate-skeleton-shimmer": "skeleton-shimmer 1.6s ease-in-out infinite",
+          "animate-indeterminate": "indeterminate 1.4s cubic-bezier(0.65, 0, 0.35, 1) infinite",
+          "animate-ring-pulse": "ring-pulse 1.8s ease-out infinite",
+          "animate-grow-x": "grow-x 480ms cubic-bezier(0.23, 1, 0.32, 1) backwards",
+          "animate-grow-y": "grow-y 480ms cubic-bezier(0.23, 1, 0.32, 1) backwards"
+        },
         "light": {
-          "uai-canvas": "oklch(0.975 0.001 260)",
-          "uai-surface": "oklch(1 0 0)",
-          "uai-surface-raised": "oklch(0.94 0.003 260)",
-          "uai-border": "oklch(0.915 0.003 260)",
-          "uai-border-strong": "oklch(0.84 0.005 260)",
-          "uai-text": "oklch(0.247 0.006 258)",
-          "uai-muted": "oklch(0.47 0.01 260)",
-          "uai-subtle": "oklch(0.55 0.01 260)",
-          "uai-accent": "oklch(0.57 0.185 257)",
-          "uai-accent-foreground": "oklch(1 0 0)",
-          "uai-success": "oklch(0.6 0.15 153)",
-          "uai-warning": "oklch(0.66 0.16 55)",
-          "uai-danger": "oklch(0.58 0.2 23)"
+          "radius": "0.875rem",
+          "background": "oklch(0.975 0.001 260)",
+          "foreground": "oklch(0.247 0.006 258)",
+          "card": "oklch(1 0 0)",
+          "card-foreground": "oklch(0.247 0.006 258)",
+          "popover": "oklch(1 0 0)",
+          "popover-foreground": "oklch(0.247 0.006 258)",
+          "primary": "oklch(0.57 0.185 257)",
+          "primary-foreground": "oklch(1 0 0)",
+          "secondary": "oklch(0.94 0.003 260)",
+          "secondary-foreground": "oklch(0.247 0.006 258)",
+          "muted": "oklch(0.94 0.003 260)",
+          "muted-foreground": "oklch(0.47 0.01 260)",
+          "subtle-foreground": "oklch(0.55 0.01 260)",
+          "accent": "oklch(0.94 0.003 260)",
+          "accent-foreground": "oklch(0.247 0.006 258)",
+          "destructive": "oklch(0.58 0.2 23)",
+          "success": "oklch(0.6 0.15 153)",
+          "warning": "oklch(0.66 0.16 55)",
+          "border": "oklch(0.915 0.003 260)",
+          "border-strong": "oklch(0.84 0.005 260)",
+          "input": "oklch(0.915 0.003 260)",
+          "ring": "oklch(0.57 0.185 257)"
         },
         "dark": {
-          "uai-canvas": "oklch(0.226 0.004 264)",
-          "uai-surface": "oklch(0.26 0.006 271)",
-          "uai-surface-raised": "oklch(0.293 0.006 271)",
-          "uai-border": "oklch(0.315 0.006 268)",
-          "uai-border-strong": "oklch(0.39 0.007 268)",
-          "uai-text": "oklch(0.964 0.002 248)",
-          "uai-muted": "oklch(0.731 0.008 261)",
-          "uai-subtle": "oklch(0.62 0.01 264)",
-          "uai-accent": "oklch(0.57 0.185 257)",
-          "uai-accent-foreground": "oklch(1 0 0)",
-          "uai-success": "oklch(0.705 0.154 154)",
-          "uai-warning": "oklch(0.746 0.156 56)",
-          "uai-danger": "oklch(0.666 0.18 21)"
+          "background": "oklch(0.226 0.004 264)",
+          "foreground": "oklch(0.964 0.002 248)",
+          "card": "oklch(0.26 0.006 271)",
+          "card-foreground": "oklch(0.964 0.002 248)",
+          "popover": "oklch(0.26 0.006 271)",
+          "popover-foreground": "oklch(0.964 0.002 248)",
+          "primary": "oklch(0.57 0.185 257)",
+          "primary-foreground": "oklch(1 0 0)",
+          "secondary": "oklch(0.293 0.006 271)",
+          "secondary-foreground": "oklch(0.964 0.002 248)",
+          "muted": "oklch(0.293 0.006 271)",
+          "muted-foreground": "oklch(0.731 0.008 261)",
+          "subtle-foreground": "oklch(0.62 0.01 264)",
+          "accent": "oklch(0.293 0.006 271)",
+          "accent-foreground": "oklch(0.964 0.002 248)",
+          "destructive": "oklch(0.666 0.18 21)",
+          "success": "oklch(0.705 0.154 154)",
+          "warning": "oklch(0.746 0.156 56)",
+          "border": "oklch(0.315 0.006 268)",
+          "border-strong": "oklch(0.39 0.007 268)",
+          "input": "oklch(0.315 0.006 268)",
+          "ring": "oklch(0.57 0.185 257)"
         }
       },
-      "categories": ["theme"]
+      "categories": ["theme"],
+      "css": {
+        "@keyframes shimmer": {
+          "from": {
+            "background-position": "100% 0"
+          },
+          "to": {
+            "background-position": "-100% 0"
+          }
+        },
+        "@keyframes skeleton-shimmer": {
+          "from": {
+            "background-position": "150% 0"
+          },
+          "to": {
+            "background-position": "-50% 0"
+          }
+        },
+        "@keyframes indeterminate": {
+          "from": {
+            "transform": "translateX(-100%)"
+          },
+          "to": {
+            "transform": "translateX(290%)"
+          }
+        },
+        "@keyframes ring-pulse": {
+          "0%": {
+            "box-shadow": "0 0 0 0 color-mix(in oklab, currentColor 45%, transparent)"
+          },
+          "70%, 100%": {
+            "box-shadow": "0 0 0 5px transparent"
+          }
+        },
+        "@keyframes grow-x": {
+          "from": {
+            "transform": "scaleX(0)"
+          }
+        },
+        "@keyframes grow-y": {
+          "from": {
+            "transform": "scaleY(0)"
+          }
+        },
+        "@utility shimmer-text": {
+          "background-image": "linear-gradient(90deg, var(--subtle-foreground) 0%, var(--subtle-foreground) 35%, var(--foreground) 50%, var(--subtle-foreground) 65%, var(--subtle-foreground) 100%)",
+          "background-size": "200% 100%",
+          "background-clip": "text",
+          "color": "transparent",
+          "animation": "var(--animate-shimmer)",
+          "@media (prefers-reduced-motion: reduce)": {
+            "animation": "none",
+            "background": "none",
+            "color": "var(--foreground)"
+          }
+        }
+      },
+      "dependencies": ["tw-animate-css"]
     },
     {
       "name": "uai-utils",
@@ -64,8 +171,8 @@
       "description": "A composable activity disclosure with explicit states and structured evidence.",
       "dependencies": ["lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/uai-utils.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -81,10 +188,10 @@
       "type": "registry:ui",
       "title": "Approval Card",
       "description": "A composable decision surface that keeps risk, evidence, and impact explicit.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/uai-utils.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -101,8 +208,8 @@
       "title": "Empty State",
       "description": "A compound blank-slate surface with card, plain, compact, and page variants.",
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/uai-utils.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -111,17 +218,18 @@
           "target": "@ui/uai/empty-state.tsx"
         }
       ],
-      "categories": ["feedback", "data-display"]
+      "categories": ["feedback", "data-display"],
+      "dependencies": ["class-variance-authority"]
     },
     {
       "name": "task-list",
       "type": "registry:ui",
       "title": "Task List",
       "description": "A composable progress list with card, timeline, and compact variants.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/uai-utils.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -137,10 +245,10 @@
       "type": "registry:ui",
       "title": "Prompt Composer",
       "description": "A compound prompt bar with composable add, input, and action regions.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/uai-utils.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -156,10 +264,10 @@
       "type": "registry:ui",
       "title": "Sign-in Card",
       "description": "A compound sign-in form with providers, credentials, recovery, and async feedback.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/uai-utils.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -175,10 +283,10 @@
       "type": "registry:ui",
       "title": "Sign-up Card",
       "description": "A compound account creation form with consent, password guidance, and verification feedback.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/uai-utils.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -194,10 +302,10 @@
       "type": "registry:ui",
       "title": "Password Recovery",
       "description": "A compound account recovery workflow with request, sent, reset, expired, and success states.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/uai-utils.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -213,10 +321,10 @@
       "type": "registry:ui",
       "title": "Coupon Field",
       "description": "A compound discount field with rounded, pill, and compact variants.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/uai-utils.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -232,10 +340,10 @@
       "type": "registry:ui",
       "title": "Quantity Picker",
       "description": "A compound quantity control with limits, direct input, and stock feedback.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/uai-utils.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -251,11 +359,11 @@
       "type": "registry:ui",
       "title": "Cart Item",
       "description": "A compound cart line with product details, availability, quantity, price, and removal.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/uai-utils.json",
-        "http://localhost:3000/r/quantity-picker.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json",
+        "https://useuai.vercel.app/r/quantity-picker.json"
       ],
       "files": [
         {
@@ -272,8 +380,8 @@
       "title": "Price Summary",
       "description": "A compound order total with card, plain, and compact variants.",
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/uai-utils.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -282,17 +390,18 @@
           "target": "@ui/uai/price-summary.tsx"
         }
       ],
-      "categories": ["commerce", "data-display"]
+      "categories": ["commerce", "data-display"],
+      "dependencies": ["class-variance-authority"]
     },
     {
       "name": "order-status",
       "type": "registry:ui",
       "title": "Order Status",
       "description": "A compound fulfillment timeline with card, plain, and compact variants.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/uai-utils.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -308,10 +417,10 @@
       "type": "registry:ui",
       "title": "App Header",
       "description": "A compound application header with navigation, search, account actions, and responsive overflow.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/uai-utils.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -327,8 +436,11 @@
       "type": "registry:ui",
       "title": "Form Field",
       "description": "Labels, descriptions, requirements, validation, and character counts.",
-      "dependencies": [],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/form-field.tsx",
@@ -343,8 +455,11 @@
       "type": "registry:ui",
       "title": "Search Field",
       "description": "Clearable search with recent queries, loading, empty, and error feedback.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/search-field.tsx",
@@ -359,8 +474,11 @@
       "type": "registry:ui",
       "title": "Filter Bar",
       "description": "Composable filters, removable chips, result counts, and reset actions.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/filter-bar.tsx",
@@ -375,8 +493,11 @@
       "type": "registry:ui",
       "title": "File Upload",
       "description": "File selection and drag and drop with validation, progress, retry, and removal.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/file-upload.tsx",
@@ -391,8 +512,11 @@
       "type": "registry:ui",
       "title": "Date Range Picker",
       "description": "Presets, date inputs, and a keyboard-navigable calendar for local date ranges.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/date-range-picker.tsx",
@@ -407,8 +531,11 @@
       "type": "registry:ui",
       "title": "Form Error Summary",
       "description": "A submission error summary with links that focus the matching fields.",
-      "dependencies": [],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/form-error-summary.tsx",
@@ -423,8 +550,11 @@
       "type": "registry:ui",
       "title": "Unsaved Changes Bar",
       "description": "Persistent save and discard actions with busy, error, and page-exit warnings.",
-      "dependencies": [],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/unsaved-changes-bar.tsx",
@@ -439,8 +569,11 @@
       "type": "registry:ui",
       "title": "Step Indicator",
       "description": "Current, complete, optional, blocked, and error steps with explicit status text.",
-      "dependencies": [],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/step-indicator.tsx",
@@ -455,8 +588,11 @@
       "type": "registry:ui",
       "title": "App Sidebar",
       "description": "Nested navigation with collapsed mode, a mobile disclosure, and active states.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/app-sidebar.tsx",
@@ -471,8 +607,11 @@
       "type": "registry:ui",
       "title": "Breadcrumb Trail",
       "description": "Hierarchy with label truncation, collapsed levels, and a compact mobile fallback.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/breadcrumb-trail.tsx",
@@ -487,7 +626,10 @@
       "type": "registry:ui",
       "title": "Page Tabs",
       "description": "Primary tabs with counts, page actions, and horizontal overflow.",
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/page-tabs.tsx",
@@ -495,15 +637,19 @@
           "target": "@ui/uai/page-tabs.tsx"
         }
       ],
-      "categories": ["navigation"]
+      "categories": ["navigation"],
+      "dependencies": ["class-variance-authority"]
     },
     {
       "name": "command-menu",
       "type": "registry:ui",
       "title": "Command Menu",
       "description": "Search and run grouped actions with full keyboard navigation.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/command-menu.tsx",
@@ -518,7 +664,10 @@
       "type": "registry:ui",
       "title": "Split Pane",
       "description": "Two resizable regions with keyboard controls and saved proportions.",
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/split-pane.tsx",
@@ -526,15 +675,19 @@
           "target": "@ui/uai/split-pane.tsx"
         }
       ],
-      "categories": ["navigation"]
+      "categories": ["navigation"],
+      "dependencies": ["class-variance-authority"]
     },
     {
       "name": "status-banner",
       "type": "registry:ui",
       "title": "Status Banner",
       "description": "Information, success, warning, and error banners with optional actions and dismissal.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/status-banner.tsx",
@@ -549,7 +702,10 @@
       "type": "registry:ui",
       "title": "Progress Summary",
       "description": "Progress, elapsed time, remaining work, and cancellation in one composable summary.",
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/progress-summary.tsx",
@@ -557,15 +713,19 @@
           "target": "@ui/uai/progress-summary.tsx"
         }
       ],
-      "categories": ["feedback", "progress"]
+      "categories": ["feedback", "progress"],
+      "dependencies": ["class-variance-authority"]
     },
     {
       "name": "inline-feedback",
       "type": "registry:ui",
       "title": "Inline Feedback",
       "description": "Confirm or reject a local action in a polite live region without interrupting the workflow.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/inline-feedback.tsx",
@@ -580,7 +740,10 @@
       "type": "registry:ui",
       "title": "Confirmation Dialog",
       "description": "A native modal that explains impact before destructive actions, with optional typed confirmation.",
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/confirmation-dialog.tsx",
@@ -588,14 +751,18 @@
           "target": "@ui/uai/confirmation-dialog.tsx"
         }
       ],
-      "categories": ["feedback", "dialog"]
+      "categories": ["feedback", "dialog"],
+      "dependencies": ["class-variance-authority"]
     },
     {
       "name": "activity-timeline",
       "type": "registry:ui",
       "title": "Activity Timeline",
       "description": "Events, actors, timestamps, metadata, and grouped dates in an ordered timeline.",
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/activity-timeline.tsx",
@@ -603,14 +770,18 @@
           "target": "@ui/uai/activity-timeline.tsx"
         }
       ],
-      "categories": ["feedback", "data-display"]
+      "categories": ["feedback", "data-display"],
+      "dependencies": ["class-variance-authority"]
     },
     {
       "name": "skeleton-group",
       "type": "registry:ui",
       "title": "Skeleton Group",
       "description": "Composable loading placeholders that match page structure without layout shift.",
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/skeleton-group.tsx",
@@ -618,15 +789,19 @@
           "target": "@ui/uai/skeleton-group.tsx"
         }
       ],
-      "categories": ["feedback", "loading"]
+      "categories": ["feedback", "loading"],
+      "dependencies": ["class-variance-authority"]
     },
     {
       "name": "data-table-toolbar",
       "type": "registry:ui",
       "title": "Data Table Toolbar",
       "description": "Search, filters, column visibility, export, and bulk actions for selected rows.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/data-table-toolbar.tsx",
@@ -641,8 +816,11 @@
       "type": "registry:ui",
       "title": "Metric Card",
       "description": "A value with comparison, trend, and supporting context.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/metric-card.tsx",
@@ -657,7 +835,10 @@
       "type": "registry:ui",
       "title": "Description List",
       "description": "Labeled facts with responsive alignment and optional actions.",
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/description-list.tsx",
@@ -665,7 +846,8 @@
           "target": "@ui/uai/description-list.tsx"
         }
       ],
-      "categories": ["data-display"]
+      "categories": ["data-display"],
+      "dependencies": ["class-variance-authority"]
     },
     {
       "name": "comparison-table",
@@ -673,7 +855,10 @@
       "title": "Comparison Table",
       "description": "Compare plans or products with sticky labels and highlighted differences.",
       "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/comparison-table.tsx",
@@ -688,7 +873,10 @@
       "type": "registry:ui",
       "title": "Kanban Board",
       "description": "Columns, cards, keyboard movement, and empty states.",
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/kanban-board.tsx",
@@ -696,15 +884,19 @@
           "target": "@ui/uai/kanban-board.tsx"
         }
       ],
-      "categories": ["data-display"]
+      "categories": ["data-display"],
+      "dependencies": ["class-variance-authority"]
     },
     {
       "name": "calendar-view",
       "type": "registry:ui",
       "title": "Calendar View",
       "description": "Day, week, and month layouts with event overflow.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/calendar-view.tsx",
@@ -719,8 +911,11 @@
       "type": "registry:ui",
       "title": "Audit Log",
       "description": "Actors, actions, resources, timestamps, filters, and event details.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/audit-log.tsx",
@@ -735,8 +930,11 @@
       "type": "registry:ui",
       "title": "Author Card",
       "description": "Author identity with an initials fallback, biography, profile links, and a follow toggle.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/author-card.tsx",
@@ -751,8 +949,11 @@
       "type": "registry:ui",
       "title": "Comment",
       "description": "Comments with nested replies, reactions, inline editing, moderation states, and timestamps.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/comment.tsx",
@@ -767,8 +968,11 @@
       "type": "registry:ui",
       "title": "Reaction Bar",
       "description": "Reaction counts and selected states with accessible names and an add-reaction menu.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/reaction-bar.tsx",
@@ -783,8 +987,11 @@
       "type": "registry:ui",
       "title": "Share Menu",
       "description": "A share menu with native sharing, copy-link feedback, and channel links.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/share-menu.tsx",
@@ -799,8 +1006,11 @@
       "type": "registry:ui",
       "title": "Changelog Entry",
       "description": "A release entry with date, version, categories, and linked changes.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/changelog-entry.tsx",
@@ -815,8 +1025,11 @@
       "type": "registry:ui",
       "title": "Announcement Bar",
       "description": "A campaign message with actions, dismissal, and remembered dismissal.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/announcement-bar.tsx",
@@ -831,7 +1044,10 @@
       "type": "registry:ui",
       "title": "Pricing Toggle",
       "description": "Switch billing periods while keeping prices, billing context, and savings labels in sync.",
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/pricing-toggle.tsx",
@@ -839,15 +1055,19 @@
           "target": "@ui/uai/pricing-toggle.tsx"
         }
       ],
-      "categories": ["marketing", "pricing"]
+      "categories": ["marketing", "pricing"],
+      "dependencies": ["class-variance-authority"]
     },
     {
       "name": "testimonial-card",
       "type": "registry:ui",
       "title": "Testimonial Card",
       "description": "A quote with the person, role, organization, and an optional proof link.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/testimonial-card.tsx",
@@ -862,8 +1082,11 @@
       "type": "registry:ui",
       "title": "Product Gallery",
       "description": "Media selection with thumbnails, zoom, fullscreen viewing, and required alt text.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/product-gallery.tsx",
@@ -878,8 +1101,11 @@
       "type": "registry:ui",
       "title": "Trust Panel",
       "description": "Customer logos, ratings, certifications, and security evidence in one section.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/trust-panel.tsx",
@@ -894,7 +1120,10 @@
       "type": "registry:ui",
       "title": "Newsletter Form",
       "description": "Email signup with consent, validation, submission, success, and duplicate-email states.",
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/newsletter-form.tsx",
@@ -902,15 +1131,19 @@
           "target": "@ui/uai/newsletter-form.tsx"
         }
       ],
-      "categories": ["marketing", "forms"]
+      "categories": ["marketing", "forms"],
+      "dependencies": ["class-variance-authority"]
     },
     {
       "name": "message",
       "type": "registry:ui",
       "title": "Message",
       "description": "User, assistant, system, and tool messages with avatar, header, content, actions, and streaming state.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/message.tsx",
@@ -926,7 +1159,10 @@
       "title": "Citation",
       "description": "An inline claim marker with a source preview card and destination link.",
       "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/citation.tsx",
@@ -941,8 +1177,11 @@
       "type": "registry:ui",
       "title": "Attachment",
       "description": "A file with type icon or thumbnail, upload progress, failure and retry, and removal.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/attachment.tsx",
@@ -957,8 +1196,11 @@
       "type": "registry:ui",
       "title": "Tool Call",
       "description": "Queued, running, successful, and failed tool activity with a disclosure for input and output.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/tool-call.tsx",
@@ -973,8 +1215,11 @@
       "type": "registry:ui",
       "title": "Response Status",
       "description": "Queued, streaming, stopped, complete, and failed response states with stop and retry actions.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/response-status.tsx",
@@ -989,8 +1234,11 @@
       "type": "registry:ui",
       "title": "Run Summary",
       "description": "A summary of completed agent work with stats, changed artifacts, warnings, and next actions.",
-      "dependencies": ["lucide-react"],
-      "registryDependencies": ["http://localhost:3000/r/uai-theme.json"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
+      ],
       "files": [
         {
           "path": "src/registry/uai/components/run-summary.tsx",
@@ -1006,8 +1254,9 @@
       "title": "Hero Section",
       "description": "Positioning, a primary action, supporting proof, and product media.",
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/trust-panel.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/trust-panel.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1016,7 +1265,8 @@
           "target": "@components/uai/hero-section.tsx"
         }
       ],
-      "categories": ["marketing", "hero"]
+      "categories": ["marketing", "hero"],
+      "dependencies": ["class-variance-authority"]
     },
     {
       "name": "feature-showcase",
@@ -1024,8 +1274,9 @@
       "title": "Feature Showcase",
       "description": "Benefits through alternating copy, media, and supporting details.",
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/description-list.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/description-list.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1034,17 +1285,19 @@
           "target": "@components/uai/feature-showcase.tsx"
         }
       ],
-      "categories": ["marketing", "features"]
+      "categories": ["marketing", "features"],
+      "dependencies": ["class-variance-authority"]
     },
     {
       "name": "pricing-section",
       "type": "registry:block",
       "title": "Pricing Section",
       "description": "Plans, billing periods, limits, and purchase actions.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/pricing-toggle.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/pricing-toggle.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1061,9 +1314,10 @@
       "title": "Testimonials Section",
       "description": "Customer stories with people, roles, organizations, and a rating summary.",
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/testimonial-card.json",
-        "http://localhost:3000/r/trust-panel.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/testimonial-card.json",
+        "https://useuai.vercel.app/r/trust-panel.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1072,17 +1326,19 @@
           "target": "@components/uai/testimonials-section.tsx"
         }
       ],
-      "categories": ["marketing", "social-proof"]
+      "categories": ["marketing", "social-proof"],
+      "dependencies": ["class-variance-authority"]
     },
     {
       "name": "faq-section",
       "type": "registry:block",
       "title": "FAQ Section",
       "description": "Searchable questions with accessible disclosure answers.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/search-field.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/search-field.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1098,10 +1354,11 @@
       "type": "registry:block",
       "title": "Call to Action",
       "description": "A closing section with one goal, supporting copy, and reassurance.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/trust-panel.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/trust-panel.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1118,9 +1375,10 @@
       "title": "Waitlist Section",
       "description": "Collect interest with qualification fields, consent, and confirmation.",
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/newsletter-form.json",
-        "http://localhost:3000/r/form-field.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/newsletter-form.json",
+        "https://useuai.vercel.app/r/form-field.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1129,18 +1387,20 @@
           "target": "@components/uai/waitlist-section.tsx"
         }
       ],
-      "categories": ["marketing", "conversion", "forms"]
+      "categories": ["marketing", "conversion", "forms"],
+      "dependencies": ["class-variance-authority"]
     },
     {
       "name": "contact-section",
       "type": "registry:block",
       "title": "Contact Section",
       "description": "Contact options, availability, a message form with its states, and expectations.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/status-banner.json",
-        "http://localhost:3000/r/form-field.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/status-banner.json",
+        "https://useuai.vercel.app/r/form-field.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1156,12 +1416,13 @@
       "type": "registry:block",
       "title": "Dashboard Shell",
       "description": "Global navigation, page hierarchy, actions, key metrics, and a layout that stacks on narrow screens.",
-      "dependencies": [],
+      "dependencies": ["class-variance-authority"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/app-sidebar.json",
-        "http://localhost:3000/r/breadcrumb-trail.json",
-        "http://localhost:3000/r/metric-card.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/app-sidebar.json",
+        "https://useuai.vercel.app/r/breadcrumb-trail.json",
+        "https://useuai.vercel.app/r/metric-card.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1177,12 +1438,13 @@
       "type": "registry:block",
       "title": "Settings Page",
       "description": "Grouped settings with field validation, a sticky save state, and a guarded danger zone.",
-      "dependencies": [],
+      "dependencies": ["class-variance-authority"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/confirmation-dialog.json",
-        "http://localhost:3000/r/form-field.json",
-        "http://localhost:3000/r/unsaved-changes-bar.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/confirmation-dialog.json",
+        "https://useuai.vercel.app/r/form-field.json",
+        "https://useuai.vercel.app/r/unsaved-changes-bar.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1198,12 +1460,13 @@
       "type": "registry:block",
       "title": "Profile Page",
       "description": "Identity, account actions, contact details, and recent activity in a sidebar or stacked layout.",
-      "dependencies": [],
+      "dependencies": ["class-variance-authority"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/activity-timeline.json",
-        "http://localhost:3000/r/author-card.json",
-        "http://localhost:3000/r/description-list.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/activity-timeline.json",
+        "https://useuai.vercel.app/r/author-card.json",
+        "https://useuai.vercel.app/r/description-list.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1219,12 +1482,13 @@
       "type": "registry:block",
       "title": "Team Management",
       "description": "Members, roles, invitations, access status, search, and confirmed removal.",
-      "dependencies": [],
+      "dependencies": ["class-variance-authority"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/confirmation-dialog.json",
-        "http://localhost:3000/r/data-table-toolbar.json",
-        "http://localhost:3000/r/empty-state.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/confirmation-dialog.json",
+        "https://useuai.vercel.app/r/data-table-toolbar.json",
+        "https://useuai.vercel.app/r/empty-state.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1240,11 +1504,12 @@
       "type": "registry:block",
       "title": "Notification Center",
       "description": "Updates grouped by date with unread state, filters, per-item toggles, and bulk actions.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/empty-state.json",
-        "http://localhost:3000/r/page-tabs.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/empty-state.json",
+        "https://useuai.vercel.app/r/page-tabs.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1260,13 +1525,14 @@
       "type": "registry:block",
       "title": "Billing Portal",
       "description": "Plan, usage, payment method, invoice history, billing alerts, and confirmed cancellation.",
-      "dependencies": [],
+      "dependencies": ["class-variance-authority"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/confirmation-dialog.json",
-        "http://localhost:3000/r/description-list.json",
-        "http://localhost:3000/r/progress-summary.json",
-        "http://localhost:3000/r/status-banner.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/confirmation-dialog.json",
+        "https://useuai.vercel.app/r/description-list.json",
+        "https://useuai.vercel.app/r/progress-summary.json",
+        "https://useuai.vercel.app/r/status-banner.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1282,13 +1548,14 @@
       "type": "registry:block",
       "title": "Search Results",
       "description": "Query controls, filters, ranked results with highlighted terms, empty states, and pagination.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/empty-state.json",
-        "http://localhost:3000/r/filter-bar.json",
-        "http://localhost:3000/r/search-field.json",
-        "http://localhost:3000/r/skeleton-group.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/empty-state.json",
+        "https://useuai.vercel.app/r/filter-bar.json",
+        "https://useuai.vercel.app/r/search-field.json",
+        "https://useuai.vercel.app/r/skeleton-group.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1305,12 +1572,12 @@
       "title": "Resource Manager",
       "description": "List, create, inspect, edit, archive, and delete domain records.",
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/uai-utils.json",
-        "http://localhost:3000/r/confirmation-dialog.json",
-        "http://localhost:3000/r/data-table-toolbar.json",
-        "http://localhost:3000/r/description-list.json",
-        "http://localhost:3000/r/empty-state.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json",
+        "https://useuai.vercel.app/r/confirmation-dialog.json",
+        "https://useuai.vercel.app/r/data-table-toolbar.json",
+        "https://useuai.vercel.app/r/description-list.json",
+        "https://useuai.vercel.app/r/empty-state.json"
       ],
       "files": [
         {
@@ -1319,20 +1586,21 @@
           "target": "@components/uai/resource-manager.tsx"
         }
       ],
-      "categories": ["operations", "data", "crud"]
+      "categories": ["operations", "data", "crud"],
+      "dependencies": ["class-variance-authority"]
     },
     {
       "name": "data-explorer",
       "type": "registry:block",
       "title": "Data Explorer",
       "description": "Query surface, results, saved views, and export actions.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/uai-utils.json",
-        "http://localhost:3000/r/data-table-toolbar.json",
-        "http://localhost:3000/r/empty-state.json",
-        "http://localhost:3000/r/page-tabs.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json",
+        "https://useuai.vercel.app/r/data-table-toolbar.json",
+        "https://useuai.vercel.app/r/empty-state.json",
+        "https://useuai.vercel.app/r/page-tabs.json"
       ],
       "files": [
         {
@@ -1348,14 +1616,14 @@
       "type": "registry:block",
       "title": "Import Workflow",
       "description": "File selection, column mapping, validation, preview, and completion.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/uai-utils.json",
-        "http://localhost:3000/r/file-upload.json",
-        "http://localhost:3000/r/progress-summary.json",
-        "http://localhost:3000/r/status-banner.json",
-        "http://localhost:3000/r/step-indicator.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json",
+        "https://useuai.vercel.app/r/file-upload.json",
+        "https://useuai.vercel.app/r/progress-summary.json",
+        "https://useuai.vercel.app/r/status-banner.json",
+        "https://useuai.vercel.app/r/step-indicator.json"
       ],
       "files": [
         {
@@ -1372,12 +1640,12 @@
       "title": "Approval Queue",
       "description": "Pending decisions grouped by risk, age, owner, and impact.",
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/uai-utils.json",
-        "http://localhost:3000/r/approval-card.json",
-        "http://localhost:3000/r/empty-state.json",
-        "http://localhost:3000/r/filter-bar.json",
-        "http://localhost:3000/r/metric-card.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json",
+        "https://useuai.vercel.app/r/approval-card.json",
+        "https://useuai.vercel.app/r/empty-state.json",
+        "https://useuai.vercel.app/r/filter-bar.json",
+        "https://useuai.vercel.app/r/metric-card.json"
       ],
       "files": [
         {
@@ -1386,7 +1654,8 @@
           "target": "@components/uai/approval-queue.tsx"
         }
       ],
-      "categories": ["operations", "approvals", "review"]
+      "categories": ["operations", "approvals", "review"],
+      "dependencies": []
     },
     {
       "name": "audit-log-viewer",
@@ -1394,11 +1663,11 @@
       "title": "Audit Log Viewer",
       "description": "Filters, events, details, and export controls.",
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/uai-utils.json",
-        "http://localhost:3000/r/audit-log.json",
-        "http://localhost:3000/r/date-range-picker.json",
-        "http://localhost:3000/r/filter-bar.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json",
+        "https://useuai.vercel.app/r/audit-log.json",
+        "https://useuai.vercel.app/r/date-range-picker.json",
+        "https://useuai.vercel.app/r/filter-bar.json"
       ],
       "files": [
         {
@@ -1407,7 +1676,8 @@
           "target": "@components/uai/audit-log-viewer.tsx"
         }
       ],
-      "categories": ["operations", "audit", "security"]
+      "categories": ["operations", "audit", "security"],
+      "dependencies": ["class-variance-authority"]
     },
     {
       "name": "incident-dashboard",
@@ -1415,12 +1685,12 @@
       "title": "Incident Dashboard",
       "description": "Status, impact, timeline, responders, and updates.",
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/uai-utils.json",
-        "http://localhost:3000/r/activity-timeline.json",
-        "http://localhost:3000/r/description-list.json",
-        "http://localhost:3000/r/metric-card.json",
-        "http://localhost:3000/r/status-banner.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json",
+        "https://useuai.vercel.app/r/activity-timeline.json",
+        "https://useuai.vercel.app/r/description-list.json",
+        "https://useuai.vercel.app/r/metric-card.json",
+        "https://useuai.vercel.app/r/status-banner.json"
       ],
       "files": [
         {
@@ -1429,7 +1699,8 @@
           "target": "@components/uai/incident-dashboard.tsx"
         }
       ],
-      "categories": ["operations", "incidents", "monitoring"]
+      "categories": ["operations", "incidents", "monitoring"],
+      "dependencies": ["class-variance-authority"]
     },
     {
       "name": "report-builder",
@@ -1437,10 +1708,10 @@
       "title": "Report Builder",
       "description": "Select metrics, dimensions, filters, visualization, and export format.",
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/uai-utils.json",
-        "http://localhost:3000/r/filter-bar.json",
-        "http://localhost:3000/r/metric-card.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json",
+        "https://useuai.vercel.app/r/filter-bar.json",
+        "https://useuai.vercel.app/r/metric-card.json"
       ],
       "files": [
         {
@@ -1449,18 +1720,20 @@
           "target": "@components/uai/report-builder.tsx"
         }
       ],
-      "categories": ["operations", "reporting", "charts"]
+      "categories": ["operations", "reporting", "charts"],
+      "dependencies": ["class-variance-authority"]
     },
     {
       "name": "product-detail",
       "type": "registry:block",
       "title": "Product Detail",
       "description": "Gallery, options, availability, price, delivery, and purchase actions.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/product-gallery.json",
-        "http://localhost:3000/r/quantity-picker.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/product-gallery.json",
+        "https://useuai.vercel.app/r/quantity-picker.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1476,10 +1749,11 @@
       "type": "registry:block",
       "title": "Product Listing",
       "description": "Categories, filters, sorting, result counts, and pagination.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/filter-bar.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/filter-bar.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1495,13 +1769,14 @@
       "type": "registry:block",
       "title": "Cart Drawer",
       "description": "Review items, quantities, discounts, totals, and checkout actions.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/cart-item.json",
-        "http://localhost:3000/r/coupon-field.json",
-        "http://localhost:3000/r/price-summary.json",
-        "http://localhost:3000/r/quantity-picker.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/cart-item.json",
+        "https://useuai.vercel.app/r/coupon-field.json",
+        "https://useuai.vercel.app/r/price-summary.json",
+        "https://useuai.vercel.app/r/quantity-picker.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1517,12 +1792,13 @@
       "type": "registry:block",
       "title": "Checkout",
       "description": "Guide contact, delivery, payment, review, and confirmation.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/price-summary.json",
-        "http://localhost:3000/r/status-banner.json",
-        "http://localhost:3000/r/step-indicator.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/price-summary.json",
+        "https://useuai.vercel.app/r/status-banner.json",
+        "https://useuai.vercel.app/r/step-indicator.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1538,11 +1814,12 @@
       "type": "registry:block",
       "title": "Order Tracking",
       "description": "Status, shipment events, delivery estimates, and support.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/description-list.json",
-        "http://localhost:3000/r/order-status.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/description-list.json",
+        "https://useuai.vercel.app/r/order-status.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1559,10 +1836,11 @@
       "title": "Subscription Management",
       "description": "Change plans, usage limits, payment, renewal, and cancellation.",
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/confirmation-dialog.json",
-        "http://localhost:3000/r/description-list.json",
-        "http://localhost:3000/r/pricing-toggle.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/confirmation-dialog.json",
+        "https://useuai.vercel.app/r/description-list.json",
+        "https://useuai.vercel.app/r/pricing-toggle.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1571,7 +1849,8 @@
           "target": "@components/uai/subscription-management.tsx"
         }
       ],
-      "categories": ["commerce", "billing"]
+      "categories": ["commerce", "billing"],
+      "dependencies": ["class-variance-authority"]
     },
     {
       "name": "code-verification",
@@ -1579,9 +1858,10 @@
       "title": "Code Verification",
       "description": "One-time code entry with paste, resend timing, errors, and alternate methods.",
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/inline-feedback.json",
-        "http://localhost:3000/r/status-banner.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/inline-feedback.json",
+        "https://useuai.vercel.app/r/status-banner.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1590,7 +1870,8 @@
           "target": "@components/uai/code-verification.tsx"
         }
       ],
-      "categories": ["authentication", "onboarding", "forms"]
+      "categories": ["authentication", "onboarding", "forms"],
+      "dependencies": ["class-variance-authority"]
     },
     {
       "name": "onboarding-wizard",
@@ -1598,9 +1879,10 @@
       "title": "Onboarding Wizard",
       "description": "Resumable setup steps with validation, progress, optional steps, and completion.",
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/step-indicator.json",
-        "http://localhost:3000/r/status-banner.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/step-indicator.json",
+        "https://useuai.vercel.app/r/status-banner.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1609,18 +1891,20 @@
           "target": "@components/uai/onboarding-wizard.tsx"
         }
       ],
-      "categories": ["authentication", "onboarding", "forms"]
+      "categories": ["authentication", "onboarding", "forms"],
+      "dependencies": ["class-variance-authority"]
     },
     {
       "name": "workspace-setup",
       "type": "registry:block",
       "title": "Workspace Setup",
       "description": "Create a workspace, invite teammates, and choose initial settings.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/form-field.json",
-        "http://localhost:3000/r/status-banner.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/form-field.json",
+        "https://useuai.vercel.app/r/status-banner.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1636,11 +1920,12 @@
       "type": "registry:block",
       "title": "Article Page",
       "description": "Long-form reading with metadata, text size controls, sharing, and related articles.",
-      "dependencies": [],
+      "dependencies": ["class-variance-authority"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/author-card.json",
-        "http://localhost:3000/r/share-menu.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/author-card.json",
+        "https://useuai.vercel.app/r/share-menu.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1656,11 +1941,12 @@
       "type": "registry:block",
       "title": "Documentation Page",
       "description": "Navigation, an in-page table of contents with the current section, content, and page actions.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/app-sidebar.json",
-        "http://localhost:3000/r/breadcrumb-trail.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/app-sidebar.json",
+        "https://useuai.vercel.app/r/breadcrumb-trail.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1676,12 +1962,13 @@
       "type": "registry:block",
       "title": "Changelog Page",
       "description": "Releases grouped by date with version, category, and product area filters.",
-      "dependencies": [],
+      "dependencies": ["class-variance-authority"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/changelog-entry.json",
-        "http://localhost:3000/r/empty-state.json",
-        "http://localhost:3000/r/filter-bar.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/changelog-entry.json",
+        "https://useuai.vercel.app/r/empty-state.json",
+        "https://useuai.vercel.app/r/filter-bar.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1699,9 +1986,10 @@
       "description": "Nested replies, reactions, sorting, moderation states, and a comment composer.",
       "dependencies": ["lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/comment.json",
-        "http://localhost:3000/r/reaction-bar.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/comment.json",
+        "https://useuai.vercel.app/r/reaction-bar.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1717,12 +2005,13 @@
       "type": "registry:block",
       "title": "Community Feed",
       "description": "Posts with authors, tags, reactions, filters, and numbered pagination.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/author-card.json",
-        "http://localhost:3000/r/empty-state.json",
-        "http://localhost:3000/r/reaction-bar.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/author-card.json",
+        "https://useuai.vercel.app/r/empty-state.json",
+        "https://useuai.vercel.app/r/reaction-bar.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1738,11 +2027,12 @@
       "type": "registry:block",
       "title": "Public Profile",
       "description": "Identity, links, follower counts, pinned work, and recent activity.",
-      "dependencies": [],
+      "dependencies": ["class-variance-authority"],
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/activity-timeline.json",
-        "http://localhost:3000/r/author-card.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/activity-timeline.json",
+        "https://useuai.vercel.app/r/author-card.json",
+        "https://useuai.vercel.app/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1759,12 +2049,12 @@
       "title": "Conversation Thread",
       "description": "Messages, cited sources, response states, and a prompt composer in one thread.",
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/uai-utils.json",
-        "http://localhost:3000/r/citation.json",
-        "http://localhost:3000/r/message.json",
-        "http://localhost:3000/r/prompt-composer.json",
-        "http://localhost:3000/r/response-status.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json",
+        "https://useuai.vercel.app/r/citation.json",
+        "https://useuai.vercel.app/r/message.json",
+        "https://useuai.vercel.app/r/prompt-composer.json",
+        "https://useuai.vercel.app/r/response-status.json"
       ],
       "files": [
         {
@@ -1773,7 +2063,8 @@
           "target": "@components/uai/conversation-thread.tsx"
         }
       ],
-      "categories": ["ai", "chat", "conversation"]
+      "categories": ["ai", "chat", "conversation"],
+      "dependencies": []
     },
     {
       "name": "research-session",
@@ -1781,13 +2072,13 @@
       "title": "Research Session",
       "description": "A research plan, live search activity, sources, and a cited synthesis.",
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/uai-utils.json",
-        "http://localhost:3000/r/citation.json",
-        "http://localhost:3000/r/progress-summary.json",
-        "http://localhost:3000/r/response-status.json",
-        "http://localhost:3000/r/task-list.json",
-        "http://localhost:3000/r/thinking.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json",
+        "https://useuai.vercel.app/r/citation.json",
+        "https://useuai.vercel.app/r/progress-summary.json",
+        "https://useuai.vercel.app/r/response-status.json",
+        "https://useuai.vercel.app/r/task-list.json",
+        "https://useuai.vercel.app/r/thinking.json"
       ],
       "files": [
         {
@@ -1796,7 +2087,8 @@
           "target": "@components/uai/research-session.tsx"
         }
       ],
-      "categories": ["ai", "research", "sources"]
+      "categories": ["ai", "research", "sources"],
+      "dependencies": []
     },
     {
       "name": "file-analysis",
@@ -1804,11 +2096,11 @@
       "title": "File Analysis",
       "description": "Attached files, extraction status, and findings that cite the page or cell they came from.",
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/uai-utils.json",
-        "http://localhost:3000/r/attachment.json",
-        "http://localhost:3000/r/citation.json",
-        "http://localhost:3000/r/progress-summary.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json",
+        "https://useuai.vercel.app/r/attachment.json",
+        "https://useuai.vercel.app/r/citation.json",
+        "https://useuai.vercel.app/r/progress-summary.json"
       ],
       "files": [
         {
@@ -1817,7 +2109,8 @@
           "target": "@components/uai/file-analysis.tsx"
         }
       ],
-      "categories": ["ai", "files", "analysis"]
+      "categories": ["ai", "files", "analysis"],
+      "dependencies": ["class-variance-authority"]
     },
     {
       "name": "agent-run",
@@ -1825,14 +2118,14 @@
       "title": "Agent Run",
       "description": "Agent thinking and tool calls, task progress, approvals, and a final run summary.",
       "registryDependencies": [
-        "http://localhost:3000/r/uai-theme.json",
-        "http://localhost:3000/r/uai-utils.json",
-        "http://localhost:3000/r/approval-card.json",
-        "http://localhost:3000/r/response-status.json",
-        "http://localhost:3000/r/run-summary.json",
-        "http://localhost:3000/r/task-list.json",
-        "http://localhost:3000/r/thinking.json",
-        "http://localhost:3000/r/tool-call.json"
+        "https://useuai.vercel.app/r/uai-theme.json",
+        "https://useuai.vercel.app/r/uai-utils.json",
+        "https://useuai.vercel.app/r/approval-card.json",
+        "https://useuai.vercel.app/r/response-status.json",
+        "https://useuai.vercel.app/r/run-summary.json",
+        "https://useuai.vercel.app/r/task-list.json",
+        "https://useuai.vercel.app/r/thinking.json",
+        "https://useuai.vercel.app/r/tool-call.json"
       ],
       "files": [
         {
@@ -1841,7 +2134,8 @@
           "target": "@components/uai/agent-run.tsx"
         }
       ],
-      "categories": ["ai", "agents", "automation"]
+      "categories": ["ai", "agents", "automation"],
+      "dependencies": ["class-variance-authority"]
     }
   ]
 }

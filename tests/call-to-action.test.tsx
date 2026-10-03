@@ -40,7 +40,10 @@ test("labels the section and separates primary and secondary actions", () => {
   const primary = within(section).getByRole("link", { name: "Start trial" });
   const secondary = within(section).getByRole("link", { name: "Book a demo" });
   expect(primary.dataset.priority).toBe("primary");
-  expect(secondary.style.textDecoration).toBe("underline");
+  expect(secondary.dataset.priority).toBe("secondary");
+  expect(secondary.className).toContain("underline");
+  expect(secondary.className).not.toContain("no-underline");
+  expect(primary.className).toContain("no-underline");
   const terms = within(section).getByRole("list", { name: "Trial terms" });
   expect(
     within(terms)

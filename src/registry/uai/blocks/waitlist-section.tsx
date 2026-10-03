@@ -1,8 +1,8 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import {
   type ComponentProps,
-  type CSSProperties,
   createContext,
   useContext,
   useEffect,
@@ -15,6 +15,7 @@ import {
   type NewsletterFormProps,
   type NewsletterFormVariant,
 } from "@/components/ui/uai/newsletter-form";
+import { cn } from "@/lib/uai-utils";
 
 export const WAITLIST_SECTION_VARIANTS = ["split", "centered", "card"] as const;
 export type WaitlistSectionVariant = (typeof WAITLIST_SECTION_VARIANTS)[number];
@@ -35,33 +36,18 @@ function useWaitlist(part: string) {
   return context;
 }
 
-const layoutCss = `
-[data-uai-waitlist-layout]{display:grid;gap:24px;align-items:start;min-width:0}
-@container (min-width: 720px){
-  [data-uai-waitlist="split"]>[data-uai-waitlist-layout]{grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:48px}
-}
-[data-uai-waitlist-confirmation]{animation:uai-waitlist-in 240ms cubic-bezier(0.16,1,0.3,1) both}
-[data-uai-waitlist-confirmation]:focus-visible{outline:2px solid var(--uai-accent)}
-[data-uai-waitlist-restart]{transition:text-decoration-color 120ms ease-out}
-[data-uai-waitlist-restart]:hover{text-decoration-color:currentColor}
-[data-uai-waitlist-restart]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px;border-radius:4px}
-@keyframes uai-waitlist-in{from{opacity:0;transform:scale(0.98) translateY(4px)}}
-@media (prefers-reduced-motion:reduce){[data-uai-waitlist-confirmation]{animation:none}[data-uai-waitlist-restart]{transition:none}}
-`;
-
-const shells: Record<WaitlistSectionVariant, CSSProperties> = {
-  split: { padding: "8px 0" },
-  centered: { maxWidth: 560, margin: "0 auto", padding: "8px 0" },
-  card: {
-    maxWidth: 560,
-    margin: "0 auto",
-    padding: "clamp(24px, 5cqi, 36px)",
-    border: "1px solid var(--uai-border)",
-    borderRadius: 14,
-    background: "var(--uai-surface)",
-    boxShadow: "0 1px 2px oklch(0 0 0 / 0.04)",
+const waitlistSectionVariants = cva(
+  "box-border @container min-w-0 text-[13px]/[18px] text-foreground",
+  {
+    variants: {
+      variant: {
+        split: "py-2",
+        centered: "mx-auto max-w-[560px] py-2",
+        card: "mx-auto max-w-[560px] rounded-[14px] border bg-card p-[clamp(24px,5cqi,36px)] shadow-[0_1px_2px_oklch(0_0_0/0.04)]",
+      },
+    },
   },
-};
+);
 const formVariants: Record<WaitlistSectionVariant, NewsletterFormVariant> = {
   split: "card",
   centered: "inline",
@@ -72,7 +58,7 @@ const formVariants: Record<WaitlistSectionVariant, NewsletterFormVariant> = {
 export function WaitlistSection({
   variant = "split",
   children,
-  style,
+  className,
   ...props
 }: WaitlistSectionProps) {
   const id = useId();
@@ -81,111 +67,85 @@ export function WaitlistSection({
     <Context.Provider value={{ id, variant, joinedEmail, setJoinedEmail }}>
       <section
         aria-labelledby={`${id}-title`}
-        {...props}
+        data-slot="waitlist-section"
         data-variant={variant}
-        data-uai-waitlist={variant}
-        style={{
-          boxSizing: "border-box",
-          containerType: "inline-size",
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...shells[variant],
-          ...style,
-        }}
+        className={cn(waitlistSectionVariants({ variant }), className)}
+        {...props}
       >
-        <style>{layoutCss}</style>
-        <div data-uai-waitlist-layout="">{children}</div>
+        <div
+          className={cn(
+            "grid min-w-0 items-start gap-6",
+            variant === "split" &&
+              "@min-[720px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] @min-[720px]:gap-x-12",
+          )}
+        >
+          {children}
+        </div>
       </section>
     </Context.Provider>
   );
 }
 
-export function WaitlistSectionContent({ style, ...props }: ComponentProps<"div">) {
+export function WaitlistSectionContent({ className, ...props }: ComponentProps<"div">) {
   const { variant } = useWaitlist("WaitlistSectionContent");
   const centered = variant !== "split";
   return (
     <div
+      data-slot="waitlist-section-content"
+      className={cn(
+        "grid min-w-0 gap-2.5",
+        centered ? "justify-items-center text-center" : "justify-items-start text-start",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        justifyItems: centered ? "center" : "start",
-        gap: 10,
-        minWidth: 0,
-        textAlign: centered ? "center" : "start",
-        ...style,
-      }}
     />
   );
 }
 
-export function WaitlistSectionTitle({ style, ...props }: ComponentProps<"h2">) {
+export function WaitlistSectionTitle({ className, ...props }: ComponentProps<"h2">) {
   const { id } = useWaitlist("WaitlistSectionTitle");
   return (
     <h2
+      data-slot="waitlist-section-title"
+      className={cn(
+        "m-0 text-[length:clamp(22px,2.5cqi_+_12px,30px)] leading-[1.15] font-medium tracking-[-0.025em] text-balance",
+        className,
+      )}
       {...props}
       id={`${id}-title`}
-      style={{
-        margin: 0,
-        fontSize: "clamp(22px, 2.5cqi + 12px, 30px)",
-        fontWeight: 500,
-        lineHeight: 1.15,
-        letterSpacing: "-0.025em",
-        textWrap: "balance",
-        ...style,
-      }}
     />
   );
 }
 
-export function WaitlistSectionDescription({ style, ...props }: ComponentProps<"p">) {
+export function WaitlistSectionDescription({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="waitlist-section-description"
+      className={cn("m-0 text-[15px]/[23px] text-pretty text-muted-foreground", className)}
       {...props}
-      style={{
-        margin: 0,
-        color: "var(--uai-muted)",
-        fontSize: 15,
-        lineHeight: "23px",
-        textWrap: "pretty",
-        ...style,
-      }}
     />
   );
 }
 
-export function WaitlistSectionHighlights({ style, ...props }: ComponentProps<"ul">) {
+export function WaitlistSectionHighlights({ className, ...props }: ComponentProps<"ul">) {
   return (
     <ul
+      data-slot="waitlist-section-highlights"
+      className={cn(
+        "m-0 mt-1.5 grid list-none gap-2 p-0 text-start text-muted-foreground",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gap: 8,
-        margin: "6px 0 0",
-        padding: 0,
-        color: "var(--uai-muted)",
-        listStyle: "none",
-        textAlign: "start",
-        ...style,
-      }}
     />
   );
 }
 
-export function WaitlistSectionHighlight({ children, style, ...props }: ComponentProps<"li">) {
+export function WaitlistSectionHighlight({ children, className, ...props }: ComponentProps<"li">) {
   return (
-    <li {...props} style={{ display: "flex", gap: 8, ...style }}>
+    <li data-slot="waitlist-section-highlight" className={cn("flex gap-2", className)} {...props}>
       <span
         aria-hidden="true"
-        style={{
-          flex: "none",
-          width: 5,
-          height: 5,
-          marginTop: 7,
-          borderRadius: 999,
-          background: "var(--uai-subtle)",
-        }}
+        className="mt-[7px] size-[5px] flex-none rounded-full bg-subtle-foreground"
       />
       <span>{children}</span>
     </li>
@@ -214,43 +174,31 @@ export function WaitlistSectionForm({ variant, onSubscribe, ...props }: Newslett
   );
 }
 
-export function WaitlistSectionQualification({ style, ...props }: ComponentProps<"fieldset">) {
+export function WaitlistSectionQualification({ className, ...props }: ComponentProps<"fieldset">) {
   return (
     <fieldset
+      data-slot="waitlist-section-qualification"
+      className={cn("m-0 grid min-w-0 gap-3 border-0 p-0 text-start", className)}
       {...props}
-      style={{
-        display: "grid",
-        gap: 12,
-        minWidth: 0,
-        margin: 0,
-        padding: 0,
-        border: 0,
-        textAlign: "start",
-        ...style,
-      }}
     />
   );
 }
 
-export function WaitlistSectionQualificationLegend({ style, ...props }: ComponentProps<"legend">) {
+export function WaitlistSectionQualificationLegend({
+  className,
+  ...props
+}: ComponentProps<"legend">) {
   return (
     <legend
+      data-slot="waitlist-section-qualification-legend"
+      className={cn("mb-1 p-0 text-[11.5px]/4 font-medium text-subtle-foreground", className)}
       {...props}
-      style={{
-        marginBottom: 4,
-        padding: 0,
-        color: "var(--uai-subtle)",
-        fontSize: 11.5,
-        fontWeight: 500,
-        lineHeight: "16px",
-        ...style,
-      }}
     />
   );
 }
 
 /** Rendered after a successful signup. Focus moves here so the confirmation is announced. */
-export function WaitlistSectionConfirmation({ style, ...props }: ComponentProps<"div">) {
+export function WaitlistSectionConfirmation({ className, ...props }: ComponentProps<"div">) {
   const waitlist = useWaitlist("WaitlistSectionConfirmation");
   const ref = useRef<HTMLDivElement>(null);
   const joined = waitlist.joinedEmail !== null;
@@ -262,78 +210,58 @@ export function WaitlistSectionConfirmation({ style, ...props }: ComponentProps<
     <div
       role="status"
       tabIndex={-1}
+      data-slot="waitlist-section-confirmation"
+      className={cn(
+        "grid min-w-0 animate-in gap-2 rounded-[14px] bg-[color-mix(in_oklab,var(--success)_10%,var(--card))] p-5 text-start outline-offset-2 fade-in-0 zoom-in-98 slide-in-from-bottom-1 duration-240 ease-[cubic-bezier(0.16,1,0.3,1)] fill-mode-both focus-visible:outline-2 focus-visible:outline-ring motion-reduce:animate-none",
+        className,
+      )}
       {...props}
       ref={ref}
-      data-uai-waitlist-confirmation=""
-      style={{
-        display: "grid",
-        gap: 8,
-        minWidth: 0,
-        padding: 20,
-        borderRadius: 14,
-        background: "color-mix(in oklab, var(--uai-success) 10%, var(--uai-surface))",
-        textAlign: "start",
-        outlineOffset: 2,
-        ...style,
-      }}
     />
   );
 }
 
-export function WaitlistSectionConfirmationTitle({ style, ...props }: ComponentProps<"p">) {
+export function WaitlistSectionConfirmationTitle({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="waitlist-section-confirmation-title"
+      className={cn(
+        "m-0 text-[15px]/5 font-medium text-[color-mix(in_oklab,var(--success)_75%,var(--foreground))]",
+        className,
+      )}
       {...props}
-      style={{
-        margin: 0,
-        color: "color-mix(in oklab, var(--uai-success) 75%, var(--uai-text))",
-        fontSize: 15,
-        fontWeight: 500,
-        lineHeight: "20px",
-        ...style,
-      }}
     />
   );
 }
 
 /** The address that joined, for use inside the confirmation copy. */
-export function WaitlistSectionEmail({ style, ...props }: ComponentProps<"strong">) {
+export function WaitlistSectionEmail({ className, ...props }: ComponentProps<"strong">) {
   const waitlist = useWaitlist("WaitlistSectionEmail");
   return (
     <strong
+      data-slot="waitlist-section-email"
+      className={cn("font-medium wrap-anywhere text-foreground", className)}
       {...props}
-      style={{ color: "var(--uai-text)", fontWeight: 500, overflowWrap: "anywhere", ...style }}
     >
       {waitlist.joinedEmail}
     </strong>
   );
 }
 
-export function WaitlistSectionRestart({ onClick, style, ...props }: ComponentProps<"button">) {
+export function WaitlistSectionRestart({ onClick, className, ...props }: ComponentProps<"button">) {
   const waitlist = useWaitlist("WaitlistSectionRestart");
   return (
     <button
       type="button"
+      data-slot="waitlist-section-restart"
+      className={cn(
+        "h-7 cursor-pointer justify-self-start border-0 bg-transparent p-0 text-[12.5px] font-medium text-foreground underline decoration-border-strong underline-offset-3 transition-[text-decoration-color] duration-120 ease-out hover:decoration-current focus-visible:rounded-[4px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none",
+        className,
+      )}
       {...props}
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) waitlist.setJoinedEmail(null);
-      }}
-      data-uai-waitlist-restart=""
-      style={{
-        justifySelf: "start",
-        height: 28,
-        padding: 0,
-        border: 0,
-        background: "transparent",
-        color: "var(--uai-text)",
-        fontSize: 12.5,
-        fontWeight: 500,
-        textDecoration: "underline",
-        textDecorationColor: "var(--uai-border-strong)",
-        textUnderlineOffset: 3,
-        cursor: "pointer",
-        ...style,
       }}
     />
   );

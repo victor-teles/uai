@@ -118,9 +118,11 @@ test("respects a controlled active section", async () => {
 test("renders every variant and guards its parts", () => {
   for (const variant of DOCUMENTATION_PAGE_VARIANTS) {
     const view = render(<Fixture variant={variant} />);
-    expect(view.container.querySelector("[data-uai-docs]")?.getAttribute("data-variant")).toBe(
-      variant,
-    );
+    expect(
+      view.container
+        .querySelector('[data-slot="documentation-page"]')
+        ?.getAttribute("data-variant"),
+    ).toBe(variant);
     view.unmount();
   }
   expect(() => render(<DocumentationPageTitle />)).toThrow(

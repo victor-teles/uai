@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, useContext, useId } from "react";
 import {
   Attachment,
@@ -12,6 +13,7 @@ import {
   type ProgressSummaryProps,
   type ProgressSummaryVariant,
 } from "@/components/ui/uai/progress-summary";
+import { cn } from "@/lib/uai-utils";
 
 export const FILE_ANALYSIS_VARIANTS = ["split", "stacked", "compact"] as const;
 export type FileAnalysisVariant = (typeof FILE_ANALYSIS_VARIANTS)[number];
@@ -49,165 +51,158 @@ const citationVariants: Record<FileAnalysisVariant, CitationVariant> = {
   compact: "number",
 };
 
-const dangerText = "color-mix(in oklab, var(--uai-danger) 75%, var(--uai-text))";
-const tones: Record<FileAnalysisFindingTone, { label: string; color: string }> = {
-  neutral: { label: "Note", color: "var(--uai-muted)" },
-  warning: { label: "Review", color: "var(--uai-warning)" },
-  critical: { label: "Risk", color: "var(--uai-danger)" },
+const tones: Record<FileAnalysisFindingTone, { label: string; className: string }> = {
+  neutral: { label: "Note", className: "bg-muted-foreground/16 text-muted-foreground" },
+  warning: { label: "Review", className: "bg-warning/14 text-warning" },
+  critical: {
+    label: "Risk",
+    className:
+      "bg-destructive/14 text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))]",
+  },
 };
 
-const layoutCss = `
-[data-uai-analysis-layout]{display:grid;gap:16px;align-items:start;min-width:0}
-[data-uai-analysis="compact"]>[data-uai-analysis-layout]{gap:12px}
-@container (min-width: 720px){
-  [data-uai-analysis="split"]>[data-uai-analysis-layout]{grid-template-columns:minmax(240px,0.8fr) minmax(0,1.3fr);gap:20px}
-  [data-uai-analysis-layout]>[data-uai-analysis-region="header"]{grid-column:1/-1}
-}
-[data-uai-analysis-action]{transition:background-color 120ms ease-out,filter 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-[data-uai-analysis-action="primary"]{background:var(--uai-accent);color:var(--uai-accent-foreground)}
-[data-uai-analysis-action="secondary"]{background:var(--uai-surface-raised);color:var(--uai-text)}
-[data-uai-analysis-action="primary"]:hover:not(:disabled){filter:brightness(1.08)}
-[data-uai-analysis-action="secondary"]:hover:not(:disabled){background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text))}
-[data-uai-analysis-action]:active:not(:disabled){transform:scale(0.97)}
-[data-uai-analysis-action]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-@keyframes uai-analysis-enter{from{opacity:0;transform:translateY(4px)}}
-[data-uai-analysis-finding]{animation:uai-analysis-enter 240ms cubic-bezier(0.23,1,0.32,1) both}
-[data-uai-analysis-finding]:nth-child(2){animation-delay:40ms}
-[data-uai-analysis-finding]:nth-child(3){animation-delay:80ms}
-[data-uai-analysis-finding]:nth-child(n+4){animation-delay:120ms}
-@media (prefers-reduced-motion: reduce){[data-uai-analysis-action],[data-uai-analysis-finding]{transition:none;animation:none}[data-uai-analysis-action]:active:not(:disabled){transform:none}}`;
-
 /** Files, extraction status, and cited findings. Split places the files beside the findings at 720px. */
-export function FileAnalysis({ variant = "split", children, style, ...props }: FileAnalysisProps) {
+export function FileAnalysis({
+  variant = "split",
+  className,
+  children,
+  ...props
+}: FileAnalysisProps) {
   const id = useId();
   return (
     <Context.Provider value={{ id, variant }}>
       <section
         aria-labelledby={`${id}-title`}
-        {...props}
+        data-slot="file-analysis"
         data-variant={variant}
-        data-uai-analysis={variant}
-        style={{
-          boxSizing: "border-box",
-          containerType: "inline-size",
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
+        className={cn("@container min-w-0 text-[13px]/[18px] text-foreground", className)}
+        {...props}
       >
-        <style>{layoutCss}</style>
-        <div data-uai-analysis-layout="">{children}</div>
+        <div
+          className={cn(
+            "grid min-w-0 items-start",
+            variant === "compact" ? "gap-3" : "gap-4",
+            variant === "split" &&
+              "@min-[720px]:grid-cols-[minmax(240px,0.8fr)_minmax(0,1.3fr)] @min-[720px]:gap-5",
+          )}
+        >
+          {children}
+        </div>
       </section>
     </Context.Provider>
   );
 }
 
-export function FileAnalysisHeader({ style, ...props }: ComponentProps<"header">) {
+export function FileAnalysisHeader({ className, ...props }: ComponentProps<"header">) {
   useAnalysis("FileAnalysisHeader");
   return (
     <header
+      data-slot="file-analysis-header"
+      className={cn(
+        "flex min-w-0 flex-wrap items-end justify-between gap-3 @min-[720px]:col-span-full",
+        className,
+      )}
       {...props}
-      data-uai-analysis-region="header"
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "flex-end",
-        justifyContent: "space-between",
-        gap: 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function FileAnalysisHeading({ style, ...props }: ComponentProps<"div">) {
+export function FileAnalysisHeading({ className, ...props }: ComponentProps<"div">) {
   return (
-    <div {...props} style={{ display: "grid", gap: 4, flex: "1 1 240px", minWidth: 0, ...style }} />
+    <div
+      data-slot="file-analysis-heading"
+      className={cn("grid min-w-0 flex-[1_1_240px] gap-1", className)}
+      {...props}
+    />
   );
 }
 
-export function FileAnalysisTitle({ style, ...props }: ComponentProps<"h2">) {
+export function FileAnalysisTitle({ className, ...props }: ComponentProps<"h2">) {
   const { id, variant } = useAnalysis("FileAnalysisTitle");
-  const compact = variant === "compact";
   return (
     <h2
+      data-slot="file-analysis-title"
+      className={cn(
+        "m-0 font-semibold tracking-[-0.01em] wrap-anywhere",
+        variant === "compact" ? "text-[15px]/5" : "text-lg/6",
+        className,
+      )}
       {...props}
       id={`${id}-title`}
-      style={{
-        margin: 0,
-        fontSize: compact ? 15 : 18,
-        lineHeight: compact ? "20px" : "24px",
-        fontWeight: 600,
-        letterSpacing: "-0.01em",
-        overflowWrap: "anywhere",
-        ...style,
-      }}
     />
   );
 }
 
-export function FileAnalysisDescription({ style, ...props }: ComponentProps<"p">) {
+export function FileAnalysisDescription({ className, ...props }: ComponentProps<"p">) {
   return (
-    <p {...props} style={{ margin: 0, color: "var(--uai-muted)", textWrap: "pretty", ...style }} />
+    <p
+      data-slot="file-analysis-description"
+      className={cn("m-0 text-pretty text-muted-foreground", className)}
+      {...props}
+    />
   );
 }
+
+const fileAnalysisActionVariants = cva(
+  "inline-flex cursor-pointer items-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap [transition:background-color_120ms_ease-out,filter_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:not-disabled:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:not-disabled:scale-100",
+  {
+    variants: {
+      emphasis: {
+        primary: "bg-primary text-primary-foreground hover:not-disabled:brightness-[1.08]",
+        secondary:
+          "bg-secondary text-secondary-foreground hover:not-disabled:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+      },
+      size: {
+        default: "h-7.5 px-[13px] text-[12.5px]",
+        compact: "h-6.5 px-2.5 text-[12px]",
+      },
+    },
+  },
+);
 
 export function FileAnalysisAction({
   emphasis = "secondary",
   type = "button",
-  style,
+  className,
   ...props
 }: ComponentProps<"button"> & { emphasis?: "primary" | "secondary" }) {
   const { variant } = useAnalysis("FileAnalysisAction");
-  const compact = variant === "compact";
   return (
     <button
+      data-slot="file-analysis-action"
+      data-emphasis={emphasis}
+      className={cn(
+        fileAnalysisActionVariants({
+          emphasis,
+          size: variant === "compact" ? "compact" : "default",
+        }),
+        className,
+      )}
       {...props}
       type={type}
-      data-uai-analysis-action={emphasis}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        height: compact ? 26 : 30,
-        padding: compact ? "0 10px" : "0 13px",
-        border: 0,
-        borderRadius: 999,
-        font: "inherit",
-        fontSize: compact ? 12 : 12.5,
-        fontWeight: 500,
-        whiteSpace: "nowrap",
-        cursor: props.disabled ? "not-allowed" : "pointer",
-        opacity: props.disabled ? 0.5 : 1,
-        ...style,
-      }}
     />
   );
 }
 
-function Panel({ part, style, ...props }: ComponentProps<"section"> & { part: string }) {
+function Panel({
+  part,
+  slot,
+  className,
+  ...props
+}: ComponentProps<"section"> & { part: string; slot: string }) {
   const { variant } = useAnalysis(part);
   const id = useId();
-  const compact = variant === "compact";
   return (
     <PanelContext.Provider value={id}>
       <section
         aria-labelledby={id}
+        data-slot={slot}
+        className={cn(
+          "grid min-w-0 content-start border bg-card",
+          variant === "compact" ? "gap-2 rounded-xl p-3" : "gap-3 rounded-[14px] p-4",
+          className,
+        )}
         {...props}
-        style={{
-          display: "grid",
-          alignContent: "start",
-          gap: compact ? 8 : 12,
-          minWidth: 0,
-          padding: compact ? 12 : 16,
-          border: "1px solid var(--uai-border)",
-          borderRadius: compact ? 12 : 14,
-          background: "var(--uai-surface)",
-          ...style,
-        }}
       />
     </PanelContext.Provider>
   );
@@ -215,21 +210,22 @@ function Panel({ part, style, ...props }: ComponentProps<"section"> & { part: st
 
 /** The analysed files and their extraction status. */
 export function FileAnalysisFiles(props: ComponentProps<"section">) {
-  return <Panel {...props} part="FileAnalysisFiles" />;
+  return <Panel {...props} part="FileAnalysisFiles" slot="file-analysis-files" />;
 }
 
 /** What the analysis found. Compose findings with citations inside it. */
 export function FileAnalysisFindings(props: ComponentProps<"section">) {
-  return <Panel {...props} part="FileAnalysisFindings" />;
+  return <Panel {...props} part="FileAnalysisFindings" slot="file-analysis-findings" />;
 }
 
-export function FileAnalysisPanelTitle({ style, ...props }: ComponentProps<"h3">) {
+export function FileAnalysisPanelTitle({ className, ...props }: ComponentProps<"h3">) {
   const id = usePanel("FileAnalysisPanelTitle");
   return (
     <h3
+      data-slot="file-analysis-panel-title"
+      className={cn("m-0 text-[13px]/[18px] font-medium", className)}
       {...props}
       id={id}
-      style={{ margin: 0, fontSize: 13, lineHeight: "18px", fontWeight: 500, ...style }}
     />
   );
 }
@@ -237,26 +233,29 @@ export function FileAnalysisPanelTitle({ style, ...props }: ComponentProps<"h3">
 /** Overall extraction status. Compose Progress Summary parts inside it. */
 export function FileAnalysisExtraction(props: Omit<ProgressSummaryProps, "variant">) {
   const { variant } = useAnalysis("FileAnalysisExtraction");
-  return <ProgressSummary {...props} variant={progressVariants[variant]} />;
+  return (
+    <ProgressSummary
+      data-slot="file-analysis-extraction"
+      {...props}
+      variant={progressVariants[variant]}
+    />
+  );
 }
 
-export function FileAnalysisFileList({ style, ...props }: ComponentProps<"ul">) {
+export function FileAnalysisFileList({ className, ...props }: ComponentProps<"ul">) {
   const id = usePanel("FileAnalysisFileList");
   const { variant } = useAnalysis("FileAnalysisFileList");
   return (
     <ul
       aria-labelledby={id}
+      data-slot="file-analysis-file-list"
+      className={cn(
+        "m-0 min-w-0 list-none flex-wrap p-0",
+        variant === "split" ? "grid" : "flex",
+        variant === "compact" ? "gap-1.5" : "gap-2",
+        className,
+      )}
       {...props}
-      style={{
-        display: variant === "split" ? "grid" : "flex",
-        flexWrap: "wrap",
-        gap: variant === "compact" ? 6 : 8,
-        margin: 0,
-        padding: 0,
-        listStyle: "none",
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
@@ -265,32 +264,28 @@ export function FileAnalysisFileList({ style, ...props }: ComponentProps<"ul">) 
 export function FileAnalysisFile(props: Omit<AttachmentProps, "variant">) {
   const { variant } = useAnalysis("FileAnalysisFile");
   return (
-    <li style={{ minWidth: 0, maxWidth: "100%" }}>
+    <li data-slot="file-analysis-file" className="min-w-0 max-w-full">
       <Attachment {...props} variant={attachmentVariants[variant]} />
     </li>
   );
 }
 
-export function FileAnalysisFindingList({ style, ...props }: ComponentProps<"ol">) {
+export function FileAnalysisFindingList({ className, ...props }: ComponentProps<"ol">) {
   const id = usePanel("FileAnalysisFindingList");
   const { variant } = useAnalysis("FileAnalysisFindingList");
   return (
     <ol
       aria-labelledby={id}
+      data-slot="file-analysis-finding-list"
+      className={cn(
+        "m-0 grid min-w-0 list-none p-0",
+        variant === "stacked"
+          ? "grid-cols-[repeat(auto-fit,minmax(min(100%,260px),1fr))]"
+          : "grid-cols-[minmax(0,1fr)]",
+        variant === "compact" ? "gap-1.5" : "gap-2",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gridTemplateColumns:
-          variant === "stacked"
-            ? "repeat(auto-fit, minmax(min(100%, 260px), 1fr))"
-            : "minmax(0, 1fr)",
-        gap: variant === "compact" ? 6 : 8,
-        margin: 0,
-        padding: 0,
-        listStyle: "none",
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
@@ -305,47 +300,32 @@ export function FileAnalysisFinding({
   tone = "neutral",
   toneLabel,
   children,
-  style,
+  className,
   ...props
 }: FileAnalysisFindingProps) {
   const { variant } = useAnalysis("FileAnalysisFinding");
-  const compact = variant === "compact";
   const details = tones[tone];
   return (
     <li
-      {...props}
+      data-slot="file-analysis-finding"
       data-tone={tone}
-      data-uai-analysis-finding=""
-      style={{
-        display: "grid",
-        alignContent: "start",
-        justifyItems: "start",
-        gap: compact ? 4 : 6,
-        minWidth: 0,
-        padding: compact ? "8px 10px" : "12px 14px",
-        borderRadius: compact ? 8 : 10,
-        background: "color-mix(in oklab, var(--uai-surface-raised) 70%, var(--uai-surface))",
-        ...style,
-      }}
+      className={cn(
+        "grid min-w-0 content-start justify-items-start bg-[color-mix(in_oklab,var(--muted)_70%,var(--card))]",
+        "animate-in fade-in-0 slide-in-from-bottom-1 duration-240 ease-out-quint fill-mode-both nth-2:[--tw-animation-delay:40ms] nth-3:[--tw-animation-delay:80ms] nth-[n+4]:[--tw-animation-delay:120ms] motion-reduce:animate-none",
+        variant === "compact"
+          ? "gap-1 rounded-lg px-2.5 py-2"
+          : "gap-1.5 rounded-[10px] px-3.5 py-3",
+        className,
+      )}
+      {...props}
     >
       <span
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 5,
-          padding: "0 8px",
-          borderRadius: 999,
-          background: `color-mix(in oklab, ${details.color} ${tone === "neutral" ? 16 : 14}%, transparent)`,
-          color: tone === "critical" ? dangerText : details.color,
-          fontSize: 11.5,
-          lineHeight: "20px",
-          fontWeight: 500,
-        }}
+        className={cn(
+          "inline-flex items-center gap-1.25 rounded-full px-2 text-[11.5px]/5 font-medium",
+          details.className,
+        )}
       >
-        <span
-          aria-hidden="true"
-          style={{ width: 6, height: 6, borderRadius: 999, background: "currentColor" }}
-        />
+        <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
         {toneLabel ?? details.label}
       </span>
       {children}
@@ -353,17 +333,22 @@ export function FileAnalysisFinding({
   );
 }
 
-export function FileAnalysisFindingTitle({ style, ...props }: ComponentProps<"p">) {
+export function FileAnalysisFindingTitle({ className, ...props }: ComponentProps<"p">) {
   return (
-    <p {...props} style={{ margin: 0, fontWeight: 500, overflowWrap: "anywhere", ...style }} />
+    <p
+      data-slot="file-analysis-finding-title"
+      className={cn("m-0 font-medium wrap-anywhere", className)}
+      {...props}
+    />
   );
 }
 
-export function FileAnalysisFindingDetail({ style, ...props }: ComponentProps<"p">) {
+export function FileAnalysisFindingDetail({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="file-analysis-finding-detail"
+      className={cn("m-0 text-muted-foreground wrap-anywhere", className)}
       {...props}
-      style={{ margin: 0, color: "var(--uai-muted)", overflowWrap: "anywhere", ...style }}
     />
   );
 }
@@ -371,5 +356,7 @@ export function FileAnalysisFindingDetail({ style, ...props }: ComponentProps<"p
 /** A marker that points to the page or cell a finding came from. Compose Citation parts inside it. */
 export function FileAnalysisCitation(props: Omit<CitationProps, "variant">) {
   const { variant } = useAnalysis("FileAnalysisCitation");
-  return <Citation {...props} variant={citationVariants[variant]} />;
+  return (
+    <Citation data-slot="file-analysis-citation" {...props} variant={citationVariants[variant]} />
+  );
 }

@@ -1,6 +1,7 @@
 "use client";
 
-import { type ComponentProps, type CSSProperties, createContext, useContext, useId } from "react";
+import { cva } from "class-variance-authority";
+import { type ComponentProps, createContext, useContext, useId } from "react";
 import { AuditLog, type AuditLogProps, type AuditLogVariant } from "@/components/ui/uai/audit-log";
 import {
   DateRangePicker,
@@ -12,6 +13,7 @@ import {
   type FilterBarProps,
   type FilterBarVariant,
 } from "@/components/ui/uai/filter-bar";
+import { cn } from "@/lib/uai-utils";
 
 export const AUDIT_LOG_VIEWER_VARIANTS = ["sidebar", "stacked", "compact"] as const;
 export type AuditLogViewerVariant = (typeof AUDIT_LOG_VIEWER_VARIANTS)[number];
@@ -41,40 +43,37 @@ const logVariants: Record<AuditLogViewerVariant, AuditLogVariant> = {
   compact: "compact",
 };
 
-const viewerCss = `
-[data-uai-audit-log-viewer-action]{transition:filter 120ms ease-out,box-shadow 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-[data-uai-audit-log-viewer-action]:hover:not(:disabled){box-shadow:inset 0 0 0 999px color-mix(in oklab,var(--uai-text) 9%,transparent)}
-[data-uai-audit-log-viewer-action][data-uai-audit-log-viewer-action="primary"]:hover:not(:disabled){box-shadow:none;filter:brightness(1.08)}
-[data-uai-audit-log-viewer-action]:active:not(:disabled){transform:scale(0.97)}
-[data-uai-audit-log-viewer-action]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-@media (prefers-reduced-motion:reduce){[data-uai-audit-log-viewer-action]{transition:none}[data-uai-audit-log-viewer-action]:active:not(:disabled){transform:none}}
-`;
+const auditLogViewerVariants = cva(
+  "grid min-w-0 content-start text-[13px]/[18px] text-foreground",
+  {
+    variants: {
+      variant: { sidebar: "gap-4", stacked: "gap-4", compact: "gap-2.5" },
+    },
+  },
+);
 
-function actionStyle(compact: boolean, primary: boolean, disabled?: boolean): CSSProperties {
-  return {
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    height: compact ? 26 : 30,
-    padding: compact ? "0 11px" : "0 13px",
-    border: 0,
-    borderRadius: 999,
-    background: primary ? "var(--uai-accent)" : "var(--uai-surface-raised)",
-    color: primary ? "var(--uai-accent-foreground)" : "var(--uai-text)",
-    fontSize: compact ? 12 : 12.5,
-    fontWeight: 500,
-    lineHeight: "16px",
-    whiteSpace: "nowrap",
-    cursor: disabled ? "not-allowed" : "pointer",
-    opacity: disabled ? 0.5 : 1,
-  };
-}
+const auditLogViewerActionVariants = cva(
+  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap [transition:filter_120ms_ease-out,box-shadow_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
+  {
+    variants: {
+      emphasis: {
+        primary:
+          "bg-primary text-primary-foreground enabled:hover:shadow-none enabled:hover:brightness-108",
+        secondary:
+          "bg-secondary text-secondary-foreground enabled:hover:shadow-[inset_0_0_0_999px_color-mix(in_oklab,var(--foreground)_9%,transparent)]",
+      },
+      compact: {
+        true: "h-6.5 px-2.75 text-[12px]/4",
+        false: "h-7.5 px-3.25 text-[12.5px]/4",
+      },
+    },
+  },
+);
 
 /** Audit review surface: filters, a date range, expandable events, and export. */
 export function AuditLogViewer({
   variant = "sidebar",
-  style,
+  className,
   children,
   ...props
 }: AuditLogViewerProps) {
@@ -83,84 +82,71 @@ export function AuditLogViewer({
     <Context.Provider value={{ id, variant }}>
       <section
         aria-labelledby={`${id}-title`}
-        {...props}
+        data-slot="audit-log-viewer"
         data-variant={variant}
-        style={{
-          display: "grid",
-          alignContent: "start",
-          gap: variant === "compact" ? 10 : 16,
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
+        className={cn(auditLogViewerVariants({ variant }), className)}
+        {...props}
       >
-        <style>{viewerCss}</style>
         {children}
       </section>
     </Context.Provider>
   );
 }
 
-export function AuditLogViewerHeader({ style, ...props }: ComponentProps<"div">) {
+export function AuditLogViewerHeader({ className, ...props }: ComponentProps<"div">) {
   useViewer("AuditLogViewerHeader");
   return (
     <div
+      data-slot="audit-log-viewer-header"
+      className={cn("flex min-w-0 flex-wrap items-end justify-between gap-3", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "flex-end",
-        justifyContent: "space-between",
-        gap: 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function AuditLogViewerHeading({ style, ...props }: ComponentProps<"div">) {
+export function AuditLogViewerHeading({ className, ...props }: ComponentProps<"div">) {
   return (
-    <div {...props} style={{ display: "grid", gap: 4, flex: "1 1 240px", minWidth: 0, ...style }} />
+    <div
+      data-slot="audit-log-viewer-heading"
+      className={cn("grid min-w-0 flex-[1_1_240px] gap-1", className)}
+      {...props}
+    />
   );
 }
 
-export function AuditLogViewerTitle({ style, ...props }: ComponentProps<"h2">) {
+export function AuditLogViewerTitle({ className, ...props }: ComponentProps<"h2">) {
   const context = useViewer("AuditLogViewerTitle");
   const compact = context.variant === "compact";
   return (
     <h2
+      data-slot="audit-log-viewer-title"
+      className={cn(
+        "m-0 font-semibold tracking-[-0.015em] wrap-anywhere",
+        compact ? "text-[15px]/5" : "text-lg/6",
+        className,
+      )}
       {...props}
       id={`${context.id}-title`}
-      style={{
-        margin: 0,
-        fontSize: compact ? 15 : 18,
-        lineHeight: compact ? "20px" : "24px",
-        fontWeight: 600,
-        letterSpacing: "-0.015em",
-        overflowWrap: "anywhere",
-        ...style,
-      }}
     />
   );
 }
 
-export function AuditLogViewerDescription({ style, ...props }: ComponentProps<"p">) {
+export function AuditLogViewerDescription({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="audit-log-viewer-description"
+      className={cn("m-0 text-muted-foreground tabular-nums", className)}
       {...props}
-      style={{ margin: 0, color: "var(--uai-muted)", fontVariantNumeric: "tabular-nums", ...style }}
     />
   );
 }
 
-export function AuditLogViewerActions({ style, ...props }: ComponentProps<"div">) {
+export function AuditLogViewerActions({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="audit-log-viewer-actions"
+      className={cn("flex flex-wrap items-center gap-1.5", className)}
       {...props}
-      style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6, ...style }}
     />
   );
 }
@@ -168,37 +154,37 @@ export function AuditLogViewerActions({ style, ...props }: ComponentProps<"div">
 export function AuditLogViewerAction({
   emphasis = "secondary",
   type = "button",
-  style,
+  className,
   ...props
 }: ComponentProps<"button"> & { emphasis?: "primary" | "secondary" }) {
   const context = useViewer("AuditLogViewerAction");
   return (
     <button
-      {...props}
+      data-slot="audit-log-viewer-action"
+      data-emphasis={emphasis}
       type={type}
-      data-uai-audit-log-viewer-action={emphasis}
-      style={{
-        ...actionStyle(context.variant === "compact", emphasis === "primary", props.disabled),
-        ...style,
-      }}
+      className={cn(
+        auditLogViewerActionVariants({ emphasis, compact: context.variant === "compact" }),
+        className,
+      )}
+      {...props}
     />
   );
 }
 
 /** Places filters beside the log in Sidebar and above it otherwise. */
-export function AuditLogViewerBody({ style, ...props }: ComponentProps<"div">) {
+export function AuditLogViewerBody({ className, ...props }: ComponentProps<"div">) {
   const context = useViewer("AuditLogViewerBody");
   return (
     <div
+      data-slot="audit-log-viewer-body"
+      className={cn(
+        "min-w-0 flex-wrap items-start",
+        context.variant === "sidebar" ? "flex" : "grid",
+        context.variant === "compact" ? "gap-2" : "gap-3",
+        className,
+      )}
       {...props}
-      style={{
-        display: context.variant === "sidebar" ? "flex" : "grid",
-        flexWrap: "wrap",
-        alignItems: "flex-start",
-        gap: context.variant === "compact" ? 8 : 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
@@ -206,7 +192,7 @@ export function AuditLogViewerBody({ style, ...props }: ComponentProps<"div">) {
 /** Actor, action, and resource filters. Compose Filter Bar parts inside it. */
 export function AuditLogViewerFilters({
   "aria-label": label = "Audit filters",
-  style,
+  className,
   ...props
 }: Omit<FilterBarProps, "variant">) {
   const context = useViewer("AuditLogViewerFilters");
@@ -214,9 +200,9 @@ export function AuditLogViewerFilters({
     <FilterBar
       role="group"
       aria-label={label}
+      className={cn(context.variant === "sidebar" && "flex-[1_1_220px]", className)}
       {...props}
       variant={filterVariants[context.variant]}
-      style={{ flex: context.variant === "sidebar" ? "1 1 220px" : undefined, ...style }}
     />
   );
 }
@@ -227,19 +213,17 @@ export function AuditLogViewerDateRange(props: Omit<DateRangePickerProps, "varia
   return <DateRangePicker {...props} variant={rangeVariants[context.variant]} />;
 }
 
-export function AuditLogViewerMain({ style, ...props }: ComponentProps<"div">) {
+export function AuditLogViewerMain({ className, ...props }: ComponentProps<"div">) {
   const context = useViewer("AuditLogViewerMain");
   return (
     <div
+      data-slot="audit-log-viewer-main"
+      className={cn(
+        "grid min-w-0 flex-[999_1_360px] content-start",
+        context.variant === "compact" ? "gap-1.5" : "gap-2.5",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        alignContent: "start",
-        gap: context.variant === "compact" ? 6 : 10,
-        flex: "999 1 360px",
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
@@ -251,19 +235,13 @@ export function AuditLogViewerLog(props: Omit<AuditLogProps, "variant">) {
 }
 
 /** Result counts and export confirmations, announced politely. */
-export function AuditLogViewerStatus({ style, ...props }: ComponentProps<"p">) {
+export function AuditLogViewerStatus({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
       role="status"
+      data-slot="audit-log-viewer-status"
+      className={cn("m-0 px-0.5 text-[12px] text-subtle-foreground tabular-nums", className)}
       {...props}
-      style={{
-        margin: 0,
-        padding: "0 2px",
-        color: "var(--uai-subtle)",
-        fontSize: 12,
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     />
   );
 }

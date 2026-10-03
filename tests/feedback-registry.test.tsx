@@ -13,7 +13,7 @@ test("publishes every feedback source without drift and keeps examples executabl
     const preview = await Bun.file(
       `src/components/registry/feedback/${item.id}-preview.tsx`,
     ).text();
-    expect(mirror).toBe(source);
+    expect(mirror).toBe(`export * from "@/registry/uai/components/${item.id}";\n`);
     expect(output.files[0].content).toBe(source);
     expect(item.usage).toBe(preview);
     expect(item.category).toBe("Feedback");

@@ -147,19 +147,19 @@ test("renders card, split, and compact chrome from the root variant", () => {
 
   expect(SIGN_IN_CARD_VARIANTS).toEqual(["card", "split", "compact"]);
   expect(form?.dataset.variant).toBe("card");
-  expect(form?.style.borderRadius).toBe("14px");
-  expect(form?.style.padding).toBe("20px");
+  expect(form?.className).toContain("rounded-[14px]");
+  expect(form?.className).toContain("p-5");
 
   rerender(<SignInCardFixture variant="split" />);
   expect(form?.dataset.variant).toBe("split");
-  expect(form?.style.padding).toBe("24px");
+  expect(form?.className).toContain("p-6");
   expect(screen.getByText("or").parentElement?.className).toContain("sm:flex-col");
   expect(screen.queryByText("or continue with email")).toBeNull();
 
   rerender(<SignInCardFixture variant="compact" />);
   expect(form?.dataset.variant).toBe("compact");
-  expect(form?.style.borderRadius).toBe("12px");
-  expect(form?.style.padding).toBe("14px");
+  expect(form?.className).toContain("rounded-xl");
+  expect(form?.className).toContain("p-3.5");
   expect(screen.getByText("or continue with email")).toBeDefined();
   expect(screen.getByRole("button", { name: "Sign in" }).className).toContain("h-[34px]");
 });

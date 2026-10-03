@@ -1,8 +1,10 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { Check } from "lucide-react";
-import { type ComponentProps, type CSSProperties, createContext, useContext, useId } from "react";
+import { type ComponentProps, createContext, useContext, useId } from "react";
 import { TrustPanelBadge, TrustPanelBadges } from "@/components/ui/uai/trust-panel";
+import { cn } from "@/lib/uai-utils";
 
 export const CALL_TO_ACTION_VARIANTS = ["banner", "centered", "split"] as const;
 export type CallToActionVariant = (typeof CALL_TO_ACTION_VARIANTS)[number];
@@ -16,131 +18,105 @@ function useCta(part: string) {
   return context;
 }
 
-const layoutCss = `
-[data-uai-cta-layout]{display:grid;gap:20px;min-width:0}
-@container (min-width: 640px){
-  [data-uai-cta="split"]>[data-uai-cta-layout]{grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:32px}
-  [data-uai-cta="split"]>[data-uai-cta-layout]>[data-uai-cta-reassurance]{grid-column:1 / -1}
-}
-[data-uai-cta-action]{transition:filter 120ms ease-out,text-decoration-color 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-[data-uai-cta-action="primary"]:hover{filter:brightness(1.08)}
-[data-uai-cta-action="secondary"]:hover{text-decoration-color:currentColor}
-[data-uai-cta-action]:active{transform:scale(0.97)}
-[data-uai-cta-action]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-@media (prefers-reduced-motion:reduce){[data-uai-cta-action]{transition:none}[data-uai-cta-action]:active{transform:none}}
-`;
-
-const shells: Record<CallToActionVariant, CSSProperties> = {
-  banner: {
-    padding: "clamp(24px, 5cqi, 44px)",
-    borderRadius: 14,
-    background: "color-mix(in oklab, var(--uai-surface-raised) 75%, var(--uai-surface))",
+const callToActionVariants = cva("@container min-w-0 text-[13px]/[18px] text-foreground", {
+  variants: {
+    variant: {
+      banner:
+        "rounded-[14px] bg-[color-mix(in_oklab,var(--muted)_75%,var(--card))] p-[clamp(24px,5cqi,44px)]",
+      centered: "px-0 py-6 text-center",
+      split:
+        "rounded-[14px] border bg-card p-[clamp(20px,4cqi,32px)] shadow-[0_1px_2px_oklch(0_0_0/0.04)]",
+    },
   },
-  centered: { padding: "24px 0", textAlign: "center" },
-  split: {
-    padding: "clamp(20px, 4cqi, 32px)",
-    border: "1px solid var(--uai-border)",
-    borderRadius: 14,
-    background: "var(--uai-surface)",
-    boxShadow: "0 1px 2px oklch(0 0 0 / 0.04)",
-  },
-};
+});
 
 /** A closing section with one goal, supporting copy, and reassurance. Split stacks below 640px. */
-export function CallToAction({ variant = "banner", children, style, ...props }: CallToActionProps) {
+export function CallToAction({
+  variant = "banner",
+  className,
+  children,
+  ...props
+}: CallToActionProps) {
   const id = useId();
   return (
     <Context.Provider value={{ id, variant }}>
       <section
         aria-labelledby={`${id}-title`}
-        {...props}
+        data-slot="call-to-action"
         data-variant={variant}
-        data-uai-cta={variant}
-        style={{
-          boxSizing: "border-box",
-          containerType: "inline-size",
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...shells[variant],
-          ...style,
-        }}
+        className={cn(callToActionVariants({ variant }), className)}
+        {...props}
       >
-        <style>{layoutCss}</style>
-        <div data-uai-cta-layout="">{children}</div>
+        <div
+          className={cn(
+            "grid min-w-0 gap-5",
+            variant === "split" &&
+              "@min-[640px]:grid-cols-[minmax(0,1fr)_auto] @min-[640px]:items-center @min-[640px]:gap-x-8",
+          )}
+        >
+          {children}
+        </div>
       </section>
     </Context.Provider>
   );
 }
 
-export function CallToActionContent({ style, ...props }: ComponentProps<"div">) {
+export function CallToActionContent({ className, ...props }: ComponentProps<"div">) {
   const { variant } = useCta("CallToActionContent");
-  const centered = variant === "centered";
   return (
     <div
+      data-slot="call-to-action-content"
+      className={cn(
+        "grid min-w-0 gap-2.5",
+        variant === "centered"
+          ? "mx-auto max-w-[560px] justify-items-center"
+          : "max-w-[640px] justify-items-start",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        justifyItems: centered ? "center" : "start",
-        gap: 10,
-        minWidth: 0,
-        maxWidth: centered ? 560 : 640,
-        margin: centered ? "0 auto" : undefined,
-        ...style,
-      }}
     />
   );
 }
 
-export function CallToActionTitle({ style, ...props }: ComponentProps<"h2">) {
+export function CallToActionTitle({ className, ...props }: ComponentProps<"h2">) {
   const { id, variant } = useCta("CallToActionTitle");
   return (
     <h2
+      data-slot="call-to-action-title"
+      className={cn(
+        "m-0 font-medium text-balance",
+        variant === "split"
+          ? "text-[22px]/[1.15] tracking-[-0.02em]"
+          : "text-[length:clamp(22px,2.5cqi_+_12px,30px)]/[1.15] tracking-[-0.025em]",
+        className,
+      )}
       {...props}
       id={`${id}-title`}
-      style={{
-        margin: 0,
-        fontSize: variant === "split" ? 22 : "clamp(22px, 2.5cqi + 12px, 30px)",
-        fontWeight: 500,
-        lineHeight: 1.15,
-        letterSpacing: variant === "split" ? "-0.02em" : "-0.025em",
-        textWrap: "balance",
-        ...style,
-      }}
     />
   );
 }
 
-export function CallToActionDescription({ style, ...props }: ComponentProps<"p">) {
+export function CallToActionDescription({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="call-to-action-description"
+      className={cn("m-0 text-[15px]/[23px] text-pretty text-muted-foreground", className)}
       {...props}
-      style={{
-        margin: 0,
-        color: "var(--uai-muted)",
-        fontSize: 15,
-        lineHeight: "23px",
-        textWrap: "pretty",
-        ...style,
-      }}
     />
   );
 }
 
-export function CallToActionActions({ style, ...props }: ComponentProps<"div">) {
+export function CallToActionActions({ className, ...props }: ComponentProps<"div">) {
   const { variant } = useCta("CallToActionActions");
   return (
     <div
+      data-slot="call-to-action-actions"
+      className={cn(
+        "flex flex-wrap items-center gap-2",
+        variant === "centered" ? "justify-center" : "justify-start",
+        className,
+      )}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        justifyContent: variant === "centered" ? "center" : "flex-start",
-        gap: 8,
-        ...style,
-      }}
     />
   );
 }
@@ -149,48 +125,45 @@ export type CallToActionActionProps = ComponentProps<"a"> & {
   priority?: "primary" | "secondary";
 };
 
+const callToActionActionVariants = cva(
+  "inline-flex h-9 items-center justify-center gap-1.5 rounded-full text-[13px]/[18px] font-medium whitespace-nowrap decoration-border-strong underline-offset-3 [transition:filter_120ms_ease-out,text-decoration-color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100",
+  {
+    variants: {
+      priority: {
+        primary: "bg-primary px-4 text-primary-foreground no-underline hover:brightness-[1.08]",
+        secondary: "bg-transparent px-3 text-foreground underline hover:decoration-current",
+      },
+    },
+  },
+);
+
 export function CallToActionAction({
   priority = "primary",
-  style,
+  className,
   ...props
 }: CallToActionActionProps) {
-  const primary = priority === "primary";
   return (
     <a
-      {...props}
+      data-slot="call-to-action-action"
       data-priority={priority}
-      data-uai-cta-action={priority}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 6,
-        height: 36,
-        padding: primary ? "0 16px" : "0 12px",
-        borderRadius: 999,
-        background: primary ? "var(--uai-accent)" : "transparent",
-        color: primary ? "var(--uai-accent-foreground)" : "var(--uai-text)",
-        fontSize: 13,
-        fontWeight: 500,
-        lineHeight: "18px",
-        textDecoration: primary ? "none" : "underline",
-        textDecorationColor: "var(--uai-border-strong)",
-        textUnderlineOffset: 3,
-        whiteSpace: "nowrap",
-        ...style,
-      }}
+      className={cn(callToActionActionVariants({ priority }), className)}
+      {...props}
     />
   );
 }
 
 /** Reassurance points rendered as Trust Panel badges. Pass an aria-label that names the list. */
-export function CallToActionReassurance({ style, ...props }: ComponentProps<"ul">) {
+export function CallToActionReassurance({ className, ...props }: ComponentProps<"ul">) {
   const { variant } = useCta("CallToActionReassurance");
   return (
     <TrustPanelBadges
+      data-slot="call-to-action-reassurance"
+      className={cn(
+        variant === "centered" ? "justify-center" : "justify-start",
+        variant === "split" && "@min-[640px]:col-span-full",
+        className,
+      )}
       {...props}
-      data-uai-cta-reassurance=""
-      style={{ justifyContent: variant === "centered" ? "center" : "flex-start", ...style }}
     />
   );
 }
@@ -200,5 +173,5 @@ export function CallToActionReassuranceItem({
   ...props
 }: ComponentProps<typeof TrustPanelBadge>) {
   useCta("CallToActionReassuranceItem");
-  return <TrustPanelBadge {...props} icon={icon} />;
+  return <TrustPanelBadge data-slot="call-to-action-reassurance-item" {...props} icon={icon} />;
 }

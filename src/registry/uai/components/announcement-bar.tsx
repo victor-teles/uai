@@ -1,15 +1,9 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { ArrowRight, X } from "lucide-react";
-import {
-  type ComponentProps,
-  type CSSProperties,
-  createContext,
-  useContext,
-  useEffect,
-  useId,
-  useState,
-} from "react";
+import { type ComponentProps, createContext, useContext, useEffect, useId, useState } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const ANNOUNCEMENT_BAR_VARIANTS = ["bar", "card", "pill"] as const;
 export type AnnouncementBarVariant = (typeof ANNOUNCEMENT_BAR_VARIANTS)[number];
@@ -47,52 +41,18 @@ function writeDismissed(key: string) {
     // Storage can be unavailable in private modes; dismissal still applies in memory.
   }
 }
-const shells: Record<AnnouncementBarVariant, CSSProperties> = {
-  bar: {
-    width: "100%",
-    padding: "8px 10px 8px 16px",
-    background: "color-mix(in oklab, var(--uai-accent) 9%, var(--uai-surface))",
-    boxShadow: "inset 0 -1px 0 color-mix(in oklab, var(--uai-accent) 16%, var(--uai-border))",
+const announcementBarVariants = cva(
+  "box-border flex min-w-0 animate-in items-center text-[13px]/[18px] text-foreground duration-240 ease-out-quint fade-in-0 slide-in-from-top-1 fill-mode-both motion-reduce:animate-none [&_:is(a,button)]:focus-visible:outline-2 [&_:is(a,button)]:focus-visible:outline-offset-2 [&_:is(a,button)]:focus-visible:outline-ring",
+  {
+    variants: {
+      variant: {
+        bar: "w-full flex-wrap gap-3 bg-[color-mix(in_oklab,var(--primary)_9%,var(--card))] py-2 pr-2.5 pl-4 shadow-[inset_0_-1px_0_color-mix(in_oklab,var(--primary)_16%,var(--border))]",
+        card: "w-full flex-wrap gap-3 rounded-[14px] border bg-card py-2.5 pr-2.5 pl-3.5",
+        pill: "mx-auto my-0 w-fit max-w-full flex-nowrap gap-2.5 rounded-full bg-card py-1 pr-1 pl-1.25 shadow-[0_0_0_1px_var(--border)]",
+      },
+    },
   },
-  card: {
-    width: "100%",
-    padding: "10px 10px 10px 14px",
-    border: "1px solid var(--uai-border)",
-    borderRadius: 14,
-    background: "var(--uai-surface)",
-  },
-  pill: {
-    width: "fit-content",
-    maxWidth: "100%",
-    margin: "0 auto",
-    padding: "4px 4px 4px 5px",
-    borderRadius: 999,
-    background: "var(--uai-surface)",
-    boxShadow: "0 0 0 1px var(--uai-border)",
-  },
-};
-const announcementCss = `
-.uai-announcement{animation:uai-announcement-in 240ms cubic-bezier(0.23,1,0.32,1) both}
-.uai-announcement-action{background:var(--uai-surface-raised);color:var(--uai-text);transition:background-color 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-announcement[data-variant=bar] .uai-announcement-action{background:var(--uai-accent);color:var(--uai-accent-foreground)}
-.uai-announcement-action:hover{background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text))}
-.uai-announcement[data-variant=bar] .uai-announcement-action:hover{background:var(--uai-accent);filter:brightness(1.08)}
-.uai-announcement-action:active{transform:scale(0.97)}
-.uai-announcement-action svg{transition:transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-announcement-action:hover svg{transform:translateX(2px)}
-.uai-announcement-dismiss{background:transparent;color:var(--uai-muted);transition:background-color 120ms ease-out,color 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-announcement-dismiss:hover{background:var(--uai-surface-raised);color:var(--uai-text)}
-.uai-announcement[data-variant=bar] .uai-announcement-dismiss:hover{background:color-mix(in oklab,var(--uai-text) 8%,transparent)}
-.uai-announcement-dismiss:active{transform:scale(0.94)}
-.uai-announcement :is(a,button):focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-@keyframes uai-announcement-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion: reduce){
-.uai-announcement,.uai-announcement-action,.uai-announcement-action svg,.uai-announcement-dismiss{animation:none;transition:none;transform:none}
-}
-`;
-function cx(...names: (string | undefined)[]) {
-  return names.filter(Boolean).join(" ");
-}
+);
 
 export function AnnouncementBar({
   variant = "bar",
@@ -102,7 +62,6 @@ export function AnnouncementBar({
   storageKey,
   children,
   className,
-  style,
   ...props
 }: AnnouncementBarProps) {
   const id = useId();
@@ -124,115 +83,78 @@ export function AnnouncementBar({
     <Context.Provider value={{ id, variant, dismiss }}>
       <section
         aria-labelledby={`${id}-message`}
+        data-slot="announcement-bar"
+        className={cn(announcementBarVariants({ variant }), className)}
         {...props}
         data-variant={variant}
-        className={cx("uai-announcement", className)}
-        style={{
-          boxSizing: "border-box",
-          display: "flex",
-          flexWrap: variant === "pill" ? "nowrap" : "wrap",
-          alignItems: "center",
-          gap: variant === "pill" ? 10 : 12,
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...shells[variant],
-          ...style,
-        }}
       >
-        <style>{announcementCss}</style>
         {children}
       </section>
     </Context.Provider>
   );
 }
 
-export function AnnouncementBarLabel({ style, ...props }: ComponentProps<"span">) {
+export function AnnouncementBarLabel({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
+      data-slot="announcement-bar-label"
+      className={cn(
+        "inline-flex h-5 flex-none items-center rounded-full bg-primary/16 px-2 text-[11.5px]/4 font-medium whitespace-nowrap text-[color-mix(in_oklab,var(--primary)_62%,var(--foreground))] shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_28%,transparent)]",
+        className,
+      )}
       {...props}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        flex: "none",
-        height: 20,
-        padding: "0 8px",
-        borderRadius: 999,
-        background: "color-mix(in oklab, var(--uai-accent) 16%, transparent)",
-        boxShadow: "inset 0 0 0 1px color-mix(in oklab, var(--uai-accent) 28%, transparent)",
-        color: "color-mix(in oklab, var(--uai-accent) 62%, var(--uai-text))",
-        fontSize: 11.5,
-        fontWeight: 500,
-        lineHeight: "16px",
-        whiteSpace: "nowrap",
-        ...style,
-      }}
     />
   );
 }
 
-export function AnnouncementBarMessage({ style, ...props }: ComponentProps<"p">) {
+export function AnnouncementBarMessage({ className, ...props }: ComponentProps<"p">) {
   const context = useAnnouncement("AnnouncementBarMessage");
   return (
     <p
+      data-slot="announcement-bar-message"
+      className={cn(
+        "m-0 min-w-0 text-pretty",
+        context.variant === "pill"
+          ? "flex-[0_1_auto] truncate text-muted-foreground"
+          : "flex-[1_1_240px] text-foreground",
+        className,
+      )}
       {...props}
       id={`${context.id}-message`}
-      style={{
-        flex: context.variant === "pill" ? "0 1 auto" : "1 1 240px",
-        minWidth: 0,
-        margin: 0,
-        color: context.variant === "pill" ? "var(--uai-muted)" : "var(--uai-text)",
-        textWrap: "pretty",
-        ...(context.variant === "pill"
-          ? { overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }
-          : null),
-        ...style,
-      }}
     />
   );
 }
 
-export function AnnouncementBarActions({ style, ...props }: ComponentProps<"div">) {
+export function AnnouncementBarActions({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="announcement-bar-actions"
+      className={cn("ml-auto flex items-center gap-1", className)}
       {...props}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 4,
-        marginLeft: "auto",
-        ...style,
-      }}
     />
   );
 }
 
-export function AnnouncementBarAction({
-  children,
-  className,
-  style,
-  ...props
-}: ComponentProps<"a">) {
+const actionVariants = cva(
+  "inline-flex items-center gap-1 rounded-full font-medium whitespace-nowrap no-underline [transition:background-color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 [&_svg]:[transition:translate_140ms_cubic-bezier(0.23,1,0.32,1)] hover:[&_svg]:translate-x-0.5 motion-reduce:[&_svg]:transition-none motion-reduce:hover:[&_svg]:translate-x-0",
+  {
+    variants: {
+      variant: {
+        bar: "h-7 bg-primary pr-2.5 pl-3.5 text-[13px] text-primary-foreground hover:bg-primary hover:brightness-108",
+        card: "h-7 bg-secondary pr-2.5 pl-3.5 text-[13px] text-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+        pill: "h-6.5 bg-secondary pr-2.5 pl-3 text-[12.5px] text-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+      },
+    },
+  },
+);
+
+export function AnnouncementBarAction({ children, className, ...props }: ComponentProps<"a">) {
   const context = useAnnouncement("AnnouncementBarAction");
-  const pill = context.variant === "pill";
   return (
     <a
+      data-slot="announcement-bar-action"
+      className={cn(actionVariants({ variant: context.variant }), className)}
       {...props}
-      className={cx("uai-announcement-action", className)}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 4,
-        height: pill ? 26 : 28,
-        padding: pill ? "0 10px 0 12px" : "0 10px 0 14px",
-        borderRadius: 999,
-        fontSize: pill ? 12.5 : 13,
-        fontWeight: 500,
-        textDecoration: "none",
-        whiteSpace: "nowrap",
-        ...style,
-      }}
     >
       {children}
       <ArrowRight size={14} strokeWidth={1.75} aria-hidden="true" />
@@ -244,27 +166,22 @@ export function AnnouncementBarDismiss({
   children = <X size={14} strokeWidth={1.75} aria-hidden="true" />,
   onClick,
   className,
-  style,
   ...props
 }: ComponentProps<"button">) {
   const context = useAnnouncement("AnnouncementBarDismiss");
+  const pill = context.variant === "pill";
   return (
     <button
       aria-label="Dismiss announcement"
+      data-slot="announcement-bar-dismiss"
+      className={cn(
+        "grid cursor-pointer place-items-center border-0 bg-transparent p-0 text-muted-foreground [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:text-foreground active:scale-[0.94] motion-reduce:transition-none motion-reduce:active:scale-100",
+        pill ? "size-6.5 rounded-full" : "size-7 rounded-lg",
+        context.variant === "bar" ? "hover:bg-foreground/8" : "hover:bg-accent",
+        className,
+      )}
       {...props}
       type="button"
-      className={cx("uai-announcement-dismiss", className)}
-      style={{
-        display: "grid",
-        placeItems: "center",
-        width: context.variant === "pill" ? 26 : 28,
-        height: context.variant === "pill" ? 26 : 28,
-        padding: 0,
-        border: 0,
-        borderRadius: context.variant === "pill" ? 999 : 8,
-        cursor: "pointer",
-        ...style,
-      }}
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) context.dismiss();

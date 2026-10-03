@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, useContext, useId } from "react";
 import {
   ConfirmationDialog,
@@ -17,6 +18,7 @@ import {
   type StatusBannerProps,
   type StatusBannerVariant,
 } from "@/components/ui/uai/status-banner";
+import { cn } from "@/lib/uai-utils";
 
 export const BILLING_PORTAL_VARIANTS = ["overview", "stacked", "compact"] as const;
 export type BillingPortalVariant = (typeof BILLING_PORTAL_VARIANTS)[number];
@@ -47,25 +49,14 @@ const dialogVariants: Record<BillingPortalVariant, ConfirmationDialogVariant> = 
   compact: "compact",
 };
 
-const interactionCss = `
-[data-uai-billing-button],[data-uai-billing-invoice]{transition:background-color 120ms ease-out,filter 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-[data-uai-billing-button="primary"]{background:var(--uai-accent);color:var(--uai-accent-foreground)}
-[data-uai-billing-button="secondary"]{background:var(--uai-surface-raised);color:var(--uai-text)}
-[data-uai-billing-button="primary"]:hover:not(:disabled){filter:brightness(1.08)}
-[data-uai-billing-button="secondary"]:hover:not(:disabled){background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text))}
-[data-uai-billing-button]:active:not(:disabled){transform:scale(0.97)}
-[data-uai-billing-button]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-[data-uai-billing-invoice]:hover{background:color-mix(in oklab,var(--uai-surface-raised) 55%,transparent)}
-[data-uai-billing-invoice]>td{border-bottom:1px solid var(--uai-border)}
-[data-uai-billing-invoice]:last-child>td{border-bottom-color:transparent}
-[data-uai-billing-invoice]>td:first-child{border-top-left-radius:8px;border-bottom-left-radius:8px}
-[data-uai-billing-invoice]>td:last-child{border-top-right-radius:8px;border-bottom-right-radius:8px}
-@media (prefers-reduced-motion: reduce){[data-uai-billing-button],[data-uai-billing-invoice]{transition:none}[data-uai-billing-button]:active:not(:disabled){transform:none}}`;
+const billingPortalVariants = cva("grid min-w-0 content-start text-[13px]/[18px] text-foreground", {
+  variants: { variant: { overview: "gap-4", stacked: "gap-4", compact: "gap-2.5" } },
+});
 
 export function BillingPortal({
   variant = "overview",
   children,
-  style,
+  className,
   ...props
 }: BillingPortalProps) {
   const id = useId();
@@ -73,111 +64,108 @@ export function BillingPortal({
     <Context.Provider value={{ id, variant }}>
       <section
         aria-labelledby={`${id}-title`}
+        data-slot="billing-portal"
+        className={cn(billingPortalVariants({ variant }), className)}
         {...props}
         data-variant={variant}
-        style={{
-          display: "grid",
-          alignContent: "start",
-          gap: variant === "compact" ? 10 : 16,
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
       >
-        <style>{interactionCss}</style>
         {children}
       </section>
     </Context.Provider>
   );
 }
 
-export function BillingPortalHeader({ style, ...props }: ComponentProps<"div">) {
+export function BillingPortalHeader({ className, ...props }: ComponentProps<"div">) {
   usePortal("BillingPortalHeader");
   return (
     <div
+      data-slot="billing-portal-header"
+      className={cn("flex min-w-0 flex-wrap items-end justify-between gap-3", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "flex-end",
-        justifyContent: "space-between",
-        gap: 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function BillingPortalHeading({ style, ...props }: ComponentProps<"div">) {
-  return (
-    <div {...props} style={{ display: "grid", gap: 4, flex: "1 1 240px", minWidth: 0, ...style }} />
-  );
-}
-
-export function BillingPortalTitle({ style, ...props }: ComponentProps<"h2">) {
-  const context = usePortal("BillingPortalTitle");
-  const compact = context.variant === "compact";
-  return (
-    <h2
-      {...props}
-      id={`${context.id}-title`}
-      style={{
-        margin: 0,
-        fontSize: compact ? 15 : 18,
-        lineHeight: compact ? "20px" : "24px",
-        fontWeight: 600,
-        letterSpacing: "-0.01em",
-        ...style,
-      }}
-    />
-  );
-}
-
-export function BillingPortalDescription({ style, ...props }: ComponentProps<"p">) {
-  return <p {...props} style={{ margin: 0, color: "var(--uai-muted)", ...style }} />;
-}
-
-export function BillingPortalActions({ style, ...props }: ComponentProps<"div">) {
+export function BillingPortalHeading({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="billing-portal-heading"
+      className={cn("grid min-w-0 flex-[1_1_240px] gap-1", className)}
       {...props}
-      style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6, ...style }}
     />
   );
 }
+
+export function BillingPortalTitle({ className, ...props }: ComponentProps<"h2">) {
+  const context = usePortal("BillingPortalTitle");
+  return (
+    <h2
+      data-slot="billing-portal-title"
+      className={cn(
+        "m-0 font-semibold tracking-[-0.01em]",
+        context.variant === "compact" ? "text-[15px]/5" : "text-lg/6",
+        className,
+      )}
+      {...props}
+      id={`${context.id}-title`}
+    />
+  );
+}
+
+export function BillingPortalDescription({ className, ...props }: ComponentProps<"p">) {
+  return (
+    <p
+      data-slot="billing-portal-description"
+      className={cn("m-0 text-muted-foreground", className)}
+      {...props}
+    />
+  );
+}
+
+export function BillingPortalActions({ className, ...props }: ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="billing-portal-actions"
+      className={cn("flex flex-wrap items-center gap-1.5", className)}
+      {...props}
+    />
+  );
+}
+
+const billingPortalButtonVariants = cva(
+  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap [transition:background-color_120ms_ease-out,filter_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:[transform:scale(0.97)] motion-reduce:transition-none motion-reduce:enabled:active:[transform:none]",
+  {
+    variants: {
+      emphasis: {
+        primary: "bg-primary text-primary-foreground enabled:hover:brightness-108",
+        secondary:
+          "bg-secondary text-secondary-foreground enabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+      },
+      compact: {
+        true: "h-[26px] px-2.5 text-[12px]",
+        false: "h-[30px] px-[13px] text-[12.5px]",
+      },
+    },
+  },
+);
 
 export function BillingPortalButton({
   emphasis = "secondary",
   type = "button",
-  style,
+  className,
   ...props
 }: ComponentProps<"button"> & { emphasis?: "primary" | "secondary" }) {
   const context = usePortal("BillingPortalButton");
-  const compact = context.variant === "compact";
   return (
     <button
+      data-slot="billing-portal-button"
+      className={cn(
+        billingPortalButtonVariants({ emphasis, compact: context.variant === "compact" }),
+        className,
+      )}
       {...props}
       type={type}
-      data-uai-billing-button={emphasis}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 6,
-        height: compact ? 26 : 30,
-        padding: compact ? "0 10px" : "0 13px",
-        border: 0,
-        borderRadius: 999,
-        font: "inherit",
-        fontSize: compact ? 12 : 12.5,
-        fontWeight: 500,
-        whiteSpace: "nowrap",
-        cursor: "pointer",
-        ...style,
-      }}
+      data-emphasis={emphasis}
     />
   );
 }
@@ -188,22 +176,24 @@ export function BillingPortalAlert(props: Omit<StatusBannerProps, "variant">) {
   return <StatusBanner {...props} variant={bannerVariants[context.variant]} />;
 }
 
+const billingPortalGridVariants = cva("grid min-w-0", {
+  variants: {
+    variant: {
+      overview: "grid-cols-[repeat(auto-fit,minmax(min(100%,320px),1fr))] gap-3",
+      stacked: "grid-cols-[minmax(0,1fr)] gap-3",
+      compact: "grid-cols-[repeat(auto-fit,minmax(min(100%,240px),1fr))] gap-2",
+    },
+  },
+});
+
 /** Section layout. Overview tiles sections side by side; Stacked keeps one column. */
-export function BillingPortalGrid({ style, ...props }: ComponentProps<"div">) {
+export function BillingPortalGrid({ className, ...props }: ComponentProps<"div">) {
   const { variant } = usePortal("BillingPortalGrid");
   return (
     <div
+      data-slot="billing-portal-grid"
+      className={cn(billingPortalGridVariants({ variant }), className)}
       {...props}
-      style={{
-        display: "grid",
-        gridTemplateColumns:
-          variant === "stacked"
-            ? "minmax(0, 1fr)"
-            : `repeat(auto-fit, minmax(min(100%, ${variant === "compact" ? 240 : 320}px), 1fr))`,
-        gap: variant === "compact" ? 8 : 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
@@ -211,106 +201,86 @@ export function BillingPortalGrid({ style, ...props }: ComponentProps<"div">) {
 /** A billing card. Set `span` to let a section such as invoices fill the whole row. */
 export function BillingPortalSection({
   span = false,
-  style,
+  className,
   ...props
 }: ComponentProps<"section"> & { span?: boolean }) {
   const { variant } = usePortal("BillingPortalSection");
   const id = useId();
-  const compact = variant === "compact";
   return (
     <SectionContext.Provider value={id}>
       <section
         aria-labelledby={id}
+        data-slot="billing-portal-section"
+        data-span={span || undefined}
+        className={cn(
+          "grid min-w-0 content-start border bg-card",
+          variant === "compact"
+            ? "gap-2.5 rounded-xl p-3"
+            : "gap-3.5 rounded-[14px] px-[18px] pt-4 pb-[18px]",
+          span && "col-span-full",
+          className,
+        )}
         {...props}
-        style={{
-          display: "grid",
-          alignContent: "start",
-          gap: compact ? 10 : 14,
-          gridColumn: span ? "1 / -1" : undefined,
-          minWidth: 0,
-          padding: compact ? 12 : "16px 18px 18px",
-          border: "1px solid var(--uai-border)",
-          borderRadius: compact ? 12 : 14,
-          background: "var(--uai-surface)",
-          ...style,
-        }}
       />
     </SectionContext.Provider>
   );
 }
 
-export function BillingPortalSectionHeader({ style, ...props }: ComponentProps<"div">) {
+export function BillingPortalSectionHeader({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="billing-portal-section-header"
+      className={cn("flex min-w-0 flex-wrap items-center justify-between gap-2", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 8,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function BillingPortalSectionTitle({ style, ...props }: ComponentProps<"h3">) {
+export function BillingPortalSectionTitle({ className, ...props }: ComponentProps<"h3">) {
   const id = useContext(SectionContext);
   if (!id) throw new Error("BillingPortalSectionTitle must be used within BillingPortalSection");
   return (
     <h3
+      data-slot="billing-portal-section-title"
+      className={cn("m-0 text-[13px]/[18px] font-medium", className)}
       {...props}
       id={id}
-      style={{ margin: 0, fontSize: 13, lineHeight: "18px", fontWeight: 500, ...style }}
     />
   );
 }
 
-export function BillingPortalSectionDescription({ style, ...props }: ComponentProps<"p">) {
+export function BillingPortalSectionDescription({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="billing-portal-section-description"
+      className={cn("m-0 text-[12.5px]/[18px] text-muted-foreground", className)}
       {...props}
-      style={{ margin: 0, color: "var(--uai-muted)", fontSize: 12.5, lineHeight: "18px", ...style }}
     />
   );
 }
 
-export function BillingPortalSectionFooter({ style, ...props }: ComponentProps<"div">) {
+export function BillingPortalSectionFooter({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="billing-portal-section-footer"
+      className={cn("flex flex-wrap items-center gap-1.5 pt-1", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        gap: 6,
-        paddingTop: 4,
-        ...style,
-      }}
     />
   );
 }
 
 /** The plan price. Put the billing period in a nested span. */
-export function BillingPortalPrice({ style, ...props }: ComponentProps<"p">) {
+export function BillingPortalPrice({ className, ...props }: ComponentProps<"p">) {
   const { variant } = usePortal("BillingPortalPrice");
   return (
     <p
+      data-slot="billing-portal-price"
+      className={cn(
+        "m-0 flex items-baseline gap-1.5 font-semibold tracking-[-0.02em] tabular-nums",
+        variant === "compact" ? "text-xl/[26px]" : "text-[26px]/8",
+        className,
+      )}
       {...props}
-      style={{
-        display: "flex",
-        alignItems: "baseline",
-        gap: 6,
-        margin: 0,
-        fontSize: variant === "compact" ? 20 : 26,
-        lineHeight: variant === "compact" ? "26px" : "32px",
-        fontWeight: 600,
-        letterSpacing: "-0.02em",
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     />
   );
 }
@@ -328,21 +298,17 @@ export function BillingPortalDetails(props: Omit<DescriptionListProps, "variant"
 }
 
 /** Invoice history. Scrolls horizontally on narrow screens instead of squeezing columns. */
-export function BillingPortalInvoices({ children, style, ...props }: ComponentProps<"table">) {
+export function BillingPortalInvoices({ children, className, ...props }: ComponentProps<"table">) {
   usePortal("BillingPortalInvoices");
   return (
     <div
-      style={{ minWidth: 0, margin: "0 -8px", overflowX: "auto", overscrollBehaviorX: "contain" }}
+      data-slot="billing-portal-invoices-scroller"
+      className="-mx-2 min-w-0 overflow-x-auto overscroll-x-contain"
     >
       <table
+        data-slot="billing-portal-invoices"
+        className={cn("w-full min-w-[440px] border-collapse tabular-nums", className)}
         {...props}
-        style={{
-          width: "100%",
-          minWidth: 440,
-          borderCollapse: "collapse",
-          fontVariantNumeric: "tabular-nums",
-          ...style,
-        }}
       >
         {children}
       </table>
@@ -350,9 +316,13 @@ export function BillingPortalInvoices({ children, style, ...props }: ComponentPr
   );
 }
 
-export function BillingPortalInvoicesHeader({ children, ...props }: ComponentProps<"thead">) {
+export function BillingPortalInvoicesHeader({
+  children,
+  className,
+  ...props
+}: ComponentProps<"thead">) {
   return (
-    <thead {...props}>
+    <thead data-slot="billing-portal-invoices-header" className={cn(className)} {...props}>
       <tr>{children}</tr>
     </thead>
   );
@@ -360,50 +330,56 @@ export function BillingPortalInvoicesHeader({ children, ...props }: ComponentPro
 
 export function BillingPortalInvoicesColumn({
   align = "start",
-  style,
+  className,
   ...props
 }: Omit<ComponentProps<"th">, "align"> & { align?: "start" | "end" }) {
   return (
     <th
       scope="col"
+      data-slot="billing-portal-invoices-column"
+      className={cn(
+        "border-b px-2.5 pt-0 pb-2 text-[12px] font-medium whitespace-nowrap text-subtle-foreground",
+        align === "end" ? "text-end" : "text-start",
+        className,
+      )}
       {...props}
-      style={{
-        padding: "0 10px 8px",
-        borderBottom: "1px solid var(--uai-border)",
-        color: "var(--uai-subtle)",
-        fontSize: 12,
-        fontWeight: 500,
-        textAlign: align,
-        whiteSpace: "nowrap",
-        ...style,
-      }}
     />
   );
 }
 
-export function BillingPortalInvoicesBody(props: ComponentProps<"tbody">) {
-  return <tbody {...props} />;
+export function BillingPortalInvoicesBody({ className, ...props }: ComponentProps<"tbody">) {
+  return <tbody data-slot="billing-portal-invoices-body" className={cn(className)} {...props} />;
 }
 
-export function BillingPortalInvoice(props: ComponentProps<"tr">) {
-  return <tr {...props} data-uai-billing-invoice="" />;
+export function BillingPortalInvoice({ className, ...props }: ComponentProps<"tr">) {
+  return (
+    <tr
+      data-slot="billing-portal-invoice"
+      className={cn(
+        "transition-[background-color] duration-120 ease-[ease-out] hover:bg-accent/55 motion-reduce:transition-none [&:last-child>td]:border-b-transparent [&>td]:border-b [&>td:first-child]:rounded-l-lg [&>td:last-child]:rounded-r-lg",
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 
 export function BillingPortalInvoiceCell({
   align = "start",
-  style,
+  className,
   ...props
 }: Omit<ComponentProps<"td">, "align"> & { align?: "start" | "end" }) {
   const { variant } = usePortal("BillingPortalInvoiceCell");
   return (
     <td
+      data-slot="billing-portal-invoice-cell"
+      className={cn(
+        "px-2.5 whitespace-nowrap",
+        variant === "compact" ? "py-[7px]" : "py-2.5",
+        align === "end" ? "text-end" : "text-start",
+        className,
+      )}
       {...props}
-      style={{
-        padding: variant === "compact" ? "7px 10px" : "10px 10px",
-        textAlign: align,
-        whiteSpace: "nowrap",
-        ...style,
-      }}
     />
   );
 }

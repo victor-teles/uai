@@ -1,7 +1,9 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { ArrowDownRight, ArrowRight, ArrowUpRight } from "lucide-react";
 import { type ComponentProps, createContext, useContext, useId } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const METRIC_CARD_VARIANTS = ["card", "plain", "compact"] as const;
 export type MetricCardVariant = (typeof METRIC_CARD_VARIANTS)[number];
@@ -17,19 +19,20 @@ function useMetric(part: string) {
   return context;
 }
 
-const srOnly = {
-  position: "absolute",
-  width: 1,
-  height: 1,
-  margin: -1,
-  padding: 0,
-  overflow: "hidden",
-  clip: "rect(0, 0, 0, 0)",
-  whiteSpace: "nowrap",
-  border: 0,
-} as const;
+const metricCardVariants = cva(
+  "grid min-w-0 content-start text-[13px]/[18px] text-card-foreground",
+  {
+    variants: {
+      variant: {
+        card: "gap-1.5 rounded-[14px] border bg-card p-4",
+        plain: "gap-1.5 bg-transparent p-0",
+        compact: "gap-1 rounded-xl border bg-card p-3",
+      },
+    },
+  },
+);
 
-export function MetricCard({ variant = "card", style, children, ...props }: MetricCardProps) {
+export function MetricCard({ variant = "card", className, children, ...props }: MetricCardProps) {
   const labelId = useId();
   return (
     <Context.Provider value={{ labelId, variant }}>
@@ -37,22 +40,10 @@ export function MetricCard({ variant = "card", style, children, ...props }: Metr
       <div
         role="group"
         aria-labelledby={labelId}
-        {...props}
+        data-slot="metric-card"
         data-variant={variant}
-        style={{
-          display: "grid",
-          alignContent: "start",
-          gap: variant === "compact" ? 4 : 6,
-          minWidth: 0,
-          padding: variant === "plain" ? 0 : variant === "compact" ? 12 : 16,
-          border: variant === "plain" ? 0 : "1px solid var(--uai-border)",
-          borderRadius: variant === "compact" ? 12 : 14,
-          background: variant === "plain" ? "transparent" : "var(--uai-surface)",
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
+        className={cn(metricCardVariants({ variant }), className)}
+        {...props}
       >
         {children}
       </div>
@@ -60,64 +51,60 @@ export function MetricCard({ variant = "card", style, children, ...props }: Metr
   );
 }
 
-export function MetricCardLabel({ style, ...props }: ComponentProps<"span">) {
+export function MetricCardLabel({ className, ...props }: ComponentProps<"span">) {
   const context = useMetric("MetricCardLabel");
   return (
     <span
+      data-slot="metric-card-label"
+      className={cn(
+        "text-[12.5px]/4 font-medium text-muted-foreground",
+        context.variant === "compact" && "text-xs/4",
+        className,
+      )}
       {...props}
       id={context.labelId}
-      style={{
-        color: "var(--uai-muted)",
-        fontSize: context.variant === "compact" ? 12 : 12.5,
-        lineHeight: "16px",
-        fontWeight: 500,
-        ...style,
-      }}
     />
   );
 }
 
-export function MetricCardValue({ style, ...props }: ComponentProps<"p">) {
+export function MetricCardValue({ className, ...props }: ComponentProps<"p">) {
   const context = useMetric("MetricCardValue");
   return (
     <p
+      data-slot="metric-card-value"
+      className={cn(
+        "m-0 font-semibold tabular-nums wrap-anywhere",
+        context.variant === "compact"
+          ? "text-xl/[26px] tracking-[-0.015em]"
+          : "text-[28px]/[34px] tracking-[-0.025em]",
+        className,
+      )}
       {...props}
-      style={{
-        margin: 0,
-        fontSize: context.variant === "compact" ? 20 : 28,
-        lineHeight: context.variant === "compact" ? "26px" : "34px",
-        fontWeight: 600,
-        letterSpacing: context.variant === "compact" ? "-0.015em" : "-0.025em",
-        fontVariantNumeric: "tabular-nums",
-        overflowWrap: "anywhere",
-        ...style,
-      }}
     />
   );
 }
 
 const trendIcons = { up: ArrowUpRight, down: ArrowDownRight, flat: ArrowRight };
 const trendWords = { up: "Increased", down: "Decreased", flat: "Unchanged" };
-const sentimentTones = {
-  positive: {
-    color: "var(--uai-success)",
-    background: "color-mix(in oklab, var(--uai-success) 14%, transparent)",
+
+const metricCardTrendVariants = cva(
+  "inline-flex w-fit items-center gap-0.75 rounded-full py-0.5 pr-2 pl-1.25 text-[11.5px]/4 font-medium tabular-nums",
+  {
+    variants: {
+      sentiment: {
+        positive: "bg-success/14 text-success",
+        negative: "bg-destructive/14 text-destructive",
+        neutral: "bg-foreground/7 text-muted-foreground",
+      },
+    },
   },
-  negative: {
-    color: "var(--uai-danger)",
-    background: "color-mix(in oklab, var(--uai-danger) 14%, transparent)",
-  },
-  neutral: {
-    color: "var(--uai-muted)",
-    background: "color-mix(in oklab, var(--uai-text) 7%, transparent)",
-  },
-};
+);
 
 export function MetricCardTrend({
   direction,
   sentiment = direction === "up" ? "positive" : direction === "down" ? "negative" : "neutral",
+  className,
   children,
-  style,
   ...props
 }: ComponentProps<"span"> & {
   direction: MetricCardTrendDirection;
@@ -127,74 +114,45 @@ export function MetricCardTrend({
   const Icon = trendIcons[direction];
   return (
     <span
-      {...props}
+      data-slot="metric-card-trend"
       data-direction={direction}
       data-sentiment={sentiment}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 3,
-        width: "fit-content",
-        padding: "2px 8px 2px 5px",
-        borderRadius: 999,
-        ...sentimentTones[sentiment],
-        fontSize: 11.5,
-        lineHeight: "16px",
-        fontWeight: 500,
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
+      className={cn(metricCardTrendVariants({ sentiment }), className)}
+      {...props}
     >
       <Icon size={13} strokeWidth={2} aria-hidden="true" />
-      <span style={srOnly}>{trendWords[direction]} </span>
+      <span className="sr-only">{trendWords[direction]} </span>
       {children}
     </span>
   );
 }
 
-export function MetricCardComparison({ style, ...props }: ComponentProps<"p">) {
+export function MetricCardComparison({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="metric-card-comparison"
+      className={cn("m-0 text-xs text-subtle-foreground tabular-nums", className)}
       {...props}
-      style={{
-        margin: 0,
-        color: "var(--uai-subtle)",
-        fontSize: 12,
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     />
   );
 }
 
-export function MetricCardDescription({ style, ...props }: ComponentProps<"p">) {
+export function MetricCardDescription({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="metric-card-description"
+      className={cn("mt-1 mb-0 border-t pt-2.5 text-[12.5px] text-muted-foreground", className)}
       {...props}
-      style={{
-        margin: "4px 0 0",
-        paddingTop: 10,
-        borderTop: "1px solid var(--uai-border)",
-        color: "var(--uai-muted)",
-        fontSize: 12.5,
-        ...style,
-      }}
     />
   );
 }
 
-export function MetricCardHeader({ style, ...props }: ComponentProps<"div">) {
+export function MetricCardHeader({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="metric-card-header"
+      className={cn("flex flex-wrap items-center justify-between gap-2", className)}
       {...props}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        flexWrap: "wrap",
-        gap: 8,
-        ...style,
-      }}
     />
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { Menu, Search, X } from "lucide-react";
 import {
   type ComponentProps,
@@ -27,21 +28,6 @@ function appHeaderChrome(variant: AppHeaderVariant) {
   const compact = variant === "compact";
 
   return {
-    rootClass:
-      variant === "bar"
-        ? "border-b border-[var(--uai-border)] bg-[var(--uai-surface)]"
-        : variant === "floating"
-          ? "bg-[var(--uai-surface)]"
-          : "border border-[var(--uai-border)] bg-[var(--uai-surface)]",
-    rootStyle: {
-      minHeight: compact ? 44 : 56,
-      borderRadius: variant === "bar" ? 0 : compact ? 12 : 14,
-      padding: compact ? "4px 6px" : variant === "floating" ? 8 : "0 16px",
-      boxShadow:
-        variant === "floating"
-          ? "0 0 0 1px var(--uai-border), 0 1px 2px oklch(0 0 0 / 0.06), 0 12px 28px -20px oklch(0 0 0 / 0.4)"
-          : undefined,
-    },
     gapClass: compact ? "gap-1.5" : "gap-2.5",
     brandClass: compact ? "h-7 gap-1.5 px-1 text-[12.5px]" : "h-8 gap-2 px-1 text-[13px]",
     overflowClass: compact ? "gap-2 md:gap-3" : "gap-3 md:gap-5",
@@ -51,6 +37,17 @@ function appHeaderChrome(variant: AppHeaderVariant) {
     actionClass: compact ? "size-7 text-[11px]" : "size-8 text-[11.5px]",
   };
 }
+
+const appHeaderVariants = cva("flex w-full flex-wrap items-center bg-card text-foreground", {
+  variants: {
+    variant: {
+      bar: "min-h-14 gap-2.5 rounded-none border-b px-4 py-0",
+      floating:
+        "min-h-14 gap-2.5 rounded-[14px] p-2 shadow-[0_0_0_1px_var(--border),0_1px_2px_oklch(0_0_0/0.06),0_12px_28px_-20px_oklch(0_0_0/0.4)]",
+      compact: "min-h-11 gap-1.5 rounded-xl border px-1.5 py-1",
+    },
+  },
+});
 
 type AppHeaderContextValue = {
   chrome: ReturnType<typeof appHeaderChrome>;
@@ -74,7 +71,6 @@ export function AppHeader({
   onOpenChange,
   children,
   className,
-  style,
   ...props
 }: AppHeaderProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
@@ -90,16 +86,11 @@ export function AppHeader({
   return (
     <AppHeaderContext.Provider value={{ chrome, open: resolvedOpen, overflowId, setOpen }}>
       <header
-        {...props}
-        className={cn(
-          "flex w-full flex-wrap items-center text-[var(--uai-text)]",
-          chrome.gapClass,
-          chrome.rootClass,
-          className,
-        )}
-        style={{ ...chrome.rootStyle, ...style }}
+        data-slot="app-header"
         data-variant={variant}
         data-open={resolvedOpen || undefined}
+        className={cn(appHeaderVariants({ variant }), className)}
+        {...props}
       >
         {children}
       </header>
@@ -114,8 +105,9 @@ export function AppHeaderBrand({ children, className, ...props }: AppHeaderBrand
 
   return (
     <a
+      data-slot="app-header-brand"
       className={cn(
-        "inline-flex min-w-0 shrink-0 items-center rounded-[8px] font-medium tracking-[-0.01em] outline-none focus-visible:ring-2 focus-visible:ring-[var(--uai-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uai-surface)]",
+        "inline-flex min-w-0 shrink-0 items-center rounded-lg font-medium tracking-[-0.01em] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card",
         context.chrome.brandClass,
         className,
       )}
@@ -133,15 +125,16 @@ export function AppHeaderOverflow({ children, className, ...props }: AppHeaderOv
 
   return (
     <div
-      {...props}
-      id={context.overflowId}
+      data-slot="app-header-overflow"
+      data-state={context.open ? "open" : "closed"}
       className={cn(
-        "order-4 min-w-0 basis-full flex-col border-t border-[var(--uai-border)] pt-2 md:order-none md:flex md:basis-auto md:flex-row md:items-center md:border-0 md:pt-0",
+        "order-4 min-w-0 basis-full flex-col border-t pt-2 md:order-none md:flex md:basis-auto md:flex-row md:items-center md:border-0 md:pt-0",
         context.open ? "flex" : "hidden",
         context.chrome.overflowClass,
         className,
       )}
-      data-state={context.open ? "open" : "closed"}
+      {...props}
+      id={context.overflowId}
     >
       {children}
     </div>
@@ -159,7 +152,12 @@ export function AppHeaderNav({
   const context = useAppHeader("AppHeaderNav");
 
   return (
-    <nav aria-label={ariaLabel} className={cn("min-w-0", className)} {...props}>
+    <nav
+      data-slot="app-header-nav"
+      aria-label={ariaLabel}
+      className={cn("min-w-0", className)}
+      {...props}
+    >
       <ul className={cn("flex list-none flex-col p-0 md:flex-row", context.chrome.navClass)}>
         {children}
       </ul>
@@ -183,12 +181,14 @@ export function AppHeaderNavItem({
   return (
     <li className="min-w-0">
       <a
+        data-slot="app-header-nav-item"
+        data-active={active || undefined}
         aria-current={ariaCurrent ?? (active ? "page" : undefined)}
         className={cn(
-          "flex min-w-0 items-center rounded-full font-medium whitespace-nowrap outline-none transition-[background-color,color,transform] duration-[120ms] ease-out focus-visible:ring-2 focus-visible:ring-[var(--uai-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uai-surface)] active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100",
+          "flex min-w-0 items-center rounded-full font-medium whitespace-nowrap outline-none transition-[background-color,color,scale] duration-[120ms] ease-out focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100",
           active
-            ? "bg-[var(--uai-surface-raised)] text-[var(--uai-text)]"
-            : "text-[var(--uai-muted)] hover:bg-[color-mix(in_oklab,var(--uai-surface-raised)_60%,transparent)] hover:text-[var(--uai-text)]",
+            ? "bg-accent text-foreground"
+            : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
           context.chrome.navItemClass,
           className,
         )}
@@ -214,8 +214,9 @@ export function AppHeaderSearch({
 
   return (
     <label
+      data-slot="app-header-search"
       className={cn(
-        "flex w-full min-w-0 items-center gap-2 rounded-full border border-transparent bg-[var(--uai-surface-raised)] px-3 text-[var(--uai-subtle)] transition-[border-color,background-color,color] duration-[120ms] ease-out hover:text-[var(--uai-muted)] focus-within:border-[var(--uai-border-strong)] focus-within:bg-[var(--uai-surface)] focus-within:text-[var(--uai-muted)] md:ml-auto motion-reduce:transition-none",
+        "flex w-full min-w-0 items-center gap-2 rounded-full border border-transparent bg-muted px-3 text-subtle-foreground transition-[border-color,background-color,color] duration-[120ms] ease-out hover:text-muted-foreground focus-within:border-border-strong focus-within:bg-card focus-within:text-muted-foreground md:ml-auto motion-reduce:transition-none",
         context.chrome.searchClass,
       )}
     >
@@ -223,8 +224,9 @@ export function AppHeaderSearch({
       <span className="sr-only">{label}</span>
       <input
         type="search"
+        data-slot="app-header-search-input"
         className={cn(
-          "min-w-0 flex-1 bg-transparent text-[12.5px] text-[var(--uai-text)] outline-none placeholder:text-[var(--uai-subtle)] [&::-webkit-search-cancel-button]:hidden",
+          "min-w-0 flex-1 bg-transparent text-[12.5px] text-foreground outline-none placeholder:text-subtle-foreground [&::-webkit-search-cancel-button]:hidden",
           className,
         )}
         placeholder={placeholder}
@@ -241,6 +243,7 @@ export function AppHeaderActions({ children, className, ...props }: AppHeaderAct
 
   return (
     <div
+      data-slot="app-header-actions"
       className={cn("ml-auto flex shrink-0 items-center", context.chrome.gapClass, className)}
       {...props}
     >
@@ -265,11 +268,13 @@ export function AppHeaderAction({
   return (
     <button
       type={type}
+      data-slot="app-header-action"
+      data-emphasis={emphasis}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center font-medium tabular-nums outline-none transition-[background-color,color,filter,transform] duration-[120ms] ease-out focus-visible:ring-2 focus-visible:ring-[var(--uai-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uai-surface)] active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100",
+        "inline-flex shrink-0 items-center justify-center font-medium tabular-nums outline-none transition-[background-color,color,filter,scale] duration-[120ms] ease-out focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100",
         emphasis === "primary"
-          ? "rounded-full bg-[var(--uai-accent)] text-[var(--uai-accent-foreground)] shadow-[0_0_0_1px_oklch(1_0_0_/_0.08)] hover:brightness-[1.08]"
-          : "rounded-[8px] bg-transparent text-[var(--uai-muted)] hover:bg-[var(--uai-surface-raised)] hover:text-[var(--uai-text)]",
+          ? "rounded-full bg-primary text-primary-foreground shadow-[0_0_0_1px_oklch(1_0_0_/_0.08)] hover:brightness-[1.08]"
+          : "rounded-lg bg-transparent text-muted-foreground hover:bg-accent hover:text-foreground",
         context.chrome.actionClass,
         className,
       )}
@@ -297,16 +302,17 @@ export function AppHeaderMenuButton({
 
   return (
     <button
+      data-slot="app-header-menu-button"
+      className={cn(
+        "inline-flex shrink-0 items-center justify-center rounded-lg text-muted-foreground outline-none transition-[background-color,color,scale] duration-[120ms] ease-out hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card active:scale-[0.97] md:hidden motion-reduce:transition-none motion-reduce:active:scale-100",
+        context.chrome.actionClass,
+        className,
+      )}
       {...props}
       type={type}
       aria-label={ariaLabel ?? (context.open ? "Close navigation" : "Open navigation")}
       aria-controls={context.overflowId}
       aria-expanded={context.open}
-      className={cn(
-        "inline-flex shrink-0 items-center justify-center rounded-[8px] text-[var(--uai-muted)] outline-none transition-[background-color,color,transform] duration-[120ms] ease-out hover:bg-[var(--uai-surface-raised)] hover:text-[var(--uai-text)] focus-visible:ring-2 focus-visible:ring-[var(--uai-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uai-surface)] active:scale-[0.97] md:hidden motion-reduce:transition-none motion-reduce:active:scale-100",
-        context.chrome.actionClass,
-        className,
-      )}
       onClick={(event) => {
         context.setOpen(!context.open);
         onClick?.(event);

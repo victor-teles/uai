@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   type ComponentProps,
@@ -14,6 +15,7 @@ import {
   type FilterBarProps,
   type FilterBarVariant,
 } from "@/components/ui/uai/filter-bar";
+import { cn } from "@/lib/uai-utils";
 
 export const PRODUCT_LISTING_VARIANTS = ["grid", "sidebar", "list"] as const;
 export type ProductListingVariant = (typeof PRODUCT_LISTING_VARIANTS)[number];
@@ -27,57 +29,32 @@ function useListing(part: string) {
   return context;
 }
 
-const layoutCss = `
-[data-uai-listing-body]{display:grid;gap:16px;align-items:start;min-width:0}
-[data-uai-listing-results]{display:grid;gap:16px;margin:0;padding:0;list-style:none;min-width:0}
-[data-uai-listing="grid"] [data-uai-listing-results]{grid-template-columns:repeat(auto-fill,minmax(min(100%,180px),1fr))}
-[data-uai-listing="sidebar"] [data-uai-listing-results]{grid-template-columns:repeat(auto-fill,minmax(min(100%,160px),1fr))}
-[data-uai-listing="list"] [data-uai-listing-results]{grid-template-columns:minmax(0,1fr);gap:2px}
-[data-uai-listing="list"] [data-uai-listing-product]{grid-template-columns:64px minmax(0,1fr) auto;grid-template-rows:1fr auto 1fr;align-items:start;padding:8px 14px 8px 8px;transition:background-color 120ms ease-out}
-[data-uai-listing="list"] [data-uai-listing-product]>h3{align-self:end}
-[data-uai-listing="list"] [data-uai-listing-product]:hover{background:var(--uai-surface)}
-[data-uai-listing="list"] [data-uai-listing-product-price]{grid-column:3;grid-row:1 / span 3;align-self:center}
-@container (min-width: 760px){
-  [data-uai-listing="sidebar"] [data-uai-listing-body]{grid-template-columns:220px minmax(0,1fr);column-gap:28px}
-  [data-uai-listing="sidebar"] [data-uai-listing-aside]{position:sticky;top:16px}
-}
-@container (max-width: 420px){
-  [data-uai-listing="list"] [data-uai-listing-product]{grid-template-columns:56px minmax(0,1fr);grid-template-rows:auto}
-  [data-uai-listing="list"] [data-uai-listing-product-price]{grid-column:2;grid-row:auto}
-}
-.uai-listing-link{color:inherit;text-decoration:none}
-.uai-listing-link::after{content:"";position:absolute;inset:0;border-radius:inherit}
-.uai-listing-link:focus-visible{outline:none}
-[data-uai-listing-product]:has(.uai-listing-link:focus-visible){outline:2px solid var(--uai-accent);outline-offset:2px}
-.uai-listing-link:hover{text-decoration:none}
-[data-uai-listing-media]{transition:background-color 120ms ease-out}
-[data-uai-listing-media]>*{transition:transform 300ms cubic-bezier(0.23,1,0.32,1)}
-[data-uai-listing-product]:hover [data-uai-listing-media]>*{transform:scale(1.03)}
-.uai-listing-pill{transition:background-color 120ms ease-out,color 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-listing-pill:not([aria-current]):not([aria-disabled]):hover{background:var(--uai-surface-raised);color:var(--uai-text)}
-.uai-listing-pill:not([aria-disabled]):active{transform:scale(0.97)}
-.uai-listing-pill:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-.uai-listing-sort{transition:background-color 120ms ease-out}
-.uai-listing-sort:hover{background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text))}
-.uai-listing-sort:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-@media (prefers-reduced-motion: reduce){
-  [data-uai-listing-media]>*,.uai-listing-pill,.uai-listing-sort,[data-uai-listing-product]{transition:none}
-  [data-uai-listing-product]:hover [data-uai-listing-media]>*{transform:none}
-  .uai-listing-pill:not([aria-disabled]):active{transform:none}
-}
-`;
-
 const filterVariants: Record<ProductListingVariant, FilterBarVariant> = {
   grid: "toolbar",
   sidebar: "panel",
   list: "compact",
 };
 
+/** Reads the layout variant without requiring the root, for parts that render standalone. */
+function useListingVariant() {
+  return useContext(Context)?.variant;
+}
+
+const pillInteraction =
+  "[transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none";
+const pillHover = "hover:bg-accent hover:text-foreground";
+const pillPress = "active:scale-[0.97] motion-reduce:active:scale-100";
+
+const productListingVariants = cva(
+  "@container box-border grid min-w-0 gap-5 text-[13px]/[18px] text-foreground",
+  { variants: { variant: { grid: "", sidebar: "", list: "" } } },
+);
+
 /** Categories, filters, sorting, result counts, and pagination for a product catalog page. */
 export function ProductListing({
   variant = "grid",
+  className,
   children,
-  style,
   ...props
 }: ProductListingProps) {
   const id = useId();
@@ -85,78 +62,68 @@ export function ProductListing({
     <Context.Provider value={{ id, variant }}>
       <section
         aria-labelledby={`${id}-title`}
-        {...props}
+        data-slot="product-listing"
         data-variant={variant}
-        data-uai-listing={variant}
-        style={{
-          boxSizing: "border-box",
-          display: "grid",
-          gap: 20,
-          containerType: "inline-size",
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
+        className={cn(productListingVariants({ variant }), className)}
+        {...props}
       >
-        <style>{layoutCss}</style>
         {children}
       </section>
     </Context.Provider>
   );
 }
 
-export function ProductListingHeader({ style, ...props }: ComponentProps<"header">) {
-  return <header {...props} style={{ display: "grid", gap: 6, ...style }} />;
-}
-
-export function ProductListingTitle({ style, ...props }: ComponentProps<"h2">) {
-  const { id } = useListing("ProductListingTitle");
+export function ProductListingHeader({ className, ...props }: ComponentProps<"header">) {
   return (
-    <h2
+    <header
+      data-slot="product-listing-header"
+      className={cn("grid gap-1.5", className)}
       {...props}
-      id={`${id}-title`}
-      style={{
-        margin: 0,
-        fontSize: "clamp(20px, 2cqi + 12px, 26px)",
-        fontWeight: 600,
-        lineHeight: 1.2,
-        letterSpacing: "-0.015em",
-        ...style,
-      }}
     />
   );
 }
 
-export function ProductListingDescription({ style, ...props }: ComponentProps<"p">) {
+export function ProductListingTitle({ className, ...props }: ComponentProps<"h2">) {
+  const { id } = useListing("ProductListingTitle");
   return (
-    <p {...props} style={{ margin: 0, color: "var(--uai-muted)", textWrap: "pretty", ...style }} />
+    <h2
+      data-slot="product-listing-title"
+      className={cn(
+        "m-0 text-[clamp(20px,2cqi_+_12px,26px)] leading-[1.2] font-semibold tracking-[-0.015em]",
+        className,
+      )}
+      {...props}
+      id={`${id}-title`}
+    />
+  );
+}
+
+export function ProductListingDescription({ className, ...props }: ComponentProps<"p">) {
+  return (
+    <p
+      data-slot="product-listing-description"
+      className={cn("m-0 text-pretty text-muted-foreground", className)}
+      {...props}
+    />
   );
 }
 
 /** Category navigation. Compose ProductListingCategory links inside. */
 export function ProductListingCategories({
   "aria-label": ariaLabel = "Categories",
+  className,
   children,
-  style,
   ...props
 }: ComponentProps<"nav">) {
   useListing("ProductListingCategories");
   return (
-    <nav aria-label={ariaLabel} {...props} style={{ minWidth: 0, ...style }}>
-      <ul
-        style={{
-          display: "flex",
-          gap: 2,
-          margin: 0,
-          padding: "2px",
-          overflowX: "auto",
-          listStyle: "none",
-        }}
-      >
-        {children}
-      </ul>
+    <nav
+      aria-label={ariaLabel}
+      data-slot="product-listing-categories"
+      className={cn("min-w-0", className)}
+      {...props}
+    >
+      <ul className="m-0 flex list-none gap-0.5 overflow-x-auto p-0.5">{children}</ul>
     </nav>
   );
 }
@@ -166,56 +133,74 @@ export type ProductListingCategoryProps = ComponentProps<"a"> & { current?: bool
 /** A category link. The current category is a graphite pill and is announced as the current page. */
 export function ProductListingCategory({
   current = false,
-  style,
+  className,
   ...props
 }: ProductListingCategoryProps) {
   return (
-    <li style={{ flex: "none" }}>
+    <li className="flex-none">
       <a
         aria-current={current ? "page" : undefined}
+        data-slot="product-listing-category"
+        className={cn(
+          "inline-flex h-7 items-center rounded-full px-3 font-medium whitespace-nowrap no-underline",
+          pillInteraction,
+          pillPress,
+          current
+            ? "bg-accent text-foreground"
+            : cn("bg-transparent text-muted-foreground", pillHover),
+          className,
+        )}
         {...props}
-        className={joinClass("uai-listing-pill", props.className)}
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          height: 28,
-          padding: "0 12px",
-          borderRadius: 999,
-          background: current ? "var(--uai-surface-raised)" : "transparent",
-          color: current ? "var(--uai-text)" : "var(--uai-muted)",
-          fontWeight: 500,
-          textDecoration: "none",
-          whiteSpace: "nowrap",
-          ...style,
-        }}
       />
     </li>
   );
 }
 
 /** Wraps the filters and results. In the sidebar layout, the aside becomes a left column. */
-export function ProductListingBody({ style, ...props }: ComponentProps<"div">) {
-  useListing("ProductListingBody");
-  return <div {...props} data-uai-listing-body="" style={style} />;
-}
-
-export function ProductListingAside({
-  "aria-label": ariaLabel = "Filters",
-  style,
-  ...props
-}: ComponentProps<"aside">) {
+export function ProductListingBody({ className, ...props }: ComponentProps<"div">) {
+  const { variant } = useListing("ProductListingBody");
   return (
-    <aside
-      aria-label={ariaLabel}
+    <div
+      data-slot="product-listing-body"
+      className={cn(
+        "grid min-w-0 items-start gap-4",
+        variant === "sidebar" &&
+          "@min-[760px]:grid-cols-[220px_minmax(0,1fr)] @min-[760px]:gap-x-7",
+        className,
+      )}
       {...props}
-      data-uai-listing-aside=""
-      style={{ display: "grid", gap: 12, minWidth: 0, ...style }}
     />
   );
 }
 
-export function ProductListingMain({ style, ...props }: ComponentProps<"div">) {
-  return <div {...props} style={{ display: "grid", gap: 16, minWidth: 0, ...style }} />;
+export function ProductListingAside({
+  "aria-label": ariaLabel = "Filters",
+  className,
+  ...props
+}: ComponentProps<"aside">) {
+  const variant = useListingVariant();
+  return (
+    <aside
+      aria-label={ariaLabel}
+      data-slot="product-listing-aside"
+      className={cn(
+        "grid min-w-0 gap-3",
+        variant === "sidebar" && "@min-[760px]:sticky @min-[760px]:top-4",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+export function ProductListingMain({ className, ...props }: ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="product-listing-main"
+      className={cn("grid min-w-0 gap-4", className)}
+      {...props}
+    />
+  );
 }
 
 /** Filter controls. Compose FilterBar parts inside; the block picks the filter layout. */
@@ -225,36 +210,24 @@ export function ProductListingFilters(props: Omit<FilterBarProps, "variant">) {
 }
 
 /** The row above results that holds the result count and the sort control. */
-export function ProductListingToolbar({ style, ...props }: ComponentProps<"div">) {
+export function ProductListingToolbar({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="product-listing-toolbar"
+      className={cn("flex min-w-0 flex-wrap items-center justify-between gap-3", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
 /** Result count. A polite live region, so filter changes are announced. */
-export function ProductListingCount({ style, ...props }: ComponentProps<"p">) {
+export function ProductListingCount({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
       role="status"
+      data-slot="product-listing-count"
+      className={cn("m-0 text-[12.5px] text-subtle-foreground tabular-nums", className)}
       {...props}
-      style={{
-        margin: 0,
-        color: "var(--uai-subtle)",
-        fontSize: 12.5,
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     />
   );
 }
@@ -275,18 +248,25 @@ export function ProductListingSort({
   value,
   defaultValue = "",
   onValueChange,
-  style,
+  className,
   ...props
 }: ProductListingSortProps) {
   useListing("ProductListingSort");
   const id = useId();
   const [internal, setInternal] = useState(defaultValue);
   return (
-    <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-      <label htmlFor={id} style={{ color: "var(--uai-subtle)", fontSize: 12.5 }}>
+    <div data-slot="product-listing-sort" className="inline-flex items-center gap-2">
+      <label htmlFor={id} className="text-[12.5px] text-subtle-foreground">
         {label}
       </label>
       <select
+        data-slot="product-listing-sort-select"
+        className={cn(
+          "h-7 cursor-pointer rounded-full border-0 bg-secondary px-2.5 text-[12.5px] font-medium text-foreground",
+          "transition-[background-color] duration-120 ease-[ease-out] hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] motion-reduce:transition-none",
+          "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+          className,
+        )}
         {...props}
         id={id}
         value={value ?? internal}
@@ -294,31 +274,32 @@ export function ProductListingSort({
           if (value === undefined) setInternal(event.target.value);
           onValueChange?.(event.target.value);
         }}
-        className={joinClass("uai-listing-sort", props.className)}
-        style={{
-          height: 28,
-          padding: "0 10px",
-          border: 0,
-          borderRadius: 999,
-          background: "var(--uai-surface-raised)",
-          color: "var(--uai-text)",
-          fontSize: 12.5,
-          fontWeight: 500,
-          cursor: "pointer",
-          ...style,
-        }}
       />
     </div>
   );
 }
 
+const resultsLayout: Record<ProductListingVariant, string> = {
+  grid: "gap-4 grid-cols-[repeat(auto-fill,minmax(min(100%,180px),1fr))]",
+  sidebar: "gap-4 grid-cols-[repeat(auto-fill,minmax(min(100%,160px),1fr))]",
+  list: "gap-0.5 grid-cols-[minmax(0,1fr)]",
+};
+
 /** The product results list. Compose ProductListingProduct items inside. */
 export function ProductListingResults({
   "aria-label": ariaLabel = "Products",
+  className,
   ...props
 }: ComponentProps<"ul">) {
-  useListing("ProductListingResults");
-  return <ul aria-label={ariaLabel} {...props} data-uai-listing-results="" />;
+  const { variant } = useListing("ProductListingResults");
+  return (
+    <ul
+      aria-label={ariaLabel}
+      data-slot="product-listing-results"
+      className={cn("m-0 grid min-w-0 list-none p-0", resultsLayout[variant], className)}
+      {...props}
+    />
+  );
 }
 
 type ProductContext = { id: string };
@@ -330,46 +311,46 @@ function useProduct(part: string) {
 }
 
 /** One product card. The whole card is clickable through ProductListingProductName's link. */
-export function ProductListingProduct({ style, ...props }: ComponentProps<"li">) {
+export function ProductListingProduct({ className, ...props }: ComponentProps<"li">) {
   const { variant } = useListing("ProductListingProduct");
   const id = useId();
+  const list = variant === "list";
   return (
     <ProductContext.Provider value={{ id }}>
       <li
         aria-labelledby={`${id}-name`}
+        data-slot="product-listing-product"
+        className={cn(
+          "group/product relative grid min-w-0 content-start gap-x-3.5 gap-y-1",
+          "has-[[data-slot=product-listing-product-link]:focus-visible]:outline-2 has-[[data-slot=product-listing-product-link]:focus-visible]:outline-offset-2 has-[[data-slot=product-listing-product-link]:focus-visible]:outline-ring",
+          list
+            ? cn(
+                "grid-cols-[64px_minmax(0,1fr)_auto] grid-rows-[1fr_auto_1fr] items-start rounded-xl py-2 pr-3.5 pl-2",
+                "transition-[background-color] duration-120 ease-[ease-out] hover:bg-card motion-reduce:transition-none",
+                "@max-[420px]:grid-cols-[56px_minmax(0,1fr)] @max-[420px]:grid-rows-[auto]",
+              )
+            : "rounded-[14px]",
+          className,
+        )}
         {...props}
-        data-uai-listing-product=""
-        style={{
-          position: "relative",
-          display: "grid",
-          columnGap: 14,
-          rowGap: 4,
-          alignContent: "start",
-          minWidth: 0,
-          borderRadius: variant === "list" ? 12 : 14,
-          ...style,
-        }}
       />
     </ProductContext.Provider>
   );
 }
 
-export function ProductListingProductMedia({ style, ...props }: ComponentProps<"div">) {
+export function ProductListingProductMedia({ className, ...props }: ComponentProps<"div">) {
   const { variant } = useListing("ProductListingProductMedia");
   const list = variant === "list";
   return (
     <div
+      data-slot="product-listing-product-media"
+      className={cn(
+        "overflow-hidden bg-muted transition-[background-color] duration-120 ease-[ease-out] motion-reduce:transition-none",
+        "*:transition-transform *:duration-300 *:ease-out-quint *:motion-reduce:transition-none *:group-hover/product:motion-safe:scale-[1.03]",
+        list ? "row-[1/span_3] mb-0 aspect-square rounded-lg" : "mb-2 aspect-[4/5] rounded-[14px]",
+        className,
+      )}
       {...props}
-      data-uai-listing-media=""
-      style={{
-        gridRow: list ? "1 / span 3" : undefined,
-        aspectRatio: list ? "1 / 1" : "4 / 5",
-        marginBottom: list ? 0 : 8,
-        overflow: "hidden",
-        borderRadius: list ? 8 : 14,
-        background: "var(--uai-surface-raised)",
-        ...style,
-      }}
     />
   );
 }
@@ -377,59 +358,63 @@ export function ProductListingProductMedia({ style, ...props }: ComponentProps<"
 export type ProductListingProductNameProps = ComponentProps<"a">;
 
 /** Product name as an h3 link; its hit area covers the card. */
-export function ProductListingProductName({
-  className,
-  style,
-  ...props
-}: ProductListingProductNameProps) {
+export function ProductListingProductName({ className, ...props }: ProductListingProductNameProps) {
   const product = useProduct("ProductListingProductName");
+  const variant = useListingVariant();
   return (
     <h3
       id={`${product.id}-name`}
-      style={{ margin: 0, fontSize: 13, fontWeight: 500, lineHeight: "18px", ...style }}
+      data-slot="product-listing-product-name"
+      className={cn("m-0 text-[13px]/[18px] font-medium", variant === "list" && "self-end")}
     >
-      <a {...props} className={["uai-listing-link", className].filter(Boolean).join(" ")} />
+      <a
+        data-slot="product-listing-product-link"
+        className={cn(
+          "text-inherit no-underline after:absolute after:inset-0 after:rounded-[inherit] hover:no-underline focus-visible:outline-none",
+          className,
+        )}
+        {...props}
+      />
     </h3>
   );
 }
 
-export function ProductListingProductMeta({ style, ...props }: ComponentProps<"p">) {
+export function ProductListingProductMeta({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="product-listing-product-meta"
+      className={cn("m-0 text-xs/4 text-subtle-foreground", className)}
       {...props}
-      style={{ margin: 0, color: "var(--uai-subtle)", fontSize: 12, lineHeight: "16px", ...style }}
     />
   );
 }
 
-export function ProductListingProductPrice({ style, ...props }: ComponentProps<"p">) {
+export function ProductListingProductPrice({ className, ...props }: ComponentProps<"p">) {
+  const variant = useListingVariant();
   return (
     <p
+      data-slot="product-listing-product-price"
+      className={cn(
+        "m-0 font-medium tabular-nums",
+        variant === "list" &&
+          "col-3 row-[1/span_3] self-center @max-[420px]:col-2 @max-[420px]:row-auto",
+        className,
+      )}
       {...props}
-      data-uai-listing-product-price=""
-      style={{ margin: 0, fontWeight: 500, fontVariantNumeric: "tabular-nums", ...style }}
     />
   );
 }
 
 /** A small text badge on a product, such as "Back in stock". */
-export function ProductListingProductBadge({ style, ...props }: ComponentProps<"span">) {
+export function ProductListingProductBadge({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
+      data-slot="product-listing-product-badge"
+      className={cn(
+        "inline-flex h-5 items-center justify-self-start rounded-full bg-primary/16 px-2 text-[11.5px] font-medium text-[color-mix(in_oklab,var(--primary)_70%,var(--foreground))]",
+        className,
+      )}
       {...props}
-      style={{
-        justifySelf: "start",
-        display: "inline-flex",
-        alignItems: "center",
-        height: 20,
-        padding: "0 8px",
-        borderRadius: 999,
-        background: "color-mix(in oklab, var(--uai-accent) 16%, transparent)",
-        color: "color-mix(in oklab, var(--uai-accent) 70%, var(--uai-text))",
-        fontSize: 11.5,
-        fontWeight: 500,
-        ...style,
-      }}
     />
   );
 }
@@ -437,63 +422,49 @@ export function ProductListingProductBadge({ style, ...props }: ComponentProps<"
 /** Page navigation. Compose ProductListingPage links and the previous and next links. */
 export function ProductListingPagination({
   "aria-label": ariaLabel = "Pagination",
+  className,
   children,
-  style,
   ...props
 }: ComponentProps<"nav">) {
   useListing("ProductListingPagination");
   return (
-    <nav aria-label={ariaLabel} {...props} style={{ minWidth: 0, ...style }}>
-      <ul
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: 4,
-          margin: 0,
-          padding: 0,
-          listStyle: "none",
-        }}
-      >
+    <nav
+      aria-label={ariaLabel}
+      data-slot="product-listing-pagination"
+      className={cn("min-w-0", className)}
+      {...props}
+    >
+      <ul className="m-0 flex list-none flex-wrap items-center justify-center gap-1 p-0">
         {children}
       </ul>
     </nav>
   );
 }
 
-const pageLinkStyle = {
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: 4,
-  minWidth: 28,
-  height: 28,
-  padding: "0 8px",
-  borderRadius: 999,
-  color: "var(--uai-text)",
-  textDecoration: "none",
-  fontVariantNumeric: "tabular-nums",
-} as const;
+const pageLinkClass =
+  "inline-flex h-7 min-w-7 items-center justify-center gap-1 rounded-full font-medium no-underline tabular-nums";
 
 export function ProductListingPage({
   current = false,
-  style,
+  className,
   ...props
 }: ComponentProps<"a"> & { current?: boolean }) {
   return (
     <li>
       <a
         aria-current={current ? "page" : undefined}
+        data-slot="product-listing-page"
+        className={cn(
+          pageLinkClass,
+          "px-2",
+          pillInteraction,
+          pillPress,
+          current
+            ? "bg-accent text-foreground"
+            : cn("bg-transparent text-muted-foreground", pillHover),
+          className,
+        )}
         {...props}
-        className={joinClass("uai-listing-pill", props.className)}
-        style={{
-          ...pageLinkStyle,
-          background: current ? "var(--uai-surface-raised)" : "transparent",
-          color: current ? "var(--uai-text)" : "var(--uai-muted)",
-          fontWeight: 500,
-          ...style,
-        }}
       />
     </li>
   );
@@ -506,25 +477,28 @@ function PageStep({
   disabled = false,
   href,
   children,
-  style,
+  className,
   ...props
 }: ProductListingPageStepProps & { direction: "previous" | "next" }) {
   const Icon = direction === "previous" ? ChevronLeft : ChevronRight;
   return (
     <li>
       <a
+        data-slot={
+          direction === "previous" ? "product-listing-page-previous" : "product-listing-page-next"
+        }
+        className={cn(
+          pageLinkClass,
+          "px-2.5",
+          pillInteraction,
+          disabled
+            ? "text-subtle-foreground opacity-50"
+            : cn("text-muted-foreground", pillHover, pillPress),
+          className,
+        )}
         {...props}
         href={disabled ? undefined : href}
         aria-disabled={disabled || undefined}
-        className={joinClass("uai-listing-pill", props.className)}
-        style={{
-          ...pageLinkStyle,
-          padding: "0 10px",
-          color: disabled ? "var(--uai-subtle)" : "var(--uai-muted)",
-          fontWeight: 500,
-          opacity: disabled ? 0.5 : 1,
-          ...style,
-        }}
       >
         {direction === "previous" ? <Icon size={14} aria-hidden="true" /> : null}
         {children}
@@ -554,8 +528,4 @@ export function ProductListingPageNext({
       {children}
     </PageStep>
   );
-}
-
-function joinClass(base: string, extra?: string) {
-  return extra ? `${base} ${extra}` : base;
 }

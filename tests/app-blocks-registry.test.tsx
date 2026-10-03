@@ -21,14 +21,16 @@ test("publishes every application block without drift and keeps examples executa
       `src/components/registry/app-blocks/${item.id}-preview.tsx`,
     ).text();
     expect(item.category).toBe("Application");
-    expect(mirror).toBe(source);
+    expect(mirror).toBe(`export * from "@/registry/uai/blocks/${item.id}";\n`);
     expect(output.type).toBe("registry:block");
     expect(output.files[0].content).toBe(source);
     expect(item.usage).toBe(preview);
     expect(item.accessibility.length).toBeGreaterThanOrEqual(3);
     expect(source).not.toContain("@/registry/");
     for (const [, component] of source.matchAll(/@\/components\/ui\/uai\/([\w-]+)/g)) {
-      expect(output.registryDependencies).toContain(`http://localhost:3000/r/${component}.json`);
+      expect(output.registryDependencies).toContain(
+        `https://useuai.vercel.app/r/${component}.json`,
+      );
     }
   }
 });

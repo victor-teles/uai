@@ -1,7 +1,9 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { Check, Plus } from "lucide-react";
 import { type ComponentProps, createContext, useContext, useId, useState } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const AUTHOR_CARD_VARIANTS = ["card", "inline", "compact"] as const;
 export type AuthorCardVariant = (typeof AUTHOR_CARD_VARIANTS)[number];
@@ -13,26 +15,9 @@ function useAuthor(part: string) {
   if (!context) throw new Error(`${part} must be used within AuthorCard`);
   return context;
 }
-const authorCss = `
-.uai-author-link{background:var(--uai-surface-raised);color:var(--uai-muted);transition:background-color 120ms ease-out,color 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-author-link:hover{background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text));color:var(--uai-text)}
-.uai-author-follow{background:var(--uai-accent);color:var(--uai-accent-foreground);transition:background-color 120ms ease-out,color 120ms ease-out,filter 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-author-follow:hover{filter:brightness(1.08)}
-.uai-author-follow[aria-pressed=true]{background:var(--uai-surface-raised);color:var(--uai-text)}
-.uai-author-follow[aria-pressed=true]:hover{filter:none;background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text))}
-.uai-author-follow svg{transition:transform 180ms cubic-bezier(0.23,1,0.32,1)}
-.uai-author-follow[aria-pressed=true] svg{animation:uai-author-check 220ms cubic-bezier(0.16,1,0.3,1)}
-:is(.uai-author-link,.uai-author-follow):active{transform:scale(0.97)}
-:is(.uai-author-link,.uai-author-follow):focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-@keyframes uai-author-check{from{opacity:0;transform:scale(0.6)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion: reduce){
-.uai-author-link,.uai-author-follow,.uai-author-follow svg{transition:none;animation:none}
-:is(.uai-author-link,.uai-author-follow):active{transform:none}
-}
-`;
-function cx(...names: (string | undefined)[]) {
-  return names.filter(Boolean).join(" ");
-}
+const actionClass =
+  "transition-[background-color,color,filter,transform] duration-[120ms,120ms,120ms,140ms] ease-[ease-out,ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100";
+const mixHover = "hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]";
 function initials(name: string) {
   return name
     .trim()
@@ -43,77 +28,64 @@ function initials(name: string) {
     .toUpperCase();
 }
 
-export function AuthorCard({ variant = "card", style, children, ...props }: AuthorCardProps) {
+const authorCardVariants = cva(
+  "grid min-w-0 items-start gap-x-3 text-[13px]/[18px] text-card-foreground",
+  {
+    variants: {
+      variant: {
+        card: "grid-cols-[minmax(0,1fr)] gap-y-3 rounded-[14px] border bg-card p-4.5",
+        inline: "grid-cols-[auto_minmax(0,1fr)] gap-y-2 rounded-[14px] border-0 bg-transparent p-0",
+        compact: "grid-cols-[minmax(0,1fr)] gap-y-2 rounded-xl border bg-card p-3",
+      },
+    },
+  },
+);
+
+export function AuthorCard({ variant = "card", className, children, ...props }: AuthorCardProps) {
   const id = useId();
-  const inline = variant === "inline";
   return (
     <Context.Provider value={{ id, variant }}>
       <article
         aria-labelledby={`${id}-name`}
-        {...props}
+        data-slot="author-card"
         data-variant={variant}
-        style={{
-          display: "grid",
-          gridTemplateColumns: inline ? "auto minmax(0, 1fr)" : "minmax(0, 1fr)",
-          columnGap: 12,
-          rowGap: variant === "compact" ? 8 : inline ? 8 : 12,
-          alignItems: "start",
-          minWidth: 0,
-          padding: inline ? 0 : variant === "compact" ? 12 : 18,
-          border: inline ? 0 : "1px solid var(--uai-border)",
-          borderRadius: variant === "compact" ? 12 : 14,
-          background: inline ? "transparent" : "var(--uai-surface)",
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
+        className={cn(authorCardVariants({ variant }), className)}
+        {...props}
       >
-        <style>{authorCss}</style>
         {children}
       </article>
     </Context.Provider>
   );
 }
 
+const avatarSizes = {
+  card: "size-10 text-[13px]",
+  inline: "row-span-3 size-9 text-[12px]",
+  compact: "size-7 text-[11px]",
+};
+
 export function AuthorCardAvatar({
   name,
   src,
-  style,
+  className,
   ...props
 }: Omit<ComponentProps<"span">, "children"> & { name: string; src?: string }) {
   const { variant } = useAuthor("AuthorCardAvatar");
   const [failed, setFailed] = useState(false);
-  const size = variant === "compact" ? 28 : variant === "inline" ? 36 : 40;
   return (
     <span
       aria-hidden="true"
+      data-slot="author-card-avatar"
+      className={cn(
+        "grid shrink-0 place-items-center overflow-hidden rounded-full bg-muted font-medium text-muted-foreground shadow-[0_0_0_1px_oklch(1_0_0/0.08)]",
+        avatarSizes[variant],
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        placeItems: "center",
-        width: size,
-        height: size,
-        flexShrink: 0,
-        overflow: "hidden",
-        borderRadius: 999,
-        background: "var(--uai-surface-raised)",
-        boxShadow: "0 0 0 1px oklch(1 0 0 / 0.08)",
-        color: "var(--uai-muted)",
-        fontSize: size >= 40 ? 13 : size >= 36 ? 12 : 11,
-        fontWeight: 500,
-        gridRow: variant === "inline" ? "span 3" : undefined,
-        ...style,
-      }}
     >
       {src && !failed ? (
         // biome-ignore lint/performance/noImgElement: distributed source cannot depend on next/image.
-        <img
-          src={src}
-          alt=""
-          onError={() => setFailed(true)}
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-        />
+        <img src={src} alt="" onError={() => setFailed(true)} className="size-full object-cover" />
       ) : (
         initials(name)
       )}
@@ -121,116 +93,98 @@ export function AuthorCardAvatar({
   );
 }
 
-export function AuthorCardHeader({ style, ...props }: ComponentProps<"div">) {
+export function AuthorCardHeader({ className, ...props }: ComponentProps<"div">) {
   const { variant } = useAuthor("AuthorCardHeader");
   return (
     <div
+      data-slot="author-card-header"
+      className={cn(
+        "flex min-w-0 flex-wrap items-center justify-between gap-3",
+        variant === "inline" && "col-start-2",
+        className,
+      )}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 12,
-        minWidth: 0,
-        gridColumn: variant === "inline" ? 2 : undefined,
-        ...style,
-      }}
     />
   );
 }
 
-export function AuthorCardName({ style, ...props }: ComponentProps<"p">) {
+export function AuthorCardName({ className, ...props }: ComponentProps<"p">) {
   const { id, variant } = useAuthor("AuthorCardName");
-  const compact = variant === "compact";
   return (
     <p
+      data-slot="author-card-name"
+      className={cn(
+        "m-0 font-medium",
+        variant === "compact" ? "text-[13px]/[18px]" : "text-[14px]/5",
+        className,
+      )}
       {...props}
       id={`${id}-name`}
-      style={{
-        margin: 0,
-        fontSize: compact ? 13 : 14,
-        lineHeight: compact ? "18px" : "20px",
-        fontWeight: 500,
-        ...style,
-      }}
     />
   );
 }
 
-export function AuthorCardRole({ style, ...props }: ComponentProps<"p">) {
+export function AuthorCardRole({ className, ...props }: ComponentProps<"p">) {
   useAuthor("AuthorCardRole");
   return (
     <p
+      data-slot="author-card-role"
+      className={cn("m-0 text-xs/4 text-subtle-foreground", className)}
       {...props}
-      style={{ margin: 0, color: "var(--uai-subtle)", fontSize: 12, lineHeight: "16px", ...style }}
     />
   );
 }
 
-export function AuthorCardBio({ style, ...props }: ComponentProps<"p">) {
+export function AuthorCardBio({ className, ...props }: ComponentProps<"p">) {
   const { variant } = useAuthor("AuthorCardBio");
   return (
     <p
+      data-slot="author-card-bio"
+      className={cn(
+        "m-0 text-pretty text-muted-foreground",
+        variant === "compact" ? "text-[12.5px]/[18px]" : "text-[13px]/[19px]",
+        variant === "inline" && "col-start-2",
+        className,
+      )}
       {...props}
-      style={{
-        margin: 0,
-        color: "var(--uai-muted)",
-        fontSize: variant === "compact" ? 12.5 : 13,
-        lineHeight: variant === "compact" ? "18px" : "19px",
-        textWrap: "pretty",
-        gridColumn: variant === "inline" ? 2 : undefined,
-        ...style,
-      }}
     />
   );
 }
 
 export function AuthorCardLinks({
   "aria-label": label = "Profiles",
-  style,
+  className,
   ...props
 }: ComponentProps<"ul">) {
   const { variant } = useAuthor("AuthorCardLinks");
   return (
     <ul
       aria-label={label}
+      data-slot="author-card-links"
+      className={cn(
+        "m-0 flex list-none flex-wrap gap-1 p-0",
+        variant === "inline" && "col-start-2",
+        className,
+      )}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 4,
-        margin: 0,
-        padding: 0,
-        listStyle: "none",
-        gridColumn: variant === "inline" ? 2 : undefined,
-        ...style,
-      }}
     />
   );
 }
 
-export function AuthorCardLink({ className, style, children, ...props }: ComponentProps<"a">) {
+export function AuthorCardLink({ className, children, ...props }: ComponentProps<"a">) {
   const { variant } = useAuthor("AuthorCardLink");
   return (
-    <li style={{ display: "flex" }}>
+    <li className="flex">
       <a
+        data-slot="author-card-link"
+        className={cn(
+          actionClass,
+          mixHover,
+          "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-secondary px-2.5 text-[12px] font-medium text-muted-foreground tabular-nums no-underline hover:text-foreground",
+          variant === "compact" ? "h-6" : "h-6.5",
+          className,
+        )}
         {...props}
-        className={cx("uai-author-link", className)}
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 6,
-          height: variant === "compact" ? 24 : 26,
-          padding: "0 10px",
-          borderRadius: 999,
-          fontSize: 12,
-          fontWeight: 500,
-          fontVariantNumeric: "tabular-nums",
-          textDecoration: "none",
-          whiteSpace: "nowrap",
-          ...style,
-        }}
       >
         {children}
       </a>
@@ -250,7 +204,6 @@ export function AuthorCardFollow({
   onClick,
   children = "Follow",
   className,
-  style,
   ...props
 }: AuthorCardFollowProps) {
   const { id, variant } = useAuthor("AuthorCardFollow");
@@ -260,6 +213,14 @@ export function AuthorCardFollow({
   return (
     <button
       aria-describedby={`${id}-name`}
+      data-slot="author-card-follow"
+      className={cn(
+        actionClass,
+        "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 bg-primary font-medium text-primary-foreground hover:brightness-108",
+        "aria-pressed:bg-secondary aria-pressed:text-secondary-foreground aria-pressed:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] aria-pressed:hover:filter-none",
+        variant === "compact" ? "h-6.5 pr-2.5 pl-2 text-[12px]" : "h-7 pr-3 pl-2.5 text-[12.5px]",
+        className,
+      )}
       {...props}
       type="button"
       aria-pressed={current}
@@ -269,23 +230,17 @@ export function AuthorCardFollow({
         if (pressed === undefined) setInternal(!current);
         onPressedChange?.(!current);
       }}
-      className={cx("uai-author-follow", className)}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 6,
-        height: variant === "compact" ? 26 : 28,
-        padding: variant === "compact" ? "0 10px 0 8px" : "0 12px 0 10px",
-        border: 0,
-        borderRadius: 999,
-        fontSize: variant === "compact" ? 12 : 12.5,
-        fontWeight: 500,
-        cursor: "pointer",
-        ...style,
-      }}
     >
-      <Icon key={current ? "on" : "off"} size={14} strokeWidth={2} aria-hidden="true" />
+      <Icon
+        key={current ? "on" : "off"}
+        size={14}
+        strokeWidth={2}
+        aria-hidden="true"
+        className={cn(
+          current &&
+            "animate-in fade-in-0 zoom-in-60 duration-220 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:animate-none",
+        )}
+      />
       {children}
     </button>
   );

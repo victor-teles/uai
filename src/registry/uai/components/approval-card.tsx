@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import {
   Check,
   CircleAlert,
@@ -62,37 +63,37 @@ const riskConfig = {
   low: {
     label: "Low risk",
     icon: ShieldCheck,
-    iconClassName:
-      "bg-[color-mix(in_oklab,var(--uai-success)_14%,transparent)] text-[var(--uai-success)]",
+    iconClassName: "bg-success/14 text-success",
   },
   medium: {
     label: "Medium risk",
     icon: CircleAlert,
-    iconClassName:
-      "bg-[color-mix(in_oklab,var(--uai-warning)_14%,transparent)] text-[var(--uai-warning)]",
+    iconClassName: "bg-warning/14 text-warning",
   },
   high: {
     label: "High risk",
     icon: TriangleAlert,
-    iconClassName:
-      "bg-[color-mix(in_oklab,var(--uai-danger)_14%,transparent)] text-[var(--uai-danger)]",
+    iconClassName: "bg-destructive/14 text-destructive",
   },
   critical: {
     label: "Critical risk",
     icon: OctagonAlert,
     iconClassName:
-      "bg-[color-mix(in_oklab,var(--uai-danger)_14%,transparent)] text-[var(--uai-danger)] shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--uai-danger)_28%,transparent)]",
+      "bg-destructive/14 text-destructive shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--destructive)_28%,transparent)]",
   },
 } satisfies Record<
   ApprovalRisk,
   { label: string; icon: typeof ShieldCheck; iconClassName: string }
 >;
 
-const approvalCss = `
-@keyframes uai-approval-shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
-[data-uai-approval] [data-shimmer]{background-image:linear-gradient(90deg,var(--uai-subtle) 0%,var(--uai-subtle) 35%,var(--uai-text) 50%,var(--uai-subtle) 65%,var(--uai-subtle) 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:uai-approval-shimmer 2s linear infinite}
-@media (prefers-reduced-motion:reduce){[data-uai-approval] [data-shimmer]{animation:none;background:none;color:var(--uai-muted)}}
-`;
+const approvalCardVariants = cva(
+  "rounded-[14px] border bg-card text-card-foreground transition-[border-color,opacity] duration-150 motion-reduce:transition-none",
+  {
+    variants: {
+      variant: { compact: "p-3.5", detailed: "p-4" },
+    },
+  },
+);
 
 type ApprovalCardContextValue = {
   risk: ApprovalRisk;
@@ -129,7 +130,6 @@ export function ApprovalCard(props: ApprovalCardProps) {
     disabled = false,
     children,
     className,
-    style,
     "aria-labelledby": ariaLabelledby,
     ...sectionProps
   } = props;
@@ -167,24 +167,22 @@ export function ApprovalCard(props: ApprovalCardProps) {
   return (
     <ApprovalCardContext.Provider value={context}>
       <section
-        {...sectionProps}
+        data-slot="approval-card"
         className={cn(
-          "border bg-[var(--uai-surface)] text-[var(--uai-text)] transition-[border-color,opacity] duration-150 motion-reduce:transition-none",
-          variant === "compact" ? "p-3.5" : "p-4",
+          approvalCardVariants({ variant }),
           risk === "critical"
-            ? "border-[color-mix(in_oklab,var(--uai-danger)_40%,var(--uai-border))]"
-            : "border-[var(--uai-border)]",
+            ? "border-[color-mix(in_oklab,var(--destructive)_40%,var(--border))]"
+            : "border-border",
           disabled && "opacity-55",
           className,
         )}
-        style={{ ...style, borderRadius: 14 }}
+        {...sectionProps}
         aria-busy={isSubmitting}
         aria-labelledby={ariaLabelledby ?? titleId}
-        data-uai-approval=""
+        data-variant={variant}
         data-risk={risk}
         data-status={status}
       >
-        <style>{approvalCss}</style>
         {children}
       </section>
     </ApprovalCardContext.Provider>
@@ -220,7 +218,11 @@ export function ApprovalCardHeader({
     }[context.status];
 
   return (
-    <div className={cn("flex items-start gap-3", className)} {...props}>
+    <div
+      data-slot="approval-card-header"
+      className={cn("flex items-start gap-3", className)}
+      {...props}
+    >
       <span
         className={cn(
           "grid size-8 shrink-0 place-items-center rounded-[10px]",
@@ -241,10 +243,10 @@ export function ApprovalCardHeader({
           </span>
           <span
             className={cn(
-              "inline-flex items-center gap-1.5 text-[11.5px] leading-4 text-[var(--uai-subtle)]",
-              context.status === "approved" && "text-[var(--uai-success)]",
-              context.status === "rejected" && "text-[var(--uai-muted)]",
-              context.status === "error" && "text-[var(--uai-danger)]",
+              "inline-flex items-center gap-1.5 text-[11.5px] leading-4 text-subtle-foreground",
+              context.status === "approved" && "text-success",
+              context.status === "rejected" && "text-muted-foreground",
+              context.status === "error" && "text-destructive",
             )}
             role="status"
             aria-live="polite"
@@ -255,13 +257,19 @@ export function ApprovalCardHeader({
                 aria-hidden="true"
               />
             ) : context.status === "approved" ? (
-              <Check className="size-3 text-[var(--uai-success)]" aria-hidden="true" />
+              <Check className="size-3 text-success" aria-hidden="true" />
             ) : context.status === "rejected" ? (
-              <X className="size-3 text-[var(--uai-danger)]" aria-hidden="true" />
+              <X className="size-3 text-destructive" aria-hidden="true" />
             ) : context.status === "error" ? (
-              <CircleAlert className="size-3 text-[var(--uai-danger)]" aria-hidden="true" />
+              <CircleAlert className="size-3 text-destructive" aria-hidden="true" />
             ) : null}
-            <span data-shimmer={context.isSubmitting ? "" : undefined}>{resolvedStatusLabel}</span>
+            <span
+              className={cn(
+                context.isSubmitting && "shimmer-text motion-reduce:text-muted-foreground!",
+              )}
+            >
+              {resolvedStatusLabel}
+            </span>
           </span>
         </div>
         <h3
@@ -271,7 +279,7 @@ export function ApprovalCardHeader({
           {title}
         </h3>
         {description ? (
-          <p className="mt-1 max-w-[68ch] text-[13px] leading-[19px] text-pretty text-[var(--uai-muted)]">
+          <p className="mt-1 max-w-[68ch] text-[13px] leading-[19px] text-pretty text-muted-foreground">
             {description}
           </p>
         ) : null}
@@ -288,8 +296,9 @@ export function ApprovalCardDetails({ children, className, ...props }: ApprovalC
 
   return (
     <dl
+      data-slot="approval-card-details"
       className={cn(
-        "mt-4 grid gap-x-4 gap-y-3 rounded-[10px] bg-[color-mix(in_oklab,var(--uai-surface-raised)_55%,transparent)] p-3 sm:grid-cols-2",
+        "mt-4 grid gap-x-4 gap-y-3 rounded-[10px] bg-muted/55 p-3 sm:grid-cols-2",
         className,
       )}
       {...props}
@@ -308,9 +317,9 @@ export function ApprovalCardDetail({
   ...props
 }: ApprovalCardDetailProps) {
   return (
-    <div className={cn("min-w-0", className)} {...props}>
-      <dt className="text-[11.5px] leading-4 text-[var(--uai-subtle)]">{label}</dt>
-      <dd className="mt-1 min-w-0 text-[13px] leading-[18px] text-[var(--uai-text)] [&_code]:rounded-md [&_code]:bg-[var(--uai-surface-raised)] [&_code]:px-1.5 [&_code]:py-px [&_code]:font-mono [&_code]:text-[11.5px] [&_li+li]:mt-1 [&_ul]:list-inside [&_ul]:list-disc [&_ul]:marker:text-[var(--uai-subtle)]">
+    <div data-slot="approval-card-detail" className={cn("min-w-0", className)} {...props}>
+      <dt className="text-[11.5px] leading-4 text-subtle-foreground">{label}</dt>
+      <dd className="mt-1 min-w-0 text-[13px] leading-[18px] text-foreground [&_code]:rounded-md [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-px [&_code]:font-mono [&_code]:text-[11.5px] [&_li+li]:mt-1 [&_ul]:list-inside [&_ul]:list-disc [&_ul]:marker:text-subtle-foreground">
         {children}
       </dd>
     </div>
@@ -324,15 +333,15 @@ export function ApprovalCardConfirmation({ className, ...props }: ApprovalCardCo
   if (context.risk !== "critical" || context.isTerminal || !context.confirmation) return null;
 
   return (
-    <div className={cn("mt-4", className)} {...props}>
+    <div data-slot="approval-card-confirmation" className={cn("mt-4", className)} {...props}>
       <label
         htmlFor={context.confirmationId}
-        className="block text-[12.5px] leading-[18px] text-[var(--uai-muted)]"
+        className="block text-[12.5px] leading-[18px] text-muted-foreground"
       >
         {context.confirmation.label ?? (
           <>
             Type{" "}
-            <strong className="rounded-md bg-[var(--uai-surface-raised)] px-1.5 py-px font-mono text-[11.5px] font-medium text-[var(--uai-text)]">
+            <strong className="rounded-md bg-muted px-1.5 py-px font-mono text-[11.5px] font-medium text-foreground">
               {context.confirmation.phrase}
             </strong>{" "}
             to confirm.
@@ -348,7 +357,7 @@ export function ApprovalCardConfirmation({ className, ...props }: ApprovalCardCo
         spellCheck={false}
         disabled={context.disabled || context.isSubmitting}
         onChange={(event) => context.setConfirmationValue(event.target.value)}
-        className="mt-2 h-9 w-full rounded-[10px] border border-transparent bg-[var(--uai-canvas)] px-3 font-mono text-[12.5px] text-[var(--uai-text)] caret-[var(--uai-text)] outline-none transition-[border-color,box-shadow] duration-[120ms] ease-out placeholder:text-[var(--uai-subtle)] focus-visible:border-[var(--uai-border-strong)] focus-visible:ring-2 focus-visible:ring-[color-mix(in_oklab,var(--uai-accent)_45%,transparent)] selection:bg-[color-mix(in_oklab,var(--uai-text)_18%,transparent)] disabled:cursor-not-allowed motion-reduce:transition-none"
+        className="mt-2 h-9 w-full rounded-[10px] border border-transparent bg-background px-3 font-mono text-[12.5px] text-foreground caret-foreground outline-none transition-[border-color,box-shadow] duration-[120ms] ease-out placeholder:text-subtle-foreground focus-visible:border-border-strong focus-visible:ring-2 focus-visible:ring-ring/45 selection:bg-foreground/18 disabled:cursor-not-allowed motion-reduce:transition-none"
       />
     </div>
   );
@@ -362,17 +371,15 @@ export function ApprovalCardError({ className, children, ...props }: ApprovalCar
 
   return (
     <p
+      data-slot="approval-card-error"
       className={cn(
-        "mt-4 flex items-start gap-2 rounded-[10px] bg-[color-mix(in_oklab,var(--uai-danger)_10%,transparent)] px-3 py-2.5 text-[13px] leading-[18px] text-[var(--uai-text)]",
+        "mt-4 flex items-start gap-2 rounded-[10px] bg-destructive/10 px-3 py-2.5 text-[13px] leading-[18px] text-foreground",
         className,
       )}
       {...props}
       role="alert"
     >
-      <CircleAlert
-        className="mt-0.5 size-3.5 shrink-0 text-[var(--uai-danger)]"
-        aria-hidden="true"
-      />
+      <CircleAlert className="mt-0.5 size-3.5 shrink-0 text-destructive" aria-hidden="true" />
       {children}
     </p>
   );
@@ -385,7 +392,11 @@ export function ApprovalCardActions({ className, children, ...props }: ApprovalC
   if (context.isTerminal) return null;
 
   return (
-    <div className={cn("mt-4 flex flex-wrap items-center justify-end gap-2", className)} {...props}>
+    <div
+      data-slot="approval-card-actions"
+      className={cn("mt-4 flex flex-wrap items-center justify-end gap-2", className)}
+      {...props}
+    >
       {children}
     </div>
   );
@@ -403,10 +414,11 @@ export function ApprovalCardReject({
 
   return (
     <button
+      data-slot="approval-card-reject"
       {...props}
       type="button"
       className={cn(
-        "h-8 rounded-full bg-[var(--uai-surface-raised)] px-3.5 text-[13px] font-medium text-[var(--uai-text)] outline-none transition-[background-color,transform] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] enabled:hover:bg-[color-mix(in_oklab,var(--uai-surface-raised)_85%,var(--uai-text))] focus-visible:ring-2 focus-visible:ring-[var(--uai-accent)] enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100",
+        "h-8 rounded-full bg-secondary px-3.5 text-[13px] font-medium text-secondary-foreground outline-none transition-[background-color,transform] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] enabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] focus-visible:ring-2 focus-visible:ring-ring enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100",
         className,
       )}
       disabled={context.disabled || !context.isActionable || disabled}
@@ -430,13 +442,14 @@ export function ApprovalCardApprove({
 
   return (
     <button
+      data-slot="approval-card-approve"
       {...props}
       type="button"
       className={cn(
-        "h-8 rounded-full px-3.5 text-[13px] font-medium outline-none transition-[filter,opacity,transform] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] enabled:hover:brightness-[1.08] focus-visible:ring-2 focus-visible:ring-[var(--uai-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uai-surface)] enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none motion-reduce:active:scale-100",
+        "h-8 rounded-full px-3.5 text-[13px] font-medium outline-none transition-[filter,opacity,transform] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] enabled:hover:brightness-[1.08] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none motion-reduce:active:scale-100",
         context.risk === "critical"
-          ? "bg-[var(--uai-danger)] text-[var(--uai-accent-foreground)]"
-          : "bg-[var(--uai-accent)] text-[var(--uai-accent-foreground)]",
+          ? "bg-destructive text-primary-foreground"
+          : "bg-primary text-primary-foreground",
         className,
       )}
       disabled={disabled}

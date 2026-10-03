@@ -1,11 +1,13 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, useContext, useId } from "react";
 import {
   TestimonialCard,
   type TestimonialCardProps,
   type TestimonialCardVariant,
 } from "@/components/ui/uai/testimonial-card";
+import { cn } from "@/lib/uai-utils";
 
 export const TESTIMONIALS_SECTION_VARIANTS = ["grid", "featured", "wall"] as const;
 export type TestimonialsSectionVariant = (typeof TESTIMONIALS_SECTION_VARIANTS)[number];
@@ -21,118 +23,85 @@ function useSection(part: string) {
   return context;
 }
 
-const layoutCss = `
-[data-uai-testimonials="grid"] [data-uai-testimonials-list]{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr));gap:12px}
-[data-uai-testimonials="featured"] [data-uai-testimonials-list]{display:grid;gap:12px}
-[data-uai-testimonials="wall"] [data-uai-testimonials-list]{columns:3 220px;column-gap:10px}
-[data-uai-testimonials="wall"] [data-uai-testimonials-item]{break-inside:avoid;margin-bottom:10px}
-@container (min-width: 720px){
-  [data-uai-testimonials="featured"] [data-uai-testimonials-list]{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px 32px;align-items:start}
-  [data-uai-testimonials="featured"] [data-uai-testimonials-item][data-featured]{grid-row:span 3;align-self:center}
-}
-[data-uai-testimonials-item]{animation:uai-testimonials-in 400ms cubic-bezier(0.23,1,0.32,1) both}
-[data-uai-testimonials-item]:nth-child(2){animation-delay:40ms}
-[data-uai-testimonials-item]:nth-child(3){animation-delay:80ms}
-[data-uai-testimonials-item]:nth-child(4){animation-delay:120ms}
-[data-uai-testimonials-item]:nth-child(5){animation-delay:160ms}
-[data-uai-testimonials-item]:nth-child(n+6){animation-delay:200ms}
-@keyframes uai-testimonials-in{from{opacity:0;transform:translateY(6px)}}
-@media (prefers-reduced-motion:reduce){[data-uai-testimonials-item]{animation:none}}
-`;
+const testimonialsSectionListVariants = cva("m-0 min-w-0 list-none p-0", {
+  variants: {
+    variant: {
+      grid: "grid grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))] gap-3",
+      featured:
+        "grid gap-3 @min-[720px]:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] @min-[720px]:items-start @min-[720px]:gap-x-8 @min-[720px]:gap-y-4",
+      wall: "columns-[3_220px] gap-x-2.5",
+    },
+  },
+});
 
 /** Customer stories with people, roles, and organizations. Columns collapse to one on narrow widths. */
 export function TestimonialsSection({
   variant = "grid",
+  className,
   children,
-  style,
   ...props
 }: TestimonialsSectionProps) {
   const id = useId();
   return (
     <Context.Provider value={{ id, variant }}>
       <section
+        data-slot="testimonials-section"
         aria-labelledby={`${id}-title`}
+        className={cn(
+          "@container box-border grid min-w-0 gap-7 text-[13px]/[18px] text-foreground",
+          className,
+        )}
         {...props}
         data-variant={variant}
-        data-uai-testimonials={variant}
-        style={{
-          boxSizing: "border-box",
-          display: "grid",
-          gap: 28,
-          containerType: "inline-size",
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
       >
-        <style>{layoutCss}</style>
         {children}
       </section>
     </Context.Provider>
   );
 }
 
-export function TestimonialsSectionHeader({ style, ...props }: ComponentProps<"header">) {
+export function TestimonialsSectionHeader({ className, ...props }: ComponentProps<"header">) {
   return (
     <header
+      data-slot="testimonials-section-header"
+      className={cn("mx-auto grid max-w-[600px] justify-items-center gap-2 text-center", className)}
       {...props}
-      style={{
-        display: "grid",
-        justifyItems: "center",
-        gap: 8,
-        maxWidth: 600,
-        margin: "0 auto",
-        textAlign: "center",
-        ...style,
-      }}
     />
   );
 }
 
-export function TestimonialsSectionTitle({ style, ...props }: ComponentProps<"h2">) {
+export function TestimonialsSectionTitle({ className, ...props }: ComponentProps<"h2">) {
   const { id } = useSection("TestimonialsSectionTitle");
   return (
     <h2
+      data-slot="testimonials-section-title"
+      className={cn(
+        "m-0 text-[length:clamp(22px,2.5cqi_+_12px,30px)] leading-[1.15] font-medium tracking-[-0.025em] text-balance",
+        className,
+      )}
       {...props}
       id={`${id}-title`}
-      style={{
-        margin: 0,
-        fontSize: "clamp(22px, 2.5cqi + 12px, 30px)",
-        fontWeight: 500,
-        lineHeight: 1.15,
-        letterSpacing: "-0.025em",
-        textWrap: "balance",
-        ...style,
-      }}
     />
   );
 }
 
-export function TestimonialsSectionDescription({ style, ...props }: ComponentProps<"p">) {
+export function TestimonialsSectionDescription({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="testimonials-section-description"
+      className={cn("m-0 text-[15px]/[23px] text-pretty text-muted-foreground", className)}
       {...props}
-      style={{
-        margin: 0,
-        color: "var(--uai-muted)",
-        fontSize: 15,
-        lineHeight: "23px",
-        textWrap: "pretty",
-        ...style,
-      }}
     />
   );
 }
 
-export function TestimonialsSectionList({ style, ...props }: ComponentProps<"ul">) {
-  useSection("TestimonialsSectionList");
+export function TestimonialsSectionList({ className, ...props }: ComponentProps<"ul">) {
+  const { variant } = useSection("TestimonialsSectionList");
   return (
     <ul
+      data-slot="testimonials-section-list"
+      className={cn(testimonialsSectionListVariants({ variant }), className)}
       {...props}
-      data-uai-testimonials-list=""
-      style={{ minWidth: 0, margin: 0, padding: 0, listStyle: "none", ...style }}
     />
   );
 }
@@ -151,27 +120,29 @@ export function TestimonialsSectionItem({
   const cardVariant: TestimonialCardVariant =
     variant === "wall" ? "compact" : variant === "featured" && featured ? "editorial" : "card";
   return (
-    <li data-uai-testimonials-item="" data-featured={featured || undefined} style={{ minWidth: 0 }}>
+    <li
+      data-slot="testimonials-section-item"
+      data-featured={featured || undefined}
+      className={cn(
+        "min-w-0 animate-in fade-in-0 slide-in-from-bottom-[6px] duration-400 ease-out-quint fill-mode-both motion-reduce:animate-none nth-2:[animation-delay:40ms] nth-3:[animation-delay:80ms] nth-4:[animation-delay:120ms] nth-5:[animation-delay:160ms] nth-[n+6]:[animation-delay:200ms]",
+        variant === "wall" && "mb-2.5 break-inside-avoid",
+        variant === "featured" && featured && "@min-[720px]:row-span-3 @min-[720px]:self-center",
+      )}
+    >
       <TestimonialCard {...props} variant={cardVariant} />
     </li>
   );
 }
 
-export function TestimonialsSectionSummary({ style, ...props }: ComponentProps<"div">) {
+export function TestimonialsSectionSummary({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="testimonials-section-summary"
+      className={cn(
+        "flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[12px] text-subtle-foreground tabular-nums",
+        className,
+      )}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: "8px 16px",
-        color: "var(--uai-subtle)",
-        fontSize: 12,
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     />
   );
 }

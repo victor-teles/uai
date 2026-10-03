@@ -1,6 +1,8 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, useContext, useEffect } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const UNSAVED_CHANGES_BAR_VARIANTS = ["bar", "floating", "compact"] as const;
 export type UnsavedChangesBarVariant = (typeof UNSAVED_CHANGES_BAR_VARIANTS)[number];
@@ -18,32 +20,21 @@ type ChangesContext = {
   onDiscard?: () => void;
 };
 const Context = createContext<ChangesContext | null>(null);
-const changesCss = `
-.uai-unsaved-bar{animation:uai-unsaved-in 180ms cubic-bezier(0.16,1,0.3,1)}
-.uai-unsaved-save,.uai-unsaved-discard{transition:background-color 120ms ease-out,filter 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-unsaved-save{background:var(--uai-accent);color:var(--uai-accent-foreground)}
-.uai-unsaved-save:hover:not(:disabled){filter:brightness(1.08)}
-.uai-unsaved-discard{background:var(--uai-surface-raised);color:var(--uai-text)}
-.uai-unsaved-discard:hover:not(:disabled){background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text))}
-.uai-unsaved-save:active:not(:disabled),.uai-unsaved-discard:active:not(:disabled){transform:scale(0.97)}
-.uai-unsaved-save:focus-visible,.uai-unsaved-discard:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-.uai-unsaved-save:disabled,.uai-unsaved-discard:disabled{cursor:not-allowed;opacity:0.6}
-.uai-unsaved-shimmer{color:transparent;background:linear-gradient(90deg,var(--uai-subtle) 0%,var(--uai-subtle) 35%,var(--uai-text) 50%,var(--uai-subtle) 65%,var(--uai-subtle) 100%) 0 0/200% 100%;-webkit-background-clip:text;background-clip:text;animation:uai-unsaved-shimmer 2s linear infinite}
-@keyframes uai-unsaved-in{from{opacity:0;transform:translateY(4px) scale(0.98)}to{opacity:1;transform:none}}
-@keyframes uai-unsaved-shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
-@media (prefers-reduced-motion: reduce){.uai-unsaved-bar{animation:none}.uai-unsaved-save,.uai-unsaved-discard{transition:none}.uai-unsaved-shimmer{animation:none;color:var(--uai-muted);background:none}}
-`;
-const actionStyle = {
-  height: 30,
-  padding: "0 14px",
-  border: 0,
-  borderRadius: 999,
-  font: "inherit",
-  fontSize: 12.5,
-  fontWeight: 500,
-  whiteSpace: "nowrap",
-  cursor: "pointer",
-} as const;
+const unsavedChangesBarVariants = cva(
+  "sticky z-10 flex flex-wrap items-center border-solid border-border bg-card text-card-foreground animate-in fade-in-0 slide-in-from-bottom-1 zoom-in-98 duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:animate-none",
+  {
+    variants: {
+      variant: {
+        bar: "bottom-0 gap-3 rounded-none border-x-0 border-y px-4 py-2.5 text-[13px]/[18px]",
+        floating:
+          "bottom-4 gap-3 rounded-2xl border-0 py-2 pr-2 pl-4 text-[13px]/[18px] shadow-[0_0_0_1px_var(--border-strong),0_12px_32px_-12px_oklch(0_0_0/0.45)]",
+        compact: "bottom-0 gap-2 rounded-xl border py-1.5 pr-1.5 pl-3 text-[12.5px]/[18px]",
+      },
+    },
+  },
+);
+const actionClass =
+  "h-7.5 cursor-pointer whitespace-nowrap rounded-full border-0 px-3.5 text-[12.5px] font-medium transition-[background-color,filter,transform] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none";
 function useChanges() {
   const context = useContext(Context);
   if (!context) throw new Error("UnsavedChangesBar children must be used within UnsavedChangesBar");
@@ -57,7 +48,6 @@ export function UnsavedChangesBar({
   onSave,
   onDiscard,
   className,
-  style,
   children,
   ...props
 }: UnsavedChangesBarProps) {
@@ -75,106 +65,84 @@ export function UnsavedChangesBar({
     <Context.Provider value={{ status, onSave, onDiscard }}>
       <section
         aria-label="Unsaved changes"
+        data-slot="unsaved-changes-bar"
+        data-variant={variant}
+        className={cn(unsavedChangesBarVariants({ variant }), className)}
         {...props}
         aria-busy={status === "saving"}
-        data-variant={variant}
-        className={className ? `uai-unsaved-bar ${className}` : "uai-unsaved-bar"}
-        style={{
-          position: "sticky",
-          bottom: variant === "floating" ? 16 : 0,
-          zIndex: 10,
-          display: "flex",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: variant === "compact" ? 8 : 12,
-          padding:
-            variant === "compact"
-              ? "6px 6px 6px 12px"
-              : variant === "floating"
-                ? "8px 8px 8px 16px"
-                : "10px 16px",
-          background: "var(--uai-surface)",
-          color: "var(--uai-text)",
-          borderStyle: "solid",
-          borderColor: "var(--uai-border)",
-          borderWidth: variant === "bar" ? "1px 0" : variant === "floating" ? 0 : 1,
-          borderRadius: variant === "bar" ? 0 : variant === "compact" ? 12 : 16,
-          boxShadow:
-            variant === "floating"
-              ? "0 0 0 1px var(--uai-border-strong), 0 12px 32px -12px oklch(0 0 0 / 0.45)"
-              : undefined,
-          fontSize: variant === "compact" ? 12.5 : 13,
-          lineHeight: "18px",
-          ...style,
-        }}
       >
-        <style>{changesCss}</style>
         {children}
       </section>
     </Context.Provider>
   );
 }
-export function UnsavedChangesBarMessage({ children, style, ...props }: ComponentProps<"p">) {
+export function UnsavedChangesBarMessage({ children, className, ...props }: ComponentProps<"p">) {
   const context = useChanges();
+  const error = context.status === "error";
   return (
     <p
+      data-slot="unsaved-changes-bar-message"
+      className={cn(
+        "m-0 flex min-w-0 flex-[1_1_140px] items-center gap-2 font-medium",
+        error
+          ? "text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))]"
+          : "text-foreground",
+        className,
+      )}
       {...props}
-      role={context.status === "error" ? "alert" : "status"}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        margin: 0,
-        flex: "1 1 140px",
-        minWidth: 0,
-        fontWeight: 500,
-        color:
-          context.status === "error"
-            ? "color-mix(in oklab, var(--uai-danger) 75%, var(--uai-text))"
-            : "var(--uai-text)",
-        ...style,
-      }}
+      role={error ? "alert" : "status"}
     >
       <span
         aria-hidden="true"
-        style={{
-          width: 6,
-          height: 6,
-          flexShrink: 0,
-          borderRadius: 999,
-          background: context.status === "error" ? "var(--uai-danger)" : "var(--uai-warning)",
-          boxShadow: `0 0 0 3px color-mix(in oklab, var(${context.status === "error" ? "--uai-danger" : "--uai-warning"}) 22%, transparent)`,
-        }}
+        className={cn(
+          "size-1.5 shrink-0 rounded-full ring-3",
+          error ? "bg-destructive ring-destructive/22" : "bg-warning ring-warning/22",
+        )}
       />
-      <span className={context.status === "saving" ? "uai-unsaved-shimmer" : undefined}>
+      <span
+        className={
+          context.status === "saving"
+            ? "shimmer-text motion-reduce:text-muted-foreground"
+            : undefined
+        }
+      >
         {children ??
           (context.status === "saving"
             ? "Saving changes…"
-            : context.status === "error"
+            : error
               ? "Changes could not be saved. Try again."
               : "You have unsaved changes.")}
       </span>
     </p>
   );
 }
-export function UnsavedChangesBarActions({ style, ...props }: ComponentProps<"div">) {
-  return <div {...props} style={{ display: "flex", flexWrap: "wrap", gap: 6, ...style }} />;
+export function UnsavedChangesBarActions({ className, ...props }: ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="unsaved-changes-bar-actions"
+      className={cn("flex flex-wrap gap-1.5", className)}
+      {...props}
+    />
+  );
 }
 export function UnsavedChangesBarSave({
   children = "Save changes",
   onClick,
   className,
-  style,
   ...props
 }: ComponentProps<"button">) {
   const context = useChanges();
   return (
     <button
+      data-slot="unsaved-changes-bar-save"
+      className={cn(
+        actionClass,
+        "bg-primary text-primary-foreground enabled:hover:brightness-108",
+        className,
+      )}
       {...props}
       type="button"
       disabled={context.status === "saving" || props.disabled}
-      className={className ? `uai-unsaved-save ${className}` : "uai-unsaved-save"}
-      style={{ ...actionStyle, ...style }}
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) context.onSave?.();
@@ -188,17 +156,20 @@ export function UnsavedChangesBarDiscard({
   children = "Discard",
   onClick,
   className,
-  style,
   ...props
 }: ComponentProps<"button">) {
   const context = useChanges();
   return (
     <button
+      data-slot="unsaved-changes-bar-discard"
+      className={cn(
+        actionClass,
+        "bg-secondary text-secondary-foreground enabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+        className,
+      )}
       {...props}
       type="button"
       disabled={context.status === "saving" || props.disabled}
-      className={className ? `uai-unsaved-discard ${className}` : "uai-unsaved-discard"}
-      style={{ ...actionStyle, ...style }}
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) context.onDiscard?.();

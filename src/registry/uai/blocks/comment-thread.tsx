@@ -15,6 +15,7 @@ import {
   type ReactionBarProps,
   type ReactionBarVariant,
 } from "@/components/ui/uai/reaction-bar";
+import { cn } from "@/lib/uai-utils";
 
 export const COMMENT_THREAD_VARIANTS = ["threaded", "cards", "compact"] as const;
 export type CommentThreadVariant = (typeof COMMENT_THREAD_VARIANTS)[number];
@@ -39,20 +40,6 @@ function useThread(part: string) {
   return context;
 }
 
-const threadCss = `
-.uai-comment-thread-sort{transition:background-color 180ms cubic-bezier(0.23,1,0.32,1),color 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-comment-thread-sort[aria-checked=false]:hover{color:var(--uai-text)}
-.uai-comment-thread-sort:active{transform:scale(0.96)}
-.uai-comment-thread-sort:focus-visible,.uai-comment-thread-send:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-.uai-comment-thread-composer{transition:box-shadow 120ms ease-out}
-.uai-comment-thread-composer:focus-within{box-shadow:inset 0 0 0 1px var(--uai-border-strong)}
-.uai-comment-thread-composer textarea{outline:none}
-.uai-comment-thread-composer textarea::placeholder{color:var(--uai-subtle)}
-.uai-comment-thread-send{transition:background-color 120ms ease-out,color 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-comment-thread-send:active:not(:disabled){transform:scale(0.92)}
-@media (prefers-reduced-motion: reduce){.uai-comment-thread-sort,.uai-comment-thread-composer,.uai-comment-thread-send{transition:none}.uai-comment-thread-sort:active,.uai-comment-thread-send:active:not(:disabled){transform:none}}
-`;
-
 const commentVariants: Record<CommentThreadVariant, CommentVariant> = {
   threaded: "thread",
   cards: "card",
@@ -71,7 +58,7 @@ export function CommentThread({
   defaultSort = "",
   onSortChange,
   children,
-  style,
+  className,
   ...props
 }: CommentThreadProps) {
   const id = useId();
@@ -92,77 +79,58 @@ export function CommentThread({
     >
       <section
         aria-labelledby={`${id}-title`}
+        data-slot="comment-thread"
+        className={cn(
+          "grid min-w-0 text-[13px]/[18px] text-foreground",
+          variant === "compact" ? "gap-3" : "gap-5",
+          className,
+        )}
         {...props}
         data-variant={variant}
-        style={{
-          display: "grid",
-          gap: variant === "compact" ? 12 : 20,
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
       >
-        <style>{threadCss}</style>
         {children}
       </section>
     </Context.Provider>
   );
 }
 
-export function CommentThreadHeader({ style, ...props }: ComponentProps<"header">) {
+export function CommentThreadHeader({ className, ...props }: ComponentProps<"header">) {
   useThread("CommentThreadHeader");
   return (
     <header
+      data-slot="comment-thread-header"
+      className={cn("flex min-w-0 flex-wrap items-center justify-between gap-3", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function CommentThreadTitle({ style, ...props }: ComponentProps<"h2">) {
+export function CommentThreadTitle({ className, ...props }: ComponentProps<"h2">) {
   const { id, variant } = useThread("CommentThreadTitle");
   return (
     <h2
+      data-slot="comment-thread-title"
+      className={cn(
+        "m-0 inline-flex items-baseline gap-2 font-semibold tracking-[-0.01em]",
+        variant === "compact" ? "text-sm/5" : "text-[15px]/[22px]",
+        className,
+      )}
       {...props}
       id={`${id}-title`}
-      style={{
-        display: "inline-flex",
-        alignItems: "baseline",
-        gap: 8,
-        margin: 0,
-        fontSize: variant === "compact" ? 14 : 15,
-        lineHeight: variant === "compact" ? "20px" : "22px",
-        fontWeight: 600,
-        letterSpacing: "-0.01em",
-        ...style,
-      }}
     />
   );
 }
 
 /** A muted count beside the title, such as "14 comments". */
-export function CommentThreadCount({ style, ...props }: ComponentProps<"span">) {
+export function CommentThreadCount({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
+      data-slot="comment-thread-count"
+      className={cn(
+        "text-[12.5px] font-normal tracking-normal text-subtle-foreground tabular-nums",
+        className,
+      )}
       {...props}
-      style={{
-        color: "var(--uai-subtle)",
-        fontSize: 12.5,
-        fontWeight: 400,
-        letterSpacing: 0,
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     />
   );
 }
@@ -171,7 +139,7 @@ export function CommentThreadCount({ style, ...props }: ComponentProps<"span">) 
 export function CommentThreadSort({
   "aria-label": label = "Sort comments",
   onKeyDown,
-  style,
+  className,
   ...props
 }: ComponentProps<"div">) {
   const { variant } = useThread("CommentThreadSort");
@@ -179,19 +147,16 @@ export function CommentThreadSort({
     <div
       role="radiogroup"
       aria-label={label}
+      data-slot="comment-thread-sort"
+      className={cn(
+        "inline-flex items-center gap-0.5 rounded-full bg-card",
+        variant === "compact" ? "p-px" : "p-0.5",
+        className,
+      )}
       {...props}
       onKeyDown={(event) => {
         onKeyDown?.(event);
         if (!event.defaultPrevented) moveRadio(event);
-      }}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 2,
-        padding: variant === "compact" ? 1 : 2,
-        borderRadius: 999,
-        background: "var(--uai-surface)",
-        ...style,
       }}
     />
   );
@@ -200,7 +165,7 @@ export function CommentThreadSort({
 export function CommentThreadSortOption({
   value,
   onClick,
-  style,
+  className,
   ...props
 }: Omit<ComponentProps<"button">, "value"> & { value: string }) {
   const context = useThread("CommentThreadSortOption");
@@ -209,30 +174,23 @@ export function CommentThreadSortOption({
   return (
     // biome-ignore lint/a11y/useSemanticElements: APG radio group built from buttons for custom segmented styling.
     <button
+      data-slot="comment-thread-sort-option"
+      className={cn(
+        "cursor-pointer rounded-full border-0 px-2.5 text-[12px] font-medium [transition:background-color_180ms_cubic-bezier(0.23,1,0.32,1),color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.96] motion-reduce:transition-none motion-reduce:active:scale-100",
+        compact ? "h-5.5" : "h-6",
+        checked
+          ? "bg-accent text-foreground"
+          : "bg-transparent text-subtle-foreground hover:text-foreground",
+        className,
+      )}
       {...props}
       type="button"
       role="radio"
       aria-checked={checked}
       tabIndex={checked ? 0 : -1}
-      className={
-        props.className ? `uai-comment-thread-sort ${props.className}` : "uai-comment-thread-sort"
-      }
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) context.setSort(value);
-      }}
-      style={{
-        height: compact ? 22 : 24,
-        padding: "0 10px",
-        border: 0,
-        borderRadius: 999,
-        background: checked ? "var(--uai-surface-raised)" : "transparent",
-        color: checked ? "var(--uai-text)" : "var(--uai-subtle)",
-        font: "inherit",
-        fontSize: 12,
-        fontWeight: 500,
-        cursor: "pointer",
-        ...style,
       }}
     />
   );
@@ -241,7 +199,7 @@ export function CommentThreadSortOption({
 /** Top-level comments. Nest replies with CommentReplies inside a CommentThreadComment. */
 export function CommentThreadList({
   "aria-label": label = "Comments",
-  style,
+  className,
   ...props
 }: ComponentProps<"div">) {
   const { variant } = useThread("CommentThreadList");
@@ -250,14 +208,9 @@ export function CommentThreadList({
     <div
       role="group"
       aria-label={label}
+      data-slot="comment-thread-list"
+      className={cn("grid min-w-0", variant === "threaded" ? "gap-5" : "gap-3", className)}
       {...props}
-      data-uai-comment-thread-list=""
-      style={{
-        display: "grid",
-        gap: variant === "threaded" ? 20 : 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
@@ -288,7 +241,7 @@ export function CommentThreadComposer({
   label = "Add a comment",
   placeholder = "Add a comment…",
   disabled = false,
-  style,
+  className,
   ...props
 }: CommentThreadComposerProps) {
   const { variant } = useThread("CommentThreadComposer");
@@ -302,26 +255,16 @@ export function CommentThreadComposer({
   };
   return (
     <form
+      data-slot="comment-thread-composer"
+      className={cn(
+        "flex min-w-0 items-end gap-2 bg-card shadow-[inset_0_0_0_1px_var(--border)] [transition:box-shadow_120ms_ease-out] focus-within:shadow-[inset_0_0_0_1px_var(--border-strong)] motion-reduce:transition-none",
+        compact ? "rounded-xl p-1.5" : "rounded-[14px] p-2",
+        className,
+      )}
       {...props}
-      className={
-        props.className
-          ? `uai-comment-thread-composer ${props.className}`
-          : "uai-comment-thread-composer"
-      }
       onSubmit={(event) => {
         event.preventDefault();
         submit();
-      }}
-      style={{
-        display: "flex",
-        alignItems: "flex-end",
-        gap: 8,
-        minWidth: 0,
-        padding: compact ? 6 : 8,
-        boxShadow: "inset 0 0 0 1px var(--uai-border)",
-        borderRadius: compact ? 12 : 14,
-        background: "var(--uai-surface)",
-        ...style,
       }}
     >
       <textarea
@@ -337,38 +280,19 @@ export function CommentThreadComposer({
             submit();
           }
         }}
-        style={{
-          flex: 1,
-          minWidth: 0,
-          padding: "5px 6px",
-          border: 0,
-          background: "transparent",
-          color: "inherit",
-          font: "inherit",
-          fontSize: 13,
-          lineHeight: "18px",
-          resize: "none",
-        }}
+        className="min-w-0 flex-1 resize-none border-0 bg-transparent px-1.5 py-1.25 text-[13px]/[18px] text-inherit outline-none placeholder:text-subtle-foreground"
       />
       <button
         type="submit"
         aria-label="Post comment"
         disabled={!ready}
-        className="uai-comment-thread-send"
-        style={{
-          display: "grid",
-          placeItems: "center",
-          flex: "0 0 auto",
-          width: compact ? 24 : 28,
-          height: compact ? 24 : 28,
-          border: 0,
-          borderRadius: 999,
-          background: ready ? "var(--uai-text)" : "var(--uai-border-strong)",
-          color: ready
-            ? "var(--uai-surface)"
-            : "color-mix(in oklab, var(--uai-surface) 70%, transparent)",
-          cursor: ready ? "pointer" : "not-allowed",
-        }}
+        className={cn(
+          "grid flex-[0_0_auto] place-items-center rounded-full border-0 [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring not-disabled:active:scale-[0.92] motion-reduce:transition-none motion-reduce:not-disabled:active:scale-100",
+          compact ? "size-6" : "size-7",
+          ready
+            ? "cursor-pointer bg-foreground text-card"
+            : "cursor-not-allowed bg-border-strong text-card/70",
+        )}
       >
         <ArrowUp size={compact ? 14 : 16} strokeWidth={2} aria-hidden="true" />
       </button>

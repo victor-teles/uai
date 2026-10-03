@@ -1,9 +1,9 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { X } from "lucide-react";
 import {
   type ComponentProps,
-  type CSSProperties,
   createContext,
   type ReactNode,
   useContext,
@@ -24,6 +24,7 @@ import {
   StatusBannerDescription,
   StatusBannerIcon,
 } from "@/components/ui/uai/status-banner";
+import { cn } from "@/lib/uai-utils";
 
 export const WORKSPACE_SETUP_VARIANTS = ["card", "split", "compact"] as const;
 export type WorkspaceSetupVariant = (typeof WORKSPACE_SETUP_VARIANTS)[number];
@@ -75,53 +76,27 @@ const slugify = (text: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+/, "")
     .slice(0, 40);
-const layoutCss = `
-[data-uai-workspace-layout]{display:grid;gap:20px;min-width:0;grid-template-areas:"header" "main" "summary"}
-[data-uai-workspace-part="header"]{grid-area:header}
-[data-uai-workspace-part="main"]{grid-area:main}
-[data-uai-workspace-part="summary"]{grid-area:summary}
-@container (min-width: 760px){
-  [data-uai-workspace="split"]>[data-uai-workspace-layout]{grid-template-columns:minmax(0,1fr) 280px;grid-template-areas:"header header" "main summary";column-gap:32px}
-  [data-uai-workspace="split"] [data-uai-workspace-part="summary"]{position:sticky;top:16px;align-self:start}
-}
-[data-uai-workspace-button],[data-uai-workspace-remove],[data-uai-workspace-choice]{transition:background-color 120ms ease-out,color 120ms ease-out,box-shadow 120ms ease-out,filter 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-[data-uai-workspace-button="primary"]{background:var(--uai-accent);color:var(--uai-accent-foreground)}
-[data-uai-workspace-button="primary"]:disabled{background:var(--uai-surface-raised);color:var(--uai-subtle);cursor:default}
-[data-uai-workspace-button="secondary"]{background:var(--uai-surface-raised);color:var(--uai-text)}
-[data-uai-workspace-button="primary"]:hover:not(:disabled){filter:brightness(1.08)}
-[data-uai-workspace-button="secondary"]:hover:not(:disabled){background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text))}
-[data-uai-workspace-button]:active:not(:disabled){transform:scale(0.97)}
-[data-uai-workspace-remove]{background:transparent;color:var(--uai-subtle)}
-[data-uai-workspace-remove]:hover{background:color-mix(in oklab,var(--uai-text) 10%,transparent);color:var(--uai-text)}
-[data-uai-workspace-choice]{background:var(--uai-surface);box-shadow:inset 0 0 0 1px var(--uai-border)}
-[data-uai-workspace-choice]:hover{background:color-mix(in oklab,var(--uai-surface-raised) 50%,var(--uai-surface))}
-[data-uai-workspace-choice]:has(input:checked){background:color-mix(in oklab,var(--uai-accent) 6%,var(--uai-surface));box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--uai-accent) 55%,transparent)}
-[data-uai-workspace-choice]:has(input:focus-visible){outline:2px solid var(--uai-accent);outline-offset:2px}
-[data-uai-workspace-button]:focus-visible,[data-uai-workspace-remove]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-@keyframes uai-workspace-pop{from{opacity:0;transform:scale(0.96)}}
-[data-uai-workspace-invite]{animation:uai-workspace-pop 180ms cubic-bezier(0.16,1,0.3,1) both}
-@keyframes uai-workspace-shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
-[data-uai-workspace-shimmer]{background:linear-gradient(90deg,color-mix(in oklab,currentColor 55%,transparent) 0%,color-mix(in oklab,currentColor 55%,transparent) 35%,currentColor 50%,color-mix(in oklab,currentColor 55%,transparent) 65%,color-mix(in oklab,currentColor 55%,transparent) 100%) 0 0/200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:uai-workspace-shimmer 2s linear infinite}
-@media (prefers-reduced-motion: reduce){[data-uai-workspace-button],[data-uai-workspace-remove],[data-uai-workspace-choice]{transition:none}[data-uai-workspace-button]:active:not(:disabled){transform:none}[data-uai-workspace-invite]{animation:none}[data-uai-workspace-shimmer]{animation:none;background:none;-webkit-text-fill-color:currentColor}}`;
-const shells: Record<WorkspaceSetupVariant, CSSProperties> = {
-  card: {
-    maxWidth: 640,
-    margin: "0 auto",
-    padding: "clamp(16px, 4cqi, 28px)",
-    border: "1px solid var(--uai-border)",
-    borderRadius: 14,
-    background: "var(--uai-surface)",
+const transition =
+  "[transition:background-color_120ms_ease-out,color_120ms_ease-out,box-shadow_120ms_ease-out,filter_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none";
+const focusRing =
+  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
+const buttonBase = cn(
+  transition,
+  focusRing,
+  "cursor-pointer rounded-full border-0 font-medium not-disabled:active:scale-[0.97] motion-reduce:not-disabled:active:scale-100",
+);
+const workspaceSetupVariants = cva(
+  "@container box-border min-w-0 text-[13px]/[18px] text-foreground",
+  {
+    variants: {
+      variant: {
+        card: "mx-auto my-0 max-w-160 rounded-[14px] border bg-card p-[clamp(16px,4cqi,28px)]",
+        split: "px-0 py-2",
+        compact: "mx-auto my-0 max-w-120 rounded-xl border bg-card p-4",
+      },
+    },
   },
-  split: { padding: "8px 0" },
-  compact: {
-    maxWidth: 480,
-    margin: "0 auto",
-    padding: 16,
-    border: "1px solid var(--uai-border)",
-    borderRadius: 12,
-    background: "var(--uai-surface)",
-  },
-};
+);
 
 /** Creates a workspace: a name and URL, pending invitations, and initial settings. */
 export function WorkspaceSetup({
@@ -129,7 +104,7 @@ export function WorkspaceSetup({
   defaultName = "",
   onCreate,
   children,
-  style,
+  className,
   ...props
 }: WorkspaceSetupProps) {
   const id = useId();
@@ -206,10 +181,11 @@ export function WorkspaceSetup({
         ref={formRef}
         noValidate
         aria-labelledby={`${id}-title`}
+        data-slot="workspace-setup"
+        className={cn(workspaceSetupVariants({ variant }), className)}
         {...props}
         data-variant={variant}
         data-status={status}
-        data-uai-workspace={variant}
         onSubmit={async (event) => {
           event.preventDefault();
           if (status === "creating") return;
@@ -241,126 +217,107 @@ export function WorkspaceSetup({
             setStatus("error");
           }
         }}
-        style={{
-          boxSizing: "border-box",
-          containerType: "inline-size",
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...shells[variant],
-          ...style,
-        }}
       >
-        <style>{layoutCss}</style>
-        <div data-uai-workspace-layout="">{children}</div>
+        <div
+          className={cn(
+            "grid min-w-0 gap-5 [grid-template-areas:'header'_'main'_'summary']",
+            variant === "split" &&
+              "@min-[760px]:grid-cols-[minmax(0,1fr)_280px] @min-[760px]:gap-x-8 @min-[760px]:[grid-template-areas:'header_header'_'main_summary']",
+          )}
+        >
+          {children}
+        </div>
       </form>
     </Context.Provider>
   );
 }
 
-export function WorkspaceSetupHeader({ style, ...props }: ComponentProps<"header">) {
+export function WorkspaceSetupHeader({ className, ...props }: ComponentProps<"header">) {
   return (
     <header
+      data-slot="workspace-setup-header"
+      className={cn("grid min-w-0 gap-1 [grid-area:header]", className)}
       {...props}
-      data-uai-workspace-part="header"
-      style={{ display: "grid", gap: 4, minWidth: 0, ...style }}
     />
   );
 }
 
-export function WorkspaceSetupTitle({ style, ...props }: ComponentProps<"h2">) {
+export function WorkspaceSetupTitle({ className, ...props }: ComponentProps<"h2">) {
   const { id, variant } = useSetup("WorkspaceSetupTitle");
   return (
     <h2
+      data-slot="workspace-setup-title"
+      className={cn(
+        "m-0 font-semibold tracking-[-0.01em]",
+        variant === "compact" ? "text-[15px]/5" : "text-lg/6",
+        className,
+      )}
       {...props}
       id={`${id}-title`}
-      style={{
-        margin: 0,
-        fontSize: variant === "compact" ? 15 : 18,
-        fontWeight: 600,
-        lineHeight: variant === "compact" ? "20px" : "24px",
-        letterSpacing: "-0.01em",
-        ...style,
-      }}
     />
   );
 }
 
-export function WorkspaceSetupDescription({ style, ...props }: ComponentProps<"p">) {
+export function WorkspaceSetupDescription({ className, ...props }: ComponentProps<"p">) {
   return (
-    <p {...props} style={{ margin: 0, color: "var(--uai-muted)", textWrap: "pretty", ...style }} />
+    <p
+      data-slot="workspace-setup-description"
+      className={cn("m-0 text-pretty text-muted-foreground", className)}
+      {...props}
+    />
   );
 }
 
 /** The main column: sections, errors, and actions. */
-export function WorkspaceSetupMain({ style, ...props }: ComponentProps<"div">) {
+export function WorkspaceSetupMain({ className, ...props }: ComponentProps<"div">) {
   const { variant } = useSetup("WorkspaceSetupMain");
   return (
     <div
+      data-slot="workspace-setup-main"
+      className={cn(
+        "grid min-w-0 content-start [grid-area:main]",
+        variant === "compact" ? "gap-5" : "gap-6",
+        className,
+      )}
       {...props}
-      data-uai-workspace-part="main"
-      style={{
-        display: "grid",
-        gap: variant === "compact" ? 20 : 24,
-        alignContent: "start",
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function WorkspaceSetupSection({ style, ...props }: ComponentProps<"fieldset">) {
+export function WorkspaceSetupSection({ className, ...props }: ComponentProps<"fieldset">) {
   const { variant, status } = useSetup("WorkspaceSetupSection");
   return (
     <fieldset
+      data-slot="workspace-setup-section"
+      className={cn(
+        "m-0 grid min-w-0 gap-3 border-0",
+        variant === "split"
+          ? "rounded-[14px] bg-card px-5 pt-4.5 pb-5 shadow-[inset_0_0_0_1px_var(--border)]"
+          : "rounded-none bg-transparent p-0",
+        className,
+      )}
       {...props}
       disabled={status === "creating"}
-      style={{
-        display: "grid",
-        gap: 12,
-        minWidth: 0,
-        margin: 0,
-        padding: variant === "split" ? "18px 20px 20px" : 0,
-        border: 0,
-        borderRadius: variant === "split" ? 14 : 0,
-        boxShadow: variant === "split" ? "inset 0 0 0 1px var(--uai-border)" : undefined,
-        background: variant === "split" ? "var(--uai-surface)" : "transparent",
-        ...style,
-      }}
     />
   );
 }
 
-export function WorkspaceSetupSectionTitle({ style, ...props }: ComponentProps<"legend">) {
+export function WorkspaceSetupSectionTitle({ className, ...props }: ComponentProps<"legend">) {
   return (
     <legend
+      data-slot="workspace-setup-section-title"
+      className={cn("float-left w-full p-0 text-sm/5 font-medium", className)}
       {...props}
-      style={{
-        float: "left",
-        width: "100%",
-        padding: 0,
-        fontSize: 14,
-        fontWeight: 500,
-        lineHeight: "20px",
-        ...style,
-      }}
     />
   );
 }
 
-export function WorkspaceSetupSectionDescription({ style, ...props }: ComponentProps<"p">) {
+export function WorkspaceSetupSectionDescription({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="workspace-setup-section-description"
+      className={cn("mx-0 -mt-2 mb-0 text-[12.5px] text-pretty text-muted-foreground", className)}
       {...props}
-      style={{
-        margin: "-8px 0 0",
-        color: "var(--uai-muted)",
-        fontSize: 12.5,
-        textWrap: "pretty",
-        ...style,
-      }}
     />
   );
 }
@@ -414,15 +371,19 @@ export function WorkspaceSetupInvite({ variant, ...props }: BoundFieldProps) {
   );
 }
 
-export function WorkspaceSetupInviteRow({ style, ...props }: ComponentProps<"div">) {
+export function WorkspaceSetupInviteRow({ className, ...props }: ComponentProps<"div">) {
   return (
-    <div {...props} style={{ display: "flex", flexWrap: "wrap", gap: 8, minWidth: 0, ...style }} />
+    <div
+      data-slot="workspace-setup-invite-row"
+      className={cn("flex min-w-0 flex-wrap gap-2", className)}
+      {...props}
+    />
   );
 }
 
 export function WorkspaceSetupInviteInput({
   onKeyDown,
-  style,
+  className,
   ...props
 }: ComponentProps<typeof FormFieldInput>) {
   const context = useSetup("WorkspaceSetupInviteInput");
@@ -430,6 +391,7 @@ export function WorkspaceSetupInviteInput({
     <FormFieldInput
       type="email"
       autoComplete="off"
+      className={cn("w-auto flex-[1_1_200px]", className)}
       {...props}
       onKeyDown={(event) => {
         onKeyDown?.(event);
@@ -439,34 +401,29 @@ export function WorkspaceSetupInviteInput({
           context.addInvites();
         }
       }}
-      style={{ flex: "1 1 200px", width: "auto", ...style }}
     />
   );
 }
 
-export function WorkspaceSetupInviteAdd({ onClick, style, ...props }: ComponentProps<"button">) {
+export function WorkspaceSetupInviteAdd({
+  onClick,
+  className,
+  ...props
+}: ComponentProps<"button">) {
   const context = useSetup("WorkspaceSetupInviteAdd");
   return (
     <button
       type="button"
+      data-slot="workspace-setup-invite-add"
+      className={cn(
+        buttonBase,
+        "h-7.5 flex-none self-center bg-secondary px-3.25 text-[12.5px] text-foreground not-disabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+        className,
+      )}
       {...props}
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) context.addInvites();
-      }}
-      data-uai-workspace-button="secondary"
-      style={{
-        flex: "none",
-        alignSelf: "center",
-        height: 30,
-        padding: "0 13px",
-        border: 0,
-        borderRadius: 999,
-        font: "inherit",
-        fontSize: 12.5,
-        fontWeight: 500,
-        cursor: "pointer",
-        ...style,
       }}
     />
   );
@@ -479,62 +436,37 @@ export function WorkspaceSetupInviteError(props: ComponentProps<typeof FormField
 }
 
 /** Lists pending invitations with remove buttons. Children render when the list is empty. */
-export function WorkspaceSetupInviteList({ children, style, ...props }: ComponentProps<"ul">) {
+export function WorkspaceSetupInviteList({ children, className, ...props }: ComponentProps<"ul">) {
   const context = useSetup("WorkspaceSetupInviteList");
   if (context.invites.length === 0) {
-    return <p style={{ margin: 0, color: "var(--uai-subtle)", fontSize: 12 }}>{children}</p>;
+    return (
+      <p data-slot="workspace-setup-invite-list" className="m-0 text-[12px] text-subtle-foreground">
+        {children}
+      </p>
+    );
   }
   return (
     <ul
       aria-label="Pending invitations"
+      data-slot="workspace-setup-invite-list"
+      className={cn("m-0 flex list-none flex-wrap gap-1.5 p-0", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 6,
-        margin: 0,
-        padding: 0,
-        listStyle: "none",
-        ...style,
-      }}
     >
       {context.invites.map((email) => (
         <li
           key={email}
-          data-uai-workspace-invite=""
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 2,
-            minWidth: 0,
-            maxWidth: "100%",
-            height: 26,
-            padding: "0 3px 0 9px",
-            borderRadius: 6,
-            background: "var(--uai-surface-raised)",
-            fontSize: 12,
-            fontWeight: 500,
-          }}
+          className="inline-flex h-6.5 max-w-full min-w-0 animate-in items-center gap-0.5 rounded-md bg-muted pr-0.75 pl-2.25 text-[12px] font-medium duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] fade-in-0 zoom-in-96 fill-mode-both motion-reduce:animate-none"
         >
-          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {email}
-          </span>
+          <span className="truncate">{email}</span>
           <button
             type="button"
             aria-label={`Remove ${email}`}
             onClick={() => context.removeInvite(email)}
-            data-uai-workspace-remove=""
-            style={{
-              display: "grid",
-              placeItems: "center",
-              flex: "none",
-              width: 20,
-              height: 20,
-              padding: 0,
-              border: 0,
-              borderRadius: 4,
-              cursor: "pointer",
-            }}
+            className={cn(
+              transition,
+              focusRing,
+              "grid size-5 flex-none cursor-pointer place-items-center rounded-sm border-0 bg-transparent p-0 text-subtle-foreground hover:bg-foreground/10 hover:text-foreground",
+            )}
           >
             <X size={12} strokeWidth={2} aria-hidden="true" />
           </button>
@@ -553,70 +485,72 @@ export type WorkspaceSetupChoiceProps = Omit<ComponentProps<"input">, "type" | "
 export function WorkspaceSetupChoice({
   type = "radio",
   children,
-  style,
+  className,
   ...props
 }: WorkspaceSetupChoiceProps) {
   const { variant } = useSetup("WorkspaceSetupChoice");
   return (
     <label
-      data-uai-workspace-choice=""
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        gap: 10,
-        minWidth: 0,
-        padding: variant === "compact" ? 10 : 12,
-        borderRadius: variant === "compact" ? 8 : 10,
-        cursor: "pointer",
-        ...style,
-      }}
+      data-slot="workspace-setup-choice"
+      className={cn(
+        transition,
+        "flex min-w-0 cursor-pointer items-start gap-2.5 bg-card shadow-[inset_0_0_0_1px_var(--border)] hover:bg-[color-mix(in_oklab,var(--muted)_50%,var(--card))] has-checked:bg-[color-mix(in_oklab,var(--primary)_6%,var(--card))] has-checked:shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_55%,transparent)] has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring",
+        variant === "compact" ? "rounded-lg p-2.5" : "rounded-[10px] p-3",
+        className,
+      )}
     >
-      <input
-        {...props}
-        type={type}
-        style={{ flex: "none", margin: "2px 0 0", accentColor: "var(--uai-accent)" }}
-      />
-      <span style={{ display: "grid", gap: 2, minWidth: 0 }}>{children}</span>
+      <input {...props} type={type} className="mx-0 mt-0.5 mb-0 flex-none accent-primary" />
+      <span className="grid min-w-0 gap-0.5">{children}</span>
     </label>
   );
 }
 
-export function WorkspaceSetupChoiceLabel({ style, ...props }: ComponentProps<"span">) {
-  return <span {...props} style={{ fontWeight: 500, ...style }} />;
-}
-
-export function WorkspaceSetupChoiceDescription({ style, ...props }: ComponentProps<"span">) {
-  return <span {...props} style={{ color: "var(--uai-muted)", fontSize: 12, ...style }} />;
-}
-
-/** A live summary of the workspace. Split shows it beside the form; others place it below. */
-export function WorkspaceSetupSummary({ style, ...props }: ComponentProps<"aside">) {
-  const { id, variant } = useSetup("WorkspaceSetupSummary");
+export function WorkspaceSetupChoiceLabel({ className, ...props }: ComponentProps<"span">) {
   return (
-    <aside
-      aria-labelledby={`${id}-summary`}
+    <span
+      data-slot="workspace-setup-choice-label"
+      className={cn("font-medium", className)}
       {...props}
-      data-uai-workspace-part="summary"
-      style={{
-        display: "grid",
-        gap: 8,
-        minWidth: 0,
-        padding: variant === "compact" ? 12 : 16,
-        borderRadius: variant === "compact" ? 12 : 14,
-        background: "var(--uai-surface-raised)",
-        ...style,
-      }}
     />
   );
 }
 
-export function WorkspaceSetupSummaryTitle({ style, ...props }: ComponentProps<"h3">) {
+export function WorkspaceSetupChoiceDescription({ className, ...props }: ComponentProps<"span">) {
+  return (
+    <span
+      data-slot="workspace-setup-choice-description"
+      className={cn("text-[12px] text-muted-foreground", className)}
+      {...props}
+    />
+  );
+}
+
+/** A live summary of the workspace. Split shows it beside the form; others place it below. */
+export function WorkspaceSetupSummary({ className, ...props }: ComponentProps<"aside">) {
+  const { id, variant } = useSetup("WorkspaceSetupSummary");
+  return (
+    <aside
+      aria-labelledby={`${id}-summary`}
+      data-slot="workspace-setup-summary"
+      className={cn(
+        "grid min-w-0 gap-2 bg-muted [grid-area:summary]",
+        variant === "compact" ? "rounded-xl p-3" : "rounded-[14px] p-4",
+        variant === "split" && "@min-[760px]:sticky @min-[760px]:top-4 @min-[760px]:self-start",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+export function WorkspaceSetupSummaryTitle({ className, ...props }: ComponentProps<"h3">) {
   const { id } = useSetup("WorkspaceSetupSummaryTitle");
   return (
     <h3
+      data-slot="workspace-setup-summary-title"
+      className={cn("m-0 text-[13px] font-medium", className)}
       {...props}
       id={`${id}-summary`}
-      style={{ margin: 0, fontSize: 13, fontWeight: 500, ...style }}
     />
   );
 }
@@ -625,7 +559,7 @@ export function WorkspaceSetupSummaryTitle({ style, ...props }: ComponentProps<"
 export function WorkspaceSetupValue({
   field,
   children,
-  style,
+  className,
   ...props
 }: ComponentProps<"span"> & { field: "name" | "slug" | "invites" }) {
   const context = useSetup("WorkspaceSetupValue");
@@ -635,12 +569,9 @@ export function WorkspaceSetupValue({
       : context[field].trim();
   return (
     <span
+      data-slot="workspace-setup-value"
+      className={cn("wrap-anywhere", !value && "text-muted-foreground", className)}
       {...props}
-      style={{
-        color: value ? undefined : "var(--uai-muted)",
-        overflowWrap: "anywhere",
-        ...style,
-      }}
     >
       {value || children}
     </span>
@@ -659,7 +590,7 @@ export function WorkspaceSetupError({
       <StatusBannerIcon />
       <StatusBannerContent>
         {children}
-        <StatusBannerDescription style={{ color: "inherit" }}>
+        <StatusBannerDescription className="text-inherit">
           {context.failure}
         </StatusBannerDescription>
       </StatusBannerContent>
@@ -682,18 +613,12 @@ export function WorkspaceSetupCreated({
   );
 }
 
-export function WorkspaceSetupActions({ style, ...props }: ComponentProps<"div">) {
+export function WorkspaceSetupActions({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="workspace-setup-actions"
+      className={cn("flex flex-wrap items-center justify-end gap-2", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        justifyContent: "flex-end",
-        gap: 8,
-        ...style,
-      }}
     />
   );
 }
@@ -701,31 +626,34 @@ export function WorkspaceSetupActions({ style, ...props }: ComponentProps<"div">
 export function WorkspaceSetupSubmit({
   pendingLabel = "Creating…",
   children,
-  style,
+  className,
   ...props
 }: ComponentProps<"button"> & { pendingLabel?: ReactNode }) {
   const context = useSetup("WorkspaceSetupSubmit");
   const pending = context.status === "creating";
+  const compact = context.variant === "compact";
   return (
     <button
       type="submit"
+      data-slot="workspace-setup-submit"
+      className={cn(
+        buttonBase,
+        "bg-primary text-primary-foreground not-disabled:hover:brightness-108 disabled:cursor-default disabled:bg-secondary disabled:text-subtle-foreground",
+        compact ? "h-7 px-3 text-[12.5px]" : "h-8 px-3.5 text-[13px]",
+        pending && "cursor-progress",
+        className,
+      )}
       {...props}
       aria-busy={pending || undefined}
       disabled={context.status === "created"}
-      data-uai-workspace-button="primary"
-      style={{
-        height: context.variant === "compact" ? 28 : 32,
-        padding: context.variant === "compact" ? "0 12px" : "0 14px",
-        border: 0,
-        borderRadius: 999,
-        font: "inherit",
-        fontSize: context.variant === "compact" ? 12.5 : 13,
-        fontWeight: 500,
-        cursor: pending ? "progress" : "pointer",
-        ...style,
-      }}
     >
-      {pending ? <span data-uai-workspace-shimmer="">{pendingLabel}</span> : children}
+      {pending ? (
+        <span className="animate-[shimmer_2s_linear_infinite] bg-[linear-gradient(90deg,color-mix(in_oklab,currentColor_55%,transparent)_0%,color-mix(in_oklab,currentColor_55%,transparent)_35%,currentColor_50%,color-mix(in_oklab,currentColor_55%,transparent)_65%,color-mix(in_oklab,currentColor_55%,transparent)_100%)] bg-size-[200%_100%] bg-clip-text [-webkit-text-fill-color:transparent] motion-reduce:animate-none motion-reduce:bg-none motion-reduce:[-webkit-text-fill-color:currentColor]">
+          {pendingLabel}
+        </span>
+      ) : (
+        children
+      )}
     </button>
   );
 }

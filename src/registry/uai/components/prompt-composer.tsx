@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import {
   ArrowUp,
   Check,
@@ -49,14 +50,29 @@ export type PromptComposerProps = Omit<ComponentProps<"form">, "onSubmit" | "onC
 type Attachment = { id: string; file: File };
 type OpenMenu = "add" | "model" | null;
 
-function composerChrome(
-  variant: PromptComposerVariant,
-  expanded: boolean,
-  hasAttachments: boolean,
-) {
+const promptComposerCardVariants = cva(
+  "relative isolate flex flex-col border bg-card transition-colors duration-150 focus-within:border-border-strong",
+  {
+    variants: {
+      variant: {
+        rounded: "gap-1.5 rounded-[14px] p-1.5",
+        pill: "gap-1 p-1",
+        ghost: "gap-1.5 rounded-[14px] border-transparent bg-transparent p-1",
+        compact: "gap-1 rounded-xl p-1",
+      },
+      open: { true: "", false: "" },
+      invalid: { true: "border-destructive focus-within:border-destructive", false: "" },
+    },
+    compoundVariants: [
+      { variant: "pill", open: false, className: "rounded-full" },
+      { variant: "pill", open: true, className: "rounded-3xl" },
+    ],
+  },
+);
+
+function composerChrome(variant: PromptComposerVariant) {
   const compact = variant === "compact";
   const pill = variant === "pill";
-  const ghost = variant === "ghost";
 
   return {
     compact,
@@ -65,25 +81,11 @@ function composerChrome(
     controlClass: compact ? "size-6" : "size-7",
     controlHeightClass: compact ? "h-6" : "h-7",
     controlRadiusClass: pill ? "rounded-full" : compact ? "rounded-[6px]" : "rounded-lg",
-    cardClass: cn(
-      "bg-[var(--uai-surface)]",
-      pill
-        ? hasAttachments || expanded
-          ? "rounded-3xl p-1 gap-1"
-          : "rounded-full p-1 gap-1"
-        : compact
-          ? "rounded-xl p-1 gap-1"
-          : ghost
-            ? "rounded-[14px] bg-transparent p-1 gap-1.5"
-            : "rounded-[14px] p-1.5 gap-1.5",
-    ),
     chipClass: cn(
-      compact ? "h-[22px] text-[11px]" : "h-[26px] text-[11.5px]",
+      compact ? "h-5.5 text-[11px]" : "h-6.5 text-[11.5px]",
       pill ? "rounded-full" : compact ? "rounded-[5px]" : "rounded-md",
     ),
-    fieldClass: compact
-      ? "min-h-6 py-1 text-[12.5px] leading-4"
-      : "min-h-7 py-[5px] text-[13px] leading-[18px]",
+    fieldClass: compact ? "min-h-6 py-1 text-[12.5px]/4" : "min-h-7 py-1.25 text-[13px]/[18px]",
     maxFieldHeightClass: compact ? "max-h-20" : "max-h-[100px]",
     modelClass: compact ? "text-[11px]" : "text-xs",
     iconClass: compact ? "size-3.5" : "size-4",
@@ -138,9 +140,9 @@ function FloatingMenu({
       id={id}
       role="menu"
       aria-label={label}
-      data-uai-menu=""
+      data-slot="prompt-composer-menu"
       className={cn(
-        "absolute bottom-full z-10 mb-2 rounded-[14px] bg-[var(--uai-surface)] shadow-[0_0_0_1px_var(--uai-border-strong),0_10px_28px_color-mix(in_oklab,black_42%,transparent)] transition-[opacity,transform] duration-180 ease-[cubic-bezier(0.23,1,0.32,1)] starting:scale-[0.96] starting:opacity-0 motion-reduce:transition-none",
+        "absolute bottom-full z-10 mb-2 rounded-[14px] bg-popover text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_10px_28px_color-mix(in_oklab,black_42%,transparent)] transition-[opacity,transform] duration-180 ease-out-quint starting:scale-[0.96] starting:opacity-0 motion-reduce:transition-none",
         kind === "sources"
           ? "left-0 w-[min(340px,calc(100vw-32px))] origin-bottom-left"
           : "right-0 w-44 origin-bottom-right",
@@ -181,7 +183,7 @@ export function PromptComposer({
   const prompt = value ?? internalPrompt;
   const locked = busy || disabled;
   const canSend = !locked && (prompt.trim().length > 0 || attachments.length > 0);
-  const chrome = composerChrome(variant, expanded, attachments.length > 0);
+  const chrome = composerChrome(variant);
 
   const setPrompt = (nextValue: string) => {
     if (value === undefined) setInternalPrompt(nextValue);
@@ -270,22 +272,23 @@ export function PromptComposer({
     <PromptComposerContext.Provider value={context}>
       <form
         ref={rootRef}
-        data-uai-composer=""
+        data-slot="prompt-composer"
         data-variant={variant}
         data-invalid={invalid || undefined}
         className={cn("relative", disabled && "opacity-55", className)}
         aria-busy={busy || undefined}
         aria-disabled={disabled || undefined}
-        onSubmit={submit}
         {...props}
+        onSubmit={submit}
       >
         <div
-          data-uai-card=""
+          data-slot="prompt-composer-card"
           className={cn(
-            "relative isolate flex flex-col border border-[var(--uai-border)] transition-colors duration-150 focus-within:border-[var(--uai-border-strong)]",
-            chrome.cardClass,
-            variant === "ghost" && "border-transparent",
-            invalid && "border-[var(--uai-danger)] focus-within:border-[var(--uai-danger)]",
+            promptComposerCardVariants({
+              variant,
+              open: expanded || attachments.length > 0,
+              invalid,
+            }),
           )}
         >
           <span
@@ -305,19 +308,19 @@ export function PromptComposer({
                 <span
                   key={item.id}
                   className={cn(
-                    "flex items-center gap-1.5 bg-[var(--uai-surface-raised)] py-1 pr-1 pl-1.5 text-[var(--uai-muted)]",
+                    "flex items-center gap-1.5 bg-muted py-1 pr-1 pl-1.5 text-muted-foreground",
                     chrome.chipClass,
                   )}
                 >
                   <FileText className="size-3" aria-hidden="true" />
-                  <span className="max-w-36 truncate text-[var(--uai-text)]">{item.file.name}</span>
+                  <span className="max-w-36 truncate text-card-foreground">{item.file.name}</span>
                   <button
                     type="button"
                     aria-label={`Remove ${item.file.name}`}
                     disabled={locked}
                     onClick={() => context.removeAttachment(item.id)}
                     className={cn(
-                      "grid size-4 place-items-center text-[var(--uai-muted)] transition-colors duration-100 hover:text-[var(--uai-text)]",
+                      "grid size-4 place-items-center text-muted-foreground transition-colors duration-100 hover:text-card-foreground",
                       chrome.pill ? "rounded-full" : "rounded",
                     )}
                   >
@@ -360,6 +363,7 @@ export function PromptComposerAdd({
   return (
     <div
       ref={context.addRef}
+      data-slot="prompt-composer-add"
       className={cn(
         "relative",
         context.expanded ? "col-start-1 row-start-2" : "col-start-1 row-start-1",
@@ -378,15 +382,15 @@ export function PromptComposerAdd({
           context.inputRef.current?.focus();
         }}
         className={cn(
-          "flex shrink-0 items-center justify-center text-[var(--uai-muted)] transition-[background-color,color,transform] duration-150 hover:bg-[var(--uai-surface-raised)] hover:text-[var(--uai-text)] focus-visible:bg-[var(--uai-surface-raised)] active:scale-[0.94] disabled:cursor-not-allowed",
+          "flex shrink-0 items-center justify-center text-muted-foreground transition-[background-color,color,transform] duration-150 hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent active:scale-[0.94] disabled:cursor-not-allowed",
           context.chrome.controlClass,
           context.chrome.controlRadiusClass,
-          open && "bg-[var(--uai-surface-raised)] text-[var(--uai-text)]",
+          open && "bg-accent text-accent-foreground",
         )}
       >
         <span
           className={cn(
-            "grid transition-transform duration-160 ease-[cubic-bezier(0.23,1,0.32,1)]",
+            "grid transition-transform duration-160 ease-out-quint",
             open && "rotate-45",
           )}
         >
@@ -422,9 +426,10 @@ export function PromptComposerAddItem({
 
   return (
     <button
-      {...props}
+      data-slot="prompt-composer-add-item"
       type="button"
       role="menuitem"
+      {...props}
       disabled={context.locked || disabled}
       onClick={(event) => {
         onClick?.(event);
@@ -433,21 +438,21 @@ export function PromptComposerAddItem({
         context.inputRef.current?.focus();
       }}
       className={cn(
-        "group/item relative flex min-h-9 w-full cursor-pointer items-center gap-2.5 rounded-[10px] border-0 bg-transparent px-2 py-1.5 text-left font-[inherit] text-[inherit] outline-none transition-colors duration-[120ms] ease-out hover:bg-[var(--uai-surface-raised)] focus-visible:bg-[var(--uai-surface-raised)] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none",
+        "group/item relative flex min-h-9 w-full cursor-pointer items-center gap-2.5 rounded-[10px] border-0 bg-transparent px-2 py-1.5 text-left font-[inherit] text-[inherit] outline-none transition-colors duration-120 ease-out hover:bg-accent focus-visible:bg-accent disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none",
         className,
       )}
     >
       {icon ? (
-        <span className="grid size-5 shrink-0 place-items-center text-[var(--uai-muted)] transition-colors duration-[120ms] group-hover/item:text-[var(--uai-text)] [&>svg]:size-4">
+        <span className="grid size-5 shrink-0 place-items-center text-muted-foreground transition-colors duration-120 group-hover/item:text-popover-foreground [&>svg]:size-4">
           {icon}
         </span>
       ) : null}
       <span className="flex min-w-0 flex-1 items-baseline gap-2">
-        <span className="shrink-0 truncate text-[13px] leading-[18px] font-medium text-[var(--uai-text)]">
+        <span className="shrink-0 truncate text-[13px]/[18px] font-medium text-popover-foreground">
           {children}
         </span>
         {description ? (
-          <span className="min-w-0 truncate text-[12.5px] leading-[18px] text-[var(--uai-subtle)]">
+          <span className="min-w-0 truncate text-[12.5px]/[18px] text-subtle-foreground">
             {description}
           </span>
         ) : null}
@@ -470,6 +475,7 @@ export function PromptComposerFileItem({
   multiple = true,
   accept,
   disabled,
+  className,
   ...props
 }: PromptComposerFileItemProps) {
   const context = usePromptComposer("PromptComposerFileItem");
@@ -487,19 +493,20 @@ export function PromptComposerFileItem({
       </PromptComposerAddItem>
       <input
         ref={inputRef}
+        data-slot="prompt-composer-file-item"
         type="file"
         multiple={multiple}
         accept={accept}
-        className="hidden"
+        className={cn("hidden", className)}
         tabIndex={-1}
         aria-label={label}
+        {...props}
         disabled={context.locked || disabled}
         onChange={(event) => {
           const files = Array.from(event.target.files ?? []);
           if (files.length) context.addFiles(files);
           event.target.value = "";
         }}
-        {...props}
       />
     </>
   );
@@ -535,6 +542,7 @@ export function PromptComposerInput({
 
   return (
     <textarea
+      data-slot="prompt-composer-input"
       {...props}
       ref={context.inputRef}
       id={context.inputId}
@@ -550,7 +558,7 @@ export function PromptComposerInput({
       }}
       onKeyDown={handleKeyDown}
       className={cn(
-        "resize-none overflow-y-auto bg-transparent px-1 text-[var(--uai-text)] caret-[var(--uai-text)] outline-none! [field-sizing:content] selection:bg-[color-mix(in_oklab,var(--uai-text)_18%,transparent)] placeholder:text-[var(--uai-subtle)] disabled:cursor-not-allowed",
+        "resize-none overflow-y-auto bg-transparent px-1 text-card-foreground caret-card-foreground outline-none! field-sizing-content selection:bg-foreground/18 placeholder:text-subtle-foreground disabled:cursor-not-allowed",
         context.chrome.fieldClass,
         context.chrome.maxFieldHeightClass,
         context.expanded
@@ -574,6 +582,7 @@ export function PromptComposerActions({
   return (
     <div
       ref={context.actionsRef}
+      data-slot="prompt-composer-actions"
       className={cn(
         "flex items-center gap-1",
         context.expanded ? "col-start-2 row-start-2 justify-self-end" : "col-start-3 row-start-1",
@@ -612,7 +621,7 @@ export function PromptComposerModelSelect({
   if (!selected) return null;
 
   return (
-    <div className={cn("relative", className)} {...props}>
+    <div data-slot="prompt-composer-model-select" className={cn("relative", className)} {...props}>
       {models.length > 1 ? (
         <button
           type="button"
@@ -622,17 +631,17 @@ export function PromptComposerModelSelect({
           disabled={context.locked}
           onClick={() => context.setOpenMenu(open ? null : "model")}
           className={cn(
-            "flex shrink-0 items-center gap-1 px-2 font-medium text-[var(--uai-muted)] transition-colors duration-[120ms] ease-out hover:bg-[var(--uai-surface-raised)] hover:text-[var(--uai-text)] focus-visible:bg-[var(--uai-surface-raised)] disabled:cursor-not-allowed motion-reduce:transition-none",
+            "flex shrink-0 items-center gap-1 px-2 font-medium text-muted-foreground transition-colors duration-120 ease-out hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent disabled:cursor-not-allowed motion-reduce:transition-none",
             context.chrome.controlHeightClass,
             context.chrome.controlRadiusClass,
             context.chrome.modelClass,
-            open && "bg-[var(--uai-surface-raised)] text-[var(--uai-text)]",
+            open && "bg-accent text-accent-foreground",
           )}
         >
           {selected.label}
           <ChevronDown
             className={cn(
-              "size-3 transition-transform duration-180 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none",
+              "size-3 transition-transform duration-180 ease-out-quint motion-reduce:transition-none",
               open && "rotate-180",
             )}
             strokeWidth={2.4}
@@ -642,7 +651,7 @@ export function PromptComposerModelSelect({
       ) : (
         <span
           className={cn(
-            "flex shrink-0 items-center px-1.5 font-medium text-[var(--uai-muted)]",
+            "flex shrink-0 items-center px-1.5 font-medium text-muted-foreground",
             context.chrome.controlHeightClass,
             context.chrome.modelClass,
           )}
@@ -664,15 +673,15 @@ export function PromptComposerModelSelect({
                 context.setOpenMenu(null);
                 context.inputRef.current?.focus();
               }}
-              className="relative flex h-8 w-full cursor-pointer items-center gap-2 rounded-[10px] border-0 bg-transparent px-2 text-left font-[inherit] text-[inherit] transition-colors duration-150 hover:bg-[var(--uai-surface-raised)] focus-visible:bg-[var(--uai-surface-raised)]"
+              className="relative flex h-8 w-full cursor-pointer items-center gap-2 rounded-[10px] border-0 bg-transparent px-2 text-left font-[inherit] text-[inherit] transition-colors duration-150 hover:bg-accent focus-visible:bg-accent"
             >
-              <span className="min-w-0 flex-1 truncate text-[12.5px] font-medium text-[var(--uai-text)]">
+              <span className="min-w-0 flex-1 truncate text-[12.5px] font-medium text-popover-foreground">
                 {model.label}
               </span>
               <Check
                 className={cn(
                   "size-3",
-                  model.id === selected.id ? "text-[var(--uai-text)]" : "invisible",
+                  model.id === selected.id ? "text-popover-foreground" : "invisible",
                 )}
                 strokeWidth={2.5}
                 aria-hidden="true"
@@ -698,17 +707,18 @@ export function PromptComposerSubmit({
 
   return (
     <button
+      data-slot="prompt-composer-submit"
       {...props}
       type="submit"
       aria-label={ariaLabel ?? (context.busy ? "Sending prompt" : "Send")}
       disabled={!context.canSend || disabled}
       className={cn(
-        "flex shrink-0 items-center justify-center transition-[background-color,color,opacity,transform] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] enabled:hover:opacity-90 enabled:active:scale-[0.94] disabled:cursor-not-allowed motion-reduce:transition-none",
+        "flex shrink-0 items-center justify-center transition-[background-color,color,opacity,transform] duration-140 ease-out-quint enabled:hover:opacity-90 enabled:active:scale-[0.94] disabled:cursor-not-allowed motion-reduce:transition-none",
         context.chrome.controlClass,
         context.chrome.controlRadiusClass,
         context.canSend || context.busy
-          ? "bg-[var(--uai-text)] text-[var(--uai-surface)]"
-          : "bg-[var(--uai-border-strong)] text-[var(--uai-muted)]",
+          ? "bg-foreground text-card"
+          : "bg-border-strong text-muted-foreground",
         className,
       )}
     >

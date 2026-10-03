@@ -1,7 +1,9 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { ArrowUpRight } from "lucide-react";
-import { type ComponentProps, type CSSProperties, createContext, useContext } from "react";
+import { type ComponentProps, createContext, useContext } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const TESTIMONIAL_CARD_VARIANTS = ["card", "editorial", "compact"] as const;
 export type TestimonialCardVariant = (typeof TESTIMONIAL_CARD_VARIANTS)[number];
@@ -14,100 +16,64 @@ function useVariant(part: string) {
   if (!variant) throw new Error(`${part} must be used within TestimonialCard`);
   return variant;
 }
-const shells: Record<TestimonialCardVariant, CSSProperties> = {
-  card: {
-    gap: 16,
-    padding: 20,
-    border: "1px solid var(--uai-border)",
-    borderRadius: 14,
-    background: "var(--uai-surface)",
+
+const testimonialCardVariants = cva("m-0 grid min-w-0 text-[13px]/[18px] text-card-foreground", {
+  variants: {
+    variant: {
+      card: "gap-4 rounded-[14px] border bg-card p-5",
+      editorial: "gap-5 py-0.5 pr-0 pl-5 shadow-[inset_2px_0_0_var(--border-strong)]",
+      compact: "gap-3 rounded-xl border bg-card p-3.5",
+    },
   },
-  editorial: {
-    gap: 20,
-    padding: "2px 0 2px 20px",
-    boxShadow: "inset 2px 0 0 var(--uai-border-strong)",
+});
+
+const testimonialCardQuoteVariants = cva("m-0 grid gap-2 text-pretty text-card-foreground", {
+  variants: {
+    variant: {
+      card: "text-[15px]/[22px] font-normal",
+      editorial: "text-xl/7 font-medium tracking-[-0.012em]",
+      compact: "text-[13px]/[19px] font-normal",
+    },
   },
-  compact: {
-    gap: 12,
-    padding: 14,
-    border: "1px solid var(--uai-border)",
-    borderRadius: 12,
-    background: "var(--uai-surface)",
-  },
-};
-const quoteType: Record<TestimonialCardVariant, CSSProperties> = {
-  card: { fontSize: 15, lineHeight: "22px", fontWeight: 400 },
-  editorial: { fontSize: 20, lineHeight: "28px", fontWeight: 500, letterSpacing: "-0.012em" },
-  compact: { fontSize: 13, lineHeight: "19px", fontWeight: 400 },
-};
-const testimonialCss = `
-.uai-testimonial-proof{color:var(--uai-muted);transition:color 120ms ease-out}
-.uai-testimonial-proof:hover{color:var(--uai-text)}
-.uai-testimonial-proof svg{transition:transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-testimonial-proof:hover svg{transform:translate(1px,-1px)}
-.uai-testimonial-proof:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px;border-radius:4px}
-@media (prefers-reduced-motion: reduce){.uai-testimonial-proof,.uai-testimonial-proof svg{transition:none}}
-`;
+});
 
 export function TestimonialCard({
   variant = "card",
-  style,
+  className,
   children,
   ...props
 }: TestimonialCardProps) {
   return (
     <Context.Provider value={variant}>
       <figure
-        {...props}
+        data-slot="testimonial-card"
         data-variant={variant}
-        style={{
-          boxSizing: "border-box",
-          display: "grid",
-          minWidth: 0,
-          margin: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...shells[variant],
-          ...style,
-        }}
+        className={cn(testimonialCardVariants({ variant }), className)}
+        {...props}
       >
-        <style>{testimonialCss}</style>
         {children}
       </figure>
     </Context.Provider>
   );
 }
 
-export function TestimonialCardQuote({ style, ...props }: ComponentProps<"blockquote">) {
+export function TestimonialCardQuote({ className, ...props }: ComponentProps<"blockquote">) {
   const variant = useVariant("TestimonialCardQuote");
   return (
     <blockquote
+      data-slot="testimonial-card-quote"
+      className={cn(testimonialCardQuoteVariants({ variant }), className)}
       {...props}
-      style={{
-        display: "grid",
-        gap: 8,
-        margin: 0,
-        color: "var(--uai-text)",
-        textWrap: "pretty",
-        ...quoteType[variant],
-        ...style,
-      }}
     />
   );
 }
 
-export function TestimonialCardAuthor({ style, ...props }: ComponentProps<"figcaption">) {
+export function TestimonialCardAuthor({ className, ...props }: ComponentProps<"figcaption">) {
   return (
     <figcaption
+      data-slot="testimonial-card-author"
+      className={cn("grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center", className)}
       {...props}
-      style={{
-        display: "grid",
-        gridTemplateColumns: "auto minmax(0, 1fr)",
-        alignItems: "center",
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
@@ -115,7 +81,7 @@ export function TestimonialCardAuthor({ style, ...props }: ComponentProps<"figca
 export function TestimonialCardAvatar({
   src,
   children,
-  style,
+  className,
   ...props
 }: ComponentProps<"span"> & { src?: string }) {
   const variant = useVariant("TestimonialCardAvatar");
@@ -123,27 +89,19 @@ export function TestimonialCardAvatar({
   return (
     <span
       aria-hidden="true"
+      data-slot="testimonial-card-avatar"
+      className={cn(
+        "row-[1/span_3] grid place-items-center overflow-hidden rounded-full bg-muted font-medium text-muted-foreground shadow-[0_0_0_1px_oklch(1_0_0/0.08)]",
+        variant === "compact" && "mr-2 size-6 text-[10.5px]",
+        variant === "editorial" && "mr-2.5 size-9 text-[11.5px]",
+        variant === "card" && "mr-2.5 size-8 text-[11.5px]",
+        className,
+      )}
       {...props}
-      style={{
-        gridRow: "1 / span 3",
-        display: "grid",
-        placeItems: "center",
-        width: size,
-        height: size,
-        marginRight: variant === "compact" ? 8 : 10,
-        overflow: "hidden",
-        borderRadius: 999,
-        background: "var(--uai-surface-raised)",
-        boxShadow: "0 0 0 1px oklch(1 0 0 / 0.08)",
-        color: "var(--uai-muted)",
-        fontSize: variant === "compact" ? 10.5 : 11.5,
-        fontWeight: 500,
-        ...style,
-      }}
     >
       {src ? (
         // biome-ignore lint/performance/noImgElement: registry source is framework-agnostic.
-        <img src={src} alt="" width={size} height={size} style={{ objectFit: "cover" }} />
+        <img src={src} alt="" width={size} height={size} className="object-cover" />
       ) : (
         children
       )}
@@ -151,50 +109,48 @@ export function TestimonialCardAvatar({
   );
 }
 
-const line: CSSProperties = { gridColumn: 2, minWidth: 0, display: "block" };
+const line = "col-start-2 block min-w-0";
 
-export function TestimonialCardName({ style, ...props }: ComponentProps<"span">) {
-  return <span {...props} style={{ ...line, fontWeight: 500, ...style }} />;
-}
-
-export function TestimonialCardRole({ style, ...props }: ComponentProps<"span">) {
+export function TestimonialCardName({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
+      data-slot="testimonial-card-name"
+      className={cn(line, "font-medium", className)}
       {...props}
-      style={{ ...line, color: "var(--uai-muted)", fontSize: 12, lineHeight: "16px", ...style }}
     />
   );
 }
 
-export function TestimonialCardOrganization({ style, ...props }: ComponentProps<"span">) {
+export function TestimonialCardRole({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
+      data-slot="testimonial-card-role"
+      className={cn(line, "text-xs/4 text-muted-foreground", className)}
       {...props}
-      style={{ ...line, color: "var(--uai-subtle)", fontSize: 12, lineHeight: "16px", ...style }}
     />
   );
 }
 
-export function TestimonialCardProof({
-  children,
-  className,
-  style,
-  ...props
-}: ComponentProps<"a">) {
+export function TestimonialCardOrganization({ className, ...props }: ComponentProps<"span">) {
+  return (
+    <span
+      data-slot="testimonial-card-organization"
+      className={cn(line, "text-xs/4 text-subtle-foreground", className)}
+      {...props}
+    />
+  );
+}
+
+export function TestimonialCardProof({ children, className, ...props }: ComponentProps<"a">) {
   return (
     <a
+      data-slot="testimonial-card-proof"
+      className={cn(
+        "inline-flex items-center justify-self-start gap-1 text-[12.5px] font-medium text-muted-foreground no-underline transition-colors duration-120 ease-[ease-out] hover:text-foreground focus-visible:rounded-[4px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none",
+        "[&_svg]:transition-transform [&_svg]:duration-140 [&_svg]:ease-out-quint hover:[&_svg]:translate-x-px hover:[&_svg]:-translate-y-px motion-reduce:[&_svg]:transition-none",
+        className,
+      )}
       {...props}
-      className={["uai-testimonial-proof", className].filter(Boolean).join(" ")}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifySelf: "start",
-        gap: 4,
-        fontSize: 12.5,
-        fontWeight: 500,
-        textDecoration: "none",
-        ...style,
-      }}
     >
       {children}
       <ArrowUpRight size={14} strokeWidth={1.75} aria-hidden="true" />

@@ -1,7 +1,9 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { X } from "lucide-react";
 import { type ComponentProps, createContext, useContext } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const FILTER_BAR_VARIANTS = ["toolbar", "panel", "compact"] as const;
 export type FilterBarVariant = (typeof FILTER_BAR_VARIANTS)[number];
@@ -18,74 +20,64 @@ type FilterContext = {
   disabled: boolean;
 };
 const Context = createContext<FilterContext | null>(null);
-const filterCss = `
-.uai-filter-bar-chip{animation:uai-filter-chip-in 180ms cubic-bezier(0.16,1,0.3,1)}
-.uai-filter-bar-remove,.uai-filter-bar-reset{transition:background-color 120ms ease-out,color 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-filter-bar-remove{background:transparent;color:var(--uai-subtle)}
-.uai-filter-bar-remove:hover:not(:disabled){background:color-mix(in oklab,var(--uai-text) 10%,transparent);color:var(--uai-text)}
-.uai-filter-bar-reset{background:transparent;color:var(--uai-muted)}
-.uai-filter-bar-reset:hover:not(:disabled){background:var(--uai-surface-raised);color:var(--uai-text)}
-.uai-filter-bar-remove:active:not(:disabled),.uai-filter-bar-reset:active:not(:disabled){transform:scale(0.97)}
-.uai-filter-bar-remove:focus-visible,.uai-filter-bar-reset:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-.uai-filter-bar-reset:disabled,.uai-filter-bar-remove:disabled{cursor:not-allowed;opacity:0.45}
-@keyframes uai-filter-chip-in{from{opacity:0;transform:scale(0.96)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion: reduce){.uai-filter-bar-chip{animation:none}.uai-filter-bar-remove,.uai-filter-bar-reset{transition:none}}
-`;
 function useFilter() {
   const context = useContext(Context);
   if (!context) throw new Error("FilterBar children must be used within FilterBar");
   return context;
 }
+
+const filterBarVariants = cva("flex min-w-0 flex-wrap border text-foreground", {
+  variants: {
+    variant: {
+      toolbar:
+        "flex-row items-center gap-3 rounded-[14px] border-transparent bg-card px-3 py-2.5 text-[13px]/[18px]",
+      panel: "flex-col items-stretch gap-3.5 rounded-[14px] bg-card p-4 text-[13px]/[18px]",
+      compact:
+        "flex-row items-center gap-2 rounded-xl bg-transparent px-2 py-1.5 text-[12.5px]/[18px]",
+    },
+  },
+});
+
+const actionButton =
+  "cursor-pointer border-0 bg-transparent transition-[background-color,color,transform] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none";
+
 export function FilterBar({
   variant = "toolbar",
   activeCount = 0,
   onReset,
   disabled = false,
-  style,
+  className,
   children,
   ...props
 }: FilterBarProps) {
   return (
     <Context.Provider value={{ variant, activeCount, onReset, disabled }}>
       <div
-        {...props}
+        data-slot="filter-bar"
         data-variant={variant}
-        style={{
-          display: "flex",
-          flexDirection: variant === "panel" ? "column" : "row",
-          flexWrap: "wrap",
-          alignItems: variant === "panel" ? "stretch" : "center",
-          gap: variant === "compact" ? 8 : variant === "panel" ? 14 : 12,
-          padding: variant === "compact" ? "6px 8px" : variant === "panel" ? 16 : "10px 12px",
-          border: variant === "toolbar" ? "1px solid transparent" : "1px solid var(--uai-border)",
-          borderRadius: variant === "compact" ? 12 : 14,
-          background: variant === "compact" ? "transparent" : "var(--uai-surface)",
-          color: "var(--uai-text)",
-          fontSize: variant === "compact" ? 12.5 : 13,
-          lineHeight: "18px",
-          minWidth: 0,
-          ...style,
-        }}
+        className={cn(filterBarVariants({ variant }), className)}
+        {...props}
       >
-        <style>{filterCss}</style>
         {children}
       </div>
     </Context.Provider>
   );
 }
-export function FilterBarControls({ style, ...props }: ComponentProps<"div">) {
+export function FilterBarControls({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="filter-bar-controls"
+      className={cn("flex flex-wrap items-center gap-2", className)}
       {...props}
-      style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8, ...style }}
     />
   );
 }
-export function FilterBarChips({ style, ...props }: ComponentProps<"div">) {
+export function FilterBarChips({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="filter-bar-chips"
+      className={cn("flex flex-wrap items-center gap-1.5", className)}
       {...props}
-      style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6, ...style }}
     />
   );
 }
@@ -94,47 +86,28 @@ export function FilterBarChip({
   onRemove,
   disabled,
   className,
-  style,
   ...props
 }: ComponentProps<"span"> & { onRemove: () => void; disabled?: boolean }) {
   const context = useFilter();
   return (
     <span
+      data-slot="filter-bar-chip"
+      className={cn(
+        "box-border inline-flex min-h-6.5 max-w-full items-center gap-0.5 rounded-full bg-muted py-0 pr-0.75 pl-2.5 text-[12px] font-medium text-foreground",
+        "animate-in fade-in-0 zoom-in-96 duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:animate-none",
+        className,
+      )}
       {...props}
-      className={className ? `uai-filter-bar-chip ${className}` : "uai-filter-bar-chip"}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 2,
-        minHeight: 26,
-        padding: "0 3px 0 10px",
-        maxWidth: "100%",
-        boxSizing: "border-box",
-        borderRadius: 999,
-        background: "var(--uai-surface-raised)",
-        color: "var(--uai-text)",
-        fontSize: 12,
-        fontWeight: 500,
-        ...style,
-      }}
     >
-      <span style={{ overflowWrap: "anywhere" }}>{children}</span>
+      <span className="wrap-anywhere">{children}</span>
       <button
         type="button"
-        className="uai-filter-bar-remove"
         disabled={context.disabled || disabled}
         onClick={onRemove}
-        style={{
-          display: "grid",
-          placeItems: "center",
-          width: 20,
-          height: 20,
-          padding: 0,
-          flexShrink: 0,
-          border: 0,
-          borderRadius: 999,
-          cursor: "pointer",
-        }}
+        className={cn(
+          actionButton,
+          "grid size-5 shrink-0 place-items-center rounded-full p-0 text-subtle-foreground enabled:hover:bg-foreground/10 enabled:hover:text-foreground",
+        )}
       >
         <X size={12} strokeWidth={2} aria-hidden="true" />
         <span className="sr-only">Remove {children} filter</span>
@@ -142,17 +115,13 @@ export function FilterBarChip({
     </span>
   );
 }
-export function FilterBarCount({ children, style, ...props }: ComponentProps<"span">) {
+export function FilterBarCount({ children, className, ...props }: ComponentProps<"span">) {
   return (
     <span
       role="status"
+      data-slot="filter-bar-count"
+      className={cn("text-[12px] text-subtle-foreground tabular-nums", className)}
       {...props}
-      style={{
-        color: "var(--uai-subtle)",
-        fontSize: 12,
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     >
       {children}
     </span>
@@ -162,32 +131,24 @@ export function FilterBarReset({
   children = "Reset filters",
   onClick,
   className,
-  style,
   ...props
 }: ComponentProps<"button">) {
   const context = useFilter();
   return (
     <button
+      data-slot="filter-bar-reset"
+      className={cn(
+        actionButton,
+        "h-7 rounded-full px-3 text-[12.5px] font-medium text-muted-foreground enabled:hover:bg-accent enabled:hover:text-foreground",
+        context.variant === "panel" ? "ml-0 self-start" : "ml-auto",
+        className,
+      )}
       {...props}
       type="button"
       disabled={context.disabled || !context.activeCount || props.disabled}
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) context.onReset?.();
-      }}
-      className={className ? `uai-filter-bar-reset ${className}` : "uai-filter-bar-reset"}
-      style={{
-        height: 28,
-        marginLeft: context.variant === "panel" ? 0 : "auto",
-        alignSelf: context.variant === "panel" ? "flex-start" : undefined,
-        border: 0,
-        borderRadius: 999,
-        padding: "0 12px",
-        font: "inherit",
-        fontSize: 12.5,
-        fontWeight: 500,
-        cursor: "pointer",
-        ...style,
       }}
     >
       {children}

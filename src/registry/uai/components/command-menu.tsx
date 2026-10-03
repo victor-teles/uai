@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { Search } from "lucide-react";
 import {
   type ComponentProps,
@@ -12,6 +13,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const COMMAND_MENU_VARIANTS = ["panel", "floating", "compact"] as const;
 export type CommandMenuVariant = (typeof COMMAND_MENU_VARIANTS)[number];
@@ -61,6 +63,20 @@ function options(list: HTMLElement | null) {
   );
 }
 
+const commandMenuVariants = cva(
+  "flex min-w-0 origin-top flex-col overflow-hidden bg-popover text-[13px]/[18px] text-popover-foreground",
+  {
+    variants: {
+      variant: {
+        panel: "rounded-[14px] border p-0",
+        floating:
+          "rounded-[14px] border-0 p-1 shadow-[0_0_0_1px_var(--border-strong),0_16px_32px_-12px_oklch(0_0_0/0.32),0_4px_8px_-4px_oklch(0_0_0/0.12)]",
+        compact: "rounded-xl border p-0",
+      },
+    },
+  },
+);
+
 export function CommandMenu({
   variant = "panel",
   value,
@@ -69,7 +85,7 @@ export function CommandMenu({
   onDismiss,
   label = "Commands",
   children,
-  style,
+  className,
   ...props
 }: CommandMenuProps) {
   const id = useId();
@@ -126,27 +142,11 @@ export function CommandMenu({
       }}
     >
       <div
+        data-slot="command-menu"
+        data-variant={variant}
+        className={cn(commandMenuVariants({ variant }), className)}
         {...props}
         ref={rootRef}
-        data-variant={variant}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          minWidth: 0,
-          overflow: "hidden",
-          padding: floating ? 4 : 0,
-          border: floating ? 0 : "1px solid var(--uai-border)",
-          borderRadius: variant === "compact" ? 12 : 14,
-          background: "var(--uai-surface)",
-          boxShadow: floating
-            ? "0 0 0 1px var(--uai-border-strong), 0 16px 32px -12px oklch(0 0 0 / 0.32), 0 4px 8px -4px oklch(0 0 0 / 0.12)"
-            : undefined,
-          transformOrigin: "top center",
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
       >
         {children}
       </div>
@@ -155,7 +155,7 @@ export function CommandMenu({
 }
 
 export function CommandMenuInput({
-  style,
+  className,
   onChange,
   onKeyDown,
   placeholder = "Search commands…",
@@ -189,14 +189,14 @@ export function CommandMenuInput({
   };
   return (
     <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: compact ? 8 : 10,
-        padding: compact ? "6px 10px" : context.variant === "floating" ? "8px 10px" : "10px 14px",
-        borderBottom: "1px solid var(--uai-border)",
-        color: "var(--uai-subtle)",
-      }}
+      className={cn(
+        "flex items-center border-b text-subtle-foreground",
+        compact
+          ? "gap-2 px-2.5 py-1.5"
+          : context.variant === "floating"
+            ? "gap-2.5 px-2.5 py-2"
+            : "gap-2.5 px-3.5 py-2.5",
+      )}
     >
       <Search size={compact ? 14 : 16} strokeWidth={1.75} aria-hidden="true" />
       <input
@@ -206,6 +206,12 @@ export function CommandMenuInput({
         autoComplete="off"
         spellCheck={false}
         placeholder={placeholder}
+        data-slot="command-menu-input"
+        className={cn(
+          "min-w-0 flex-1 border-0 bg-transparent text-foreground outline-none placeholder:text-subtle-foreground",
+          compact ? "h-6 text-[12.5px]/[18px]" : "h-7 text-[13px]/[18px]",
+          className,
+        )}
         {...props}
         value={context.query}
         aria-expanded={!context.empty}
@@ -220,49 +226,27 @@ export function CommandMenuInput({
           onKeyDown?.(event);
           if (!event.defaultPrevented) move(event);
         }}
-        className={["placeholder:text-[var(--uai-subtle)]", props.className]
-          .filter(Boolean)
-          .join(" ")}
-        style={{
-          flex: 1,
-          minWidth: 0,
-          height: compact ? 24 : 28,
-          border: 0,
-          outline: "none",
-          background: "transparent",
-          color: "var(--uai-text)",
-          font: "inherit",
-          fontSize: compact ? 12.5 : 13,
-          lineHeight: "18px",
-          ...style,
-        }}
       />
     </div>
   );
 }
 
-export function CommandMenuList({ style, ...props }: ComponentProps<"div">) {
+export function CommandMenuList({ className, ...props }: ComponentProps<"div">) {
   const context = useMenu("CommandMenuList");
   return (
     <div
       role="listbox"
       aria-label={context.label}
+      data-slot="command-menu-list"
+      className={cn("max-h-80 overflow-y-auto overscroll-contain scroll-py-1 p-1", className)}
       {...props}
       ref={context.listRef}
       id={`${context.id}-list`}
-      style={{
-        maxHeight: 320,
-        overflowY: "auto",
-        overscrollBehavior: "contain",
-        padding: 4,
-        scrollPaddingBlock: 4,
-        ...style,
-      }}
     />
   );
 }
 
-export function CommandMenuGroup({ style, children, ...props }: ComponentProps<"div">) {
+export function CommandMenuGroup({ className, children, ...props }: ComponentProps<"div">) {
   useMenu("CommandMenuGroup");
   const labelId = useId();
   const ref = useRef<HTMLDivElement>(null);
@@ -277,10 +261,11 @@ export function CommandMenuGroup({ style, children, ...props }: ComponentProps<"
       <div
         role="group"
         aria-labelledby={labelId}
+        data-slot="command-menu-group"
+        className={cn(hidden ? "hidden" : "grid", "gap-px pb-0.5", className)}
         {...props}
         ref={ref}
         hidden={hidden}
-        style={{ display: hidden ? "none" : "grid", gap: 1, paddingBottom: 2, ...style }}
       >
         {children}
       </div>
@@ -288,21 +273,18 @@ export function CommandMenuGroup({ style, children, ...props }: ComponentProps<"
   );
 }
 
-export function CommandMenuGroupLabel({ style, ...props }: ComponentProps<"div">) {
+export function CommandMenuGroupLabel({ className, ...props }: ComponentProps<"div">) {
   const labelId = useContext(GroupContext);
   if (!labelId) throw new Error("CommandMenuGroupLabel must be used within CommandMenuGroup");
   return (
     <div
+      data-slot="command-menu-group-label"
+      className={cn(
+        "px-2.5 pt-2 pb-1 text-[11.5px]/4 font-normal text-subtle-foreground",
+        className,
+      )}
       {...props}
       id={labelId}
-      style={{
-        padding: "8px 10px 4px",
-        color: "var(--uai-subtle)",
-        fontSize: 11.5,
-        lineHeight: "16px",
-        fontWeight: 400,
-        ...style,
-      }}
     />
   );
 }
@@ -323,7 +305,6 @@ export function CommandMenuItem({
   onSelect,
   onClick,
   onPointerMove,
-  style,
   className,
   ...props
 }: CommandMenuItemProps) {
@@ -337,17 +318,23 @@ export function CommandMenuItem({
     // biome-ignore lint/a11y/useKeyWithClickEvents: keyboard selection is handled by the combobox input.
     <div
       role="option"
+      data-slot="command-menu-item"
+      className={cn(
+        "flex items-center font-medium transition-[background-color] duration-120 ease-out select-none motion-reduce:transition-none [&>svg]:shrink-0 [&>svg]:text-muted-foreground data-[active]:[&>svg]:text-foreground",
+        compact
+          ? "min-h-7 gap-2 rounded-[7px] px-2 text-[12.5px]"
+          : "min-h-8 gap-2.5 rounded-lg px-2.5 text-[13px]",
+        active ? "bg-accent" : "bg-transparent",
+        disabled
+          ? "cursor-not-allowed text-muted-foreground opacity-45"
+          : "cursor-pointer text-foreground",
+        className,
+      )}
       {...props}
       id={id}
       aria-selected={active}
       aria-disabled={disabled || undefined}
       data-active={active || undefined}
-      className={[
-        "[&>svg]:shrink-0 [&>svg]:text-[var(--uai-muted)] data-[active]:[&>svg]:text-[var(--uai-text)]",
-        className,
-      ]
-        .filter(Boolean)
-        .join(" ")}
       onPointerMove={(event) => {
         onPointerMove?.(event);
         if (!disabled && !active) context.setActiveId(id);
@@ -356,64 +343,35 @@ export function CommandMenuItem({
         onClick?.(event);
         if (!disabled && !event.defaultPrevented) onSelect?.();
       }}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: compact ? 8 : 10,
-        minHeight: compact ? 28 : 32,
-        padding: compact ? "0 8px" : "0 10px",
-        borderRadius: compact ? 7 : 8,
-        background: active ? "var(--uai-surface-raised)" : "transparent",
-        color: disabled ? "var(--uai-muted)" : "var(--uai-text)",
-        fontSize: compact ? 12.5 : 13,
-        fontWeight: 500,
-        opacity: disabled ? 0.45 : 1,
-        transition: "background-color 120ms ease-out",
-        cursor: disabled ? "not-allowed" : "pointer",
-        userSelect: "none",
-        ...style,
-      }}
     />
   );
 }
 
-export function CommandMenuShortcut({ style, ...props }: ComponentProps<"kbd">) {
+export function CommandMenuShortcut({ className, ...props }: ComponentProps<"kbd">) {
   return (
     <kbd
+      data-slot="command-menu-shortcut"
+      className={cn(
+        "ml-auto min-w-5 rounded-md bg-foreground/6 px-1.25 text-center [font-family:inherit] text-[11px]/[18px] font-medium tracking-[0.02em] text-subtle-foreground",
+        className,
+      )}
       {...props}
-      style={{
-        marginLeft: "auto",
-        minWidth: 20,
-        padding: "0 5px",
-        borderRadius: 6,
-        background: "color-mix(in oklab, var(--uai-text) 6%, transparent)",
-        color: "var(--uai-subtle)",
-        fontFamily: "inherit",
-        fontSize: 11,
-        lineHeight: "18px",
-        fontWeight: 500,
-        textAlign: "center",
-        letterSpacing: "0.02em",
-        ...style,
-      }}
     />
   );
 }
 
-export function CommandMenuEmpty({ style, children, ...props }: ComponentProps<"div">) {
+export function CommandMenuEmpty({ className, children, ...props }: ComponentProps<"div">) {
   const context = useMenu("CommandMenuEmpty");
   return (
     <div
       role="status"
+      data-slot="command-menu-empty"
+      className={cn(
+        context.empty ? "block" : "hidden",
+        "px-3 py-6 text-center text-[12.5px] text-subtle-foreground",
+        className,
+      )}
       {...props}
-      style={{
-        display: context.empty ? "block" : "none",
-        padding: "24px 12px",
-        color: "var(--uai-subtle)",
-        fontSize: 12.5,
-        textAlign: "center",
-        ...style,
-      }}
     >
       {context.empty ? (children ?? `No results for “${context.query}”.`) : null}
     </div>

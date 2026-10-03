@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import {
   Check,
   Circle,
@@ -10,14 +11,7 @@ import {
   LoaderCircle,
   MailCheck,
 } from "lucide-react";
-import {
-  type ComponentProps,
-  type CSSProperties,
-  createContext,
-  useContext,
-  useId,
-  useState,
-} from "react";
+import { type ComponentProps, createContext, useContext, useId, useState } from "react";
 
 import { cn } from "@/lib/uai-utils";
 
@@ -36,47 +30,47 @@ export type PasswordRecoveryProps = ComponentProps<"form"> & {
 };
 
 type PasswordRecoveryChrome = {
-  rootClass: string;
-  rootStyle: CSSProperties;
   asideClass: string;
-  asideStyle: CSSProperties;
-  mainStyle: CSSProperties;
+  mainClass: string;
   titleClass: string;
   descriptionClass: string;
   groupGapClass: string;
   controlClass: string;
-  controlStyle: CSSProperties;
+  controlRadiusClass: string;
   footerClass: string;
 };
+
+const passwordRecoveryVariants = cva(
+  "grid w-full overflow-hidden border bg-card text-card-foreground",
+  {
+    variants: {
+      variant: {
+        card: "rounded-[14px] p-5",
+        split: "rounded-[14px] p-0 sm:grid-cols-[minmax(190px,0.72fr)_minmax(0,1fr)]",
+        compact: "rounded-xl p-3.5",
+      },
+    },
+  },
+);
 
 function passwordRecoveryChrome(variant: PasswordRecoveryVariant): PasswordRecoveryChrome {
   const compact = variant === "compact";
   const split = variant === "split";
 
   return {
-    rootClass: cn(
-      "grid w-full border border-[var(--uai-border)] bg-[var(--uai-surface)] text-[var(--uai-text)]",
-      split && "sm:grid-cols-[minmax(190px,0.72fr)_minmax(0,1fr)]",
-    ),
-    rootStyle: {
-      borderRadius: compact ? 12 : 14,
-      overflow: "hidden",
-      padding: split ? 0 : compact ? 14 : 20,
-    },
     asideClass: split
-      ? "border-b border-[var(--uai-border)] bg-[var(--uai-canvas)] sm:border-r sm:border-b-0"
-      : "border-b border-[var(--uai-border)]",
-    asideStyle: split
-      ? { padding: 24 }
-      : { marginBottom: compact ? 14 : 18, paddingBottom: compact ? 12 : 16 },
-    mainStyle: split ? { padding: 24 } : {},
+      ? "border-b bg-background p-6 sm:border-r sm:border-b-0"
+      : compact
+        ? "mb-3.5 border-b pb-3"
+        : "mb-[18px] border-b pb-4",
+    mainClass: split ? "p-6" : "",
     titleClass: compact ? "text-[15px] leading-5" : "text-[17px] leading-6",
     descriptionClass: compact
       ? "mt-1 text-[12.5px] leading-[18px]"
       : "mt-1.5 text-[13px] leading-[18px]",
     groupGapClass: compact ? "gap-2.5" : "gap-3",
     controlClass: compact ? "h-[34px] text-[12.5px]" : "h-[38px] text-[13px]",
-    controlStyle: { borderRadius: compact ? 8 : 10 },
+    controlRadiusClass: compact ? "rounded-lg" : "rounded-[10px]",
     footerClass: compact ? "mt-4 pt-3.5" : "mt-5 pt-4",
   };
 }
@@ -105,7 +99,6 @@ export function PasswordRecovery({
   status = "idle",
   children,
   className,
-  style,
   "aria-labelledby": ariaLabelledby,
   "aria-describedby": ariaDescribedby,
   ...props
@@ -120,9 +113,9 @@ export function PasswordRecovery({
       value={{ variant, step, status, submitting, titleId, errorId, chrome }}
     >
       <form
+        data-slot="password-recovery"
+        className={cn(passwordRecoveryVariants({ variant }), className)}
         {...props}
-        className={cn(chrome.rootClass, className)}
-        style={{ ...chrome.rootStyle, ...style }}
         data-variant={variant}
         data-step={step}
         aria-busy={submitting || undefined}
@@ -140,19 +133,18 @@ export type PasswordRecoveryAsideProps = ComponentProps<"aside">;
 export function PasswordRecoveryAside({
   children,
   className,
-  style,
   ...props
 }: PasswordRecoveryAsideProps) {
   const { chrome } = usePasswordRecovery("PasswordRecoveryAside");
 
   return (
     <aside
+      data-slot="password-recovery-aside"
       className={cn(
-        "grid min-w-0 content-start gap-3 text-[12px] leading-4 text-[var(--uai-muted)] [&_p]:m-0 [&_strong]:font-medium [&_strong]:text-[var(--uai-text)]",
+        "grid min-w-0 content-start gap-3 text-[12px] leading-4 text-muted-foreground [&_p]:m-0 [&_strong]:font-medium [&_strong]:text-foreground",
         chrome.asideClass,
         className,
       )}
-      style={{ ...chrome.asideStyle, ...style }}
       {...props}
     >
       {children}
@@ -171,6 +163,7 @@ export function PasswordRecoveryProgress({
 
   return (
     <ol
+      data-slot="password-recovery-progress"
       className={cn(
         "grid list-none gap-2 p-0",
         variant !== "split" && "grid-cols-3",
@@ -199,11 +192,12 @@ export function PasswordRecoveryProgressItem({
 
   return (
     <li
+      data-slot="password-recovery-progress-item"
       className={cn(
         "flex min-w-0 items-start gap-2 text-[11.5px] leading-4",
-        state === "upcoming" && "text-[var(--uai-subtle)]",
-        state === "complete" && "text-[var(--uai-muted)]",
-        state === "current" && "font-medium text-[var(--uai-text)]",
+        state === "upcoming" && "text-subtle-foreground",
+        state === "complete" && "text-muted-foreground",
+        state === "current" && "font-medium text-foreground",
         className,
       )}
       aria-current={state === "current" ? "step" : undefined}
@@ -212,12 +206,11 @@ export function PasswordRecoveryProgressItem({
     >
       <span
         className={cn(
-          "mt-px inline-flex size-4 shrink-0 items-center justify-center rounded-full border border-[var(--uai-border-strong)] transition-[background-color,border-color] duration-[180ms] ease-out motion-reduce:transition-none",
+          "mt-px inline-flex size-4 shrink-0 items-center justify-center rounded-full border border-border-strong transition-[background-color,border-color] duration-180 ease-out motion-reduce:transition-none",
           state === "upcoming" && "[&_svg]:opacity-0",
-          state === "complete" &&
-            "border-transparent bg-[var(--uai-accent)] text-[var(--uai-accent-foreground)]",
+          state === "complete" && "border-transparent bg-primary text-primary-foreground",
           state === "current" &&
-            "border-[var(--uai-accent)] text-[var(--uai-accent)] shadow-[0_0_0_3px_color-mix(in_oklab,var(--uai-accent)_18%,transparent)] [&_svg]:fill-current",
+            "border-primary text-primary shadow-[0_0_0_3px_color-mix(in_oklab,var(--primary)_18%,transparent)] [&_svg]:fill-current",
         )}
       >
         <Icon
@@ -226,7 +219,7 @@ export function PasswordRecoveryProgressItem({
           aria-hidden="true"
         />
       </span>
-      <span className="min-w-0 [overflow-wrap:anywhere]">
+      <span className="min-w-0 wrap-anywhere">
         <span className="sr-only">
           {state === "complete" ? "Complete: " : state === "current" ? "Current: " : "Upcoming: "}
         </span>
@@ -238,16 +231,15 @@ export function PasswordRecoveryProgressItem({
 
 export type PasswordRecoveryMainProps = ComponentProps<"div">;
 
-export function PasswordRecoveryMain({
-  children,
-  className,
-  style,
-  ...props
-}: PasswordRecoveryMainProps) {
+export function PasswordRecoveryMain({ children, className, ...props }: PasswordRecoveryMainProps) {
   const { chrome } = usePasswordRecovery("PasswordRecoveryMain");
 
   return (
-    <div className={cn("min-w-0", className)} style={{ ...chrome.mainStyle, ...style }} {...props}>
+    <div
+      data-slot="password-recovery-main"
+      className={cn("min-w-0", chrome.mainClass, className)}
+      {...props}
+    >
       {children}
     </div>
   );
@@ -262,7 +254,7 @@ export function PasswordRecoveryHeader({
 }: PasswordRecoveryHeaderProps) {
   usePasswordRecovery("PasswordRecoveryHeader");
   return (
-    <header className={cn("mb-5", className)} {...props}>
+    <header data-slot="password-recovery-header" className={cn("mb-5", className)} {...props}>
       {children}
     </header>
   );
@@ -278,9 +270,10 @@ export function PasswordRecoveryTitle({
   const { titleId, chrome } = usePasswordRecovery("PasswordRecoveryTitle");
   return (
     <h2
-      id={titleId}
+      data-slot="password-recovery-title"
       className={cn("font-semibold tracking-[-0.015em] text-balance", chrome.titleClass, className)}
       {...props}
+      id={titleId}
     >
       {children}
     </h2>
@@ -297,8 +290,9 @@ export function PasswordRecoveryDescription({
   const { chrome } = usePasswordRecovery("PasswordRecoveryDescription");
   return (
     <p
+      data-slot="password-recovery-description"
       className={cn(
-        "max-w-[52ch] text-[var(--uai-muted)] [overflow-wrap:anywhere]",
+        "max-w-[52ch] text-muted-foreground wrap-anywhere",
         chrome.descriptionClass,
         className,
       )}
@@ -324,18 +318,14 @@ export function PasswordRecoveryStage({
 
   return (
     <div
+      data-slot="password-recovery-stage"
       className={cn(
-        "grid gap-4 motion-safe:animate-[uai-recovery-in_240ms_cubic-bezier(0.23,1,0.32,1)]",
+        "grid gap-4 animate-in fade-in-0 slide-in-from-bottom-1 duration-240 ease-out-quint motion-reduce:animate-none",
         className,
       )}
       data-recovery-stage={when}
       {...props}
     >
-      <style>
-        {
-          "@keyframes uai-recovery-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}"
-        }
-      </style>
       {children}
     </div>
   );
@@ -350,7 +340,11 @@ export function PasswordRecoveryFields({
 }: PasswordRecoveryFieldsProps) {
   const { chrome } = usePasswordRecovery("PasswordRecoveryFields");
   return (
-    <div className={cn("grid", chrome.groupGapClass, className)} {...props}>
+    <div
+      data-slot="password-recovery-fields"
+      className={cn("grid", chrome.groupGapClass, className)}
+      {...props}
+    >
       {children}
     </div>
   );
@@ -384,7 +378,7 @@ export function PasswordRecoveryField({
 
   return (
     <PasswordRecoveryFieldContext.Provider value={{ controlId, messageId, invalid }}>
-      <div className={cn("grid gap-1.5", className)} {...props}>
+      <div data-slot="password-recovery-field" className={cn("grid gap-1.5", className)} {...props}>
         {children}
       </div>
     </PasswordRecoveryFieldContext.Provider>
@@ -404,6 +398,7 @@ export function PasswordRecoveryLabel({
 
   return (
     <label
+      data-slot="password-recovery-label"
       htmlFor={htmlFor ?? controlId}
       className={cn("text-[12.5px] leading-4 font-medium", className)}
       {...props}
@@ -421,7 +416,6 @@ export function PasswordRecoveryInput({
   revealable = false,
   className,
   id,
-  style,
   disabled,
   "aria-describedby": ariaDescribedby,
   "aria-invalid": ariaInvalid,
@@ -435,22 +429,23 @@ export function PasswordRecoveryInput({
   const describedBy = [ariaDescribedby, invalid ? messageId : undefined].filter(Boolean).join(" ");
   const input = (
     <input
+      data-slot="password-recovery-input"
       {...props}
       id={id ?? controlId}
       type={inputType}
       disabled={disabled || submitting}
       className={cn(
-        "min-w-0 w-full bg-transparent px-3 text-[var(--uai-text)] outline-none placeholder:text-[var(--uai-subtle)] disabled:cursor-not-allowed disabled:opacity-50",
+        "min-w-0 w-full bg-transparent px-3 text-foreground outline-none placeholder:text-subtle-foreground disabled:cursor-not-allowed disabled:opacity-50",
         !revealable &&
-          "border border-[var(--uai-border)] bg-[var(--uai-canvas)] transition-[border-color,box-shadow] duration-[120ms] ease-out hover:border-[var(--uai-border-strong)] focus:border-[var(--uai-border-strong)] focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--uai-accent)_24%,transparent)] motion-reduce:transition-none",
+          "border bg-background transition-[border-color,box-shadow] duration-120 ease-out hover:border-border-strong focus:border-border-strong focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--primary)_24%,transparent)] motion-reduce:transition-none",
         !revealable &&
           invalid &&
-          "border-[color-mix(in_oklab,var(--uai-danger)_70%,transparent)] hover:border-[var(--uai-danger)] focus:border-[var(--uai-danger)] focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--uai-danger)_22%,transparent)]",
+          "border-destructive/70 hover:border-destructive focus:border-destructive focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--destructive)_22%,transparent)]",
+        !revealable && chrome.controlRadiusClass,
         revealable && "pr-10",
         chrome.controlClass,
         className,
       )}
-      style={!revealable ? { ...chrome.controlStyle, ...style } : style}
       aria-describedby={describedBy || undefined}
       aria-invalid={ariaInvalid ?? (invalid || undefined)}
     />
@@ -461,16 +456,16 @@ export function PasswordRecoveryInput({
   return (
     <div
       className={cn(
-        "relative border border-[var(--uai-border)] bg-[var(--uai-canvas)] transition-[border-color,box-shadow] duration-[120ms] ease-out hover:border-[var(--uai-border-strong)] focus-within:border-[var(--uai-border-strong)] focus-within:shadow-[0_0_0_3px_color-mix(in_oklab,var(--uai-accent)_24%,transparent)] motion-reduce:transition-none",
+        "relative border bg-background transition-[border-color,box-shadow] duration-120 ease-out hover:border-border-strong focus-within:border-border-strong focus-within:shadow-[0_0_0_3px_color-mix(in_oklab,var(--primary)_24%,transparent)] motion-reduce:transition-none",
         invalid &&
-          "border-[color-mix(in_oklab,var(--uai-danger)_70%,transparent)] hover:border-[var(--uai-danger)] focus-within:border-[var(--uai-danger)] focus-within:shadow-[0_0_0_3px_color-mix(in_oklab,var(--uai-danger)_22%,transparent)]",
+          "border-destructive/70 hover:border-destructive focus-within:border-destructive focus-within:shadow-[0_0_0_3px_color-mix(in_oklab,var(--destructive)_22%,transparent)]",
+        chrome.controlRadiusClass,
       )}
-      style={chrome.controlStyle}
     >
       {input}
       <button
         type="button"
-        className="absolute inset-y-0 right-0 inline-flex w-10 items-center justify-center rounded-[inherit] text-[var(--uai-subtle)] transition-colors duration-[120ms] ease-out hover:text-[var(--uai-text)] focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-[var(--uai-accent)] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none [&_svg]:size-4 [&_svg]:stroke-[1.75]"
+        className="absolute inset-y-0 right-0 inline-flex w-10 items-center justify-center rounded-[inherit] text-subtle-foreground transition-colors duration-120 ease-out hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none [&_svg]:size-4 [&_svg]:stroke-[1.75]"
         disabled={disabled || submitting}
         aria-label={revealed ? "Hide password" : "Show password"}
         aria-pressed={revealed}
@@ -500,12 +495,13 @@ export function PasswordRecoveryFieldMessage({
 
   return (
     <p
+      data-slot="password-recovery-field-message"
       id={id ?? messageId}
       className={cn(
-        "text-[11.5px] leading-4 [overflow-wrap:anywhere]",
+        "text-[11.5px] leading-4 wrap-anywhere",
         invalid
-          ? "text-[color-mix(in_oklab,var(--uai-danger)_80%,var(--uai-text))]"
-          : "text-[var(--uai-subtle)]",
+          ? "text-[color-mix(in_oklab,var(--destructive)_80%,var(--foreground))]"
+          : "text-subtle-foreground",
         className,
       )}
       role={role ?? (invalid ? "alert" : undefined)}
@@ -527,8 +523,9 @@ export function PasswordRecoveryPasswordGuide({
   usePasswordRecovery("PasswordRecoveryPasswordGuide");
   return (
     <ul
+      data-slot="password-recovery-password-guide"
       aria-label={ariaLabel}
-      className={cn("grid gap-1 text-[11.5px] leading-4 text-[var(--uai-subtle)]", className)}
+      className={cn("grid gap-1 text-[11.5px] leading-4 text-subtle-foreground", className)}
       {...props}
     >
       {children}
@@ -549,9 +546,10 @@ export function PasswordRecoveryPasswordRequirement({
 
   return (
     <li
+      data-slot="password-recovery-password-requirement"
       className={cn(
-        "flex items-start gap-1.5 transition-colors duration-[120ms] ease-out motion-reduce:transition-none",
-        met && "text-[var(--uai-muted)] [&_svg]:text-[var(--uai-success)]",
+        "flex items-start gap-1.5 transition-colors duration-120 ease-out motion-reduce:transition-none",
+        met && "text-muted-foreground [&_svg]:text-success",
         className,
       )}
       {...props}
@@ -576,12 +574,12 @@ export function PasswordRecoveryError({
 
   return (
     <div
+      data-slot="password-recovery-error"
       id={id ?? errorId}
       className={cn(
-        "bg-[color-mix(in_oklab,var(--uai-danger)_10%,transparent)] px-3 py-2.5 text-[12px] leading-4 text-[color-mix(in_oklab,var(--uai-danger)_80%,var(--uai-text))] shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--uai-danger)_24%,transparent)] [overflow-wrap:anywhere]",
+        "rounded-[10px] bg-destructive/10 px-3 py-2.5 text-[12px] leading-4 text-[color-mix(in_oklab,var(--destructive)_80%,var(--foreground))] shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--destructive)_24%,transparent)] wrap-anywhere",
         className,
       )}
-      style={{ borderRadius: 10 }}
       role="alert"
       {...props}
     >
@@ -606,7 +604,6 @@ const passwordRecoverySubmitCopy: Record<
 export function PasswordRecoverySubmit({
   children,
   className,
-  style,
   disabled,
   type = "submit",
   ...props
@@ -616,15 +613,15 @@ export function PasswordRecoverySubmit({
 
   return (
     <button
+      data-slot="password-recovery-submit"
       {...props}
       type={type}
       disabled={disabled || submitting}
       className={cn(
-        "inline-flex w-full items-center justify-center gap-2 rounded-full border-0 bg-[var(--uai-accent)] px-4 font-medium text-[var(--uai-accent-foreground)] transition-[filter,transform] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:brightness-[1.08] active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uai-accent)] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100 motion-reduce:transform-none motion-reduce:transition-none",
+        "inline-flex w-full items-center justify-center gap-2 rounded-full border-0 bg-primary px-4 font-medium text-primary-foreground transition-[filter,scale] duration-140 ease-out-quint hover:brightness-[1.08] active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100 motion-reduce:active:scale-100 motion-reduce:transition-none",
         chrome.controlClass,
         className,
       )}
-      style={style}
       aria-busy={submitting || undefined}
     >
       {submitting ? (
@@ -660,25 +657,22 @@ export function PasswordRecoveryStatus({
 
   return (
     <div
+      data-slot="password-recovery-status"
       className={cn(
-        "grid justify-items-center gap-3 bg-[var(--uai-surface-raised)] px-4 py-5 text-center text-[12.5px] leading-[18px] text-[var(--uai-muted)] [&_strong]:font-medium [&_strong]:text-[var(--uai-text)]",
+        "grid justify-items-center gap-3 rounded-xl bg-muted px-4 py-5 text-center text-[12.5px] leading-[18px] text-muted-foreground [&_strong]:font-medium [&_strong]:text-foreground",
         tone === "expired" &&
-          "bg-[color-mix(in_oklab,var(--uai-warning)_8%,var(--uai-surface-raised))] shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--uai-warning)_26%,transparent)]",
+          "bg-[color-mix(in_oklab,var(--warning)_8%,var(--muted))] shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--warning)_26%,transparent)]",
         className,
       )}
-      style={{ borderRadius: 12 }}
       role={role ?? (tone === "expired" ? "alert" : "status")}
       {...props}
     >
       <span
         className={cn(
           "flex size-9 items-center justify-center rounded-full",
-          tone === "sent" &&
-            "bg-[color-mix(in_oklab,var(--uai-accent)_16%,transparent)] text-[var(--uai-accent)]",
-          tone === "expired" &&
-            "bg-[color-mix(in_oklab,var(--uai-warning)_16%,transparent)] text-[var(--uai-warning)]",
-          tone === "success" &&
-            "bg-[color-mix(in_oklab,var(--uai-success)_16%,transparent)] text-[var(--uai-success)]",
+          tone === "sent" && "bg-primary/16 text-primary",
+          tone === "expired" && "bg-warning/16 text-warning",
+          tone === "success" && "bg-success/16 text-success",
         )}
       >
         <Icon className="size-[18px]" strokeWidth={1.8} aria-hidden="true" />
@@ -697,7 +691,11 @@ export function PasswordRecoveryActions({
 }: PasswordRecoveryActionsProps) {
   usePasswordRecovery("PasswordRecoveryActions");
   return (
-    <div className={cn("flex flex-wrap items-center justify-center gap-1", className)} {...props}>
+    <div
+      data-slot="password-recovery-actions"
+      className={cn("flex flex-wrap items-center justify-center gap-1", className)}
+      {...props}
+    >
       {children}
     </div>
   );
@@ -715,11 +713,12 @@ export function PasswordRecoveryAction({
   const { submitting } = usePasswordRecovery("PasswordRecoveryAction");
   return (
     <button
+      data-slot="password-recovery-action"
       {...props}
       type={type}
       disabled={disabled || submitting}
       className={cn(
-        "inline-flex h-7 items-center rounded-full px-3 text-[12.5px] font-medium text-[var(--uai-muted)] transition-[background-color,color,transform] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-[var(--uai-surface-raised)] hover:text-[var(--uai-text)] active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uai-accent)] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transform-none motion-reduce:transition-none",
+        "inline-flex h-7 items-center rounded-full px-3 text-[12.5px] font-medium text-muted-foreground transition-[background-color,color,scale] duration-140 ease-out-quint hover:bg-accent hover:text-foreground active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:active:scale-100 motion-reduce:transition-none",
         className,
       )}
     >
@@ -738,8 +737,9 @@ export function PasswordRecoveryFooter({
   const { chrome } = usePasswordRecovery("PasswordRecoveryFooter");
   return (
     <footer
+      data-slot="password-recovery-footer"
       className={cn(
-        "border-t border-[var(--uai-border)] text-center text-[12px] leading-4 text-[var(--uai-muted)] [&_a]:font-medium [&_a]:text-[var(--uai-accent)] [&_a]:underline-offset-4 [&_a:hover]:underline",
+        "border-t text-center text-[12px] leading-4 text-muted-foreground [&_a]:font-medium [&_a]:text-primary [&_a]:underline-offset-4 [&_a:hover]:underline",
         chrome.footerClass,
         className,
       )}

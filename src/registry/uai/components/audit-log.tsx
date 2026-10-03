@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { ChevronRight } from "lucide-react";
 import {
   type ComponentProps,
@@ -11,6 +12,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const AUDIT_LOG_VARIANTS = ["card", "timeline", "compact"] as const;
 export type AuditLogVariant = (typeof AUDIT_LOG_VARIANTS)[number];
@@ -25,6 +27,15 @@ function useLog(part: string) {
 }
 const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 const easeOut = "cubic-bezier(0.23, 1, 0.32, 1)";
+const auditLogVariants = cva("grid min-w-0 rounded-[14px] text-[13px]/[18px] text-foreground", {
+  variants: {
+    variant: {
+      card: "gap-3 border bg-card px-3 pt-3.5 pb-2 text-card-foreground",
+      timeline: "gap-3 border-0 bg-transparent p-0",
+      compact: "gap-2 border-0 bg-transparent p-0",
+    },
+  },
+});
 type EventContext = { id: string; open: boolean; setOpen: (open: boolean) => void };
 const EventCtx = createContext<EventContext | null>(null);
 function useEvent(part: string) {
@@ -33,27 +44,16 @@ function useEvent(part: string) {
   return context;
 }
 
-export function AuditLog({ variant = "card", style, children, ...props }: AuditLogProps) {
+export function AuditLog({ variant = "card", className, children, ...props }: AuditLogProps) {
   const id = useId();
   return (
     <Context.Provider value={{ id, variant }}>
       <section
         aria-labelledby={`${id}-title`}
+        data-slot="audit-log"
+        className={cn(auditLogVariants({ variant }), className)}
         {...props}
         data-variant={variant}
-        style={{
-          display: "grid",
-          gap: variant === "compact" ? 8 : 12,
-          minWidth: 0,
-          padding: variant === "card" ? "14px 12px 8px" : 0,
-          border: variant === "card" ? "1px solid var(--uai-border)" : 0,
-          borderRadius: 14,
-          background: variant === "card" ? "var(--uai-surface)" : "transparent",
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
       >
         {children}
       </section>
@@ -61,63 +61,49 @@ export function AuditLog({ variant = "card", style, children, ...props }: AuditL
   );
 }
 
-export function AuditLogHeader({ style, ...props }: ComponentProps<"div">) {
+export function AuditLogHeader({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="audit-log-header"
+      className={cn("flex flex-wrap items-center justify-between gap-3 px-1", className)}
       {...props}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        flexWrap: "wrap",
-        gap: 12,
-        paddingInline: 4,
-        ...style,
-      }}
     />
   );
 }
 
-export function AuditLogTitle({ style, ...props }: ComponentProps<"h3">) {
+export function AuditLogTitle({ className, ...props }: ComponentProps<"h3">) {
   const context = useLog("AuditLogTitle");
   return (
     <h3
+      data-slot="audit-log-title"
+      className={cn("m-0 text-sm/5 font-semibold tracking-[-0.01em]", className)}
       {...props}
       id={`${context.id}-title`}
-      style={{
-        margin: 0,
-        fontSize: 14,
-        lineHeight: "20px",
-        fontWeight: 600,
-        letterSpacing: "-0.01em",
-        ...style,
-      }}
     />
   );
 }
 
-export function AuditLogFilters({ style, ...props }: ComponentProps<"div">) {
+export function AuditLogFilters({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="audit-log-filters"
+      className={cn("flex flex-wrap items-center gap-2", className)}
       {...props}
-      style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8, ...style }}
     />
   );
 }
 
-export function AuditLogList({ style, ...props }: ComponentProps<"ol">) {
+export function AuditLogList({ className, ...props }: ComponentProps<"ol">) {
   const context = useLog("AuditLogList");
   return (
     <ol
+      data-slot="audit-log-list"
+      className={cn(
+        "m-0 grid list-none p-0",
+        context.variant === "compact" ? "gap-0.5" : "gap-0",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gap: context.variant === "card" ? 0 : context.variant === "compact" ? 2 : 0,
-        margin: 0,
-        padding: 0,
-        listStyle: "none",
-        ...style,
-      }}
     />
   );
 }
@@ -132,7 +118,6 @@ export function AuditLogEvent({
   open,
   defaultOpen = false,
   onOpenChange,
-  style,
   className,
   children,
   ...props
@@ -149,44 +134,25 @@ export function AuditLogEvent({
   return (
     <EventCtx.Provider value={{ id, open: current, setOpen }}>
       <li
+        data-slot="audit-log-event"
+        className={cn(
+          "relative grid min-w-0",
+          log.variant === "compact" ? "gap-1" : "gap-1.5",
+          log.variant === "card" && "ml-0 border-b py-1 last:border-b-0",
+          timeline && "ml-1 border-l pt-0 pr-0 pb-2.5 pl-4 last:border-l-transparent",
+          log.variant === "compact" && "ml-0 p-0",
+          className,
+        )}
         {...props}
         data-state={current ? "open" : "closed"}
-        className={[
-          log.variant === "card"
-            ? "border-b border-[var(--uai-border)] last:border-b-0"
-            : timeline
-              ? "border-l-[var(--uai-border)] last:border-l-transparent"
-              : undefined,
-          className,
-        ]
-          .filter(Boolean)
-          .join(" ")}
-        style={{
-          position: "relative",
-          display: "grid",
-          gap: log.variant === "compact" ? 4 : 6,
-          minWidth: 0,
-          padding: timeline ? "0 0 10px 16px" : log.variant === "compact" ? 0 : "4px 0",
-          borderLeftWidth: timeline ? 1 : undefined,
-          borderLeftStyle: timeline ? "solid" : undefined,
-          marginLeft: timeline ? 4 : 0,
-          ...style,
-        }}
       >
         {timeline ? (
           <span
             aria-hidden="true"
-            style={{
-              position: "absolute",
-              left: -4,
-              top: 11,
-              width: 7,
-              height: 7,
-              borderRadius: 999,
-              background: current ? "var(--uai-text)" : "var(--uai-border-strong)",
-              boxShadow: "0 0 0 3px var(--uai-canvas)",
-              transition: "background-color 120ms ease-out",
-            }}
+            className={cn(
+              "absolute top-2.75 -left-1 size-1.75 rounded-full shadow-[0_0_0_3px_var(--background)] transition-colors duration-120 ease-[ease-out]",
+              current ? "bg-foreground" : "bg-border-strong",
+            )}
           />
         ) : null}
         {children}
@@ -196,7 +162,6 @@ export function AuditLogEvent({
 }
 
 export function AuditLogEventSummary({
-  style,
   className,
   children,
   onClick,
@@ -204,8 +169,18 @@ export function AuditLogEventSummary({
 }: ComponentProps<"button">) {
   const log = useLog("AuditLogEventSummary");
   const event = useEvent("AuditLogEventSummary");
+  const compact = log.variant === "compact";
   return (
     <button
+      data-slot="audit-log-event-summary"
+      className={cn(
+        "flex w-full cursor-pointer flex-wrap items-baseline gap-x-1.5 gap-y-0.5 border-0 text-left text-inherit [transition:background-color_120ms_ease-out] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none",
+        event.open ? "bg-accent" : "bg-transparent hover:bg-accent/70",
+        compact
+          ? "min-h-6.5 rounded-[7px] px-1.5 py-1 text-[12.5px]"
+          : "min-h-8 rounded-lg px-2 py-1.75 text-[13px]",
+        className,
+      )}
       {...props}
       type="button"
       aria-expanded={event.open}
@@ -214,95 +189,62 @@ export function AuditLogEventSummary({
         onClick?.(clickEvent);
         if (!clickEvent.defaultPrevented) event.setOpen(!event.open);
       }}
-      className={[
-        event.open ? undefined : "bg-transparent",
-        "[transition:background-color_120ms_ease-out] hover:bg-[color-mix(in_oklab,var(--uai-surface-raised)_70%,transparent)] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--uai-accent)] motion-reduce:transition-none",
-        className,
-      ]
-        .filter(Boolean)
-        .join(" ")}
-      style={{
-        display: "flex",
-        alignItems: "baseline",
-        flexWrap: "wrap",
-        columnGap: 6,
-        rowGap: 2,
-        width: "100%",
-        minHeight: log.variant === "compact" ? 26 : 32,
-        padding: log.variant === "compact" ? "4px 6px" : "7px 8px",
-        border: 0,
-        borderRadius: log.variant === "compact" ? 7 : 8,
-        background: event.open ? "var(--uai-surface-raised)" : undefined,
-        color: "inherit",
-        font: "inherit",
-        fontSize: log.variant === "compact" ? 12.5 : 13,
-        textAlign: "left",
-        cursor: "pointer",
-        ...style,
-      }}
     >
       <ChevronRight
         size={14}
         strokeWidth={1.75}
         aria-hidden="true"
-        style={{
-          flexShrink: 0,
-          alignSelf: "center",
-          color: "var(--uai-subtle)",
-          transform: event.open ? "rotate(90deg)" : "none",
-          transition: `transform 180ms ${easeOut}`,
-        }}
+        className={cn(
+          "shrink-0 self-center text-subtle-foreground transition-[rotate] duration-180 ease-out-quint",
+          event.open && "rotate-90",
+        )}
       />
       {children}
     </button>
   );
 }
 
-export function AuditLogActor({ style, ...props }: ComponentProps<"span">) {
-  return <span {...props} style={{ fontWeight: 500, ...style }} />;
+export function AuditLogActor({ className, ...props }: ComponentProps<"span">) {
+  return <span data-slot="audit-log-actor" className={cn("font-medium", className)} {...props} />;
 }
 
-export function AuditLogAction({ style, ...props }: ComponentProps<"span">) {
-  return <span {...props} style={{ color: "var(--uai-muted)", ...style }} />;
-}
-
-export function AuditLogResource({ style, ...props }: ComponentProps<"span">) {
+export function AuditLogAction({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
+      data-slot="audit-log-action"
+      className={cn("text-muted-foreground", className)}
       {...props}
-      style={{
-        padding: "1px 6px",
-        borderRadius: 6,
-        background: "color-mix(in oklab, var(--uai-text) 7%, transparent)",
-        color: "var(--uai-text)",
-        fontFamily: "var(--font-mono, ui-monospace, monospace)",
-        fontSize: 11.5,
-        lineHeight: "16px",
-        overflowWrap: "anywhere",
-        ...style,
-      }}
     />
   );
 }
 
-export function AuditLogTimestamp({ style, ...props }: ComponentProps<"time">) {
+export function AuditLogResource({ className, ...props }: ComponentProps<"span">) {
+  return (
+    <span
+      data-slot="audit-log-resource"
+      className={cn(
+        "rounded-md bg-foreground/7 px-1.5 py-px font-mono text-[11.5px]/4 text-foreground wrap-anywhere",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+export function AuditLogTimestamp({ className, ...props }: ComponentProps<"time">) {
   return (
     <time
+      data-slot="audit-log-timestamp"
+      className={cn(
+        "ml-auto pl-2 text-[12px] whitespace-nowrap text-subtle-foreground tabular-nums",
+        className,
+      )}
       {...props}
-      style={{
-        marginLeft: "auto",
-        paddingLeft: 8,
-        color: "var(--uai-subtle)",
-        fontSize: 12,
-        fontVariantNumeric: "tabular-nums",
-        whiteSpace: "nowrap",
-        ...style,
-      }}
     />
   );
 }
 
-export function AuditLogEventDetails({ style, ...props }: ComponentProps<"dl">) {
+export function AuditLogEventDetails({ className, ...props }: ComponentProps<"dl">) {
   const log = useLog("AuditLogEventDetails");
   const event = useEvent("AuditLogEventDetails");
   const ref = useRef<HTMLDListElement>(null);
@@ -322,65 +264,56 @@ export function AuditLogEventDetails({ style, ...props }: ComponentProps<"dl">) 
       { duration: 220, easing: easeOut },
     );
   }, [event.open]);
+  const compact = log.variant === "compact";
   return (
     <dl
+      data-slot="audit-log-event-details"
+      className={cn(
+        "grid-cols-[minmax(88px,max-content)_minmax(0,1fr)] gap-x-4 gap-y-1.5 bg-background text-xs/4 shadow-[inset_0_0_0_1px_var(--border)]",
+        event.open ? "grid" : "hidden",
+        compact
+          ? "mt-0 mr-0 mb-1 ml-6.5 rounded-lg px-2.5 py-2"
+          : "mt-0 mr-0 mb-2 ml-7 rounded-[10px] px-3 py-2.5",
+        className,
+      )}
       {...props}
       ref={ref}
       id={`${event.id}-details`}
       hidden={!event.open}
-      style={{
-        display: event.open ? "grid" : "none",
-        gridTemplateColumns: "minmax(88px, max-content) minmax(0, 1fr)",
-        columnGap: 16,
-        rowGap: 6,
-        margin: log.variant === "compact" ? "0 0 4px 26px" : "0 0 8px 28px",
-        padding: log.variant === "compact" ? "8px 10px" : "10px 12px",
-        borderRadius: log.variant === "compact" ? 8 : 10,
-        background: "var(--uai-canvas)",
-        boxShadow: "inset 0 0 0 1px var(--uai-border)",
-        fontSize: 12,
-        lineHeight: "16px",
-        ...style,
-      }}
     />
   );
 }
 
-export function AuditLogDetailLabel({ style, ...props }: ComponentProps<"dt">) {
-  return <dt {...props} style={{ color: "var(--uai-subtle)", ...style }} />;
+export function AuditLogDetailLabel({ className, ...props }: ComponentProps<"dt">) {
+  return (
+    <dt
+      data-slot="audit-log-detail-label"
+      className={cn("text-subtle-foreground", className)}
+      {...props}
+    />
+  );
 }
 
-export function AuditLogDetailValue({ style, ...props }: ComponentProps<"dd">) {
+export function AuditLogDetailValue({ className, ...props }: ComponentProps<"dd">) {
   return (
     <dd
+      data-slot="audit-log-detail-value"
+      className={cn("m-0 min-w-0 font-medium tabular-nums wrap-anywhere", className)}
       {...props}
-      style={{
-        margin: 0,
-        minWidth: 0,
-        fontWeight: 500,
-        fontVariantNumeric: "tabular-nums",
-        overflowWrap: "anywhere",
-        ...style,
-      }}
     />
   );
 }
 
-export function AuditLogEmpty({ style, ...props }: ComponentProps<"p">) {
+export function AuditLogEmpty({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
       role="status"
+      data-slot="audit-log-empty"
+      className={cn(
+        "m-0 rounded-[10px] border border-dashed px-3 py-6 text-center text-[12.5px] text-subtle-foreground",
+        className,
+      )}
       {...props}
-      style={{
-        margin: 0,
-        padding: "24px 12px",
-        border: "1px dashed var(--uai-border)",
-        borderRadius: 10,
-        color: "var(--uai-subtle)",
-        fontSize: 12.5,
-        textAlign: "center",
-        ...style,
-      }}
     />
   );
 }

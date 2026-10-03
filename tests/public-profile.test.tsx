@@ -112,7 +112,7 @@ test("renders every variant and guards its parts", () => {
   for (const variant of PUBLIC_PROFILE_VARIANTS) {
     const view = render(<Fixture variant={variant} />);
     expect(
-      view.container.querySelector("[data-uai-public-profile]")?.getAttribute("data-variant"),
+      view.container.querySelector('[data-slot="public-profile"]')?.getAttribute("data-variant"),
     ).toBe(variant);
     view.unmount();
   }

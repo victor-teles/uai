@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import {
   type ComponentProps,
   createContext,
@@ -21,6 +22,7 @@ import {
   type FilterBarProps,
   type FilterBarVariant,
 } from "@/components/ui/uai/filter-bar";
+import { cn } from "@/lib/uai-utils";
 
 export const CHANGELOG_PAGE_VARIANTS = ["timeline", "cards", "compact"] as const;
 export type ChangelogPageVariant = (typeof CHANGELOG_PAGE_VARIANTS)[number];
@@ -57,14 +59,11 @@ function usePage(part: string) {
 }
 const GroupContext = createContext<(Registry & { titleId: string }) | null>(null);
 
-const pageCss = `
-.uai-changelog-select{transition:background-color 120ms ease-out}
-.uai-changelog-select:hover{background:color-mix(in oklab,var(--uai-surface-raised) 85%,var(--uai-text))}
-.uai-changelog-select:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-[data-uai-changelog-release]{animation:uai-changelog-fade-up 240ms cubic-bezier(0.23,1,0.32,1) both}
-@keyframes uai-changelog-fade-up{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion: reduce){.uai-changelog-select{transition:none}[data-uai-changelog-release]{animation:none}}
-`;
+const changelogPageVariants = cva("grid min-w-0 text-[13px]/[18px] text-foreground", {
+  variants: {
+    variant: { timeline: "gap-7", cards: "gap-7", compact: "gap-4" },
+  },
+});
 
 const entryVariants: Record<ChangelogPageVariant, ChangelogEntryVariant> = {
   timeline: "timeline",
@@ -114,7 +113,7 @@ export function ChangelogPage({
   defaultArea = "",
   onAreaChange,
   children,
-  style,
+  className,
   ...props
 }: ChangelogPageProps) {
   const id = useId();
@@ -136,73 +135,54 @@ export function ChangelogPage({
     <Context.Provider value={{ id, variant, filters, setFilter, ...registry }}>
       <section
         aria-labelledby={`${id}-title`}
+        data-slot="changelog-page"
+        className={cn(changelogPageVariants({ variant }), className)}
         {...props}
         data-variant={variant}
-        style={{
-          display: "grid",
-          gap: variant === "compact" ? 16 : 28,
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
       >
-        <style>{pageCss}</style>
         {children}
       </section>
     </Context.Provider>
   );
 }
 
-export function ChangelogPageHeader({ style, ...props }: ComponentProps<"header">) {
+export function ChangelogPageHeader({ className, ...props }: ComponentProps<"header">) {
   const { variant } = usePage("ChangelogPageHeader");
   return (
     <header
+      data-slot="changelog-page-header"
+      className={cn(
+        "flex min-w-0 flex-wrap items-end justify-between",
+        variant === "compact" ? "gap-2" : "gap-4",
+        className,
+      )}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "flex-end",
-        justifyContent: "space-between",
-        gap: variant === "compact" ? 8 : 16,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function ChangelogPageTitle({ style, ...props }: ComponentProps<"h1">) {
+export function ChangelogPageTitle({ className, ...props }: ComponentProps<"h1">) {
   const { id, variant } = usePage("ChangelogPageTitle");
   return (
     <h1
+      data-slot="changelog-page-title"
+      className={cn(
+        "m-0 font-semibold tracking-[-0.015em] text-balance",
+        variant === "compact" ? "text-xl/[26px]" : "text-[28px]/[34px]",
+        className,
+      )}
       {...props}
       id={`${id}-title`}
-      style={{
-        margin: 0,
-        fontSize: variant === "compact" ? 20 : 28,
-        lineHeight: variant === "compact" ? "26px" : "34px",
-        fontWeight: 600,
-        letterSpacing: "-0.015em",
-        textWrap: "balance",
-        ...style,
-      }}
     />
   );
 }
 
-export function ChangelogPageDescription({ style, ...props }: ComponentProps<"p">) {
+export function ChangelogPageDescription({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="changelog-page-description"
+      className={cn("m-0 max-w-[60ch] text-pretty text-muted-foreground", className)}
       {...props}
-      style={{
-        maxWidth: "60ch",
-        margin: 0,
-        color: "var(--uai-muted)",
-        textWrap: "pretty",
-        ...style,
-      }}
     />
   );
 }
@@ -214,6 +194,7 @@ export function ChangelogPageFilters(
   const context = usePage("ChangelogPageFilters");
   return (
     <FilterBar
+      data-slot="changelog-page-filters"
       {...props}
       variant={filterVariants[context.variant]}
       activeCount={[context.filters.category, context.filters.area].filter(Boolean).length}
@@ -238,7 +219,7 @@ export function ChangelogPageFilter({
   name,
   label,
   onChange,
-  style,
+  className,
   children,
   ...props
 }: ChangelogPageFilterProps) {
@@ -246,11 +227,17 @@ export function ChangelogPageFilter({
   const id = useId();
   const compact = context.variant === "compact";
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 8, minWidth: 0 }}>
-      <label htmlFor={id} style={{ color: "var(--uai-subtle)", fontSize: 12 }}>
+    <span className="inline-flex min-w-0 items-center gap-2">
+      <label htmlFor={id} className="text-[12px] text-subtle-foreground">
         {label}
       </label>
       <select
+        data-slot="changelog-page-filter"
+        className={cn(
+          "max-w-full cursor-pointer rounded-full border-0 bg-secondary px-2.5 text-[12.5px] font-medium text-secondary-foreground transition-colors duration-120 ease-[ease-out] hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none",
+          compact ? "h-6" : "h-7",
+          className,
+        )}
         {...props}
         id={id}
         name={name}
@@ -258,23 +245,6 @@ export function ChangelogPageFilter({
         onChange={(event) => {
           onChange?.(event);
           if (!event.defaultPrevented) context.setFilter(name, event.target.value);
-        }}
-        className={
-          props.className ? `uai-changelog-select ${props.className}` : "uai-changelog-select"
-        }
-        style={{
-          height: compact ? 24 : 28,
-          maxWidth: "100%",
-          padding: "0 10px",
-          border: 0,
-          borderRadius: 999,
-          background: "var(--uai-surface-raised)",
-          color: "var(--uai-text)",
-          font: "inherit",
-          fontSize: 12.5,
-          fontWeight: 500,
-          cursor: "pointer",
-          ...style,
         }}
       >
         {children}
@@ -284,19 +254,14 @@ export function ChangelogPageFilter({
 }
 
 /** A polite status with the number of matching releases. */
-export function ChangelogPageCount({ style, children, ...props }: ComponentProps<"p">) {
+export function ChangelogPageCount({ className, children, ...props }: ComponentProps<"p">) {
   const { visible, total } = usePage("ChangelogPageCount");
   return (
     <p
       role="status"
+      data-slot="changelog-page-count"
+      className={cn("m-0 text-[12px] text-subtle-foreground tabular-nums", className)}
       {...props}
-      style={{
-        margin: 0,
-        color: "var(--uai-subtle)",
-        fontSize: 12,
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     >
       {children ??
         (visible === total
@@ -307,7 +272,7 @@ export function ChangelogPageCount({ style, children, ...props }: ComponentProps
 }
 
 /** Releases for one period. The group hides itself when none of its releases match. */
-export function ChangelogPageGroup({ style, ...props }: ComponentProps<"section">) {
+export function ChangelogPageGroup({ className, ...props }: ComponentProps<"section">) {
   const { variant } = usePage("ChangelogPageGroup");
   const titleId = useId();
   const registry = useRegistry();
@@ -321,37 +286,33 @@ export function ChangelogPageGroup({ style, ...props }: ComponentProps<"section"
       <section
         aria-labelledby={titleId}
         hidden={empty}
+        data-slot="changelog-page-group"
+        className={cn(
+          "min-w-0",
+          empty ? "hidden" : "grid",
+          variant === "compact" ? "gap-2" : "gap-4",
+          className,
+        )}
         {...props}
-        style={{
-          display: empty ? "none" : "grid",
-          gap: variant === "compact" ? 8 : 16,
-          minWidth: 0,
-          ...style,
-        }}
       />
     </GroupContext.Provider>
   );
 }
 
-export function ChangelogPageGroupTitle({ style, ...props }: ComponentProps<"h2">) {
+export function ChangelogPageGroupTitle({ className, ...props }: ComponentProps<"h2">) {
   const group = useContext(GroupContext);
   const { variant } = usePage("ChangelogPageGroupTitle");
   if (!group) throw new Error("ChangelogPageGroupTitle must be used within ChangelogPageGroup");
   return (
     <h2
+      data-slot="changelog-page-group-title"
+      className={cn(
+        "m-0 border-b text-[11.5px]/4 font-medium text-subtle-foreground tabular-nums",
+        variant === "compact" ? "pb-1" : "pb-2",
+        className,
+      )}
       {...props}
       id={group.titleId}
-      style={{
-        margin: 0,
-        paddingBottom: variant === "compact" ? 4 : 8,
-        borderBottom: "1px solid var(--uai-border)",
-        color: "var(--uai-subtle)",
-        fontSize: 11.5,
-        fontWeight: 500,
-        lineHeight: "16px",
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     />
   );
 }
@@ -366,6 +327,7 @@ export type ChangelogPageReleaseProps = Omit<ChangelogEntryProps, "variant"> & {
 export function ChangelogPageRelease({
   categories = [],
   area,
+  className,
   ...props
 }: ChangelogPageReleaseProps) {
   const context = usePage("ChangelogPageRelease");
@@ -389,9 +351,13 @@ export function ChangelogPageRelease({
   if (!visible) return null;
   return (
     <ChangelogEntry
+      data-slot="changelog-page-release"
       {...props}
+      className={cn(
+        "animate-in fill-mode-both duration-240 ease-out-quint fade-in-0 slide-in-from-bottom-1 motion-reduce:animate-none",
+        className,
+      )}
       variant={entryVariants[context.variant]}
-      data-uai-changelog-release=""
       data-area={area}
       data-categories={categories.join(" ") || undefined}
     />
@@ -402,5 +368,11 @@ export function ChangelogPageRelease({
 export function ChangelogPageEmpty(props: Omit<EmptyStateProps, "variant">) {
   const context = usePage("ChangelogPageEmpty");
   if (context.total === 0 || context.visible > 0) return null;
-  return <EmptyState {...props} variant={context.variant === "compact" ? "compact" : "card"} />;
+  return (
+    <EmptyState
+      data-slot="changelog-page-empty"
+      {...props}
+      variant={context.variant === "compact" ? "compact" : "card"}
+    />
+  );
 }

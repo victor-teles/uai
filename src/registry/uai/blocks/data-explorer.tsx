@@ -1,7 +1,8 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { Play } from "lucide-react";
-import { type ComponentProps, type CSSProperties, createContext, useContext, useId } from "react";
+import { type ComponentProps, createContext, useContext, useId } from "react";
 import {
   DataTableToolbar,
   type DataTableToolbarProps,
@@ -13,6 +14,7 @@ import {
   type EmptyStateVariant,
 } from "@/components/ui/uai/empty-state";
 import { PageTabs, type PageTabsProps, type PageTabsVariant } from "@/components/ui/uai/page-tabs";
+import { cn } from "@/lib/uai-utils";
 
 export const DATA_EXPLORER_VARIANTS = ["workbench", "stacked", "compact"] as const;
 export type DataExplorerVariant = (typeof DATA_EXPLORER_VARIANTS)[number];
@@ -42,54 +44,34 @@ const emptyVariants: Record<DataExplorerVariant, EmptyStateVariant> = {
   compact: "compact",
 };
 
-const explorerCss = `
-[data-uai-data-explorer-action]{transition:filter 120ms ease-out,box-shadow 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-[data-uai-data-explorer-action]:hover:not(:disabled){box-shadow:inset 0 0 0 999px color-mix(in oklab,var(--uai-text) 9%,transparent)}
-[data-uai-data-explorer-action][data-uai-data-explorer-action="primary"]:hover:not(:disabled){box-shadow:none;filter:brightness(1.08)}
-[data-uai-data-explorer-action]:active:not(:disabled){transform:scale(0.97)}
-[data-uai-data-explorer-action]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-[data-uai-data-explorer-input]{transition:box-shadow 120ms ease-out}
-[data-uai-data-explorer-input]:focus{outline:none;box-shadow:0 0 0 1px var(--uai-border-strong),0 0 0 4px color-mix(in oklab,var(--uai-accent) 22%,transparent)}
-[data-uai-data-explorer-input]::placeholder{color:var(--uai-subtle)}
-[data-uai-data-explorer-scroll]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-[data-uai-data-explorer-row]{transition:background-color 120ms ease-out}
-tbody>[data-uai-data-explorer-row]:hover{background:color-mix(in oklab,var(--uai-text) 4%,transparent)}
-tbody>[data-uai-data-explorer-row]>td:first-child{font-weight:500}
-tbody>[data-uai-data-explorer-row]{animation:uai-data-explorer-in 240ms cubic-bezier(0.23,1,0.32,1) both}
-tbody>[data-uai-data-explorer-row]:nth-child(2){animation-delay:40ms}
-tbody>[data-uai-data-explorer-row]:nth-child(3){animation-delay:80ms}
-tbody>[data-uai-data-explorer-row]:nth-child(4){animation-delay:120ms}
-tbody>[data-uai-data-explorer-row]:nth-child(5){animation-delay:160ms}
-tbody>[data-uai-data-explorer-row]:nth-child(n+6){animation-delay:200ms}
-@keyframes uai-data-explorer-in{from{opacity:0;transform:translateY(4px)}}
-@media (prefers-reduced-motion:reduce){[data-uai-data-explorer-action]{transition:none}[data-uai-data-explorer-action]:active:not(:disabled){transform:none}[data-uai-data-explorer-row],[data-uai-data-explorer-input]{transition:none;animation:none}}
-`;
+const dataExplorerVariants = cva("grid min-w-0 content-start text-[13px]/[18px] text-foreground", {
+  variants: {
+    variant: { workbench: "gap-4", stacked: "gap-4", compact: "gap-2.5" },
+  },
+});
 
-function actionStyle(compact: boolean, primary: boolean, disabled?: boolean): CSSProperties {
-  return {
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    height: compact ? 26 : 30,
-    padding: compact ? "0 11px" : "0 13px",
-    border: 0,
-    borderRadius: 999,
-    background: primary ? "var(--uai-accent)" : "var(--uai-surface-raised)",
-    color: primary ? "var(--uai-accent-foreground)" : "var(--uai-text)",
-    fontSize: compact ? 12 : 12.5,
-    fontWeight: 500,
-    lineHeight: "16px",
-    whiteSpace: "nowrap",
-    cursor: disabled ? "not-allowed" : "pointer",
-    opacity: disabled ? 0.5 : 1,
-  };
-}
+const dataExplorerActionVariants = cva(
+  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap [transition:filter_120ms_ease-out,box-shadow_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
+  {
+    variants: {
+      emphasis: {
+        primary:
+          "bg-primary text-primary-foreground enabled:hover:shadow-none enabled:hover:brightness-108",
+        secondary:
+          "bg-secondary text-secondary-foreground enabled:hover:shadow-[inset_0_0_0_999px_color-mix(in_oklab,var(--foreground)_9%,transparent)]",
+      },
+      compact: {
+        true: "h-6.5 px-2.75 text-[12px]/4",
+        false: "h-7.5 px-3.25 text-[12.5px]/4",
+      },
+    },
+  },
+);
 
 /** Query workspace: saved views, a query editor, and a results table. */
 export function DataExplorer({
   variant = "workbench",
-  style,
+  className,
   children,
   ...props
 }: DataExplorerProps) {
@@ -98,84 +80,71 @@ export function DataExplorer({
     <Context.Provider value={{ id, variant }}>
       <section
         aria-labelledby={`${id}-title`}
-        {...props}
+        data-slot="data-explorer"
         data-variant={variant}
-        style={{
-          display: "grid",
-          alignContent: "start",
-          gap: variant === "compact" ? 10 : 16,
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
+        className={cn(dataExplorerVariants({ variant }), className)}
+        {...props}
       >
-        <style>{explorerCss}</style>
         {children}
       </section>
     </Context.Provider>
   );
 }
 
-export function DataExplorerHeader({ style, ...props }: ComponentProps<"div">) {
+export function DataExplorerHeader({ className, ...props }: ComponentProps<"div">) {
   useExplorer("DataExplorerHeader");
   return (
     <div
+      data-slot="data-explorer-header"
+      className={cn("flex min-w-0 flex-wrap items-end justify-between gap-3", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "flex-end",
-        justifyContent: "space-between",
-        gap: 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function DataExplorerHeading({ style, ...props }: ComponentProps<"div">) {
+export function DataExplorerHeading({ className, ...props }: ComponentProps<"div">) {
   return (
-    <div {...props} style={{ display: "grid", gap: 4, flex: "1 1 240px", minWidth: 0, ...style }} />
+    <div
+      data-slot="data-explorer-heading"
+      className={cn("grid min-w-0 flex-[1_1_240px] gap-1", className)}
+      {...props}
+    />
   );
 }
 
-export function DataExplorerTitle({ style, ...props }: ComponentProps<"h2">) {
+export function DataExplorerTitle({ className, ...props }: ComponentProps<"h2">) {
   const context = useExplorer("DataExplorerTitle");
   const compact = context.variant === "compact";
   return (
     <h2
+      data-slot="data-explorer-title"
+      className={cn(
+        "m-0 font-semibold tracking-[-0.015em] wrap-anywhere",
+        compact ? "text-[15px]/5" : "text-lg/6",
+        className,
+      )}
       {...props}
       id={`${context.id}-title`}
-      style={{
-        margin: 0,
-        fontSize: compact ? 15 : 18,
-        lineHeight: compact ? "20px" : "24px",
-        fontWeight: 600,
-        letterSpacing: "-0.015em",
-        overflowWrap: "anywhere",
-        ...style,
-      }}
     />
   );
 }
 
-export function DataExplorerDescription({ style, ...props }: ComponentProps<"p">) {
+export function DataExplorerDescription({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="data-explorer-description"
+      className={cn("m-0 text-muted-foreground tabular-nums", className)}
       {...props}
-      style={{ margin: 0, color: "var(--uai-muted)", fontVariantNumeric: "tabular-nums", ...style }}
     />
   );
 }
 
-export function DataExplorerActions({ style, ...props }: ComponentProps<"div">) {
+export function DataExplorerActions({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
+      data-slot="data-explorer-actions"
+      className={cn("flex flex-wrap items-center gap-1.5", className)}
       {...props}
-      style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6, ...style }}
     />
   );
 }
@@ -183,19 +152,20 @@ export function DataExplorerActions({ style, ...props }: ComponentProps<"div">) 
 export function DataExplorerAction({
   emphasis = "secondary",
   type = "button",
-  style,
+  className,
   ...props
 }: ComponentProps<"button"> & { emphasis?: "primary" | "secondary" }) {
   const context = useExplorer("DataExplorerAction");
   return (
     <button
-      {...props}
+      data-slot="data-explorer-action"
+      data-emphasis={emphasis}
       type={type}
-      data-uai-data-explorer-action={emphasis}
-      style={{
-        ...actionStyle(context.variant === "compact", emphasis === "primary", props.disabled),
-        ...style,
-      }}
+      className={cn(
+        dataExplorerActionVariants({ emphasis, compact: context.variant === "compact" }),
+        className,
+      )}
+      {...props}
     />
   );
 }
@@ -207,19 +177,18 @@ export function DataExplorerViews(props: Omit<PageTabsProps, "variant">) {
 }
 
 /** Places the query beside the results in Workbench and above them otherwise. */
-export function DataExplorerBody({ style, ...props }: ComponentProps<"div">) {
+export function DataExplorerBody({ className, ...props }: ComponentProps<"div">) {
   const context = useExplorer("DataExplorerBody");
   return (
     <div
+      data-slot="data-explorer-body"
+      className={cn(
+        "min-w-0 flex-wrap items-start",
+        context.variant === "workbench" ? "flex" : "grid",
+        context.variant === "compact" ? "gap-2" : "gap-3",
+        className,
+      )}
       {...props}
-      style={{
-        display: context.variant === "workbench" ? "flex" : "grid",
-        flexWrap: "wrap",
-        alignItems: "flex-start",
-        gap: context.variant === "compact" ? 8 : 12,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
@@ -227,7 +196,7 @@ export function DataExplorerBody({ style, ...props }: ComponentProps<"div">) {
 /** Query form. Execution stays with the consumer through `onSubmit`. */
 export function DataExplorerQuery({
   "aria-label": label = "Query",
-  style,
+  className,
   ...props
 }: ComponentProps<"form">) {
   const context = useExplorer("DataExplorerQuery");
@@ -235,39 +204,25 @@ export function DataExplorerQuery({
   return (
     <form
       aria-label={label}
+      data-slot="data-explorer-query"
+      className={cn(
+        "m-0 grid min-w-0 flex-[1_1_260px] content-start border bg-card shadow-[0_1px_2px_oklch(0_0_0/0.04)]",
+        compact ? "gap-1.5 rounded-xl p-2.5" : "gap-2.5 rounded-[14px] p-3",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        alignContent: "start",
-        gap: compact ? 6 : 10,
-        flex: "1 1 260px",
-        minWidth: 0,
-        margin: 0,
-        padding: compact ? 10 : 12,
-        border: "1px solid var(--uai-border)",
-        borderRadius: compact ? 12 : 14,
-        background: "var(--uai-surface)",
-        boxShadow: "0 1px 2px oklch(0 0 0 / 0.04)",
-        ...style,
-      }}
     />
   );
 }
 
-export function DataExplorerQueryLabel({ style, children, ...props }: ComponentProps<"label">) {
+export function DataExplorerQueryLabel({ className, children, ...props }: ComponentProps<"label">) {
   const context = useExplorer("DataExplorerQueryLabel");
   return (
     <label
+      data-slot="data-explorer-query-label"
+      className={cn("px-0.5 text-[11.5px]/4 font-medium text-subtle-foreground", className)}
       {...props}
       htmlFor={`${context.id}-query`}
-      style={{
-        padding: "0 2px",
-        color: "var(--uai-subtle)",
-        fontSize: 11.5,
-        fontWeight: 500,
-        lineHeight: "16px",
-        ...style,
-      }}
     >
       {children}
     </label>
@@ -275,7 +230,7 @@ export function DataExplorerQueryLabel({ style, children, ...props }: ComponentP
 }
 
 export function DataExplorerQueryInput({
-  style,
+  className,
   ...props
 }: Omit<ComponentProps<"textarea">, "id">) {
   const context = useExplorer("DataExplorerQueryInput");
@@ -284,47 +239,40 @@ export function DataExplorerQueryInput({
     <textarea
       spellCheck={false}
       rows={compact ? 3 : 5}
+      data-slot="data-explorer-query-input"
+      className={cn(
+        "box-border w-full min-w-0 resize-y border-0 font-[family-name:var(--font-mono,ui-monospace,monospace)] text-inherit transition-shadow duration-120 ease-out placeholder:text-subtle-foreground focus:shadow-[0_0_0_1px_var(--border-strong),0_0_0_4px_color-mix(in_oklab,var(--primary)_22%,transparent)] focus:outline-none motion-reduce:transition-none",
+        compact
+          ? "rounded-lg px-2.5 py-2 text-[11.5px]/[17px]"
+          : "rounded-[10px] px-3 py-2.5 text-[12px]/[19px]",
+        context.variant === "workbench"
+          ? "bg-background"
+          : "bg-[color-mix(in_oklab,var(--background)_60%,var(--card))]",
+        className,
+      )}
       {...props}
       id={`${context.id}-query`}
-      data-uai-data-explorer-input=""
-      style={{
-        width: "100%",
-        minWidth: 0,
-        boxSizing: "border-box",
-        padding: compact ? "8px 10px" : "10px 12px",
-        border: 0,
-        borderRadius: compact ? 8 : 10,
-        background:
-          context.variant === "workbench"
-            ? "var(--uai-canvas)"
-            : "color-mix(in oklab, var(--uai-canvas) 60%, var(--uai-surface))",
-        color: "inherit",
-        fontFamily: "var(--font-mono, ui-monospace, monospace)",
-        fontSize: compact ? 11.5 : 12,
-        lineHeight: compact ? "17px" : "19px",
-        resize: "vertical",
-        ...style,
-      }}
     />
   );
 }
 
 export function DataExplorerRun({
   children = "Run query",
-  style,
+  className,
   ...props
 }: Omit<ComponentProps<"button">, "type">) {
   const context = useExplorer("DataExplorerRun");
   return (
     <button
+      data-slot="data-explorer-run"
+      data-emphasis="primary"
+      className={cn(
+        dataExplorerActionVariants({ emphasis: "primary", compact: context.variant === "compact" }),
+        "justify-self-start",
+        className,
+      )}
       {...props}
       type="submit"
-      data-uai-data-explorer-action="primary"
-      style={{
-        ...actionStyle(context.variant === "compact", true, props.disabled),
-        justifySelf: "start",
-        ...style,
-      }}
     >
       <Play size={12} strokeWidth={2} fill="currentColor" aria-hidden="true" />
       {children}
@@ -334,22 +282,20 @@ export function DataExplorerRun({
 
 export function DataExplorerResults({
   "aria-label": label = "Results",
-  style,
+  className,
   ...props
 }: ComponentProps<"section">) {
   const context = useExplorer("DataExplorerResults");
   return (
     <section
       aria-label={label}
+      data-slot="data-explorer-results"
+      className={cn(
+        "grid min-w-0 flex-[999_1_380px] content-start",
+        context.variant === "compact" ? "gap-1.5" : "gap-2.5",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        alignContent: "start",
-        gap: context.variant === "compact" ? 6 : 10,
-        flex: "999 1 380px",
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
@@ -363,7 +309,7 @@ export function DataExplorerToolbar(props: Omit<DataTableToolbarProps, "variant"
 /** Scrollable results table. The wrapper is focusable so keyboard users can scroll it. */
 export function DataExplorerTable({
   "aria-label": label = "Query results",
-  style,
+  className,
   ...props
 }: ComponentProps<"table">) {
   const context = useExplorer("DataExplorerTable");
@@ -373,48 +319,48 @@ export function DataExplorerTable({
       aria-label={label}
       // biome-ignore lint/a11y/noNoninteractiveTabindex: a scrollable region must be reachable by keyboard.
       tabIndex={0}
-      data-uai-data-explorer-scroll=""
-      style={{
-        minWidth: 0,
-        overflowX: "auto",
-        padding: compact ? "2px 4px" : "4px 6px",
-        border: "1px solid var(--uai-border)",
-        borderRadius: compact ? 12 : 14,
-        background: "var(--uai-surface)",
-        boxShadow: "0 1px 2px oklch(0 0 0 / 0.04)",
-      }}
+      data-slot="data-explorer-table-scroll"
+      className={cn(
+        "min-w-0 overflow-x-auto border bg-card shadow-[0_1px_2px_oklch(0_0_0/0.04)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+        compact ? "rounded-xl px-1 py-0.5" : "rounded-[14px] px-1.5 py-1",
+      )}
     >
       <table
+        data-slot="data-explorer-table"
+        className={cn(
+          "w-full border-collapse",
+          compact ? "text-[12px]/[18px]" : "text-[13px]/[18px]",
+          className,
+        )}
         {...props}
-        style={{
-          width: "100%",
-          borderCollapse: "collapse",
-          fontSize: compact ? 12 : 13,
-          lineHeight: "18px",
-          ...style,
-        }}
       />
     </section>
   );
 }
 
-export function DataExplorerTableHead({ style, ...props }: ComponentProps<"thead">) {
-  return <thead {...props} style={{ background: "transparent", ...style }} />;
+export function DataExplorerTableHead({ className, ...props }: ComponentProps<"thead">) {
+  return (
+    <thead
+      data-slot="data-explorer-table-head"
+      className={cn("bg-transparent", className)}
+      {...props}
+    />
+  );
 }
 
-export function DataExplorerTableBody(props: ComponentProps<"tbody">) {
-  return <tbody {...props} />;
+export function DataExplorerTableBody({ className, ...props }: ComponentProps<"tbody">) {
+  return <tbody data-slot="data-explorer-table-body" className={className} {...props} />;
 }
 
-export function DataExplorerTableRow({ style, ...props }: ComponentProps<"tr">) {
+export function DataExplorerTableRow({ className, ...props }: ComponentProps<"tr">) {
   return (
     <tr
+      data-slot="data-explorer-table-row"
+      className={cn(
+        "border-t border-border/70 [transition:background-color_120ms_ease-out] motion-reduce:transition-none [tbody>&]:animate-[enter_240ms_var(--ease-out-quint)_both] [tbody>&]:fade-in-0 [tbody>&]:slide-in-from-bottom-1 [tbody>&]:hover:bg-foreground/4 [tbody>&]:nth-2:[animation-delay:40ms] [tbody>&]:nth-3:[animation-delay:80ms] [tbody>&]:nth-4:[animation-delay:120ms] [tbody>&]:nth-5:[animation-delay:160ms] [tbody>&]:nth-[n+6]:[animation-delay:200ms] [tbody>&]:motion-reduce:animate-none [tbody>&>td:first-child]:font-medium",
+        className,
+      )}
       {...props}
-      data-uai-data-explorer-row=""
-      style={{
-        borderTop: "1px solid color-mix(in oklab, var(--uai-border) 70%, transparent)",
-        ...style,
-      }}
     />
   );
 }
@@ -422,63 +368,54 @@ export function DataExplorerTableRow({ style, ...props }: ComponentProps<"tr">) 
 export function DataExplorerHeaderCell({
   align = "start",
   scope = "col",
-  style,
+  className,
   ...props
 }: Omit<ComponentProps<"th">, "align"> & { align?: "start" | "end" }) {
   const context = useExplorer("DataExplorerHeaderCell");
+  const compact = context.variant === "compact";
   return (
     <th
       scope={scope}
+      data-slot="data-explorer-header-cell"
+      className={cn(
+        "font-medium whitespace-nowrap text-subtle-foreground",
+        compact ? "h-7.5 px-2 text-[11.5px]" : "h-8.5 px-2.5 text-[12px]",
+        align === "end" ? "text-right" : "text-left",
+        className,
+      )}
       {...props}
-      style={{
-        height: context.variant === "compact" ? 30 : 34,
-        padding: context.variant === "compact" ? "0 8px" : "0 10px",
-        color: "var(--uai-subtle)",
-        fontSize: context.variant === "compact" ? 11.5 : 12,
-        fontWeight: 500,
-        textAlign: align === "end" ? "right" : "left",
-        whiteSpace: "nowrap",
-        ...style,
-      }}
     />
   );
 }
 
 export function DataExplorerCell({
   align = "start",
-  style,
+  className,
   ...props
 }: Omit<ComponentProps<"td">, "align"> & { align?: "start" | "end" }) {
   const context = useExplorer("DataExplorerCell");
   return (
     <td
+      data-slot="data-explorer-cell"
+      className={cn(
+        "whitespace-nowrap",
+        context.variant === "compact" ? "h-8 px-2" : "h-9.5 px-2.5",
+        align === "end" ? "text-right tabular-nums" : "text-left",
+        className,
+      )}
       {...props}
-      style={{
-        height: context.variant === "compact" ? 32 : 38,
-        padding: context.variant === "compact" ? "0 8px" : "0 10px",
-        textAlign: align === "end" ? "right" : "left",
-        fontVariantNumeric: align === "end" ? "tabular-nums" : undefined,
-        whiteSpace: "nowrap",
-        ...style,
-      }}
     />
   );
 }
 
 /** Row count, timing, or errors, announced politely. */
-export function DataExplorerStatus({ style, ...props }: ComponentProps<"p">) {
+export function DataExplorerStatus({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
       role="status"
+      data-slot="data-explorer-status"
+      className={cn("m-0 px-0.5 text-[12px] text-subtle-foreground tabular-nums", className)}
       {...props}
-      style={{
-        margin: 0,
-        padding: "0 2px",
-        color: "var(--uai-subtle)",
-        fontSize: 12,
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     />
   );
 }

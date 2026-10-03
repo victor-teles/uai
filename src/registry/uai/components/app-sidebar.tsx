@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { ChevronDown, Menu, PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
 import {
   type ComponentProps,
@@ -11,6 +12,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const APP_SIDEBAR_VARIANTS = ["panel", "inset", "compact"] as const;
 export type AppSidebarVariant = (typeof APP_SIDEBAR_VARIANTS)[number];
@@ -96,22 +98,52 @@ function useReveal(ref: React.RefObject<HTMLElement | null>, open: boolean) {
     );
   }, [open]);
 }
-// Hover and press feedback for rows and icon buttons. Inline styles own the resting state.
+// Press feedback and focus for rows and icon buttons. Idle rows add their own hover tint.
 const rowInteraction =
-  "[transition:background-color_120ms_ease-out,color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-[color-mix(in_oklab,var(--uai-surface-raised)_70%,transparent)] hover:text-[var(--uai-text)] active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--uai-accent)] motion-reduce:transition-none motion-reduce:active:scale-100";
-const iconButtonInteraction =
-  "[transition:background-color_120ms_ease-out,color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-[var(--uai-surface-raised)] hover:text-[var(--uai-text)] active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uai-accent)] motion-reduce:transition-none motion-reduce:active:scale-100";
-function classes(...values: (string | false | undefined)[]) {
-  return values.filter(Boolean).join(" ");
+  "[transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring motion-reduce:transition-none motion-reduce:active:scale-100";
+const rowIdle = "bg-transparent text-muted-foreground hover:bg-accent/70 hover:text-foreground";
+
+function iconButtonClass(variant: AppSidebarVariant) {
+  return cn(
+    "grid flex-none cursor-pointer place-items-center border-0 bg-transparent p-0 text-muted-foreground",
+    "[transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-accent hover:text-foreground active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none motion-reduce:active:scale-100",
+    variant === "compact" ? "size-6 rounded-[7px]" : "size-7 rounded-lg",
+  );
 }
-const hidden: React.CSSProperties = {
-  position: "absolute",
-  width: 1,
-  height: 1,
-  overflow: "hidden",
-  clip: "rect(0 0 0 0)",
-  whiteSpace: "nowrap",
-};
+
+function rowClass(context: SidebarContext, active: boolean, nested: boolean) {
+  const compact = context.variant === "compact";
+  return cn(
+    "flex w-full min-w-0 cursor-pointer items-center border-0 text-left font-medium no-underline",
+    rowInteraction,
+    compact ? "h-6.5 gap-2 rounded-md text-[12px]" : "h-7.5 gap-2.5 rounded-[7px] text-[12.5px]",
+    context.collapsed
+      ? "justify-center p-0"
+      : cn("justify-start", nested ? cn("pr-2", compact ? "pl-7.5" : "pl-9") : "px-2"),
+    active
+      ? cn(
+          "text-foreground",
+          context.variant === "inset"
+            ? "bg-card shadow-[0_0_0_1px_var(--border),0_1px_2px_oklch(0_0_0/0.06)]"
+            : "bg-accent",
+        )
+      : rowIdle,
+  );
+}
+
+const appSidebarVariants = cva(
+  "flex min-w-0 flex-col overflow-hidden text-[13px]/[18px] text-foreground transition-[width] duration-240 ease-out-quint motion-reduce:transition-none",
+  {
+    variants: {
+      variant: {
+        panel: "gap-3 rounded-[14px] border bg-card p-2",
+        inset:
+          "gap-3 rounded-[14px] border-0 bg-background p-2 shadow-[inset_0_0_0_1px_var(--border)]",
+        compact: "gap-2 rounded-xl border-0 bg-card p-1.5",
+      },
+    },
+  },
+);
 
 export function AppSidebar({
   variant = "panel",
@@ -125,7 +157,7 @@ export function AppSidebar({
   defaultOpen = false,
   onOpenChange,
   mobileQuery = "(max-width: 767px)",
-  style,
+  className,
   ...props
 }: AppSidebarProps) {
   const id = useId();
@@ -171,94 +203,57 @@ export function AppSidebar({
       }}
     >
       <div
-        {...props}
+        data-slot="app-sidebar"
         data-variant={variant}
         data-collapsed={showCollapsed || undefined}
         data-mobile={mobile || undefined}
+        className={cn(
+          appSidebarVariants({ variant }),
+          mobile ? "h-auto w-full" : "h-full",
+          !mobile && (showCollapsed ? (compact ? "w-11" : "w-14") : compact ? "w-54" : "w-62"),
+          className,
+        )}
+        {...props}
         data-app-sidebar={id}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: compact ? 8 : 12,
-          width: mobile ? "100%" : showCollapsed ? (compact ? 44 : 56) : compact ? 216 : 248,
-          minWidth: 0,
-          height: mobile ? "auto" : "100%",
-          padding: compact ? 6 : 8,
-          border: variant === "panel" ? "1px solid var(--uai-border)" : 0,
-          borderRadius: compact ? 12 : 14,
-          background: variant === "inset" ? "var(--uai-canvas)" : "var(--uai-surface)",
-          boxShadow: variant === "inset" ? "inset 0 0 0 1px var(--uai-border)" : undefined,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          overflow: "hidden",
-          transition: `width 240ms ${easeOut}`,
-          ...style,
-        }}
       />
     </Context.Provider>
   );
 }
 
 /** Top row for the workspace switcher, toggles, and mobile trigger. */
-export function AppSidebarHeader({ style, ...props }: ComponentProps<"div">) {
+export function AppSidebarHeader({ className, ...props }: ComponentProps<"div">) {
   const context = useSidebar("AppSidebarHeader");
   return (
     <div
+      data-slot="app-sidebar-header"
+      className={cn(
+        "flex min-w-0 items-center gap-1.5",
+        context.collapsed ? "flex-col" : "flex-row",
+        className,
+      )}
       {...props}
-      style={{
-        display: "flex",
-        flexDirection: context.collapsed ? "column" : "row",
-        alignItems: "center",
-        gap: 6,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
 /** Text that hides when the sidebar collapses, such as a workspace name. */
-export function AppSidebarTitle({ style, ...props }: ComponentProps<"span">) {
+export function AppSidebarTitle({ className, ...props }: ComponentProps<"span">) {
   const context = useSidebar("AppSidebarTitle");
   return (
     <span
+      data-slot="app-sidebar-title"
+      className={cn(
+        "min-w-0 flex-1 truncate font-medium tracking-[-0.005em]",
+        context.variant === "compact" ? "pl-1 text-[12.5px]" : "pl-1.5 text-[13px]",
+        context.collapsed && "sr-only",
+        className,
+      )}
       {...props}
-      style={{
-        flex: 1,
-        minWidth: 0,
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: "nowrap",
-        paddingLeft: context.variant === "compact" ? 4 : 6,
-        fontSize: context.variant === "compact" ? 12.5 : 13,
-        fontWeight: 500,
-        letterSpacing: "-0.005em",
-        ...(context.collapsed ? hidden : null),
-        ...style,
-      }}
     />
   );
 }
 
-function iconButtonStyle(variant: AppSidebarVariant): React.CSSProperties {
-  const size = variant === "compact" ? 24 : 28;
-  return {
-    display: "grid",
-    placeItems: "center",
-    flex: "0 0 auto",
-    width: size,
-    height: size,
-    padding: 0,
-    border: 0,
-    borderRadius: variant === "compact" ? 7 : 8,
-    color: "var(--uai-muted)",
-    cursor: "pointer",
-  };
-}
-
 export function AppSidebarCollapseToggle({
-  style,
   className,
   onClick,
   ...props
@@ -270,6 +265,8 @@ export function AppSidebarCollapseToggle({
     <button
       type="button"
       aria-label={context.collapsed ? "Expand sidebar" : "Collapse sidebar"}
+      data-slot="app-sidebar-collapse-toggle"
+      className={cn(iconButtonClass(context.variant), className)}
       {...props}
       aria-expanded={!context.collapsed}
       aria-controls={`${context.id}-nav`}
@@ -277,8 +274,6 @@ export function AppSidebarCollapseToggle({
         onClick?.(event);
         if (!event.defaultPrevented) context.setCollapsed(!context.collapsed);
       }}
-      className={classes("bg-transparent", iconButtonInteraction, className)}
-      style={{ ...iconButtonStyle(context.variant), ...style }}
     >
       <Icon size={16} strokeWidth={1.75} aria-hidden="true" />
     </button>
@@ -286,7 +281,6 @@ export function AppSidebarCollapseToggle({
 }
 
 export function AppSidebarMobileTrigger({
-  style,
   className,
   onClick,
   ...props
@@ -298,6 +292,8 @@ export function AppSidebarMobileTrigger({
     <button
       type="button"
       aria-label={context.open ? "Close navigation" : "Open navigation"}
+      data-slot="app-sidebar-mobile-trigger"
+      className={cn(iconButtonClass(context.variant), "ml-auto", className)}
       {...props}
       id={`${context.id}-trigger`}
       aria-expanded={context.open}
@@ -306,38 +302,33 @@ export function AppSidebarMobileTrigger({
         onClick?.(event);
         if (!event.defaultPrevented) context.setOpen(!context.open);
       }}
-      className={classes("bg-transparent", iconButtonInteraction, className)}
-      style={{ ...iconButtonStyle(context.variant), marginLeft: "auto", ...style }}
     >
       <Icon size={16} strokeWidth={1.75} aria-hidden="true" />
     </button>
   );
 }
 
-export function AppSidebarNav({ style, ...props }: ComponentProps<"nav">) {
+export function AppSidebarNav({ className, ...props }: ComponentProps<"nav">) {
   const context = useSidebar("AppSidebarNav");
   const hiddenOnMobile = context.mobile && !context.open;
   return (
     <nav
       aria-label="Main"
+      data-slot="app-sidebar-nav"
+      className={cn(
+        "min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto",
+        hiddenOnMobile ? "hidden" : "flex",
+        context.variant === "compact" ? "gap-2.5" : "gap-4",
+        className,
+      )}
       {...props}
       id={`${context.id}-nav`}
       hidden={hiddenOnMobile}
-      style={{
-        display: hiddenOnMobile ? "none" : "flex",
-        flex: 1,
-        flexDirection: "column",
-        gap: context.variant === "compact" ? 10 : 16,
-        minHeight: 0,
-        overflowY: "auto",
-        overflowX: "hidden",
-        ...style,
-      }}
     />
   );
 }
 
-export function AppSidebarGroup({ style, ...props }: ComponentProps<"div">) {
+export function AppSidebarGroup({ className, ...props }: ComponentProps<"div">) {
   useSidebar("AppSidebarGroup");
   const labelId = useId();
   return (
@@ -346,74 +337,40 @@ export function AppSidebarGroup({ style, ...props }: ComponentProps<"div">) {
       <div
         role="group"
         aria-labelledby={labelId}
+        data-slot="app-sidebar-group"
+        className={cn("grid gap-px", className)}
         {...props}
-        style={{ display: "grid", gap: 1, ...style }}
       />
     </GroupContext.Provider>
   );
 }
 
-export function AppSidebarGroupLabel({ style, ...props }: ComponentProps<"div">) {
+export function AppSidebarGroupLabel({ className, ...props }: ComponentProps<"div">) {
   const labelId = useContext(GroupContext);
   const context = useSidebar("AppSidebarGroupLabel");
   if (!labelId) throw new Error("AppSidebarGroupLabel must be used within AppSidebarGroup");
   return (
     <div
+      data-slot="app-sidebar-group-label"
+      className={cn(
+        "px-2 pt-0.5 pb-1 text-[11.5px]/4 font-normal text-subtle-foreground",
+        context.collapsed && "sr-only",
+        className,
+      )}
       {...props}
       id={labelId}
-      style={{
-        padding: "2px 8px 4px",
-        color: "var(--uai-subtle)",
-        fontSize: 11.5,
-        lineHeight: "16px",
-        fontWeight: 400,
-        ...(context.collapsed ? hidden : null),
-        ...style,
-      }}
     />
   );
 }
 
-export function AppSidebarList({ style, ...props }: ComponentProps<"ul">) {
+export function AppSidebarList({ className, ...props }: ComponentProps<"ul">) {
   return (
     <ul
+      data-slot="app-sidebar-list"
+      className={cn("m-0 grid list-none gap-px p-0", className)}
       {...props}
-      style={{ display: "grid", gap: 1, margin: 0, padding: 0, listStyle: "none", ...style }}
     />
   );
-}
-
-function rowStyle(context: SidebarContext, active: boolean, nested: boolean): React.CSSProperties {
-  const compact = context.variant === "compact";
-  return {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: context.collapsed ? "center" : "flex-start",
-    gap: compact ? 8 : 10,
-    width: "100%",
-    minWidth: 0,
-    height: compact ? 26 : 30,
-    padding: context.collapsed ? 0 : nested ? `0 8px 0 ${compact ? 30 : 36}px` : "0 8px",
-    border: 0,
-    borderRadius: compact ? 6 : 7,
-    // Active rows are a raised pill; idle rows stay transparent so hover classes can tint them.
-    background: active
-      ? context.variant === "inset"
-        ? "var(--uai-surface)"
-        : "var(--uai-surface-raised)"
-      : undefined,
-    boxShadow:
-      active && context.variant === "inset"
-        ? "0 0 0 1px var(--uai-border), 0 1px 2px oklch(0 0 0 / 0.06)"
-        : undefined,
-    color: active ? "var(--uai-text)" : undefined,
-    font: "inherit",
-    fontSize: compact ? 12 : 12.5,
-    fontWeight: 500,
-    textAlign: "left",
-    textDecoration: "none",
-    cursor: "pointer",
-  };
 }
 
 export type AppSidebarItemProps = Omit<ComponentProps<"a">, "children"> & {
@@ -428,7 +385,6 @@ export function AppSidebarItem({
   label,
   href,
   children,
-  style,
   className,
   onClick,
   ...props
@@ -437,11 +393,13 @@ export function AppSidebarItem({
   const submenu = useContext(Submenu);
   const active = context.value === value;
   return (
-    <li style={{ minWidth: 0 }}>
+    <li className="min-w-0">
       <ItemContext.Provider value={true}>
         <a
           href={href ?? `#${value}`}
           title={context.collapsed ? label : undefined}
+          data-slot="app-sidebar-item"
+          className={cn(rowClass(context, active, Boolean(submenu)), className)}
           {...props}
           aria-current={active ? "page" : undefined}
           data-active={active || undefined}
@@ -449,12 +407,6 @@ export function AppSidebarItem({
             onClick?.(event);
             context.select(value);
           }}
-          className={classes(
-            !active && "bg-transparent text-[var(--uai-muted)]",
-            rowInteraction,
-            className,
-          )}
-          style={{ ...rowStyle(context, active, Boolean(submenu)), ...style }}
         >
           {children}
         </a>
@@ -463,68 +415,49 @@ export function AppSidebarItem({
   );
 }
 
-export function AppSidebarItemIcon({ style, ...props }: ComponentProps<"span">) {
+export function AppSidebarItemIcon({ className, ...props }: ComponentProps<"span">) {
   const context = useSidebar("AppSidebarItemIcon");
   return (
     <span
       aria-hidden="true"
+      data-slot="app-sidebar-item-icon"
+      className={cn(
+        "grid flex-none place-items-center opacity-90",
+        context.variant === "compact" ? "size-4" : "size-4.5",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        placeItems: "center",
-        flex: "0 0 auto",
-        width: context.variant === "compact" ? 16 : 18,
-        height: context.variant === "compact" ? 16 : 18,
-        opacity: 0.9,
-        ...style,
-      }}
     />
   );
 }
 
 /** Row label. It stays in the accessibility tree when collapsed. */
-export function AppSidebarItemLabel({ style, ...props }: ComponentProps<"span">) {
+export function AppSidebarItemLabel({ className, ...props }: ComponentProps<"span">) {
   const context = useSidebar("AppSidebarItemLabel");
   if (!useContext(ItemContext)) {
     throw new Error("AppSidebarItemLabel must be used within AppSidebarItem or AppSidebarSubmenu");
   }
   return (
     <span
+      data-slot="app-sidebar-item-label"
+      className={cn("min-w-0 flex-1 truncate", context.collapsed && "sr-only", className)}
       {...props}
-      style={{
-        flex: 1,
-        minWidth: 0,
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: "nowrap",
-        ...(context.collapsed ? hidden : null),
-        ...style,
-      }}
     />
   );
 }
 
 /** A trailing count or status beside a row label. Hidden when collapsed. */
-export function AppSidebarItemBadge({ style, ...props }: ComponentProps<"span">) {
+export function AppSidebarItemBadge({ className, ...props }: ComponentProps<"span">) {
   const context = useSidebar("AppSidebarItemBadge");
   if (context.collapsed) return null;
   return (
     <span
+      data-slot="app-sidebar-item-badge"
+      className={cn(
+        "ml-auto min-w-4.5 rounded-full bg-foreground/7 px-1.5 text-center text-[11px]/[17px] font-medium text-muted-foreground tabular-nums",
+        className,
+      )}
       {...props}
-      style={{
-        marginLeft: "auto",
-        minWidth: 18,
-        padding: "0 6px",
-        borderRadius: 999,
-        background: "color-mix(in oklab, var(--uai-text) 7%, transparent)",
-        color: "var(--uai-muted)",
-        fontSize: 11,
-        lineHeight: "17px",
-        fontWeight: 500,
-        textAlign: "center",
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     />
   );
 }
@@ -533,7 +466,7 @@ export function AppSidebarSubmenu({
   open,
   defaultOpen = false,
   onOpenChange,
-  style,
+  className,
   ...props
 }: ComponentProps<"li"> & {
   open?: boolean;
@@ -545,7 +478,11 @@ export function AppSidebarSubmenu({
   const [isOpen, setOpen] = useControllable(open, defaultOpen, onOpenChange);
   return (
     <Submenu.Provider value={{ id, open: isOpen, setOpen }}>
-      <li {...props} style={{ display: "grid", gap: 1, minWidth: 0, ...style }} />
+      <li
+        data-slot="app-sidebar-submenu"
+        className={cn("grid min-w-0 gap-px", className)}
+        {...props}
+      />
     </Submenu.Provider>
   );
 }
@@ -559,7 +496,6 @@ function useSubmenu(part: string) {
 export function AppSidebarSubmenuTrigger({
   label,
   children,
-  style,
   className,
   onClick,
   ...props
@@ -572,6 +508,8 @@ export function AppSidebarSubmenuTrigger({
       <button
         type="button"
         title={context.collapsed ? label : undefined}
+        data-slot="app-sidebar-submenu-trigger"
+        className={cn(rowClass(context, false, false), className)}
         {...props}
         aria-expanded={expanded}
         aria-controls={`${submenu.id}-list`}
@@ -583,8 +521,6 @@ export function AppSidebarSubmenuTrigger({
             submenu.setOpen(true);
           } else submenu.setOpen(!submenu.open);
         }}
-        className={classes("bg-transparent text-[var(--uai-muted)]", rowInteraction, className)}
-        style={{ ...rowStyle(context, false, false), ...style }}
       >
         {children}
         {context.collapsed ? null : (
@@ -592,13 +528,10 @@ export function AppSidebarSubmenuTrigger({
             size={14}
             strokeWidth={1.75}
             aria-hidden="true"
-            style={{
-              marginLeft: "auto",
-              flex: "0 0 auto",
-              color: "var(--uai-subtle)",
-              transform: expanded ? "rotate(180deg)" : "none",
-              transition: `transform 180ms ${easeOut}`,
-            }}
+            className={cn(
+              "ml-auto flex-none text-subtle-foreground transition-transform duration-180 ease-out-quint motion-reduce:transition-none",
+              expanded && "rotate-180",
+            )}
           />
         )}
       </button>
@@ -606,7 +539,7 @@ export function AppSidebarSubmenuTrigger({
   );
 }
 
-export function AppSidebarSubmenuList({ style, ...props }: ComponentProps<"ul">) {
+export function AppSidebarSubmenuList({ className, ...props }: ComponentProps<"ul">) {
   const context = useSidebar("AppSidebarSubmenuList");
   const submenu = useSubmenu("AppSidebarSubmenuList");
   const isHidden = !submenu.open || context.collapsed;
@@ -614,36 +547,25 @@ export function AppSidebarSubmenuList({ style, ...props }: ComponentProps<"ul">)
   useReveal(ref, !isHidden);
   return (
     <ul
+      data-slot="app-sidebar-submenu-list"
+      className={cn("m-0 list-none gap-px p-0", isHidden ? "hidden" : "grid", className)}
       {...props}
       ref={ref}
       id={`${submenu.id}-list`}
       hidden={isHidden}
-      style={{
-        display: isHidden ? "none" : "grid",
-        gap: 1,
-        margin: 0,
-        padding: 0,
-        listStyle: "none",
-        ...style,
-      }}
     />
   );
 }
 
 /** Bottom row for account or settings links. */
-export function AppSidebarFooter({ style, ...props }: ComponentProps<"div">) {
+export function AppSidebarFooter({ className, ...props }: ComponentProps<"div">) {
   const context = useSidebar("AppSidebarFooter");
   if (context.mobile && !context.open) return null;
   return (
     <div
+      data-slot="app-sidebar-footer"
+      className={cn("grid gap-px border-t pt-2", className)}
       {...props}
-      style={{
-        display: "grid",
-        gap: 1,
-        paddingTop: 8,
-        borderTop: "1px solid var(--uai-border)",
-        ...style,
-      }}
     />
   );
 }

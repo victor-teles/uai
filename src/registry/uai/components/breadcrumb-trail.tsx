@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { ChevronLeft, ChevronRight, Ellipsis } from "lucide-react";
 import {
   Children,
@@ -11,6 +12,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const BREADCRUMB_TRAIL_VARIANTS = ["chevron", "slash", "contained"] as const;
 export type BreadcrumbTrailVariant = (typeof BREADCRUMB_TRAIL_VARIANTS)[number];
@@ -42,12 +44,26 @@ function useMediaQuery(query: string) {
   return matches;
 }
 
+const breadcrumbTrailListVariants = cva(
+  "m-0 inline-flex max-w-full list-none flex-wrap items-center",
+  {
+    variants: {
+      variant: {
+        chevron: "gap-0.5 p-0",
+        slash: "gap-0 p-0",
+        contained:
+          "gap-0.5 rounded-full bg-muted p-0.75 shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--border)_70%,transparent)]",
+      },
+    },
+  },
+);
+
 export function BreadcrumbTrail({
   variant = "chevron",
   compactQuery = "(max-width: 479px)",
   compact,
   children,
-  style,
+  className,
   ...props
 }: BreadcrumbTrailProps) {
   const narrow = useMediaQuery(compactQuery);
@@ -56,38 +72,13 @@ export function BreadcrumbTrail({
     <Context.Provider value={{ variant, compact: isCompact }}>
       <nav
         aria-label="Breadcrumb"
-        {...props}
+        data-slot="breadcrumb-trail"
         data-variant={variant}
         data-compact={isCompact || undefined}
-        style={{
-          minWidth: 0,
-          color: "var(--uai-muted)",
-          fontSize: 13,
-          lineHeight: "18px",
-          fontWeight: 500,
-          ...style,
-        }}
+        className={cn("min-w-0 text-[13px]/[18px] font-medium text-muted-foreground", className)}
+        {...props}
       >
-        <ol
-          style={{
-            display: "inline-flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            gap: variant === "slash" ? 0 : 2,
-            maxWidth: "100%",
-            margin: 0,
-            padding: variant === "contained" ? 3 : 0,
-            listStyle: "none",
-            borderRadius: variant === "contained" ? 999 : 0,
-            background: variant === "contained" ? "var(--uai-surface-raised)" : undefined,
-            boxShadow:
-              variant === "contained"
-                ? "inset 0 0 0 1px color-mix(in oklab, var(--uai-border) 70%, transparent)"
-                : undefined,
-          }}
-        >
-          {children}
-        </ol>
+        <ol className={breadcrumbTrailListVariants({ variant })}>{children}</ol>
       </nav>
     </Context.Provider>
   );
@@ -97,39 +88,20 @@ function Separator({ variant }: { variant: BreadcrumbTrailVariant }) {
   return (
     <span
       aria-hidden="true"
-      style={{
-        display: "inline-grid",
-        placeItems: "center",
-        width: variant === "slash" ? 14 : 16,
-        color: "var(--uai-subtle)",
-        opacity: 0.7,
-        fontWeight: 400,
-      }}
+      className={cn(
+        "inline-grid place-items-center font-normal text-subtle-foreground opacity-70",
+        variant === "slash" ? "w-3.5" : "w-4",
+      )}
     >
       {variant === "slash" ? "/" : <ChevronRight size={14} strokeWidth={1.75} />}
     </span>
   );
 }
 
-const linkStyle: React.CSSProperties = {
-  display: "inline-flex",
-  alignItems: "center",
-  gap: 4,
-  minWidth: 0,
-  maxWidth: "100%",
-  height: 28,
-  padding: "0 8px",
-  borderRadius: 999,
-  textDecoration: "none",
-};
-// Hover and press feedback; inline styles own the resting state.
+const link = "inline-flex h-7 min-w-0 max-w-full items-center gap-1 rounded-full px-2 no-underline";
+// Hover and press feedback.
 const interactive =
-  "bg-transparent text-[inherit] [transition:background-color_120ms_ease-out,color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-[color-mix(in_oklab,var(--uai-surface-raised)_70%,transparent)] hover:text-[var(--uai-text)] active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--uai-accent)] motion-reduce:transition-none motion-reduce:active:scale-100";
-const labelStyle: React.CSSProperties = {
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-};
+  "bg-transparent text-inherit [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-accent/70 hover:text-foreground active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring motion-reduce:transition-none motion-reduce:active:scale-100";
 
 export type BreadcrumbTrailItemProps = Omit<ComponentProps<"li">, "children"> & {
   href?: string;
@@ -150,7 +122,7 @@ export function BreadcrumbTrailItem({
   maxWidth = 160,
   title,
   children,
-  style,
+  className,
   ...props
 }: BreadcrumbTrailItemProps) {
   const context = useTrail("BreadcrumbTrailItem");
@@ -158,15 +130,15 @@ export function BreadcrumbTrailItem({
   if (context.compact && !parent) return null;
   if (context.compact) {
     return (
-      <li {...props} style={{ display: "inline-flex", minWidth: 0, ...style }}>
-        <a
-          href={href}
-          className={interactive}
-          style={{ ...linkStyle, color: "var(--uai-text)", paddingLeft: 4 }}
-        >
+      <li
+        data-slot="breadcrumb-trail-item"
+        className={cn("inline-flex min-w-0", className)}
+        {...props}
+      >
+        <a href={href} className={cn(link, interactive, "pl-1 text-foreground")}>
           <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" />
-          <span style={{ ...labelStyle, maxWidth: 240 }} title={fullTitle}>
-            <span style={visuallyHidden}>Back to </span>
+          <span className="max-w-60 truncate" title={fullTitle}>
+            <span className="sr-only">Back to </span>
             {children}
           </span>
         </a>
@@ -174,46 +146,36 @@ export function BreadcrumbTrailItem({
     );
   }
   return (
-    <li {...props} style={{ display: "inline-flex", alignItems: "center", minWidth: 0, ...style }}>
+    <li
+      data-slot="breadcrumb-trail-item"
+      className={cn("inline-flex min-w-0 items-center", className)}
+      {...props}
+    >
       {current ? (
         <span
           aria-current="page"
           title={fullTitle}
-          style={{
-            ...linkStyle,
-            ...labelStyle,
-            display: "block",
-            lineHeight: "28px",
-            maxWidth,
-            color: "var(--uai-text)",
-            ...(context.variant === "contained"
-              ? {
-                  background: "var(--uai-surface)",
-                  boxShadow: "0 0 0 1px var(--uai-border), 0 1px 2px oklch(0 0 0 / 0.06)",
-                }
-              : null),
-          }}
+          className={cn(
+            link,
+            "block truncate leading-7 text-foreground",
+            context.variant === "contained" &&
+              "bg-card shadow-[0_0_0_1px_var(--border),0_1px_2px_oklch(0_0_0/0.06)]",
+          )}
+          style={{ maxWidth }}
         >
           {children}
         </span>
       ) : (
-        <a href={href} title={fullTitle} className={interactive} style={linkStyle}>
-          <span style={{ ...labelStyle, maxWidth }}>{children}</span>
+        <a href={href} title={fullTitle} className={cn(link, interactive)}>
+          <span className="truncate" style={{ maxWidth }}>
+            {children}
+          </span>
         </a>
       )}
       {current ? null : <Separator variant={context.variant} />}
     </li>
   );
 }
-
-const visuallyHidden: React.CSSProperties = {
-  position: "absolute",
-  width: 1,
-  height: 1,
-  overflow: "hidden",
-  clip: "rect(0 0 0 0)",
-  whiteSpace: "nowrap",
-};
 
 export type BreadcrumbTrailCollapsedProps = Omit<ComponentProps<"li">, "children"> & {
   /** Accessible label for the reveal button. */
@@ -227,7 +189,7 @@ export function BreadcrumbTrailCollapsed({
   label = "Show hidden levels",
   defaultExpanded = false,
   children,
-  style,
+  className,
   ...props
 }: BreadcrumbTrailCollapsedProps) {
   const context = useTrail("BreadcrumbTrailCollapsed");
@@ -258,7 +220,11 @@ export function BreadcrumbTrailCollapsed({
   if (context.compact) return null;
   if (expanded) return children;
   return (
-    <li {...props} style={{ display: "inline-flex", alignItems: "center", ...style }}>
+    <li
+      data-slot="breadcrumb-trail-collapsed"
+      className={cn("inline-flex items-center", className)}
+      {...props}
+    >
       <button
         type="button"
         aria-label={label}
@@ -270,17 +236,10 @@ export function BreadcrumbTrailCollapsed({
             reveal.current = { list, index: Array.from(list.children).indexOf(item) };
           setExpanded(true);
         }}
-        className={interactive}
-        style={{
-          display: "grid",
-          placeItems: "center",
-          width: 28,
-          height: 28,
-          padding: 0,
-          border: 0,
-          borderRadius: 999,
-          cursor: "pointer",
-        }}
+        className={cn(
+          interactive,
+          "grid size-7 cursor-pointer place-items-center rounded-full border-0 p-0",
+        )}
       >
         <Ellipsis size={16} strokeWidth={1.75} aria-hidden="true" />
       </button>

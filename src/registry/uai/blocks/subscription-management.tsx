@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import {
   type ComponentProps,
   createContext,
@@ -19,6 +20,7 @@ import {
   type DescriptionListVariant,
 } from "@/components/ui/uai/description-list";
 import { PricingToggle, type PricingToggleVariant } from "@/components/ui/uai/pricing-toggle";
+import { cn } from "@/lib/uai-utils";
 
 export const SUBSCRIPTION_MANAGEMENT_VARIANTS = ["split", "stacked", "compact"] as const;
 export type SubscriptionManagementVariant = (typeof SUBSCRIPTION_MANAGEMENT_VARIANTS)[number];
@@ -35,27 +37,6 @@ function useManagement(part: string) {
   return context;
 }
 
-const layoutCss = `
-[data-uai-subscription-layout]{display:grid;gap:16px;align-items:start;min-width:0}
-[data-uai-subscription-column]{display:grid;gap:16px;align-content:start;min-width:0}
-[data-uai-subscription="compact"]>[data-uai-subscription-layout],[data-uai-subscription="compact"] [data-uai-subscription-column]{gap:10px}
-@container (min-width: 760px){
-  [data-uai-subscription="split"]>[data-uai-subscription-layout]{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);column-gap:24px}
-  [data-uai-subscription="split"] [data-uai-subscription-full]{grid-column:1 / -1}
-}
-.uai-subscription-plan{transition:background-color 120ms ease-out,box-shadow 120ms ease-out}
-.uai-subscription-plan:hover{background:color-mix(in oklab,var(--uai-surface-raised) 88%,var(--uai-text))}
-.uai-subscription-plan:has(input:focus-visible){outline:2px solid var(--uai-accent);outline-offset:2px}
-.uai-subscription-plan:has(input:checked){box-shadow:inset 0 0 0 1.5px var(--uai-accent);background:color-mix(in oklab,var(--uai-accent) 8%,var(--uai-surface))}
-.uai-subscription-plan:has(input:disabled){opacity:0.55;cursor:not-allowed}
-.uai-subscription-meter-fill{transition:width 300ms cubic-bezier(0.23,1,0.32,1)}
-.uai-subscription-button{transition:background-color 120ms ease-out,filter 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-.uai-subscription-button:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-.uai-subscription-button:hover:not(:disabled){filter:brightness(1.08)}
-.uai-subscription-button:active:not(:disabled){transform:scale(0.97)}
-@media (prefers-reduced-motion: reduce){.uai-subscription-plan,.uai-subscription-meter-fill,.uai-subscription-button{transition:none}.uai-subscription-button:active:not(:disabled){transform:none}}
-`;
-
 const toggleVariants: Record<SubscriptionManagementVariant, PricingToggleVariant> = {
   split: "segmented",
   stacked: "pill",
@@ -71,31 +52,45 @@ const dialogVariants: Record<SubscriptionManagementVariant, ConfirmationDialogVa
   stacked: "sheet",
   compact: "compact",
 };
-const statusColor: Record<SubscriptionManagementStatusTone, string> = {
-  active: "var(--uai-success)",
-  trial: "var(--uai-accent)",
-  "past-due": "var(--uai-warning)",
-  canceled: "var(--uai-muted)",
+const statusVariants = cva(
+  "inline-flex h-[22px] items-center gap-1.5 rounded-full px-2 text-[11.5px] font-medium",
+  {
+    variants: {
+      tone: {
+        active: "bg-success/14 text-[color-mix(in_oklab,var(--success)_80%,var(--foreground))]",
+        trial: "bg-primary/14 text-[color-mix(in_oklab,var(--primary)_80%,var(--foreground))]",
+        "past-due": "bg-warning/14 text-[color-mix(in_oklab,var(--warning)_80%,var(--foreground))]",
+        canceled:
+          "bg-muted-foreground/14 text-[color-mix(in_oklab,var(--muted-foreground)_80%,var(--foreground))]",
+      },
+    },
+  },
+);
+const statusDotColor: Record<SubscriptionManagementStatusTone, string> = {
+  active: "bg-success",
+  trial: "bg-primary",
+  "past-due": "bg-warning",
+  canceled: "bg-muted-foreground",
 };
 
-function card(variant: SubscriptionManagementVariant) {
-  const compact = variant === "compact";
-  return {
-    boxSizing: "border-box",
-    display: "grid",
-    gap: compact ? 10 : 14,
-    minWidth: 0,
-    padding: compact ? 12 : 16,
-    borderRadius: compact ? 12 : 14,
-    background: "var(--uai-surface)",
-  } as const;
-}
+const subscriptionManagementVariants = cva(
+  "@container box-border min-w-0 text-[13px]/[18px] text-foreground",
+  {
+    variants: {
+      variant: {
+        split: "",
+        stacked: "mx-auto max-w-[640px]",
+        compact: "mx-auto max-w-[480px]",
+      },
+    },
+  },
+);
 
 /** Plan changes, usage limits, payment, renewal, and cancellation for one subscription. */
 export function SubscriptionManagement({
   variant = "split",
   children,
-  style,
+  className,
   ...props
 }: SubscriptionManagementProps) {
   const id = useId();
@@ -103,67 +98,82 @@ export function SubscriptionManagement({
     <Context.Provider value={{ id, variant }}>
       <section
         aria-labelledby={`${id}-title`}
+        data-slot="subscription-management"
+        className={cn(subscriptionManagementVariants({ variant }), className)}
         {...props}
         data-variant={variant}
-        data-uai-subscription={variant}
-        style={{
-          boxSizing: "border-box",
-          containerType: "inline-size",
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...(variant === "stacked" ? { maxWidth: 640, margin: "0 auto" } : null),
-          ...(variant === "compact" ? { maxWidth: 480, margin: "0 auto" } : null),
-          ...style,
-        }}
       >
-        <style>{layoutCss}</style>
-        <div data-uai-subscription-layout="">{children}</div>
+        <div
+          data-slot="subscription-management-layout"
+          className={cn(
+            "grid min-w-0 items-start",
+            variant === "compact" ? "gap-2.5" : "gap-4",
+            variant === "split" &&
+              "@min-[760px]:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] @min-[760px]:gap-x-6",
+          )}
+        >
+          {children}
+        </div>
       </section>
     </Context.Provider>
   );
 }
 
-export function SubscriptionManagementHeader({ style, ...props }: ComponentProps<"header">) {
-  useManagement("SubscriptionManagementHeader");
+export function SubscriptionManagementHeader({ className, ...props }: ComponentProps<"header">) {
+  const { variant } = useManagement("SubscriptionManagementHeader");
   return (
     <header
+      data-slot="subscription-management-header"
+      className={cn(
+        "grid min-w-0 gap-1",
+        variant === "split" && "@min-[760px]:col-span-full",
+        className,
+      )}
       {...props}
-      data-uai-subscription-full=""
-      style={{ display: "grid", gap: 4, minWidth: 0, ...style }}
     />
   );
 }
 
-export function SubscriptionManagementTitle({ style, ...props }: ComponentProps<"h2">) {
+export function SubscriptionManagementTitle({ className, ...props }: ComponentProps<"h2">) {
   const { id, variant } = useManagement("SubscriptionManagementTitle");
   return (
     <h2
+      data-slot="subscription-management-title"
+      className={cn(
+        "m-0 font-semibold tracking-[-0.015em]",
+        variant === "compact" ? "text-lg/[1.2]" : "text-[22px]/[1.2]",
+        className,
+      )}
       {...props}
       id={`${id}-title`}
-      style={{
-        margin: 0,
-        fontSize: variant === "compact" ? 18 : 22,
-        fontWeight: 600,
-        lineHeight: 1.2,
-        letterSpacing: "-0.015em",
-        ...style,
-      }}
     />
   );
 }
 
-export function SubscriptionManagementDescription({ style, ...props }: ComponentProps<"p">) {
+export function SubscriptionManagementDescription({ className, ...props }: ComponentProps<"p">) {
   return (
-    <p {...props} style={{ margin: 0, color: "var(--uai-muted)", textWrap: "pretty", ...style }} />
+    <p
+      data-slot="subscription-management-description"
+      className={cn("m-0 text-pretty text-muted-foreground", className)}
+      {...props}
+    />
   );
 }
 
 /** A column in the split layout; stacks on narrow containers. */
-export function SubscriptionManagementColumn({ style, ...props }: ComponentProps<"div">) {
-  useManagement("SubscriptionManagementColumn");
-  return <div {...props} data-uai-subscription-column="" style={style} />;
+export function SubscriptionManagementColumn({ className, ...props }: ComponentProps<"div">) {
+  const { variant } = useManagement("SubscriptionManagementColumn");
+  return (
+    <div
+      data-slot="subscription-management-column"
+      className={cn(
+        "grid min-w-0 content-start",
+        variant === "compact" ? "gap-2.5" : "gap-4",
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 
 export type SubscriptionManagementPanelProps = ComponentProps<"section"> & {
@@ -177,23 +187,24 @@ export function SubscriptionManagementPanel({
   title,
   aside,
   children,
-  style,
+  className,
   ...props
 }: SubscriptionManagementPanelProps) {
   const { variant } = useManagement("SubscriptionManagementPanel");
   const id = useId();
   return (
-    <section aria-labelledby={id} {...props} style={{ ...card(variant), ...style }}>
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 8,
-        }}
-      >
-        <h3 id={id} style={{ margin: 0, fontSize: 13, fontWeight: 500, lineHeight: "20px" }}>
+    <section
+      aria-labelledby={id}
+      data-slot="subscription-management-panel"
+      className={cn(
+        "box-border grid min-w-0 bg-card",
+        variant === "compact" ? "gap-2.5 rounded-xl p-3" : "gap-3.5 rounded-[14px] p-4",
+        className,
+      )}
+      {...props}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 id={id} className="m-0 text-[13px]/5 font-medium">
           {title}
         </h3>
         {aside}
@@ -211,87 +222,67 @@ export type SubscriptionManagementStatusProps = ComponentProps<"span"> & {
 export function SubscriptionManagementStatus({
   tone = "active",
   children,
-  style,
+  className,
   ...props
 }: SubscriptionManagementStatusProps) {
   return (
     <span
+      data-slot="subscription-management-status"
+      className={cn(statusVariants({ tone }), className)}
       {...props}
       data-tone={tone}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        height: 22,
-        padding: "0 8px",
-        borderRadius: 999,
-        background: `color-mix(in oklab, ${statusColor[tone]} 14%, transparent)`,
-        color: `color-mix(in oklab, ${statusColor[tone]} 80%, var(--uai-text))`,
-        fontSize: 11.5,
-        fontWeight: 500,
-        ...style,
-      }}
     >
-      <span
-        aria-hidden="true"
-        style={{ width: 6, height: 6, borderRadius: 999, background: statusColor[tone] }}
-      />
+      <span aria-hidden="true" className={cn("size-1.5 rounded-full", statusDotColor[tone])} />
       {children}
     </span>
   );
 }
 
 /** The current plan price, large and tabular. */
-export function SubscriptionManagementPrice({ style, ...props }: ComponentProps<"p">) {
+export function SubscriptionManagementPrice({ className, ...props }: ComponentProps<"p">) {
   const { variant } = useManagement("SubscriptionManagementPrice");
   return (
     <p
+      data-slot="subscription-management-price"
+      className={cn(
+        "m-0 mt-0.5 flex flex-wrap items-baseline gap-1.5 font-semibold tracking-[-0.015em] tabular-nums",
+        variant === "compact" ? "text-xl/[1.1]" : "text-[26px]/[1.1]",
+        className,
+      )}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "baseline",
-        gap: 6,
-        margin: 0,
-        fontSize: variant === "compact" ? 20 : 26,
-        fontWeight: 600,
-        marginTop: 2,
-        lineHeight: 1.1,
-        letterSpacing: "-0.015em",
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     />
   );
 }
 
-export function SubscriptionManagementPeriod({ style, ...props }: ComponentProps<"span">) {
+export function SubscriptionManagementPeriod({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
+      data-slot="subscription-management-period"
+      className={cn("text-[12.5px] font-normal tracking-normal text-subtle-foreground", className)}
       {...props}
-      style={{
-        color: "var(--uai-subtle)",
-        fontSize: 12.5,
-        fontWeight: 400,
-        letterSpacing: 0,
-        ...style,
-      }}
     />
   );
 }
 
 /** Renewal or end date text. */
-export function SubscriptionManagementRenewal({ style, ...props }: ComponentProps<"p">) {
+export function SubscriptionManagementRenewal({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="subscription-management-renewal"
+      className={cn("m-0 text-[12.5px]/[18px] text-muted-foreground", className)}
       {...props}
-      style={{ margin: 0, color: "var(--uai-muted)", fontSize: 12.5, lineHeight: "18px", ...style }}
     />
   );
 }
 
-export function SubscriptionManagementMeters({ style, ...props }: ComponentProps<"div">) {
-  return <div {...props} style={{ display: "grid", gap: 14, ...style }} />;
+export function SubscriptionManagementMeters({ className, ...props }: ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="subscription-management-meters"
+      className={cn("grid gap-3.5", className)}
+      {...props}
+    />
+  );
 }
 
 export type SubscriptionManagementMeterProps = Omit<ComponentProps<"div">, "children"> & {
@@ -308,7 +299,7 @@ export function SubscriptionManagementMeter({
   value,
   max,
   valueText,
-  style,
+  className,
   ...props
 }: SubscriptionManagementMeterProps) {
   useManagement("SubscriptionManagementMeter");
@@ -316,20 +307,23 @@ export function SubscriptionManagementMeter({
   const ratio = max > 0 ? Math.min(Math.max(value / max, 0), 1) : 0;
   const near = ratio >= 0.8;
   return (
-    <div {...props} style={{ display: "grid", gap: 6, minWidth: 0, ...style }}>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-        <span id={id} style={{ fontWeight: 500 }}>
+    <div
+      data-slot="subscription-management-meter"
+      className={cn("grid min-w-0 gap-1.5", className)}
+      {...props}
+    >
+      <div className="flex justify-between gap-2">
+        <span id={id} className="font-medium">
           {label}
         </span>
         <span
           aria-hidden="true"
-          style={{
-            color: near
-              ? "color-mix(in oklab, var(--uai-warning) 70%, var(--uai-text))"
-              : "var(--uai-subtle)",
-            fontSize: 12.5,
-            fontVariantNumeric: "tabular-nums",
-          }}
+          className={cn(
+            "text-[12.5px] tabular-nums",
+            near
+              ? "text-[color-mix(in_oklab,var(--warning)_70%,var(--foreground))]"
+              : "text-subtle-foreground",
+          )}
         >
           {valueText}
         </span>
@@ -343,21 +337,14 @@ export function SubscriptionManagementMeter({
         aria-valuenow={value}
         aria-valuetext={valueText}
         data-near-limit={near || undefined}
-        style={{
-          height: 6,
-          overflow: "hidden",
-          borderRadius: 999,
-          background: "var(--uai-surface-raised)",
-        }}
+        className="h-1.5 overflow-hidden rounded-full bg-muted"
       >
         <div
-          className="uai-subscription-meter-fill"
-          style={{
-            width: `${ratio * 100}%`,
-            height: "100%",
-            borderRadius: 999,
-            background: near ? "var(--uai-warning)" : "var(--uai-accent)",
-          }}
+          className={cn(
+            "h-full rounded-full transition-[width] duration-300 ease-out-quint motion-reduce:transition-none",
+            near ? "bg-warning" : "bg-primary",
+          )}
+          style={{ width: `${ratio * 100}%` }}
         />
       </div>
     </div>
@@ -396,7 +383,7 @@ export function SubscriptionManagementPlans({
   onPeriodChange,
   onPlanChange,
   children,
-  style,
+  className,
   ...props
 }: SubscriptionManagementPlansProps) {
   const { variant } = useManagement("SubscriptionManagementPlans");
@@ -407,12 +394,13 @@ export function SubscriptionManagementPlans({
   return (
     <PlansContext.Provider value={{ name, current: currentPlan, selected, select: setSelected }}>
       <form
+        data-slot="subscription-management-plans"
+        className={cn("min-w-0", className)}
         {...props}
         onSubmit={(event) => {
           event.preventDefault();
           onPlanChange?.(selected, currentPeriod);
         }}
-        style={{ minWidth: 0, ...style }}
       >
         <PricingToggle
           variant={toggleVariants[variant]}
@@ -421,7 +409,7 @@ export function SubscriptionManagementPlans({
             if (period === undefined) setInternalPeriod(next);
             onPeriodChange?.(next);
           }}
-          style={{ gap: variant === "compact" ? 10 : 14 }}
+          className={variant === "compact" ? "gap-2.5" : "gap-3.5"}
         >
           {children}
         </PricingToggle>
@@ -433,7 +421,7 @@ export function SubscriptionManagementPlans({
 /** A radio group of plans. */
 export function SubscriptionManagementPlanOptions({
   "aria-label": ariaLabel = "Plans",
-  style,
+  className,
   ...props
 }: ComponentProps<"div">) {
   usePlans("SubscriptionManagementPlanOptions");
@@ -441,13 +429,12 @@ export function SubscriptionManagementPlanOptions({
     <div
       role="radiogroup"
       aria-label={ariaLabel}
+      data-slot="subscription-management-plan-options"
+      className={cn(
+        "grid grid-cols-[repeat(auto-fit,minmax(min(100%,160px),1fr))] gap-2",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 160px), 1fr))",
-        gap: 8,
-        ...style,
-      }}
     />
   );
 }
@@ -468,6 +455,7 @@ export function SubscriptionManagementPlanOption({
   children,
   currentLabel = "Current plan",
   onChange,
+  className,
   style,
   ...props
 }: SubscriptionManagementPlanOptionProps) {
@@ -476,19 +464,13 @@ export function SubscriptionManagementPlanOption({
   const current = plans.current === value;
   return (
     <label
-      className="uai-subscription-plan"
-      style={{
-        position: "relative",
-        display: "grid",
-        gap: 4,
-        alignContent: "start",
-        minWidth: 0,
-        padding: variant === "compact" ? 10 : 12,
-        borderRadius: variant === "compact" ? 8 : 10,
-        background: "var(--uai-surface-raised)",
-        cursor: "pointer",
-        ...style,
-      }}
+      data-slot="subscription-management-plan-option"
+      className={cn(
+        "relative grid min-w-0 cursor-pointer content-start gap-1 bg-muted transition-[background-color,box-shadow] duration-120 ease-[ease-out] hover:bg-[color-mix(in_oklab,var(--muted)_88%,var(--foreground))] has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-ring has-[input:checked]:bg-[color-mix(in_oklab,var(--primary)_8%,var(--card))] has-[input:checked]:shadow-[inset_0_0_0_1.5px_var(--primary)] has-[input:disabled]:cursor-not-allowed has-[input:disabled]:opacity-55 motion-reduce:transition-none",
+        variant === "compact" ? "rounded-lg p-2.5" : "rounded-[10px] p-3",
+        className,
+      )}
+      style={style}
     >
       <input
         {...props}
@@ -500,23 +482,11 @@ export function SubscriptionManagementPlanOption({
           onChange?.(event);
           if (!event.defaultPrevented) plans.select(value);
         }}
-        style={{ position: "absolute", inset: 0, margin: 0, opacity: 0, cursor: "inherit" }}
+        className="absolute inset-0 m-0 cursor-[inherit] opacity-0"
       />
       {children}
       {current ? (
-        <span
-          style={{
-            justifySelf: "start",
-            marginTop: 4,
-            padding: "2px 8px",
-            borderRadius: 999,
-            background: "color-mix(in oklab, var(--uai-text) 10%, transparent)",
-            color: "var(--uai-muted)",
-            fontSize: 11.5,
-            fontWeight: 500,
-            lineHeight: "16px",
-          }}
-        >
+        <span className="mt-1 justify-self-start rounded-full bg-foreground/10 px-2 py-0.5 text-[11.5px]/4 font-medium text-muted-foreground">
           {currentLabel}
         </span>
       ) : null}
@@ -524,21 +494,22 @@ export function SubscriptionManagementPlanOption({
   );
 }
 
-export function SubscriptionManagementPlanName({ style, ...props }: ComponentProps<"span">) {
-  return <span {...props} style={{ fontWeight: 500, ...style }} />;
-}
-
-export function SubscriptionManagementPlanDetail({ style, ...props }: ComponentProps<"span">) {
+export function SubscriptionManagementPlanName({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
+      data-slot="subscription-management-plan-name"
+      className={cn("font-medium", className)}
       {...props}
-      style={{
-        color: "var(--uai-subtle)",
-        fontSize: 12,
-        lineHeight: "16px",
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
+    />
+  );
+}
+
+export function SubscriptionManagementPlanDetail({ className, ...props }: ComponentProps<"span">) {
+  return (
+    <span
+      data-slot="subscription-management-plan-detail"
+      className={cn("text-xs/4 text-subtle-foreground tabular-nums", className)}
+      {...props}
     />
   );
 }
@@ -549,7 +520,7 @@ export type SubscriptionManagementPlanSubmitProps = ComponentProps<"button">;
 export function SubscriptionManagementPlanSubmit({
   children = "Change plan",
   disabled,
-  style,
+  className,
   ...props
 }: SubscriptionManagementPlanSubmitProps) {
   const plans = usePlans("SubscriptionManagementPlanSubmit");
@@ -557,25 +528,18 @@ export function SubscriptionManagementPlanSubmit({
   const blocked = disabled || plans.selected === plans.current;
   return (
     <button
+      data-slot="subscription-management-plan-submit"
+      className={cn(
+        "justify-self-start rounded-full border-0 px-3.5 text-[13px] font-medium [transition:background-color_120ms_ease-out,filter_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:hover:brightness-108 enabled:active:[transform:scale(0.97)] motion-reduce:transition-none motion-reduce:enabled:active:[transform:none]",
+        variant === "compact" ? "h-7" : "h-8",
+        blocked
+          ? "cursor-not-allowed bg-secondary text-subtle-foreground"
+          : "cursor-pointer bg-primary text-primary-foreground",
+        className,
+      )}
       {...props}
       type="submit"
       disabled={blocked}
-      className={
-        props.className ? `uai-subscription-button ${props.className}` : "uai-subscription-button"
-      }
-      style={{
-        justifySelf: "start",
-        height: variant === "compact" ? 28 : 32,
-        padding: "0 14px",
-        border: 0,
-        borderRadius: 999,
-        background: blocked ? "var(--uai-surface-raised)" : "var(--uai-accent)",
-        color: blocked ? "var(--uai-subtle)" : "var(--uai-accent-foreground)",
-        fontSize: 13,
-        fontWeight: 500,
-        cursor: blocked ? "not-allowed" : "pointer",
-        ...style,
-      }}
     >
       {children}
     </button>

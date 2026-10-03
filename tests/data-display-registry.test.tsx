@@ -13,7 +13,7 @@ test("publishes every data display source without drift and keeps examples execu
       `src/components/registry/data-display/${item.id}-preview.tsx`,
     ).text();
     expect(item.category).toBe("Data Display");
-    expect(mirror).toBe(source);
+    expect(mirror).toBe(`export * from "@/registry/uai/components/${item.id}";\n`);
     expect(output.files[0].content).toBe(source);
     expect(item.usage).toBe(preview);
     expect(item.accessibility.length).toBeGreaterThanOrEqual(3);

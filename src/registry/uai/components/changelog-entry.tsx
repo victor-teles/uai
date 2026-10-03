@@ -1,5 +1,7 @@
+import { cva } from "class-variance-authority";
 import { ArrowUpRight } from "lucide-react";
 import { type ComponentProps, createContext, useContext, useId } from "react";
+import { cn } from "@/lib/uai-utils";
 
 export const CHANGELOG_ENTRY_VARIANTS = ["timeline", "card", "compact"] as const;
 export type ChangelogEntryVariant = (typeof CHANGELOG_ENTRY_VARIANTS)[number];
@@ -12,261 +14,222 @@ function useEntry(part: string) {
   if (!context) throw new Error(`${part} must be used within ChangelogEntry`);
   return context;
 }
-const muted = "var(--uai-muted)";
-const tones: Record<ChangelogEntryCategoryTone, string> = {
-  added: "var(--uai-success)",
-  improved: "color-mix(in oklab, var(--uai-accent) 62%, var(--uai-text))",
-  fixed: "var(--uai-warning)",
-  removed: "var(--uai-muted)",
-  security: "var(--uai-danger)",
+const toneClasses: Record<ChangelogEntryCategoryTone, string> = {
+  added: "bg-success/14 text-success",
+  improved:
+    "bg-[color-mix(in_oklab,color-mix(in_oklab,var(--primary)_62%,var(--foreground))_14%,transparent)] text-[color-mix(in_oklab,var(--primary)_62%,var(--foreground))]",
+  fixed: "bg-warning/14 text-warning",
+  removed: "bg-muted-foreground/14 text-muted-foreground",
+  security: "bg-destructive/14 text-destructive",
 };
-const changelogCss = `
-.uai-changelog li::marker{color:var(--uai-subtle)}
-.uai-changelog-link{color:var(--uai-text);text-decoration:underline;text-decoration-color:var(--uai-border-strong);text-underline-offset:3px;transition:text-decoration-color 120ms ease-out}
-.uai-changelog-link:hover{text-decoration-color:currentColor}
-.uai-changelog-link svg{color:var(--uai-subtle);transition:transform 140ms cubic-bezier(0.23,1,0.32,1),color 120ms ease-out}
-.uai-changelog-link:hover svg{color:var(--uai-text);transform:translate(1px,-1px)}
-.uai-changelog-link:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px;border-radius:4px}
-@media (prefers-reduced-motion: reduce){.uai-changelog-link,.uai-changelog-link svg{transition:none}}
-`;
+
+const changelogEntryVariants = cva(
+  "flex min-w-0 flex-wrap text-[13px]/[18px] text-foreground [&_li]:marker:text-subtle-foreground",
+  {
+    variants: {
+      variant: {
+        timeline: "flex-row gap-x-6 gap-y-2 rounded-[14px] border-0 bg-transparent p-0",
+        card: "flex-col gap-3 rounded-[14px] border bg-card p-[18px] text-card-foreground",
+        compact: "flex-col gap-2 rounded-xl border bg-card p-3 text-card-foreground",
+      },
+    },
+  },
+);
 
 export function ChangelogEntry({
   variant = "timeline",
   className,
-  style,
   children,
   ...props
 }: ChangelogEntryProps) {
   const id = useId();
-  const timeline = variant === "timeline";
   return (
     <Context.Provider value={{ id, variant }}>
       <article
         aria-labelledby={`${id}-title`}
+        data-slot="changelog-entry"
+        className={cn(changelogEntryVariants({ variant }), className)}
         {...props}
         data-variant={variant}
-        className={["uai-changelog", className].filter(Boolean).join(" ")}
-        style={{
-          display: "flex",
-          flexDirection: timeline ? "row" : "column",
-          flexWrap: "wrap",
-          gap: timeline ? "8px 24px" : variant === "compact" ? 8 : 12,
-          minWidth: 0,
-          padding: timeline ? 0 : variant === "compact" ? 12 : 18,
-          border: timeline ? 0 : "1px solid var(--uai-border)",
-          borderRadius: variant === "compact" ? 12 : 14,
-          background: timeline ? "transparent" : "var(--uai-surface)",
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...style,
-        }}
       >
-        <style>{changelogCss}</style>
         {children}
       </article>
     </Context.Provider>
   );
 }
 
-export function ChangelogEntryHeader({ style, ...props }: ComponentProps<"div">) {
+export function ChangelogEntryHeader({ className, ...props }: ComponentProps<"div">) {
   const { variant } = useEntry("ChangelogEntryHeader");
-  const timeline = variant === "timeline";
   return (
     <div
+      data-slot="changelog-entry-header"
+      className={cn(
+        "flex min-w-0 flex-wrap",
+        variant === "timeline"
+          ? "flex-[0_0_128px] flex-col items-start gap-1"
+          : "flex-row items-center gap-2",
+        className,
+      )}
       {...props}
-      style={{
-        display: "flex",
-        flexDirection: timeline ? "column" : "row",
-        flexWrap: "wrap",
-        alignItems: timeline ? "flex-start" : "center",
-        gap: timeline ? 4 : 8,
-        flex: timeline ? "0 0 128px" : undefined,
-        minWidth: 0,
-        ...style,
-      }}
     />
   );
 }
 
-export function ChangelogEntryVersion({ style, ...props }: ComponentProps<"span">) {
+export function ChangelogEntryVersion({ className, ...props }: ComponentProps<"span">) {
   const { variant } = useEntry("ChangelogEntryVersion");
   return (
     <span
+      data-slot="changelog-entry-version"
+      className={cn(
+        "inline-flex items-center rounded-md bg-muted px-1.75 font-mono text-[11.5px] font-medium text-foreground tabular-nums",
+        variant === "compact" ? "h-5" : "h-5.5",
+        className,
+      )}
       {...props}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        height: variant === "compact" ? 20 : 22,
-        padding: "0 7px",
-        borderRadius: 6,
-        background: "var(--uai-surface-raised)",
-        color: "var(--uai-text)",
-        fontFamily: "var(--font-mono, ui-monospace, monospace)",
-        fontSize: 11.5,
-        fontWeight: 500,
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     />
   );
 }
 
 export function ChangelogEntryDate({
-  style,
+  className,
   ...props
 }: ComponentProps<"time"> & { dateTime: string }) {
   useEntry("ChangelogEntryDate");
   return (
     <time
+      data-slot="changelog-entry-date"
+      className={cn("text-[12px] text-subtle-foreground tabular-nums", className)}
       {...props}
-      style={{
-        color: "var(--uai-subtle)",
-        fontSize: 12,
-        fontVariantNumeric: "tabular-nums",
-        ...style,
-      }}
     />
   );
 }
 
-export function ChangelogEntryContent({ style, ...props }: ComponentProps<"div">) {
+export function ChangelogEntryContent({ className, ...props }: ComponentProps<"div">) {
   const { variant } = useEntry("ChangelogEntryContent");
-  const timeline = variant === "timeline";
   return (
     <div
+      data-slot="changelog-entry-content"
+      className={cn(
+        "grid min-w-0",
+        variant === "compact" ? "gap-2" : "gap-3",
+        variant === "timeline" ? "flex-[1_1_320px] border-s ps-6" : "border-s-0 ps-0",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gap: variant === "compact" ? 8 : 12,
-        flex: timeline ? "1 1 320px" : undefined,
-        minWidth: 0,
-        paddingInlineStart: timeline ? 24 : 0,
-        borderInlineStart: timeline ? "1px solid var(--uai-border)" : 0,
-        ...style,
-      }}
     />
   );
 }
 
 export function ChangelogEntryTitle({
   level = 3,
-  style,
+  className,
   ...props
 }: ComponentProps<"h3"> & { level?: 2 | 3 | 4 }) {
   const { id, variant } = useEntry("ChangelogEntryTitle");
   const Heading = `h${level}` as "h3";
   return (
     <Heading
+      data-slot="changelog-entry-title"
+      className={cn(
+        "m-0 tracking-[-0.01em] text-balance",
+        variant === "compact" ? "text-sm/5 font-medium" : "text-[15px]/[22px] font-semibold",
+        className,
+      )}
       {...props}
       id={`${id}-title`}
-      style={{
-        margin: 0,
-        fontSize: variant === "compact" ? 14 : 15,
-        lineHeight: variant === "compact" ? "20px" : "22px",
-        fontWeight: variant === "compact" ? 500 : 600,
-        letterSpacing: "-0.01em",
-        textWrap: "balance",
-        ...style,
-      }}
     />
   );
 }
 
 export function ChangelogEntryCategories({
   "aria-label": label = "Categories",
-  style,
+  className,
   ...props
 }: ComponentProps<"ul">) {
   useEntry("ChangelogEntryCategories");
   return (
     <ul
       aria-label={label}
+      data-slot="changelog-entry-categories"
+      className={cn("m-0 flex list-none flex-wrap gap-1.5 p-0", className)}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 6,
-        margin: 0,
-        padding: 0,
-        listStyle: "none",
-        ...style,
-      }}
     />
   );
 }
 
 export function ChangelogEntryCategory({
   tone = "improved",
-  style,
+  className,
   children,
   ...props
 }: ComponentProps<"li"> & { tone?: ChangelogEntryCategoryTone }) {
   useEntry("ChangelogEntryCategory");
   return (
     <li
+      data-slot="changelog-entry-category"
+      className={cn(
+        "inline-flex h-5 items-center rounded-full px-2 text-[11.5px]/4 font-medium",
+        toneClasses[tone],
+        className,
+      )}
       {...props}
       data-tone={tone}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        height: 20,
-        padding: "0 8px",
-        borderRadius: 999,
-        background: `color-mix(in oklab, ${tones[tone]} 14%, transparent)`,
-        color: tones[tone],
-        fontSize: 11.5,
-        fontWeight: 500,
-        lineHeight: "16px",
-        ...style,
-      }}
     >
       {children}
     </li>
   );
 }
 
-export function ChangelogEntryBody({ style, ...props }: ComponentProps<"div">) {
+export function ChangelogEntryBody({ className, ...props }: ComponentProps<"div">) {
   useEntry("ChangelogEntryBody");
   return (
-    <div {...props} style={{ color: muted, lineHeight: "19px", textWrap: "pretty", ...style }} />
+    <div
+      data-slot="changelog-entry-body"
+      className={cn("leading-[19px] text-pretty text-muted-foreground", className)}
+      {...props}
+    />
   );
 }
 
-export function ChangelogEntryChanges({ style, ...props }: ComponentProps<"ul">) {
+export function ChangelogEntryChanges({ className, ...props }: ComponentProps<"ul">) {
   const { variant } = useEntry("ChangelogEntryChanges");
   return (
     <ul
+      data-slot="changelog-entry-changes"
+      className={cn(
+        "m-0 grid list-disc ps-4.5",
+        variant === "compact" ? "gap-1" : "gap-1.5",
+        className,
+      )}
       {...props}
-      style={{
-        display: "grid",
-        gap: variant === "compact" ? 4 : 6,
-        margin: 0,
-        paddingInlineStart: 18,
-        listStyle: "disc",
-        ...style,
-      }}
     />
   );
 }
 
 export function ChangelogEntryChange({
   href,
-  style,
+  className,
   children,
   ...props
 }: ComponentProps<"li"> & { href?: string }) {
   useEntry("ChangelogEntryChange");
   return (
-    <li {...props} style={{ paddingInlineStart: 2, textWrap: "pretty", ...style }}>
+    <li
+      data-slot="changelog-entry-change"
+      className={cn("ps-0.5 text-pretty", className)}
+      {...props}
+    >
       {href ? (
-        <a href={href} className="uai-changelog-link">
+        <a
+          href={href}
+          className="group/link text-foreground underline decoration-border-strong underline-offset-3 transition-[text-decoration-color] duration-120 ease-[ease-out] hover:decoration-current focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none"
+        >
           {children}
           <ArrowUpRight
             size={12}
             strokeWidth={2}
             aria-hidden="true"
-            style={{ display: "inline-block", marginInlineStart: 2, verticalAlign: "-1px" }}
+            className="ms-0.5 inline-block align-[-1px] text-subtle-foreground [transition:translate_140ms_var(--ease-out-quint),color_120ms_ease-out] group-hover/link:translate-x-px group-hover/link:-translate-y-px group-hover/link:text-foreground motion-reduce:transition-none"
           />
         </a>
       ) : (

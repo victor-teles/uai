@@ -88,7 +88,7 @@ test("exposes a focusable results region with real table headers", () => {
     "Account",
     "Seats",
   ]);
-  expect(screen.getByRole("cell", { name: "48" }).style.textAlign).toBe("right");
+  expect(screen.getByRole("cell", { name: "48" }).className).toContain("text-right");
 });
 
 test("switches saved views with the keyboard", async () => {

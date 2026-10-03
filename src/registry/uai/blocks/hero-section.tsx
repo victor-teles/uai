@@ -1,11 +1,13 @@
 "use client";
 
-import { type ComponentProps, type CSSProperties, createContext, useContext, useId } from "react";
+import { cva } from "class-variance-authority";
+import { type ComponentProps, createContext, useContext, useId } from "react";
 import {
   TrustPanel,
   type TrustPanelProps,
   type TrustPanelVariant,
 } from "@/components/ui/uai/trust-panel";
+import { cn } from "@/lib/uai-utils";
 
 export const HERO_SECTION_VARIANTS = ["split", "centered", "framed"] as const;
 export type HeroSectionVariant = (typeof HERO_SECTION_VARIANTS)[number];
@@ -19,159 +21,123 @@ function useHero(part: string) {
   return context;
 }
 
-const layoutCss = `
-[data-uai-hero-layout]{display:grid;gap:32px;align-items:center;min-width:0}
-@container (min-width: 720px){
-  [data-uai-hero="split"]>[data-uai-hero-layout],
-  [data-uai-hero="framed"]>[data-uai-hero-layout]{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:48px}
-}
-[data-uai-hero-content]>*,[data-uai-hero-media]{animation:uai-hero-in 400ms cubic-bezier(0.23,1,0.32,1) both}
-[data-uai-hero-content]>:nth-child(2){animation-delay:40ms}
-[data-uai-hero-content]>:nth-child(3){animation-delay:80ms}
-[data-uai-hero-content]>:nth-child(4){animation-delay:120ms}
-[data-uai-hero-content]>:nth-child(n+5){animation-delay:160ms}
-[data-uai-hero-media]{animation-delay:120ms}
-[data-uai-hero-action]{transition:filter 120ms ease-out,box-shadow 120ms ease-out,transform 140ms cubic-bezier(0.23,1,0.32,1)}
-[data-uai-hero-action="secondary"]:hover{box-shadow:inset 0 0 0 999px color-mix(in oklab,var(--uai-text) 9%,transparent)}
-[data-uai-hero-action="primary"]:hover{filter:brightness(1.08)}
-[data-uai-hero-action]:active{transform:scale(0.97)}
-[data-uai-hero-action]:focus-visible{outline:2px solid var(--uai-accent);outline-offset:2px}
-@keyframes uai-hero-in{from{opacity:0;transform:translateY(6px)}}
-@media (prefers-reduced-motion:reduce){[data-uai-hero-content]>*,[data-uai-hero-media]{animation:none}[data-uai-hero-action]{transition:none}[data-uai-hero-action]:active{transform:none}}
-`;
-
-const shells: Record<HeroSectionVariant, CSSProperties> = {
-  split: { padding: "8px 0" },
-  centered: { padding: "8px 0", textAlign: "center" },
-  framed: {
-    padding: "clamp(24px, 5cqi, 48px)",
-    border: "1px solid var(--uai-border)",
-    borderRadius: 14,
-    background: "var(--uai-surface)",
-    boxShadow: "0 1px 2px oklch(0 0 0 / 0.04)",
+const heroSectionVariants = cva(
+  "box-border @container min-w-0 text-[13px]/[18px] text-foreground",
+  {
+    variants: {
+      variant: {
+        split: "py-2",
+        centered: "py-2 text-center",
+        framed:
+          "rounded-[14px] border bg-card p-[clamp(24px,5cqi,48px)] shadow-[0_1px_2px_oklch(0_0_0/0.04)]",
+      },
+    },
   },
-};
+);
+
+const heroIn =
+  "animate-in fade-in-0 slide-in-from-bottom-[6px] duration-400 ease-out-quint fill-mode-both motion-reduce:animate-none";
 
 /** Opening section with positioning copy, actions, proof, and media. Split and Framed stack below 720px. */
-export function HeroSection({ variant = "split", children, style, ...props }: HeroSectionProps) {
+export function HeroSection({
+  variant = "split",
+  children,
+  className,
+  ...props
+}: HeroSectionProps) {
   const id = useId();
   return (
     <Context.Provider value={{ id, variant }}>
       <section
         aria-labelledby={`${id}-title`}
-        {...props}
+        data-slot="hero-section"
         data-variant={variant}
-        data-uai-hero={variant}
-        style={{
-          boxSizing: "border-box",
-          containerType: "inline-size",
-          minWidth: 0,
-          color: "var(--uai-text)",
-          fontSize: 13,
-          lineHeight: "18px",
-          ...shells[variant],
-          ...style,
-        }}
+        className={cn(heroSectionVariants({ variant }), className)}
+        {...props}
       >
-        <style>{layoutCss}</style>
-        <div data-uai-hero-layout="">{children}</div>
+        <div
+          className={cn(
+            "grid min-w-0 items-center gap-8",
+            variant !== "centered" &&
+              "@min-[720px]:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] @min-[720px]:gap-12",
+          )}
+        >
+          {children}
+        </div>
       </section>
     </Context.Provider>
   );
 }
 
-export function HeroSectionContent({ style, ...props }: ComponentProps<"div">) {
+export function HeroSectionContent({ className, ...props }: ComponentProps<"div">) {
   const { variant } = useHero("HeroSectionContent");
   const centered = variant === "centered";
   return (
     <div
+      data-slot="hero-section-content"
+      className={cn(
+        "grid min-w-0 gap-[18px]",
+        "*:animate-in *:fade-in-0 *:slide-in-from-bottom-[6px] *:duration-400 *:ease-out-quint *:fill-mode-both *:nth-2:[animation-delay:40ms] *:nth-3:[animation-delay:80ms] *:nth-4:[animation-delay:120ms] *:nth-[n+5]:[animation-delay:160ms] motion-reduce:*:animate-none",
+        centered ? "mx-auto max-w-[640px] justify-items-center" : "justify-items-start",
+        className,
+      )}
       {...props}
-      data-uai-hero-content=""
-      style={{
-        display: "grid",
-        justifyItems: centered ? "center" : "start",
-        gap: 18,
-        minWidth: 0,
-        maxWidth: centered ? 640 : undefined,
-        margin: centered ? "0 auto" : undefined,
-        ...style,
-      }}
     />
   );
 }
 
-export function HeroSectionEyebrow({ style, ...props }: ComponentProps<"p">) {
+export function HeroSectionEyebrow({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="hero-section-eyebrow"
+      className={cn(
+        "m-0 inline-flex min-h-6 items-center gap-1.5 rounded-full bg-muted px-2.5 text-xs/4 font-medium text-muted-foreground",
+        className,
+      )}
       {...props}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        minHeight: 24,
-        margin: 0,
-        padding: "0 10px",
-        borderRadius: 999,
-        background: "var(--uai-surface-raised)",
-        color: "var(--uai-muted)",
-        fontSize: 12,
-        fontWeight: 500,
-        lineHeight: "16px",
-        ...style,
-      }}
     />
   );
 }
 
-export function HeroSectionTitle({ style, ...props }: ComponentProps<"h1">) {
+export function HeroSectionTitle({ className, ...props }: ComponentProps<"h1">) {
   const { id } = useHero("HeroSectionTitle");
   return (
     <h1
+      data-slot="hero-section-title"
+      className={cn(
+        "m-0 text-[length:clamp(28px,4.5cqi_+_8px,44px)] leading-[1.08] font-medium tracking-[-0.03em] text-balance",
+        className,
+      )}
       {...props}
       id={`${id}-title`}
-      style={{
-        margin: 0,
-        fontSize: "clamp(28px, 4.5cqi + 8px, 44px)",
-        fontWeight: 500,
-        lineHeight: 1.08,
-        letterSpacing: "-0.03em",
-        textWrap: "balance",
-        ...style,
-      }}
     />
   );
 }
 
-export function HeroSectionDescription({ style, ...props }: ComponentProps<"p">) {
+export function HeroSectionDescription({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      data-slot="hero-section-description"
+      className={cn(
+        "m-0 max-w-[56ch] text-[15px]/[23px] text-pretty text-muted-foreground",
+        className,
+      )}
       {...props}
-      style={{
-        maxWidth: "56ch",
-        margin: 0,
-        color: "var(--uai-muted)",
-        fontSize: 15,
-        lineHeight: "23px",
-        textWrap: "pretty",
-        ...style,
-      }}
     />
   );
 }
 
-export function HeroSectionActions({ style, ...props }: ComponentProps<"div">) {
+export function HeroSectionActions({ className, ...props }: ComponentProps<"div">) {
   const { variant } = useHero("HeroSectionActions");
   return (
     <div
+      data-slot="hero-section-actions"
+      className={cn(
+        "flex flex-wrap gap-2 pt-1",
+        variant === "centered" ? "justify-center" : "justify-start",
+        className,
+      )}
       {...props}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        justifyContent: variant === "centered" ? "center" : "flex-start",
-        gap: 8,
-        paddingTop: 4,
-        ...style,
-      }}
     />
   );
 }
@@ -180,38 +146,28 @@ export type HeroSectionActionProps = ComponentProps<"a"> & { priority?: "primary
 
 export function HeroSectionAction({
   priority = "primary",
-  style,
+  className,
   ...props
 }: HeroSectionActionProps) {
   const primary = priority === "primary";
   return (
     <a
-      {...props}
+      data-slot="hero-section-action"
       data-priority={priority}
-      data-uai-hero-action={priority}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 6,
-        height: 36,
-        padding: "0 16px",
-        borderRadius: 999,
-        background: primary ? "var(--uai-accent)" : "var(--uai-surface-raised)",
-        color: primary ? "var(--uai-accent-foreground)" : "var(--uai-text)",
-        fontSize: 13,
-        fontWeight: 500,
-        lineHeight: "18px",
-        textDecoration: "none",
-        whiteSpace: "nowrap",
-        ...style,
-      }}
+      className={cn(
+        "inline-flex h-9 items-center justify-center gap-1.5 rounded-full px-4 text-[13px]/[18px] font-medium whitespace-nowrap no-underline [transition:filter_120ms_ease-out,box-shadow_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100",
+        primary
+          ? "bg-primary text-primary-foreground hover:brightness-108"
+          : "bg-secondary text-secondary-foreground hover:shadow-[inset_0_0_0_999px_color-mix(in_oklab,var(--foreground)_9%,transparent)]",
+        className,
+      )}
+      {...props}
     />
   );
 }
 
 /** Supporting proof rendered as a Trust Panel. Compose TrustPanelTitle, logos, rating, and badges inside. */
-export function HeroSectionProof({ variant, style, ...props }: TrustPanelProps) {
+export function HeroSectionProof({ variant, className, ...props }: TrustPanelProps) {
   const hero = useHero("HeroSectionProof");
   const panelVariant: TrustPanelVariant =
     variant ?? (hero.variant === "framed" ? "compact" : "plain");
@@ -219,36 +175,30 @@ export function HeroSectionProof({ variant, style, ...props }: TrustPanelProps) 
     <TrustPanel
       {...props}
       variant={panelVariant}
-      style={{
-        gap: 12,
-        width: "100%",
-        marginTop: 8,
-        justifyItems: hero.variant === "centered" ? "center" : "start",
-        ...style,
-      }}
+      className={cn(
+        "mt-2 w-full gap-3",
+        hero.variant === "centered" ? "justify-items-center" : "justify-items-start",
+        className,
+      )}
     />
   );
 }
 
-export function HeroSectionMedia({ style, ...props }: ComponentProps<"figure">) {
+export function HeroSectionMedia({ className, ...props }: ComponentProps<"figure">) {
   const { variant } = useHero("HeroSectionMedia");
   return (
     <figure
+      data-slot="hero-section-media"
+      className={cn(
+        "relative m-0 box-border w-full min-w-0 overflow-hidden [animation-delay:120ms]",
+        heroIn,
+        variant === "centered" ? "aspect-video" : "aspect-[4/3]",
+        variant === "framed"
+          ? "rounded-xl border-0 bg-background"
+          : "rounded-[14px] border bg-card",
+        className,
+      )}
       {...props}
-      data-uai-hero-media=""
-      style={{
-        position: "relative",
-        boxSizing: "border-box",
-        width: "100%",
-        minWidth: 0,
-        aspectRatio: variant === "centered" ? "16 / 9" : "4 / 3",
-        margin: 0,
-        overflow: "hidden",
-        border: variant === "framed" ? 0 : "1px solid var(--uai-border)",
-        borderRadius: variant === "framed" ? 12 : 14,
-        background: variant === "framed" ? "var(--uai-canvas)" : "var(--uai-surface)",
-        ...style,
-      }}
     />
   );
 }

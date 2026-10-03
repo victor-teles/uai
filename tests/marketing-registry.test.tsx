@@ -20,7 +20,7 @@ test("publishes every marketing source without drift and keeps examples executab
       `src/components/registry/marketing/${item.id}-preview.tsx`,
     ).text();
     expect(item.category).toBe("Marketing");
-    expect(mirror).toBe(source);
+    expect(mirror).toBe(`export * from "@/registry/uai/components/${item.id}";\n`);
     expect(output.files[0].content).toBe(source);
     expect(item.usage).toBe(preview);
     expect(item.accessibility.length).toBeGreaterThanOrEqual(3);
