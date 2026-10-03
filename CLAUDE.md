@@ -53,13 +53,17 @@ compose replaceable structure and content through exported children.
 
 ## Visual direction
 
-Uai follows the Beautiful UI language (beautifului.dev) on both layers. Read `DESIGN.md`
-and `plans/beautiful-polish-brief.md` before changing either.
+Read `DESIGN.md` before changing either layer, and `plans/beautiful-polish-brief.md`
+before changing distributed components.
 
-1. **Site** — warm graphite frame on a plain canvas, dashed hairlines, a grouped
-   sidebar, ⌘K palette, and one `/components/<id>` page per item.
+1. **Site** — a component workbench with its own identity: a top bar with breadcrumb
+   and ⌘K search, a file-tree sidebar, solid hairlines, Geist Mono chrome, and one
+   `/components/<id>` page per item that pairs a ruled canvas with a sticky inspector.
+   The lime signal (`--uai-signal`, `--uai-signal-ink`) is site-only: never route it
+   into `--primary`, `--ring`, or the `uai-theme` item. Do not copy the layout of other
+   component galleries.
 2. **Distributed components** in `src/registry/uai` — product chrome that consumers
-   install. Weight 500 for emphasis (600 for a single headline, never 700), tonal
+   install, in the Beautiful UI language (beautifului.dev). Weight 500 for emphasis (600 for a single headline, never 700), tonal
    surfaces before borders, pill buttons. Accent fills one primary action per surface;
    secondary actions use `--uai-surface-raised` without a border. Use `--uai-subtle`
    for tertiary metadata only.

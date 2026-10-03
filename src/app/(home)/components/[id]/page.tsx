@@ -21,5 +21,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function ComponentPage({ params }: PageProps) {
   const item = findRegistryItem((await params).id);
   if (!item) notFound();
-  return <RegistryItem id={item.id} />;
+  // Keyed so the selected variant resets when navigating between items.
+  return <RegistryItem key={item.id} id={item.id} />;
 }
