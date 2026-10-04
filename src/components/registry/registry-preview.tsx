@@ -237,6 +237,7 @@ import {
 import { DataDisplayPreview, getDataDisplayPreviewControl } from "./data-display/preview";
 import { FeedbackPreview, getFeedbackPreviewControl } from "./feedback/preview";
 import { FormsPreview, getFormsPreviewControl } from "./forms/preview";
+import { getMapsPreviewControl, MapsPreview } from "./maps/preview";
 import { getMarketingPreviewControl, MarketingPreview } from "./marketing/preview";
 import {
   getMarketingBlocksPreviewControl,
@@ -1563,6 +1564,7 @@ const groupPreviews = [
   { getControl: getMarketingPreviewControl, Preview: MarketingPreview },
   { getControl: getCommunityPreviewControl, Preview: CommunityPreview },
   { getControl: getAiPreviewControl, Preview: AiPreview },
+  { getControl: getMapsPreviewControl, Preview: MapsPreview },
   { getControl: getMarketingBlocksPreviewControl, Preview: MarketingBlocksPreview },
   { getControl: getOnboardingBlocksPreviewControl, Preview: OnboardingBlocksPreview },
   { getControl: getAppBlocksPreviewControl, Preview: AppBlocksPreview },

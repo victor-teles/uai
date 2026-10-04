@@ -177,6 +177,12 @@ The catalog includes Author Card, Comment, Reaction Bar, Share Menu, and Changel
 
 These components own local interaction and accessibility: the follow toggle, inline edit focus, moderation disclosure, reaction toggles and the picker menu, menu-button keyboard support, and copy announcements. Applications own identity data, follow and comment persistence, moderation decisions, reaction totals, share URLs and channels, and release content. The comment preview keeps edits in local state and switches the moderation state of a reply with a preview-only select. The reaction preview adds the viewer's reaction to fixed counts. The share preview copies a sample article URL and links to real share intents.
 
+## Maps
+
+The catalog includes Map Frame, Map Controls, Map Marker, Map Legend, Place Card, and Route Summary. Each ships three named visual variants with replaceable compound children, an interactive preview, installation source, usage code, accessibility notes, and behavior tests. Uai does not ship or depend on a map library: Map Frame hosts whichever map the application mounts, such as MapLibre, Leaflet, Mapbox, or Google Maps, and the other components are the chrome around it.
+
+These components own local interaction and accessibility: the labelled map region and its busy state, named camera buttons and zoom limits, the locate status in words, marker selection as toggle buttons, cluster names, layer visibility checkboxes, the color ramp text alternative, spoken ratings and opening status, and the single-select travel mode group. Applications own the map instance, tiles, projection, camera state, geolocation, marker positioning and clustering, layer data, place data, routing, and attribution text. Previews draw the decorative placeholder basemap instead of real tiles, place markers with percentage offsets, and use the invented Bayview neighborhood around Harbor Street. Zoom, bearing, locate, layer, and travel-mode changes only update local state, and locating resolves on a timer.
+
 ## Marketing and conversion
 
 The catalog includes Announcement Bar, Pricing Toggle, Testimonial Card, Product Gallery, Trust Panel, and Newsletter Form. Each ships three named visual variants with replaceable compound children, an interactive preview, installation source, usage code, accessibility notes, and behavior tests.
