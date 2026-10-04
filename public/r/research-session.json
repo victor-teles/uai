@@ -5,13 +5,13 @@
   "description": "A research plan, live search activity, sources, and a cited synthesis.",
   "dependencies": [],
   "registryDependencies": [
-    "https://useuai.vercel.app/r/uai-theme.json",
-    "https://useuai.vercel.app/r/uai-utils.json",
-    "https://useuai.vercel.app/r/citation.json",
-    "https://useuai.vercel.app/r/progress-summary.json",
-    "https://useuai.vercel.app/r/response-status.json",
-    "https://useuai.vercel.app/r/task-list.json",
-    "https://useuai.vercel.app/r/thinking.json"
+    "https://uaiblocks.vercel.app/r/uai-theme.json",
+    "https://uaiblocks.vercel.app/r/uai-utils.json",
+    "https://uaiblocks.vercel.app/r/citation.json",
+    "https://uaiblocks.vercel.app/r/progress-summary.json",
+    "https://uaiblocks.vercel.app/r/response-status.json",
+    "https://uaiblocks.vercel.app/r/task-list.json",
+    "https://uaiblocks.vercel.app/r/thinking.json"
   ],
   "files": [
     {

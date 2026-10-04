@@ -5,12 +5,12 @@
   "description": "Pending decisions grouped by risk, age, owner, and impact.",
   "dependencies": [],
   "registryDependencies": [
-    "https://useuai.vercel.app/r/uai-theme.json",
-    "https://useuai.vercel.app/r/uai-utils.json",
-    "https://useuai.vercel.app/r/approval-card.json",
-    "https://useuai.vercel.app/r/empty-state.json",
-    "https://useuai.vercel.app/r/filter-bar.json",
-    "https://useuai.vercel.app/r/metric-card.json"
+    "https://uaiblocks.vercel.app/r/uai-theme.json",
+    "https://uaiblocks.vercel.app/r/uai-utils.json",
+    "https://uaiblocks.vercel.app/r/approval-card.json",
+    "https://uaiblocks.vercel.app/r/empty-state.json",
+    "https://uaiblocks.vercel.app/r/filter-bar.json",
+    "https://uaiblocks.vercel.app/r/metric-card.json"
   ],
   "files": [
     {

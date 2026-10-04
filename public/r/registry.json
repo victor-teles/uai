@@ -2136,6 +2136,82 @@
       ],
       "categories": ["ai", "agents", "automation"],
       "dependencies": ["class-variance-authority"]
+    },
+    {
+      "name": "document-field",
+      "type": "registry:ui",
+      "title": "Document Field",
+      "description": "A CPF and CNPJ field with masking, check-digit validation, alphanumeric CNPJ support, and rounded, pill, and compact variants.",
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://uaiblocks.vercel.app/r/uai-theme.json",
+        "https://uaiblocks.vercel.app/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/document-field.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/document-field.tsx"
+        }
+      ],
+      "categories": ["brazil", "forms"]
+    },
+    {
+      "name": "cep-field",
+      "type": "registry:ui",
+      "title": "CEP Field",
+      "description": "A Brazilian postal code field with masking, address lookup states, and rounded, pill, and compact variants.",
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://uaiblocks.vercel.app/r/uai-theme.json",
+        "https://uaiblocks.vercel.app/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/cep-field.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/cep-field.tsx"
+        }
+      ],
+      "categories": ["brazil", "forms"]
+    },
+    {
+      "name": "pix-payment",
+      "type": "registry:ui",
+      "title": "Pix Payment",
+      "description": "A Pix charge with QR code, copy-and-paste code, expiry countdown, payment status, and card, plain, and compact variants.",
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "https://uaiblocks.vercel.app/r/uai-theme.json",
+        "https://uaiblocks.vercel.app/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/pix-payment.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/pix-payment.tsx"
+        }
+      ],
+      "categories": ["brazil", "commerce", "checkout"]
+    },
+    {
+      "name": "installment-picker",
+      "type": "registry:ui",
+      "title": "Installment Picker",
+      "description": "Card installment choices with amounts, interest terms, and totals in list, tiles, and compact variants.",
+      "dependencies": ["class-variance-authority"],
+      "registryDependencies": [
+        "https://uaiblocks.vercel.app/r/uai-theme.json",
+        "https://uaiblocks.vercel.app/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/installment-picker.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/installment-picker.tsx"
+        }
+      ],
+      "categories": ["brazil", "commerce", "forms"]
     }
   ]
 }

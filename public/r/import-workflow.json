@@ -8,12 +8,12 @@
     "lucide-react"
   ],
   "registryDependencies": [
-    "https://useuai.vercel.app/r/uai-theme.json",
-    "https://useuai.vercel.app/r/uai-utils.json",
-    "https://useuai.vercel.app/r/file-upload.json",
-    "https://useuai.vercel.app/r/progress-summary.json",
-    "https://useuai.vercel.app/r/status-banner.json",
-    "https://useuai.vercel.app/r/step-indicator.json"
+    "https://uaiblocks.vercel.app/r/uai-theme.json",
+    "https://uaiblocks.vercel.app/r/uai-utils.json",
+    "https://uaiblocks.vercel.app/r/file-upload.json",
+    "https://uaiblocks.vercel.app/r/progress-summary.json",
+    "https://uaiblocks.vercel.app/r/status-banner.json",
+    "https://uaiblocks.vercel.app/r/step-indicator.json"
   ],
   "files": [
     {

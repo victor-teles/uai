@@ -8,10 +8,10 @@
     "lucide-react"
   ],
   "registryDependencies": [
-    "https://useuai.vercel.app/r/uai-theme.json",
-    "https://useuai.vercel.app/r/status-banner.json",
-    "https://useuai.vercel.app/r/form-field.json",
-    "https://useuai.vercel.app/r/uai-utils.json"
+    "https://uaiblocks.vercel.app/r/uai-theme.json",
+    "https://uaiblocks.vercel.app/r/status-banner.json",
+    "https://uaiblocks.vercel.app/r/form-field.json",
+    "https://uaiblocks.vercel.app/r/uai-utils.json"
   ],
   "files": [
     {

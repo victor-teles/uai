@@ -18,6 +18,7 @@ import {
 import { type AiItemId, aiCatalog } from "./ai/catalog";
 import { type AiBlocksItemId, aiBlocksCatalog } from "./ai-blocks/catalog";
 import { type AppBlocksItemId, appBlocksCatalog } from "./app-blocks/catalog";
+import { type BrazilItemId, brazilCatalog } from "./brazil/catalog";
 import { type CommerceBlocksItemId, commerceBlocksCatalog } from "./commerce-blocks/catalog";
 import { type CommunityItemId, communityCatalog } from "./community/catalog";
 import { type CommunityBlocksItemId, communityBlocksCatalog } from "./community-blocks/catalog";
@@ -65,7 +66,8 @@ export type RegistryItemId =
   | OperationsBlocksItemId
   | CommerceBlocksItemId
   | CommunityBlocksItemId
-  | AiBlocksItemId;
+  | AiBlocksItemId
+  | BrazilItemId;
 
 export type RegistryCategory =
   | "All"
@@ -79,7 +81,8 @@ export type RegistryCategory =
   | "Marketing"
   | "Content"
   | "Application"
-  | "Operations";
+  | "Operations"
+  | "Brazil";
 
 export type RegistryCatalogItem = {
   id: RegistryItemId;
@@ -1017,6 +1020,7 @@ export function WorkspaceHeader() {
   ...commerceBlocksCatalog,
   ...communityBlocksCatalog,
   ...aiBlocksCatalog,
+  ...brazilCatalog,
 ] as const;
 
 export const registryCategories: readonly RegistryCategory[] = [
@@ -1032,6 +1036,7 @@ export const registryCategories: readonly RegistryCategory[] = [
   "Content",
   "Application",
   "Operations",
+  "Brazil",
 ] as const;
 
 const registryBlockIds: ReadonlySet<RegistryItemId> = new Set(

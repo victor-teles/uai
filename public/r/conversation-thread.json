@@ -5,12 +5,12 @@
   "description": "Messages, cited sources, response states, and a prompt composer in one thread.",
   "dependencies": [],
   "registryDependencies": [
-    "https://useuai.vercel.app/r/uai-theme.json",
-    "https://useuai.vercel.app/r/uai-utils.json",
-    "https://useuai.vercel.app/r/citation.json",
-    "https://useuai.vercel.app/r/message.json",
-    "https://useuai.vercel.app/r/prompt-composer.json",
-    "https://useuai.vercel.app/r/response-status.json"
+    "https://uaiblocks.vercel.app/r/uai-theme.json",
+    "https://uaiblocks.vercel.app/r/uai-utils.json",
+    "https://uaiblocks.vercel.app/r/citation.json",
+    "https://uaiblocks.vercel.app/r/message.json",
+    "https://uaiblocks.vercel.app/r/prompt-composer.json",
+    "https://uaiblocks.vercel.app/r/response-status.json"
   ],
   "files": [
     {

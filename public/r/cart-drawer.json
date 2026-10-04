@@ -8,12 +8,12 @@
     "lucide-react"
   ],
   "registryDependencies": [
-    "https://useuai.vercel.app/r/uai-theme.json",
-    "https://useuai.vercel.app/r/cart-item.json",
-    "https://useuai.vercel.app/r/coupon-field.json",
-    "https://useuai.vercel.app/r/price-summary.json",
-    "https://useuai.vercel.app/r/quantity-picker.json",
-    "https://useuai.vercel.app/r/uai-utils.json"
+    "https://uaiblocks.vercel.app/r/uai-theme.json",
+    "https://uaiblocks.vercel.app/r/cart-item.json",
+    "https://uaiblocks.vercel.app/r/coupon-field.json",
+    "https://uaiblocks.vercel.app/r/price-summary.json",
+    "https://uaiblocks.vercel.app/r/quantity-picker.json",
+    "https://uaiblocks.vercel.app/r/uai-utils.json"
   ],
   "files": [
     {

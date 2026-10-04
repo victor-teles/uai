@@ -29,7 +29,7 @@ test("publishes every application block without drift and keeps examples executa
     expect(source).not.toContain("@/registry/");
     for (const [, component] of source.matchAll(/@\/components\/ui\/uai\/([\w-]+)/g)) {
       expect(output.registryDependencies).toContain(
-        `https://useuai.vercel.app/r/${component}.json`,
+        `https://uaiblocks.vercel.app/r/${component}.json`,
       );
     }
   }

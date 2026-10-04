@@ -7,12 +7,12 @@
     "class-variance-authority"
   ],
   "registryDependencies": [
-    "https://useuai.vercel.app/r/uai-theme.json",
-    "https://useuai.vercel.app/r/confirmation-dialog.json",
-    "https://useuai.vercel.app/r/description-list.json",
-    "https://useuai.vercel.app/r/progress-summary.json",
-    "https://useuai.vercel.app/r/status-banner.json",
-    "https://useuai.vercel.app/r/uai-utils.json"
+    "https://uaiblocks.vercel.app/r/uai-theme.json",
+    "https://uaiblocks.vercel.app/r/confirmation-dialog.json",
+    "https://uaiblocks.vercel.app/r/description-list.json",
+    "https://uaiblocks.vercel.app/r/progress-summary.json",
+    "https://uaiblocks.vercel.app/r/status-banner.json",
+    "https://uaiblocks.vercel.app/r/uai-utils.json"
   ],
   "files": [
     {
