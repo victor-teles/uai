@@ -12,6 +12,9 @@ import {
   useState,
 } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/uai-utils";
 
 export const CEP_FIELD_VARIANTS = ["rounded", "pill", "compact"] as const;
@@ -53,9 +56,11 @@ function cepFieldChrome(variant: CepFieldVariant) {
       variant === "pill" ? "rounded-full" : compact ? "rounded-xl" : "rounded-[14px]",
     ),
     inputClass: compact
-      ? "h-7 px-1.5 text-[12.5px] leading-4"
-      : "h-8 px-2 text-[13px] leading-[18px]",
-    buttonClass: compact ? "h-7 px-2.5 text-[12px]" : "h-8 px-3.5 text-[12.5px]",
+      ? "h-7 px-1.5 text-[12.5px] leading-4 md:text-[12.5px]"
+      : "h-8 px-2 text-[13px] leading-[18px] md:text-[13px]",
+    buttonClass: compact
+      ? "h-7 px-2.5 text-[12px] has-[>svg]:px-2.5"
+      : "h-8 px-3.5 text-[12.5px] has-[>svg]:px-3.5",
     messageClass: compact
       ? "mt-1.5 gap-1.5 px-0.5 text-[11.5px] leading-4"
       : "mt-2 gap-2 px-1 text-[12px] leading-4",
@@ -155,10 +160,10 @@ export type CepFieldLabelProps = ComponentProps<"label">;
 export function CepFieldLabel({ children = "CEP", className, ...props }: CepFieldLabelProps) {
   const context = useCepField("CepFieldLabel");
   return (
-    <label
+    <Label
       data-slot="cep-field-label"
       className={cn(
-        "block font-medium text-muted-foreground",
+        "block font-medium text-muted-foreground select-auto",
         context.chrome.labelClass,
         className,
       )}
@@ -166,7 +171,7 @@ export function CepFieldLabel({ children = "CEP", className, ...props }: CepFiel
       htmlFor={context.inputId}
     >
       {children}
-    </label>
+    </Label>
   );
 }
 
@@ -215,13 +220,13 @@ export function CepFieldInput({ className, disabled, onKeyDown, ...props }: CepF
   };
 
   return (
-    <input
+    <Input
       inputMode="numeric"
       autoComplete="postal-code"
       placeholder="00000-000"
       data-slot="cep-field-input"
       className={cn(
-        "min-w-0 flex-1 bg-transparent font-medium tabular-nums outline-none placeholder:font-normal placeholder:text-subtle-foreground disabled:cursor-not-allowed",
+        "min-w-0 flex-1 rounded-none border-0 bg-transparent py-0 font-medium tabular-nums shadow-none outline-none placeholder:font-normal placeholder:text-subtle-foreground focus-visible:ring-0 aria-invalid:ring-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-100 dark:bg-transparent",
         context.chrome.inputClass,
         className,
       )}
@@ -249,11 +254,12 @@ export function CepFieldLookup({
   const context = useCepField("CepFieldLookup");
   const loading = context.status === "loading";
   return (
-    <button
+    <Button
       type="button"
+      variant="secondary"
       data-slot="cep-field-lookup"
       className={cn(
-        "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full bg-secondary font-medium text-secondary-foreground transition-[scale,background-color,color] duration-[140ms] ease-out-quint hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] disabled:cursor-not-allowed disabled:text-subtle-foreground disabled:hover:bg-secondary motion-reduce:transition-none motion-reduce:active:scale-100",
+        "shrink-0 gap-1.5 rounded-full bg-secondary py-0 font-medium text-secondary-foreground transition-[scale,background-color,color] duration-[140ms] ease-out-quint hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.97] disabled:pointer-events-auto disabled:cursor-not-allowed disabled:text-subtle-foreground disabled:opacity-100 disabled:hover:bg-secondary motion-reduce:transition-none motion-reduce:active:scale-100",
         loading && "cursor-progress",
         context.chrome.buttonClass,
         className,
@@ -274,7 +280,7 @@ export function CepFieldLookup({
         <Search className={context.chrome.iconClass} strokeWidth={2} aria-hidden="true" />
       )}
       {children ?? "Buscar"}
-    </button>
+    </Button>
   );
 }
 

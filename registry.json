@@ -2311,6 +2311,9 @@
       "description": "A CPF and CNPJ field with masking, check-digit validation, alphanumeric CNPJ support, and rounded, pill, and compact variants.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "badge",
+        "input",
+        "label",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -2330,6 +2333,9 @@
       "description": "A Brazilian postal code field with masking, address lookup states, and rounded, pill, and compact variants.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
+        "input",
+        "label",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -2349,6 +2355,8 @@
       "description": "A Pix charge with QR code, copy-and-paste code, expiry countdown, payment status, and card, plain, and compact variants.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "badge",
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -2368,6 +2376,7 @@
       "description": "Card installment choices with amounts, interest terms, and totals in list, tiles, and compact variants.",
       "dependencies": ["class-variance-authority"],
       "registryDependencies": [
+        "radio-group",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],

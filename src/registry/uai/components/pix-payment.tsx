@@ -12,6 +12,8 @@ import {
   useState,
 } from "react";
 
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/uai-utils";
 
 export const PIX_PAYMENT_VARIANTS = ["card", "plain", "compact"] as const;
@@ -205,11 +207,12 @@ export function PixPaymentStatusBadge({
 }: PixPaymentStatusBadgeProps) {
   const context = usePixPayment("PixPaymentStatusBadge");
   return (
-    <span
+    <Badge
+      variant="secondary"
       data-slot="pix-payment-status-badge"
       data-status={context.status}
       className={cn(
-        "inline-flex h-6 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-[11.5px] font-medium",
+        "h-6 shrink-0 gap-1.5 rounded-full border-0 px-2.5 py-0 text-[11.5px] font-medium",
         context.status === "pending" && "bg-warning/14 text-warning",
         context.status === "paid" && "bg-success/14 text-success",
         context.status === "expired" && "bg-muted text-muted-foreground",
@@ -227,7 +230,7 @@ export function PixPaymentStatusBadge({
         )}
       />
       {children ?? statusCopy[context.status]}
-    </span>
+    </Badge>
   );
 }
 
@@ -344,12 +347,15 @@ export function PixPaymentCode({
         >
           {context.code}
         </code>
-        <button
+        <Button
           type="button"
+          data-slot="pix-payment-copy"
           className={cn(
-            "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full font-medium transition-[scale,background-color,filter] duration-[140ms] ease-out-quint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-secondary disabled:text-subtle-foreground motion-reduce:transition-none motion-reduce:active:scale-100",
-            compact ? "h-7 px-3 text-[12px]" : "h-8 px-3.5 text-[12.5px]",
-            "bg-primary text-primary-foreground hover:brightness-[1.08]",
+            "shrink-0 gap-1.5 rounded-full py-0 font-medium transition-[scale,background-color,filter] duration-[140ms] ease-out-quint focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.97] disabled:pointer-events-auto disabled:cursor-not-allowed disabled:bg-secondary disabled:text-subtle-foreground disabled:opacity-100 motion-reduce:transition-none motion-reduce:active:scale-100",
+            compact
+              ? "h-7 px-3 text-[12px] has-[>svg]:px-3"
+              : "h-8 px-3.5 text-[12.5px] has-[>svg]:px-3.5",
+            "bg-primary text-primary-foreground hover:bg-primary hover:brightness-[1.08]",
           )}
           disabled={disabled}
           onClick={() => void context.copy()}
@@ -360,7 +366,7 @@ export function PixPaymentCode({
             <Copy className="size-3.5" strokeWidth={2} aria-hidden="true" />
           )}
           {context.copied ? "Copiado" : "Copiar código"}
-        </button>
+        </Button>
       </div>
       <span role="status" className="sr-only">
         {context.copied ? "Código Pix copiado" : ""}

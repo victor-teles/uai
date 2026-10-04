@@ -13,6 +13,9 @@ import {
   useState,
 } from "react";
 
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/uai-utils";
 
 export const DOCUMENT_FIELD_VARIANTS = ["rounded", "pill", "compact"] as const;
@@ -123,8 +126,8 @@ function documentFieldChrome(variant: DocumentFieldVariant) {
       variant === "pill" ? "rounded-full" : compact ? "rounded-xl" : "rounded-[14px]",
     ),
     inputClass: compact
-      ? "h-7 px-2 text-[12.5px] leading-4"
-      : "h-8 px-2.5 text-[13px] leading-[18px]",
+      ? "h-7 px-2 text-[12.5px] leading-4 md:text-[12.5px]"
+      : "h-8 px-2.5 text-[13px] leading-[18px] md:text-[13px]",
     kindClass: compact ? "h-5 px-1.5 text-[10.5px]" : "h-[22px] px-2 text-[11px]",
     messageClass: compact
       ? "mt-1.5 gap-1.5 px-0.5 text-[11.5px] leading-4"
@@ -246,10 +249,10 @@ export type DocumentFieldLabelProps = ComponentProps<"label">;
 export function DocumentFieldLabel({ children, className, ...props }: DocumentFieldLabelProps) {
   const context = useDocumentField("DocumentFieldLabel");
   return (
-    <label
+    <Label
       data-slot="document-field-label"
       className={cn(
-        "block font-medium text-muted-foreground",
+        "block font-medium text-muted-foreground select-auto",
         context.chrome.labelClass,
         className,
       )}
@@ -257,7 +260,7 @@ export function DocumentFieldLabel({ children, className, ...props }: DocumentFi
       htmlFor={context.inputId}
     >
       {children ?? defaultLabels[context.accept]}
-    </label>
+    </Label>
   );
 }
 
@@ -333,7 +336,7 @@ export function DocumentFieldInput({
   };
 
   return (
-    <input
+    <Input
       inputMode={context.accept === "cpf" ? "numeric" : "text"}
       autoCapitalize="characters"
       autoComplete="off"
@@ -341,7 +344,7 @@ export function DocumentFieldInput({
       placeholder={context.accept === "cnpj" ? "00.000.000/0000-00" : "000.000.000-00"}
       data-slot="document-field-input"
       className={cn(
-        "min-w-0 flex-1 bg-transparent font-medium tabular-nums tracking-[0.01em] outline-none placeholder:font-normal placeholder:text-subtle-foreground disabled:cursor-not-allowed",
+        "min-w-0 flex-1 rounded-none border-0 bg-transparent py-0 font-medium tabular-nums tracking-[0.01em] shadow-none outline-none placeholder:font-normal placeholder:text-subtle-foreground focus-visible:ring-0 aria-invalid:ring-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-100 dark:bg-transparent",
         context.chrome.inputClass,
         className,
       )}
@@ -368,18 +371,19 @@ export function DocumentFieldKind({ className, ...props }: DocumentFieldKindProp
   const context = useDocumentField("DocumentFieldKind");
   if (!context.value) return null;
   return (
-    <span
+    <Badge
+      variant="secondary"
       data-slot="document-field-kind"
       data-kind={context.kind}
       className={cn(
-        "inline-flex shrink-0 animate-in items-center rounded-full bg-muted font-medium text-muted-foreground duration-180 ease-out-quint fade-in-0 zoom-in-96 motion-reduce:animate-none",
+        "shrink-0 animate-in rounded-full border-0 bg-muted py-0 font-medium text-muted-foreground duration-180 ease-out-quint fade-in-0 zoom-in-96 motion-reduce:animate-none",
         context.chrome.kindClass,
         className,
       )}
       {...props}
     >
       {context.kind === "cpf" ? "CPF" : "CNPJ"}
-    </span>
+    </Badge>
   );
 }
 

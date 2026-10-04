@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   PixPayment,
   PixPaymentAmount,
@@ -26,23 +27,17 @@ export function PixPaymentPreview({ variant = "card" }: { variant?: PixPaymentVa
 
   return (
     <div style={{ display: "grid", gap: 12 }}>
-      <div
-        role="group"
+      <ToggleGroup
+        type="single"
         aria-label="Simular status"
-        style={{ display: "flex", gap: 8, justifyContent: "center" }}
+        value={status}
+        onValueChange={(next) => next && setStatus(next as PixPaymentStatus)}
+        className="justify-self-center"
       >
-        {(["pending", "paid", "expired"] as const).map((option) => (
-          <button
-            key={option}
-            type="button"
-            aria-pressed={status === option}
-            onClick={() => setStatus(option)}
-            className="h-7 rounded-full bg-secondary px-3 text-[12px] font-medium text-muted-foreground aria-pressed:text-foreground"
-          >
-            {option === "pending" ? "Pendente" : option === "paid" ? "Pago" : "Expirado"}
-          </button>
-        ))}
-      </div>
+        <ToggleGroupItem value="pending">Pendente</ToggleGroupItem>
+        <ToggleGroupItem value="paid">Pago</ToggleGroupItem>
+        <ToggleGroupItem value="expired">Expirado</ToggleGroupItem>
+      </ToggleGroup>
       <PixPayment
         variant={variant}
         status={status}

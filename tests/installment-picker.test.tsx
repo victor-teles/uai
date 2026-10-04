@@ -52,7 +52,7 @@ function Fixture({
   );
 }
 
-test("groups native radios under a legend and reports the selection", async () => {
+test("groups radios under a legend and reports the selection", async () => {
   const user = userEvent.setup();
   const onValueChange = mock((_value: string) => {});
   render(<Fixture onValueChange={onValueChange} />);
@@ -60,15 +60,22 @@ test("groups native radios under a legend and reports the selection", async () =
   expect(screen.getByRole("group", { name: "Parcelamento" })).toBeDefined();
   const radios = screen.getAllByRole("radio");
   expect(radios).toHaveLength(3);
-  expect(radios[0]).toHaveProperty("checked", true);
+  expect(radios[0]?.getAttribute("aria-checked")).toBe("true");
   expect(radios[2]).toHaveProperty("disabled", true);
 
   await user.click(screen.getByText("R$ 433,00"));
   expect(onValueChange).toHaveBeenCalledWith("3");
-  expect(radios[1]).toHaveProperty("checked", true);
+  expect(radios[1]?.getAttribute("aria-checked")).toBe("true");
   expect(radios[1]?.closest("label")?.getAttribute("data-state")).toBe("checked");
   const form = screen.getByRole("form", { name: "Pagamento" }) as HTMLFormElement;
   expect(new FormData(form).get("parcelas")).toBe("3");
+
+  radios[1]?.focus();
+  // Radix moves focus on a timer and selects only while the key is still down.
+  await user.keyboard("{ArrowUp>}");
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  await user.keyboard("{/ArrowUp}");
+  expect(onValueChange).toHaveBeenLastCalledWith("1");
 });
 
 test("names each option with its visible text", () => {

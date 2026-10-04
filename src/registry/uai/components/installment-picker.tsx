@@ -3,6 +3,7 @@
 import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, useContext, useId, useState } from "react";
 
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/uai-utils";
 
 export const INSTALLMENT_PICKER_VARIANTS = ["list", "tiles", "compact"] as const;
@@ -21,13 +22,14 @@ export type InstallmentPickerProps = Omit<
   value?: string;
   defaultValue?: string;
   onValueChange?: (value: string) => void;
-  /** Form field name for the native radio inputs. */
+  /** Form field name submitted with the selected value. */
   name?: string;
 };
 
 type InstallmentPickerContextValue = {
   variant: InstallmentPickerVariant;
   name: string;
+  legendId: string;
   value: string | undefined;
   disabled: boolean;
   select: (value: string) => void;
@@ -53,6 +55,7 @@ export function InstallmentPicker({
   ...props
 }: InstallmentPickerProps) {
   const generatedName = useId();
+  const legendId = useId();
   const [internalValue, setInternalValue] = useState(defaultValue);
   const current = value ?? internalValue;
 
@@ -63,7 +66,7 @@ export function InstallmentPicker({
 
   return (
     <InstallmentPickerContext.Provider
-      value={{ variant, name: name ?? generatedName, value: current, disabled, select }}
+      value={{ variant, name: name ?? generatedName, legendId, value: current, disabled, select }}
     >
       <fieldset
         data-slot="installment-picker"
@@ -101,6 +104,7 @@ export function InstallmentPickerLegend({
         className,
       )}
       {...props}
+      id={context.legendId}
     >
       {children}
     </legend>
@@ -110,34 +114,43 @@ export function InstallmentPickerLegend({
 const optionsVariants = cva("clear-both grid min-w-0", {
   variants: {
     variant: {
-      list: "overflow-hidden rounded-[14px] border border-border bg-card *:not-first:border-t *:not-first:border-border",
+      list: "gap-0 overflow-hidden rounded-[14px] border border-border bg-card *:not-first:border-t *:not-first:border-border",
       tiles: "@container/tiles grid-cols-[repeat(auto-fill,minmax(148px,1fr))] gap-2",
       compact: "gap-0.5 rounded-xl border border-border bg-card p-0.5",
     },
   },
 });
 
-export type InstallmentPickerOptionsProps = ComponentProps<"div">;
+export type InstallmentPickerOptionsProps = Omit<
+  ComponentProps<typeof RadioGroup>,
+  "value" | "defaultValue" | "onValueChange" | "name"
+>;
 
+/** The radio group. Arrow keys move between options and select them. */
 export function InstallmentPickerOptions({ className, ...props }: InstallmentPickerOptionsProps) {
   const context = useInstallmentPicker("InstallmentPickerOptions");
   return (
-    <div
+    <RadioGroup
       data-slot="installment-picker-options"
+      aria-labelledby={context.legendId}
       className={cn(optionsVariants({ variant: context.variant }), className)}
       {...props}
+      name={context.name}
+      value={context.value ?? ""}
+      onValueChange={context.select}
+      disabled={context.disabled}
     />
   );
 }
 
 const optionVariants = cva(
-  "group/option relative flex min-w-0 cursor-pointer items-center transition-[background-color,box-shadow] duration-[120ms] ease-out has-checked:bg-accent has-disabled:cursor-not-allowed has-disabled:opacity-55 has-focus-visible:outline-2 has-focus-visible:-outline-offset-2 has-focus-visible:outline-ring motion-reduce:transition-none",
+  "group/option relative flex min-w-0 cursor-pointer items-center transition-[background-color,box-shadow] duration-[120ms] ease-out has-data-[state=checked]:bg-accent has-disabled:cursor-not-allowed has-disabled:opacity-55 has-focus-visible:outline-2 has-focus-visible:-outline-offset-2 has-focus-visible:outline-ring motion-reduce:transition-none",
   {
     variants: {
       variant: {
         list: "gap-3 px-3.5 py-3 hover:bg-accent/60",
         tiles:
-          "flex-col items-start gap-1 rounded-xl bg-card p-3 shadow-[inset_0_0_0_1px_var(--border)] hover:shadow-[inset_0_0_0_1px_var(--border-strong)] has-checked:shadow-[inset_0_0_0_1px_var(--foreground)]",
+          "flex-col items-start gap-1 rounded-xl bg-card p-3 shadow-[inset_0_0_0_1px_var(--border)] hover:shadow-[inset_0_0_0_1px_var(--border-strong)] has-data-[state=checked]:shadow-[inset_0_0_0_1px_var(--foreground)]",
         compact: "gap-2.5 rounded-[10px] px-2.5 py-1.5 hover:bg-accent/60",
       },
     },
@@ -149,7 +162,7 @@ export type InstallmentPickerOptionProps = Omit<ComponentProps<"label">, "htmlFo
   disabled?: boolean;
 };
 
-/** One choice, built on a native radio so arrow keys and forms work without scripting. */
+/** One choice. The whole row is the click target for its radio. */
 export function InstallmentPickerOption({
   value,
   disabled = false,
@@ -158,6 +171,7 @@ export function InstallmentPickerOption({
   ...props
 }: InstallmentPickerOptionProps) {
   const context = useInstallmentPicker("InstallmentPickerOption");
+  const contentId = useId();
   const checked = context.value === value;
   return (
     <label
@@ -166,24 +180,18 @@ export function InstallmentPickerOption({
       className={cn(optionVariants({ variant: context.variant }), className)}
       {...props}
     >
-      <input
-        type="radio"
-        className="peer sr-only"
-        name={context.name}
+      <RadioGroupItem
         value={value}
-        checked={checked}
         disabled={context.disabled || disabled}
-        onChange={() => context.select(value)}
-      />
-      <span
-        aria-hidden="true"
+        aria-labelledby={contentId}
         className={cn(
-          "grid size-4 shrink-0 place-items-center rounded-full shadow-[inset_0_0_0_1.5px_var(--border-strong)] transition-[background-color,box-shadow] duration-[140ms] ease-out-quint after:size-1.5 after:scale-0 after:rounded-full after:bg-primary-foreground after:transition-transform after:duration-[140ms] after:ease-out-quint peer-checked:bg-primary peer-checked:shadow-none peer-checked:after:scale-100 motion-reduce:transition-none motion-reduce:after:transition-none",
+          "size-4 border-0 bg-transparent shadow-[inset_0_0_0_1.5px_var(--border-strong)] transition-[background-color,box-shadow] duration-[140ms] ease-out-quint focus-visible:ring-0 data-[state=checked]:bg-primary data-[state=checked]:shadow-none disabled:opacity-100 motion-reduce:transition-none dark:bg-transparent dark:data-[state=checked]:bg-primary [&_svg]:size-1.5 [&_svg]:fill-primary-foreground [&_svg]:stroke-0",
           context.variant === "tiles" && "absolute top-3 right-3",
           context.variant === "compact" && "size-3.5",
         )}
       />
       <span
+        id={contentId}
         className={cn(
           "grid min-w-0 flex-1 items-baseline gap-x-2 gap-y-0.5",
           context.variant === "tiles"

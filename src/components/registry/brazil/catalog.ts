@@ -143,6 +143,7 @@ export function CepFieldPreview({ variant = "rounded" }: { variant?: CepFieldVar
     usage: `"use client";
 
 import { useState } from "react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   PixPayment,
   PixPaymentAmount,
@@ -168,23 +169,17 @@ export function PixPaymentPreview({ variant = "card" }: { variant?: PixPaymentVa
 
   return (
     <div style={{ display: "grid", gap: 12 }}>
-      <div
-        role="group"
+      <ToggleGroup
+        type="single"
         aria-label="Simular status"
-        style={{ display: "flex", gap: 8, justifyContent: "center" }}
+        value={status}
+        onValueChange={(next) => next && setStatus(next as PixPaymentStatus)}
+        className="justify-self-center"
       >
-        {(["pending", "paid", "expired"] as const).map((option) => (
-          <button
-            key={option}
-            type="button"
-            aria-pressed={status === option}
-            onClick={() => setStatus(option)}
-            className="h-7 rounded-full bg-secondary px-3 text-[12px] font-medium text-muted-foreground aria-pressed:text-foreground"
-          >
-            {option === "pending" ? "Pendente" : option === "paid" ? "Pago" : "Expirado"}
-          </button>
-        ))}
-      </div>
+        <ToggleGroupItem value="pending">Pendente</ToggleGroupItem>
+        <ToggleGroupItem value="paid">Pago</ToggleGroupItem>
+        <ToggleGroupItem value="expired">Expirado</ToggleGroupItem>
+      </ToggleGroup>
       <PixPayment
         variant={variant}
         status={status}
@@ -291,8 +286,8 @@ export function InstallmentPickerPreview({
 }
 `,
     accessibility: [
-      "Options are native radio inputs inside a fieldset with a legend, so arrow keys and form submission work.",
-      "Each option's visible text is its accessible name, including the count, amount, and terms.",
+      "Options are a radio group named by the fieldset legend; arrow keys move and select, and the value submits with forms.",
+      "Each radio is labelled by its option text, including the count, amount, and terms, and the whole row selects it.",
       "Interest-free terms are stated in text, not only by the success tint.",
       "Focus draws an outline around the whole option row or tile.",
     ],
