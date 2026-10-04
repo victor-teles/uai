@@ -4,6 +4,7 @@ import { cva } from "class-variance-authority";
 import { LoaderCircle, Trash2 } from "lucide-react";
 import { type ComponentProps, createContext, type ReactNode, useContext, useId } from "react";
 
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/uai-utils";
 
 export const CART_ITEM_VARIANTS = ["card", "plain", "compact"] as const;
@@ -40,7 +41,9 @@ function cartItemChrome(variant: CartItemVariant) {
     optionClass: compact ? "h-5 px-1.5 text-[11px]" : "h-5.5 px-2 text-[11.5px]",
     availabilityClass: compact ? "mt-2 px-1.5 text-[11px]/4" : "mt-2.5 px-2 text-[11.5px]/4",
     actionsClass: compact ? "mt-3 gap-2.5" : "mt-4 gap-3",
-    removeClass: compact ? "h-7 px-2.5 text-[12px]" : "h-8 px-3 text-[12.5px]",
+    removeClass: compact
+      ? "h-7 px-2.5 text-[12px] has-[>svg]:px-2.5"
+      : "h-8 px-3 text-[12.5px] has-[>svg]:px-3",
   };
 }
 
@@ -301,11 +304,13 @@ export function CartItemRemove({
   const context = useCartItem("CartItemRemove");
 
   return (
-    <button
+    <Button
       data-slot="cart-item-remove"
+      variant="ghost"
+      size="sm"
       type={type}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full font-medium text-muted-foreground transition-[scale,color,background-color] duration-140 ease-out-quint hover:bg-destructive/12 hover:text-destructive focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] disabled:pointer-events-none disabled:opacity-60 motion-reduce:transition-none motion-reduce:active:scale-100",
+        "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full font-medium text-muted-foreground transition-[scale,color,background-color] duration-140 ease-out-quint hover:bg-destructive/12 hover:text-destructive focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.97] disabled:pointer-events-none disabled:opacity-60 motion-reduce:transition-none motion-reduce:active:scale-100 dark:hover:bg-destructive/12",
         context.chrome.removeClass,
         className,
       )}
@@ -322,6 +327,6 @@ export function CartItemRemove({
         <Trash2 className="size-3.5" strokeWidth={1.75} aria-hidden="true" />
       )}
       <span>{removing ? removingLabel : children}</span>
-    </button>
+    </Button>
   );
 }

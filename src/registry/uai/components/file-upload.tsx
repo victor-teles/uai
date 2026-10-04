@@ -3,6 +3,8 @@
 import { cva } from "class-variance-authority";
 import { Upload } from "lucide-react";
 import { type ComponentProps, createContext, useContext, useId, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/uai-utils";
 
 export const FILE_UPLOAD_VARIANTS = ["dropzone", "inline", "compact"] as const;
@@ -30,10 +32,10 @@ type UploadContext = {
 };
 const Context = createContext<UploadContext | null>(null);
 const buttonBase =
-  "cursor-pointer rounded-full border-0 font-medium [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] not-disabled:active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none";
+  "cursor-pointer rounded-full border-0 py-0 font-medium [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] not-disabled:active:scale-[0.97] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none";
 const raisedButton =
-  "bg-secondary text-foreground not-disabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]";
-const actionClass = "h-6.5 justify-self-start px-2.5 text-[12px]";
+  "bg-secondary text-foreground hover:bg-secondary not-disabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]";
+const actionClass = "h-6.5 justify-self-start px-2.5 text-[12px] has-[>svg]:px-2.5";
 const dangerText = "text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))]";
 function useUpload() {
   const context = useContext(Context);
@@ -206,12 +208,13 @@ export function FileUploadTrigger({
 }: ComponentProps<"button">) {
   const context = useUpload();
   return (
-    <button
+    <Button
       data-slot="file-upload-trigger"
+      variant="secondary"
       className={cn(
         buttonBase,
         raisedButton,
-        "shrink-0 px-3.5 text-[12.5px]",
+        "shrink-0 px-3.5 text-[12.5px] has-[>svg]:px-3.5",
         context.variant === "compact" ? "h-7" : "h-7.5",
         className,
       )}
@@ -224,7 +227,7 @@ export function FileUploadTrigger({
       }}
     >
       {children}
-    </button>
+    </Button>
   );
 }
 export function FileUploadList({ className, ...props }: ComponentProps<"ul">) {
@@ -294,20 +297,26 @@ export function FileUploadItem({
     </ItemContext.Provider>
   );
 }
-export function FileUploadProgress({ className, ...props }: ComponentProps<"progress">) {
+export function FileUploadProgress({
+  className,
+  ...props
+}: Omit<ComponentProps<typeof Progress>, "value" | "max">) {
   const context = useItem();
   if (context.status !== "uploading") return null;
   return (
-    <progress
+    <Progress
       aria-label="Upload progress"
       data-slot="file-upload-progress"
       className={cn(
-        "order-10 block h-1 w-full basis-full appearance-none overflow-hidden rounded-full border-0 bg-foreground/10 [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:bg-foreground [&::-webkit-progress-bar]:bg-transparent [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-foreground [&::-webkit-progress-value]:[transition:width_240ms_cubic-bezier(0.23,1,0.32,1)] motion-reduce:[&::-webkit-progress-value]:transition-none",
+        "order-10 block h-1 w-full basis-full overflow-hidden rounded-full border-0 bg-foreground/10 [&_[data-slot=progress-indicator]]:rounded-full [&_[data-slot=progress-indicator]]:bg-foreground [&_[data-slot=progress-indicator]]:[transition:transform_240ms_cubic-bezier(0.23,1,0.32,1)] motion-reduce:[&_[data-slot=progress-indicator]]:transition-none",
         className,
       )}
       {...props}
       max={100}
       value={context.progress}
+      // The shadcn Progress keeps `value` for the indicator only, so expose it to assistive tech here.
+      aria-valuenow={context.progress}
+      aria-valuetext={`${Math.round(context.progress)}%`}
     />
   );
 }
@@ -319,15 +328,16 @@ export function FileUploadRetry({
   const context = useItem();
   if (context.status !== "error") return null;
   return (
-    <button
+    <Button
       data-slot="file-upload-retry"
+      variant="secondary"
       className={cn(buttonBase, raisedButton, actionClass, className)}
       {...props}
       type="button"
       disabled={context.disabled || props.disabled}
     >
       {children}
-    </button>
+    </Button>
   );
 }
 export function FileUploadRemove({
@@ -337,11 +347,12 @@ export function FileUploadRemove({
 }: ComponentProps<"button">) {
   const context = useItem();
   return (
-    <button
+    <Button
       data-slot="file-upload-remove"
+      variant="ghost"
       className={cn(
         buttonBase,
-        "bg-transparent text-muted-foreground not-disabled:hover:bg-accent not-disabled:hover:text-foreground",
+        "bg-transparent text-muted-foreground hover:bg-transparent hover:text-muted-foreground not-disabled:hover:bg-accent not-disabled:hover:text-foreground dark:hover:bg-transparent",
         actionClass,
         className,
       )}
@@ -350,6 +361,6 @@ export function FileUploadRemove({
       disabled={context.disabled || props.disabled}
     >
       {children}
-    </button>
+    </Button>
   );
 }

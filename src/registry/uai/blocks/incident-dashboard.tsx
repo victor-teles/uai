@@ -2,6 +2,9 @@
 
 import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, useContext, useId } from "react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   ActivityTimeline,
   type ActivityTimelineVariant,
@@ -72,17 +75,17 @@ const severityClasses: Record<IncidentDashboardSeverityLevel, string> = {
 };
 
 const incidentDashboardActionVariants = cva(
-  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap [transition:filter_120ms_ease-out,box-shadow_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
+  "cursor-pointer gap-1.5 rounded-full border-0 py-0 transition-[filter,box-shadow,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
   {
     variants: {
       emphasis: {
-        primary: "bg-primary text-primary-foreground enabled:hover:brightness-108",
+        primary: "bg-primary text-primary-foreground hover:bg-primary enabled:hover:brightness-108",
         secondary:
-          "bg-secondary text-secondary-foreground enabled:hover:shadow-[inset_0_0_0_999px_color-mix(in_oklab,var(--foreground)_9%,transparent)]",
+          "bg-secondary text-secondary-foreground hover:bg-secondary enabled:hover:shadow-[inset_0_0_0_999px_color-mix(in_oklab,var(--foreground)_9%,transparent)]",
       },
       compact: {
-        true: "h-[26px] px-[11px] text-[12px]/4",
-        false: "h-7.5 px-[13px] text-[12.5px]/4",
+        true: "h-[26px] px-[11px] text-[12px]/4 has-[>svg]:px-[11px]",
+        false: "h-7.5 px-[13px] text-[12.5px]/4 has-[>svg]:px-[13px]",
       },
     },
   },
@@ -211,8 +214,9 @@ export function IncidentDashboardAction({
 }: ComponentProps<"button"> & { emphasis?: "primary" | "secondary" }) {
   const context = useDashboard("IncidentDashboardAction");
   return (
-    <button
+    <Button
       data-slot="incident-dashboard-action"
+      variant={emphasis === "primary" ? "default" : "secondary"}
       data-emphasis={emphasis}
       className={cn(
         incidentDashboardActionVariants({ emphasis, compact: context.variant === "compact" }),
@@ -422,14 +426,17 @@ export function IncidentDashboardUpdateLabel({
 }: ComponentProps<"label">) {
   const id = useUpdate("IncidentDashboardUpdateLabel");
   return (
-    <label
+    <Label
       data-slot="incident-dashboard-update-label"
-      className={cn("text-[11.5px]/4 font-medium text-subtle-foreground", className)}
+      className={cn(
+        "block text-[11.5px]/4 font-medium text-subtle-foreground select-auto",
+        className,
+      )}
       {...props}
       htmlFor={id}
     >
       {children}
-    </label>
+    </Label>
   );
 }
 
@@ -439,11 +446,11 @@ export function IncidentDashboardUpdateInput({
 }: Omit<ComponentProps<"textarea">, "id">) {
   const id = useUpdate("IncidentDashboardUpdateInput");
   return (
-    <textarea
+    <Textarea
       data-slot="incident-dashboard-update-input"
       rows={3}
       className={cn(
-        "box-border w-full min-w-0 resize-y rounded-[10px] border-0 bg-background px-[11px] py-[9px] text-[13px]/[18px] text-inherit transition-[box-shadow] duration-120 ease-out placeholder:text-subtle-foreground focus:shadow-[0_0_0_1px_var(--border-strong),0_0_0_4px_color-mix(in_oklab,var(--primary)_22%,transparent)] focus:outline-none motion-reduce:transition-none",
+        "box-border field-sizing-fixed block min-h-0 w-full min-w-0 resize-y rounded-[10px] border-0 bg-background px-[11px] py-[9px] text-[13px]/[18px] text-inherit shadow-none transition-[box-shadow] duration-120 ease-out placeholder:text-subtle-foreground focus:shadow-[0_0_0_1px_var(--border-strong),0_0_0_4px_color-mix(in_oklab,var(--primary)_22%,transparent)] focus:outline-none focus-visible:ring-0 motion-reduce:transition-none md:text-[13px]/[18px] dark:bg-background",
         className,
       )}
       {...props}
@@ -460,8 +467,9 @@ export function IncidentDashboardUpdateSubmit({
   useUpdate("IncidentDashboardUpdateSubmit");
   const context = useDashboard("IncidentDashboardUpdateSubmit");
   return (
-    <button
+    <Button
       data-slot="incident-dashboard-update-submit"
+      variant="default"
       className={cn(
         incidentDashboardActionVariants({
           emphasis: "primary",
@@ -474,6 +482,6 @@ export function IncidentDashboardUpdateSubmit({
       type="submit"
     >
       {children}
-    </button>
+    </Button>
   );
 }

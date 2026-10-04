@@ -22,7 +22,7 @@ test("publishes every operations block without drift and keeps examples executab
     expect(item.accessibility.length).toBeGreaterThanOrEqual(3);
     expect(source).not.toContain("@/registry/");
     for (const [, component] of source.matchAll(/from "@\/components\/ui\/uai\/([\w-]+)"/g)) {
-      expect(entry.registryDependencies).toContain(`https://useuai.vercel.app/r/${component}.json`);
+      expect(entry.registryDependencies).toContain(`https://uaiblocks.vercel.app/r/${component}.json`);
     }
   }
 });

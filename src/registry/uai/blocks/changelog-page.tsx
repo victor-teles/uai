@@ -11,6 +11,14 @@ import {
   useMemo,
   useState,
 } from "react";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   ChangelogEntry,
   type ChangelogEntryProps,
@@ -207,18 +215,29 @@ export function ChangelogPageFilters(
 }
 
 export type ChangelogPageFilterProps = Omit<
-  ComponentProps<"select">,
-  "value" | "defaultValue" | "name"
+  ComponentProps<typeof SelectTrigger>,
+  "id" | "name" | "size" | "value" | "defaultValue" | "onChange"
 > & {
   name: ChangelogPageFilterName;
   /** Visible label for the select. */
   label: string;
 };
-/** A labelled native select. Use an option with an empty value for "All". */
+
+// Radix Select forbids empty item values, so the "All" option ("") maps to this private value.
+const ALL_VALUE = "__uai-changelog-all__";
+
+const filterTriggerClass =
+  "w-auto max-w-full cursor-pointer gap-1 rounded-full border-0 bg-secondary py-0 pr-2 pl-2.5 text-[12.5px]/[18px] font-medium text-secondary-foreground shadow-none transition-colors duration-120 ease-[ease-out] hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid motion-reduce:transition-none dark:bg-secondary dark:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] [&_svg]:size-3.5";
+const filterContentClass =
+  "min-w-36 rounded-[14px] border-0 bg-popover text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_12px_28px_-10px_oklch(0_0_0/0.32),0_2px_6px_-2px_oklch(0_0_0/0.12)] duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-[state=open]:zoom-in-96 data-[state=open]:[--tw-enter-translate-x:0]! data-[state=open]:[--tw-enter-translate-y:0]! motion-reduce:data-[state=closed]:animate-none motion-reduce:data-[state=open]:animate-none";
+
+/**
+ * A labelled select bound to one page filter. Compose ChangelogPageFilterOption items inside;
+ * the page's onCategoryChange / onAreaChange report changes.
+ */
 export function ChangelogPageFilter({
   name,
   label,
-  onChange,
   className,
   children,
   ...props
@@ -228,28 +247,62 @@ export function ChangelogPageFilter({
   const compact = context.variant === "compact";
   return (
     <span className="inline-flex min-w-0 items-center gap-2">
-      <label htmlFor={id} className="text-[12px] text-subtle-foreground">
-        {label}
-      </label>
-      <select
-        data-slot="changelog-page-filter"
-        className={cn(
-          "max-w-full cursor-pointer rounded-full border-0 bg-secondary px-2.5 text-[12.5px] font-medium text-secondary-foreground transition-colors duration-120 ease-[ease-out] hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none",
-          compact ? "h-6" : "h-7",
-          className,
-        )}
-        {...props}
-        id={id}
-        name={name}
-        value={context.filters[name]}
-        onChange={(event) => {
-          onChange?.(event);
-          if (!event.defaultPrevented) context.setFilter(name, event.target.value);
-        }}
+      <Label
+        htmlFor={id}
+        className="text-[12px] leading-[inherit] font-normal text-subtle-foreground select-auto"
       >
-        {children}
-      </select>
+        {label}
+      </Label>
+      <Select
+        name={name}
+        value={context.filters[name] || ALL_VALUE}
+        onValueChange={(next) => context.setFilter(name, next === ALL_VALUE ? "" : next)}
+      >
+        <SelectTrigger
+          data-slot="changelog-page-filter"
+          className={cn(
+            filterTriggerClass,
+            compact ? "data-[size=default]:h-6" : "data-[size=default]:h-7",
+            className,
+          )}
+          {...props}
+          id={id}
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent position="popper" className={filterContentClass}>
+          {children}
+        </SelectContent>
+      </Select>
     </span>
+  );
+}
+
+export type ChangelogPageFilterOptionProps = Omit<ComponentProps<typeof SelectItem>, "value"> & {
+  /** Filter value. Use an empty string for the "All" option. */
+  value: string;
+};
+
+/** One option inside ChangelogPageFilter. */
+export function ChangelogPageFilterOption({
+  value,
+  className,
+  ...props
+}: ChangelogPageFilterOptionProps) {
+  const context = usePage("ChangelogPageFilterOption");
+  return (
+    <SelectItem
+      data-slot="changelog-page-filter-option"
+      className={cn(
+        "cursor-pointer rounded-[10px] text-foreground focus:bg-accent focus:text-foreground",
+        context.variant === "compact"
+          ? "min-h-7 py-1 pr-7 pl-2 text-[12.5px]/[18px]"
+          : "min-h-8 py-1.5 pr-8 pl-2.5 text-[13px]/[18px]",
+        className,
+      )}
+      {...props}
+      value={value === "" ? ALL_VALUE : value}
+    />
   );
 }
 

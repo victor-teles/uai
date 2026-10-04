@@ -2,6 +2,14 @@
 
 import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, useContext, useId, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   ConfirmationDialog,
   type ConfirmationDialogProps,
@@ -53,9 +61,9 @@ const emptyVariants: Record<TeamManagementVariant, EmptyStateVariant> = {
   compact: "compact",
 };
 const transitionClass =
-  "transition-[background-color,box-shadow,filter,transform] duration-[120ms,120ms,120ms,140ms] ease-[ease-out,ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none";
+  "transition-[background-color,box-shadow,filter,scale] duration-[120ms,120ms,120ms,140ms] ease-[ease-out,ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none";
 const focusClass =
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
+  "focus-visible:ring-0 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
 const secondaryHover =
   "enabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]";
 
@@ -152,9 +160,10 @@ export function TeamManagementActions({ className, ...props }: ComponentProps<"d
 }
 
 const teamButtonEmphasis = {
-  primary: "bg-primary text-primary-foreground enabled:hover:brightness-108",
-  secondary: cn("bg-secondary text-secondary-foreground", secondaryHover),
-  danger: "bg-destructive/12 text-destructive enabled:hover:bg-destructive/20",
+  primary: "bg-primary text-primary-foreground hover:bg-primary enabled:hover:brightness-108",
+  secondary:
+    "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+  danger: "bg-destructive/12 text-destructive hover:bg-destructive/20",
 };
 
 export function TeamManagementButton({
@@ -166,13 +175,16 @@ export function TeamManagementButton({
   const context = useTeam("TeamManagementButton");
   const compact = context.variant === "compact";
   return (
-    <button
+    <Button
       data-slot="team-management-button"
+      variant={emphasis === "primary" ? "default" : "secondary"}
       className={cn(
         transitionClass,
         focusClass,
-        "inline-flex cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-full border-0 font-medium enabled:active:scale-[0.97] motion-reduce:enabled:active:scale-100",
-        compact ? "h-6.5 px-2.5 text-[12px]" : "h-7.5 px-[13px] text-[12.5px]",
+        "cursor-pointer gap-1.5 rounded-full border-0 py-0 enabled:active:scale-[0.97] motion-reduce:enabled:active:scale-100",
+        compact
+          ? "h-6.5 px-2.5 text-[12px] has-[>svg]:px-2.5"
+          : "h-7.5 px-[13px] text-[12.5px] has-[>svg]:px-[13px]",
         teamButtonEmphasis[emphasis],
         className,
       )}
@@ -220,12 +232,31 @@ export function TeamManagementInvite({
   );
 }
 
-/** A native role select. Inside a member row it is named "Role for" plus the member name. */
+export type TeamManagementRoleSelectProps = Omit<
+  ComponentProps<typeof SelectTrigger>,
+  "size" | "value" | "defaultValue" | "onChange" | "name"
+> & {
+  value?: string;
+  defaultValue?: string;
+  onValueChange?: (value: string) => void;
+  name?: string;
+};
+
+/**
+ * A role select. Compose TeamManagementRoleOption items inside. Inside a member row it is
+ * named "Role for" plus the member name.
+ */
 export function TeamManagementRoleSelect({
+  value,
+  defaultValue,
+  onValueChange,
+  name,
+  disabled,
   className,
+  children,
   "aria-labelledby": labelledBy,
   ...props
-}: ComponentProps<"select">) {
+}: TeamManagementRoleSelectProps) {
   const context = useTeam("TeamManagementRoleSelect");
   const memberId = useContext(MemberContext);
   const labelId = useId();
@@ -237,20 +268,61 @@ export function TeamManagementRoleSelect({
           Role for
         </span>
       ) : null}
-      <select
-        aria-labelledby={labelledBy ?? (memberId ? `${labelId} ${memberId}-name` : undefined)}
-        data-slot="team-management-role-select"
-        className={cn(
-          transitionClass,
-          focusClass,
-          "cursor-pointer rounded-lg border-0 bg-secondary py-0 pr-1.5 pl-2.5 font-medium text-foreground disabled:cursor-not-allowed disabled:bg-transparent disabled:text-subtle-foreground",
-          secondaryHover,
-          compact ? "h-6.5 text-[12px]" : "h-7.5 text-[12.5px]",
-          className,
-        )}
-        {...props}
-      />
+      <Select
+        name={name}
+        value={value}
+        defaultValue={defaultValue}
+        onValueChange={onValueChange}
+        disabled={disabled}
+      >
+        <SelectTrigger
+          aria-labelledby={labelledBy ?? (memberId ? `${labelId} ${memberId}-name` : undefined)}
+          data-slot="team-management-role-select"
+          className={cn(
+            transitionClass,
+            focusClass,
+            "w-auto cursor-pointer gap-1 rounded-lg border-0 bg-secondary py-0 pr-1.5 pl-2.5 font-medium text-foreground shadow-none disabled:cursor-not-allowed disabled:bg-transparent disabled:text-subtle-foreground disabled:opacity-100 dark:bg-secondary dark:disabled:bg-transparent [&_svg]:size-3.5",
+            secondaryHover,
+            "dark:enabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+            compact
+              ? "text-[12px]/[18px] data-[size=default]:h-6.5"
+              : "text-[12.5px]/[18px] data-[size=default]:h-7.5",
+            className,
+          )}
+          {...props}
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent
+          position="popper"
+          align="end"
+          className="min-w-32 rounded-[14px] border-0 bg-popover text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_12px_28px_-10px_oklch(0_0_0/0.32),0_2px_6px_-2px_oklch(0_0_0/0.12)] duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-[state=open]:zoom-in-96 data-[state=open]:[--tw-enter-translate-x:0]! data-[state=open]:[--tw-enter-translate-y:0]! motion-reduce:data-[state=closed]:animate-none motion-reduce:data-[state=open]:animate-none"
+        >
+          {children}
+        </SelectContent>
+      </Select>
     </>
+  );
+}
+
+/** One role inside TeamManagementRoleSelect. */
+export function TeamManagementRoleOption({
+  className,
+  ...props
+}: ComponentProps<typeof SelectItem>) {
+  const context = useTeam("TeamManagementRoleOption");
+  return (
+    <SelectItem
+      data-slot="team-management-role-option"
+      className={cn(
+        "cursor-pointer rounded-[10px] text-foreground focus:bg-accent focus:text-foreground",
+        context.variant === "compact"
+          ? "min-h-7 py-1 pr-7 pl-2 text-[12.5px]/[18px]"
+          : "min-h-8 py-1.5 pr-8 pl-2.5 text-[13px]/[18px]",
+        className,
+      )}
+      {...props}
+    />
   );
 }
 

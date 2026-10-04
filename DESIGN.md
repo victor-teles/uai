@@ -385,6 +385,10 @@ Warm graphite neutrals carry structure on both layers. The site adds a lime sign
 
 **The Ink Send Rule.** Prompt Composer send uses Text on Surface when it can submit, and Border Strong when idle. Never accent.
 
+### Primitives
+
+Distributed components compose the consumer's shadcn primitives — `Button`, `Input`, `Textarea`, `Label`, `Select`, `Checkbox`, `RadioGroup`, `ToggleGroup`, `Dialog`, `AlertDialog`, `Sheet`, `DropdownMenu`, `Popover`, `Collapsible`, `Accordion`, `Tabs`, `Toggle`, `Table`, `Progress`, `Badge`, `Avatar`, `Skeleton`, `Separator`, `Breadcrumb` — instead of re-implementing them with native elements. The primitive owns base behavior and accessibility; the Uai part layers the rules in this document on top through `className`, so a pill button is a shadcn `Button` with Uai radius, height, and type. Native elements remain only where no primitive matches the semantics (description lists, step lists, calendar grids, drag handles), and where a primitive would break the part's contract: card surfaces stay sections because `Card` has no `asChild` and most parts have non-card variants, and Command Menu keeps its own listbox because cmdk cannot express its ARIA. See `plans/shadcn-primitives.md`.
+
 ### Theme tokens
 
 Distributed components read the standard shadcn theme tokens, never `--uai-*` variables. The `uai-theme` registry item fills those tokens with the palette above, so installing it gives the Uai look, and a consumer who keeps their own shadcn theme gets components that match their app. Four tokens extend the shadcn set: `subtle-foreground`, `border-strong`, `success`, and `warning`.

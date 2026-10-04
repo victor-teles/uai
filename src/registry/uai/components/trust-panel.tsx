@@ -3,6 +3,7 @@
 import { cva } from "class-variance-authority";
 import { ShieldCheck, Star } from "lucide-react";
 import { type ComponentProps, createContext, type ReactNode, useContext, useId } from "react";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/uai-utils";
 
 export const TRUST_PANEL_VARIANTS = ["card", "plain", "compact"] as const;
@@ -156,24 +157,26 @@ export function TrustPanelBadges({ className, ...props }: ComponentProps<"ul">) 
 }
 
 export function TrustPanelBadge({
-  icon = <ShieldCheck size={14} strokeWidth={1.75} aria-hidden="true" />,
+  icon = <ShieldCheck size={14} className="size-3.5" strokeWidth={1.75} aria-hidden="true" />,
   children,
   className,
   ...props
 }: ComponentProps<"li"> & { icon?: ReactNode }) {
   return (
-    <li
-      data-slot="trust-panel-badge"
+    <Badge
+      asChild
+      variant="secondary"
       className={cn(
-        "inline-flex min-h-[26px] items-center gap-1.5 rounded-full bg-muted pr-2.5 pl-2 text-xs/4 text-muted-foreground",
+        "min-h-[26px] justify-start gap-1.5 rounded-full border-0 bg-muted py-0 pr-2.5 pl-2 text-xs/4 font-normal whitespace-normal text-muted-foreground",
         className,
       )}
-      {...props}
     >
-      <span aria-hidden="true" className="inline-flex flex-none text-success">
-        {icon}
-      </span>
-      {children}
-    </li>
+      <li data-slot="trust-panel-badge" {...props}>
+        <span aria-hidden="true" className="inline-flex flex-none text-success">
+          {icon}
+        </span>
+        {children}
+      </li>
+    </Badge>
   );
 }

@@ -359,6 +359,7 @@ import {
   ChangelogPageDescription,
   ChangelogPageEmpty,
   ChangelogPageFilter,
+  ChangelogPageFilterOption,
   ChangelogPageFilters,
   ChangelogPageGroup,
   ChangelogPageGroupTitle,
@@ -470,18 +471,18 @@ export function ChangelogPagePreview({ variant = "timeline" }: { variant?: Chang
       <ChangelogPageFilters>
         <FilterBarControls>
           <ChangelogPageFilter name="category" label="Category">
-            <option value="">All categories</option>
+            <ChangelogPageFilterOption value="">All categories</ChangelogPageFilterOption>
             {Object.entries(categoryLabels).map(([value, label]) => (
-              <option key={value} value={value}>
+              <ChangelogPageFilterOption key={value} value={value}>
                 {label}
-              </option>
+              </ChangelogPageFilterOption>
             ))}
           </ChangelogPageFilter>
           <ChangelogPageFilter name="area" label="Product area">
-            <option value="">All areas</option>
-            <option value="Builds">Builds</option>
-            <option value="Dev server">Dev server</option>
-            <option value="Images">Images</option>
+            <ChangelogPageFilterOption value="">All areas</ChangelogPageFilterOption>
+            <ChangelogPageFilterOption value="Builds">Builds</ChangelogPageFilterOption>
+            <ChangelogPageFilterOption value="Dev server">Dev server</ChangelogPageFilterOption>
+            <ChangelogPageFilterOption value="Images">Images</ChangelogPageFilterOption>
           </ChangelogPageFilter>
         </FilterBarControls>
         <FilterBarReset />
@@ -548,7 +549,7 @@ export function ChangelogPagePreview({ variant = "timeline" }: { variant?: Chang
 }
 `,
     accessibility: [
-      "Filters are labelled native selects inside a Filter Bar, and Reset filters is disabled until a filter is active.",
+      "Filters are labelled selects inside a Filter Bar, and Reset filters is disabled until a filter is active.",
       "A polite status announces how many releases match after each filter change.",
       "Each month is a section named by its h2, and each release is an article named by its h3 title. Empty months are removed from the page and the accessibility tree.",
       "Categories pair a color dot with a written label, and an empty result explains how to recover.",

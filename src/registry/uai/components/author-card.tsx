@@ -3,6 +3,8 @@
 import { cva } from "class-variance-authority";
 import { Check, Plus } from "lucide-react";
 import { type ComponentProps, createContext, useContext, useId, useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/uai-utils";
 
 export const AUTHOR_CARD_VARIANTS = ["card", "inline", "compact"] as const;
@@ -16,7 +18,7 @@ function useAuthor(part: string) {
   return context;
 }
 const actionClass =
-  "transition-[background-color,color,filter,transform] duration-[120ms,120ms,120ms,140ms] ease-[ease-out,ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100";
+  "transition-[background-color,color,filter,transform] duration-[120ms,120ms,120ms,140ms] ease-[ease-out,ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100";
 const mixHover = "hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]";
 function initials(name: string) {
   return name
@@ -71,9 +73,9 @@ export function AuthorCardAvatar({
   ...props
 }: Omit<ComponentProps<"span">, "children"> & { name: string; src?: string }) {
   const { variant } = useAuthor("AuthorCardAvatar");
-  const [failed, setFailed] = useState(false);
+  // Radix shows the image only once it loads and falls back to initials otherwise.
   return (
-    <span
+    <Avatar
       aria-hidden="true"
       data-slot="author-card-avatar"
       className={cn(
@@ -83,13 +85,9 @@ export function AuthorCardAvatar({
       )}
       {...props}
     >
-      {src && !failed ? (
-        // biome-ignore lint/performance/noImgElement: distributed source cannot depend on next/image.
-        <img src={src} alt="" onError={() => setFailed(true)} className="size-full object-cover" />
-      ) : (
-        initials(name)
-      )}
-    </span>
+      {src ? <AvatarImage src={src} alt="" className="object-cover" /> : null}
+      <AvatarFallback className="text-[length:inherit]">{initials(name)}</AvatarFallback>
+    </Avatar>
   );
 }
 
@@ -175,19 +173,22 @@ export function AuthorCardLink({ className, children, ...props }: ComponentProps
   const { variant } = useAuthor("AuthorCardLink");
   return (
     <li className="flex">
-      <a
-        data-slot="author-card-link"
+      <Button
+        asChild
+        variant="secondary"
+        size="sm"
         className={cn(
           actionClass,
           mixHover,
-          "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-secondary px-2.5 text-[12px] font-medium text-muted-foreground tabular-nums no-underline hover:text-foreground",
+          "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-secondary px-2.5 text-[12px] font-medium text-muted-foreground tabular-nums no-underline hover:text-foreground has-[>svg]:px-2.5",
           variant === "compact" ? "h-6" : "h-6.5",
           className,
         )}
-        {...props}
       >
-        {children}
-      </a>
+        <a data-slot="author-card-link" {...props}>
+          {children}
+        </a>
+      </Button>
     </li>
   );
 }
@@ -211,14 +212,16 @@ export function AuthorCardFollow({
   const current = pressed ?? internal;
   const Icon = current ? Check : Plus;
   return (
-    <button
+    <Button
       aria-describedby={`${id}-name`}
       data-slot="author-card-follow"
       className={cn(
         actionClass,
-        "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 bg-primary font-medium text-primary-foreground hover:brightness-108",
+        "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 bg-primary py-0 font-medium text-primary-foreground hover:bg-primary hover:brightness-108",
         "aria-pressed:bg-secondary aria-pressed:text-secondary-foreground aria-pressed:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] aria-pressed:hover:filter-none",
-        variant === "compact" ? "h-6.5 pr-2.5 pl-2 text-[12px]" : "h-7 pr-3 pl-2.5 text-[12.5px]",
+        variant === "compact"
+          ? "h-6.5 pr-2.5 pl-2 text-[12px] has-[>svg]:pr-2.5 has-[>svg]:pl-2"
+          : "h-7 pr-3 pl-2.5 text-[12.5px] has-[>svg]:pr-3 has-[>svg]:pl-2.5",
         className,
       )}
       {...props}
@@ -237,11 +240,12 @@ export function AuthorCardFollow({
         strokeWidth={2}
         aria-hidden="true"
         className={cn(
+          "size-3.5",
           current &&
             "animate-in fade-in-0 zoom-in-60 duration-220 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:animate-none",
         )}
       />
       {children}
-    </button>
+    </Button>
   );
 }

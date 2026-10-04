@@ -28,8 +28,9 @@ Keep the Uai development server running. In a shadcn project, run:
 bunx shadcn@latest add http://localhost:3000/r/prompt-composer.json
 ```
 
-Prompt Composer installs the Uai theme and the shared class-name utility.
-Replace `prompt-composer` with another registry item name to install that component.
+Prompt Composer installs the Uai theme, the shared class-name utility, and the
+shadcn primitives it composes (`button`, `textarea`, `dropdown-menu`, …) from the
+shadcn registry. Replace `prompt-composer` with another registry item name to install that component.
 
 Components are styled with Tailwind classes and the standard shadcn theme tokens
 (`background`, `card`, `muted-foreground`, `primary`, …). The `uai-theme` item fills
@@ -48,6 +49,8 @@ time. shadcn requires full URLs for custom registry dependencies.
   install workflow.
 - `src/app/(home)/components/[id]`: the statically generated page for each item.
 - `src/components/ui/uai`: re-exports of registry components at their install path.
+- `src/components/ui`: stock shadcn primitives (new-york, Radix) that registry
+  components import. Consumers install their own copies, so never edit these.
 - `src/components/uai`: re-exports of registry blocks.
 - `registry.json`: the registry catalog and dependency graph.
 - `public/r`: generated registry documents.

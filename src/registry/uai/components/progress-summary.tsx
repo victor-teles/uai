@@ -2,6 +2,8 @@
 
 import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, useContext, useId } from "react";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/uai-utils";
 
 export const PROGRESS_SUMMARY_VARIANTS = ["card", "inline", "compact"] as const;
@@ -55,11 +57,16 @@ const statusTextClass: Record<ProgressSummaryStatus, string> = {
   error: "text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))]",
 };
 const fillClass: Record<ProgressSummaryStatus, string> = {
-  running: "bg-primary opacity-100",
-  paused: "bg-muted-foreground opacity-50",
-  complete: "bg-success opacity-100",
-  cancelled: "bg-muted-foreground opacity-50",
-  error: "bg-destructive opacity-100",
+  running:
+    "*:data-[slot=progress-indicator]:bg-primary *:data-[slot=progress-indicator]:opacity-100",
+  paused:
+    "*:data-[slot=progress-indicator]:bg-muted-foreground *:data-[slot=progress-indicator]:opacity-50",
+  complete:
+    "*:data-[slot=progress-indicator]:bg-success *:data-[slot=progress-indicator]:opacity-100",
+  cancelled:
+    "*:data-[slot=progress-indicator]:bg-muted-foreground *:data-[slot=progress-indicator]:opacity-50",
+  error:
+    "*:data-[slot=progress-indicator]:bg-destructive *:data-[slot=progress-indicator]:opacity-100",
 };
 
 export function ProgressSummary({
@@ -159,10 +166,8 @@ export function ProgressSummaryBar({
   const context = useSummary("ProgressSummaryBar");
   const indeterminate = context.percent === undefined;
   return (
-    <div
-      role="progressbar"
+    <Progress
       aria-labelledby={`${context.id}-title`}
-      aria-valuemin={0}
       aria-valuemax={context.max}
       aria-valuenow={context.value}
       aria-valuetext={
@@ -172,25 +177,18 @@ export function ProgressSummaryBar({
           : `${context.percent}% · ${statusCopy[context.status]}`)
       }
       data-slot="progress-summary-bar"
+      data-indeterminate={indeterminate || undefined}
+      value={context.percent ?? null}
       className={cn(
-        "relative col-span-full overflow-hidden rounded-full bg-muted",
+        "col-span-full bg-muted",
+        "*:data-[slot=progress-indicator]:rounded-full *:data-[slot=progress-indicator]:[transition:transform_300ms_cubic-bezier(0.23,1,0.32,1),background-color_200ms_ease-out,opacity_200ms_ease-out] motion-reduce:*:data-[slot=progress-indicator]:transition-none",
+        "data-indeterminate:*:data-[slot=progress-indicator]:w-[35%] data-indeterminate:*:data-[slot=progress-indicator]:animate-indeterminate motion-reduce:data-indeterminate:*:data-[slot=progress-indicator]:animate-none motion-reduce:data-indeterminate:*:data-[slot=progress-indicator]:transform-none!",
+        fillClass[context.status],
         context.variant === "compact" ? "h-1" : "h-1.5",
         className,
       )}
       {...props}
-    >
-      <span
-        data-indeterminate={indeterminate || undefined}
-        className={cn(
-          "absolute inset-0 rounded-full [transition:transform_300ms_cubic-bezier(0.23,1,0.32,1),background-color_200ms_ease-out,opacity_200ms_ease-out] motion-reduce:transition-none",
-          fillClass[context.status],
-          indeterminate ? "w-[35%] animate-indeterminate motion-reduce:animate-none" : "w-full",
-        )}
-        style={
-          indeterminate ? undefined : { transform: `translateX(${(context.percent ?? 0) - 100}%)` }
-        }
-      />
-    </div>
+    />
   );
 }
 
@@ -266,11 +264,14 @@ export function ProgressSummaryCancel({
   const context = useSummary("ProgressSummaryCancel");
   const finished = context.status !== "running" && context.status !== "paused";
   return (
-    <button
+    <Button
       data-slot="progress-summary-cancel"
+      variant="secondary"
       className={cn(
-        "cursor-pointer rounded-full border-0 bg-secondary font-medium whitespace-nowrap text-foreground [transition:background-color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] not-disabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] not-disabled:active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:text-subtle-foreground motion-reduce:transition-none",
-        context.variant === "compact" ? "h-6 px-2.5 text-xs/4" : "h-7 px-3 text-[12.5px]/4",
+        "cursor-pointer rounded-full py-0 text-foreground [transition:background-color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] not-disabled:active:scale-[0.97] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:text-subtle-foreground disabled:opacity-100 motion-reduce:transition-none",
+        context.variant === "compact"
+          ? "h-6 px-2.5 text-xs/4 has-[>svg]:px-2.5"
+          : "h-7 px-3 text-[12.5px]/4 has-[>svg]:px-3",
         className,
       )}
       {...props}
@@ -278,6 +279,6 @@ export function ProgressSummaryCancel({
       disabled={disabled ?? finished}
     >
       {children}
-    </button>
+    </Button>
   );
 }

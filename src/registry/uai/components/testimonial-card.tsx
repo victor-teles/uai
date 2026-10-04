@@ -3,6 +3,7 @@
 import { cva } from "class-variance-authority";
 import { ArrowUpRight } from "lucide-react";
 import { type ComponentProps, createContext, useContext } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/uai-utils";
 
 export const TESTIMONIAL_CARD_VARIANTS = ["card", "editorial", "compact"] as const;
@@ -83,15 +84,15 @@ export function TestimonialCardAvatar({
   children,
   className,
   ...props
-}: ComponentProps<"span"> & { src?: string }) {
+}: ComponentProps<typeof Avatar> & { src?: string }) {
   const variant = useVariant("TestimonialCardAvatar");
   const size = variant === "compact" ? 24 : variant === "editorial" ? 36 : 32;
   return (
-    <span
+    <Avatar
       aria-hidden="true"
       data-slot="testimonial-card-avatar"
       className={cn(
-        "row-[1/span_3] grid place-items-center overflow-hidden rounded-full bg-muted font-medium text-muted-foreground shadow-[0_0_0_1px_oklch(1_0_0/0.08)]",
+        "row-[1/span_3] grid place-items-center overflow-hidden rounded-full bg-muted font-medium text-muted-foreground shadow-[0_0_0_1px_oklch(1_0_0/0.08)] select-auto",
         variant === "compact" && "mr-2 size-6 text-[10.5px]",
         variant === "editorial" && "mr-2.5 size-9 text-[11.5px]",
         variant === "card" && "mr-2.5 size-8 text-[11.5px]",
@@ -100,12 +101,12 @@ export function TestimonialCardAvatar({
       {...props}
     >
       {src ? (
-        // biome-ignore lint/performance/noImgElement: registry source is framework-agnostic.
-        <img src={src} alt="" width={size} height={size} className="object-cover" />
-      ) : (
-        children
-      )}
-    </span>
+        <AvatarImage src={src} alt="" width={size} height={size} className="object-cover" />
+      ) : null}
+      <AvatarFallback className="bg-transparent text-[length:inherit] text-inherit">
+        {children}
+      </AvatarFallback>
+    </Avatar>
   );
 }
 
@@ -146,14 +147,14 @@ export function TestimonialCardProof({ children, className, ...props }: Componen
     <a
       data-slot="testimonial-card-proof"
       className={cn(
-        "inline-flex items-center justify-self-start gap-1 text-[12.5px] font-medium text-muted-foreground no-underline transition-colors duration-120 ease-[ease-out] hover:text-foreground focus-visible:rounded-[4px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none",
+        "inline-flex items-center justify-self-start gap-1 text-[12.5px] font-medium text-muted-foreground no-underline transition-colors duration-120 ease-[ease-out] hover:text-foreground focus-visible:rounded-[4px] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none",
         "[&_svg]:transition-transform [&_svg]:duration-140 [&_svg]:ease-out-quint hover:[&_svg]:translate-x-px hover:[&_svg]:-translate-y-px motion-reduce:[&_svg]:transition-none",
         className,
       )}
       {...props}
     >
       {children}
-      <ArrowUpRight size={14} strokeWidth={1.75} aria-hidden="true" />
+      <ArrowUpRight size={14} className="size-3.5" strokeWidth={1.75} aria-hidden="true" />
     </a>
   );
 }

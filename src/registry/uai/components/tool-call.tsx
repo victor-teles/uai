@@ -19,6 +19,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/uai-utils";
 
 export const TOOL_CALL_VARIANTS = ["card", "inline", "compact"] as const;
@@ -38,7 +39,6 @@ type ToolCallContextValue = {
   variant: ToolCallVariant;
   status: ToolCallStatus;
   open: boolean;
-  toggle: () => void;
 };
 
 const ToolCallContext = createContext<ToolCallContextValue | null>(null);
@@ -112,29 +112,22 @@ export function ToolCall({
   const [internal, setInternal] = useState(defaultOpen);
   const visible = open ?? internal;
   return (
-    <ToolCallContext.Provider
-      value={{
-        id,
-        variant,
-        status,
-        open: visible,
-        toggle: () => {
-          if (open === undefined) setInternal(!visible);
-          onOpenChange?.(!visible);
-        },
-      }}
-    >
-      <div
+    <ToolCallContext.Provider value={{ id, variant, status, open: visible }}>
+      <Collapsible
         data-slot="tool-call"
         className={cn(toolCallVariants({ variant, error: status === "error" }), className)}
         {...props}
+        open={visible}
+        onOpenChange={(next) => {
+          if (open === undefined) setInternal(next);
+          onOpenChange?.(next);
+        }}
         aria-busy={status === "running" || undefined}
         data-variant={variant}
         data-status={status}
-        data-state={visible ? "open" : "closed"}
       >
         {children}
-      </div>
+      </Collapsible>
     </ToolCallContext.Provider>
   );
 }
@@ -180,32 +173,22 @@ function StatusIcon({ status, size }: { status: ToolCallStatus; size: number }) 
   );
 }
 
-export function ToolCallTrigger({
-  children,
-  onClick,
-  className,
-  ...props
-}: ComponentProps<"button">) {
+export function ToolCallTrigger({ children, className, ...props }: ComponentProps<"button">) {
   const context = useToolCall("ToolCallTrigger");
   const compact = context.variant === "compact";
   const inline = context.variant === "inline";
   return (
-    <button
+    <CollapsibleTrigger
       data-slot="tool-call-trigger"
       type="button"
       className={cn(
-        "group/tool-call-trigger flex min-w-0 flex-auto cursor-pointer items-center gap-2 border-0 bg-transparent text-left font-[inherit] text-inherit outline-none transition-[background-color] duration-120 ease-out hover:bg-accent/50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none",
+        "group/tool-call-trigger flex min-w-0 flex-auto cursor-pointer items-center gap-2 border-0 bg-transparent text-left font-[inherit] text-inherit outline-none transition-[background-color] duration-120 ease-out hover:bg-accent/50 focus-visible:outline-2 focus-visible:outline-solid focus-visible:-outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none",
         compact ? "min-h-[34px]" : "min-h-11",
         inline ? "rounded-[10px] px-1.5" : compact ? "rounded-none px-2" : "rounded-none px-3",
         className,
       )}
       {...props}
-      aria-expanded={context.open}
       aria-controls={`${context.id}-content`}
-      onClick={(event) => {
-        onClick?.(event);
-        if (!event.defaultPrevented) context.toggle();
-      }}
     >
       <span
         className={cn(
@@ -221,11 +204,11 @@ export function ToolCallTrigger({
         size={14}
         aria-hidden="true"
         className={cn(
-          "flex-none text-subtle-foreground [transition:rotate_180ms_cubic-bezier(0.23,1,0.32,1),color_120ms_ease-out] group-hover/tool-call-trigger:text-foreground",
-          context.open && "rotate-180",
+          "size-3.5",
+          "flex-none text-subtle-foreground [transition:rotate_180ms_cubic-bezier(0.23,1,0.32,1),color_120ms_ease-out] group-hover/tool-call-trigger:text-foreground group-data-[state=open]/tool-call-trigger:rotate-180",
         )}
       />
-    </button>
+    </CollapsibleTrigger>
   );
 }
 
@@ -277,7 +260,7 @@ export function ToolCallContent({ className, ...props }: ComponentProps<"div">) 
   const context = useToolCall("ToolCallContent");
   const inline = context.variant === "inline";
   return (
-    <div
+    <CollapsibleContent
       data-slot="tool-call-content"
       className={cn(
         "animate-in gap-2.5 fade-in-0 slide-in-from-top-1 duration-240 ease-out-quint motion-reduce:animate-none",
@@ -289,6 +272,7 @@ export function ToolCallContent({ className, ...props }: ComponentProps<"div">) 
       )}
       {...props}
       id={`${context.id}-content`}
+      forceMount
       hidden={!context.open}
     />
   );
@@ -358,7 +342,7 @@ export function ToolCallError({ children, className, ...props }: ComponentProps<
       )}
       {...props}
     >
-      <CircleAlert size={14} aria-hidden="true" className="mt-0.5 flex-none" />
+      <CircleAlert size={14} aria-hidden="true" className="mt-0.5 flex-none size-3.5" />
       <span>{children ?? "The tool returned an error."}</span>
     </p>
   );

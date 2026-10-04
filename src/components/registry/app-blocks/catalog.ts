@@ -478,7 +478,7 @@ export function SettingsPagePreview({ variant = "stacked" }: { variant?: Setting
       "Each settings group is a section named by its h3 title and described by its summary text.",
       'Fields are Form Fields: visible labels, required text, and errors announced with role="alert" and linked with aria-describedby.',
       "The save bar is a labelled region whose message is a live status, or an alert when saving fails. Save is disabled while saving.",
-      "Destructive actions open a native modal alert dialog that focuses Cancel, can require a typed phrase, and returns focus to the trigger.",
+      "Destructive actions open a modal alert dialog that traps focus, focuses Cancel, can require a typed phrase, and returns focus to the trigger.",
     ],
   },
   {
@@ -677,6 +677,7 @@ import {
   TeamManagementMemberStatus,
   TeamManagementMembers,
   TeamManagementRemove,
+  TeamManagementRoleOption,
   TeamManagementRoleSelect,
   TeamManagementTitle,
   TeamManagementToolbar,
@@ -774,11 +775,13 @@ export function TeamManagementPreview({ variant = "table" }: { variant?: TeamMan
         <TeamManagementRoleSelect
           aria-label="Role for new member"
           value={inviteRole}
-          onChange={(event) => setInviteRole(event.target.value)}
+          onValueChange={setInviteRole}
           style={{ height: 32 }}
         >
           {roles.map((role) => (
-            <option key={role}>{role}</option>
+            <TeamManagementRoleOption key={role} value={role}>
+              {role}
+            </TeamManagementRoleOption>
           ))}
         </TeamManagementRoleSelect>
         <TeamManagementButton type="submit" emphasis="primary" style={{ height: 32 }}>
@@ -823,10 +826,12 @@ export function TeamManagementPreview({ variant = "table" }: { variant?: TeamMan
                 <TeamManagementRoleSelect
                   value={member.role}
                   disabled={member.owner}
-                  onChange={(event) => update(member.email, { role: event.target.value })}
+                  onValueChange={(role) => update(member.email, { role })}
                 >
                   {roles.map((role) => (
-                    <option key={role}>{role}</option>
+                    <TeamManagementRoleOption key={role} value={role}>
+                      {role}
+                    </TeamManagementRoleOption>
                   ))}
                 </TeamManagementRoleSelect>
                 {member.owner ? null : (
@@ -1349,6 +1354,7 @@ import {
   SearchResultsPagination,
   SearchResultsQuery,
   SearchResultsSort,
+  SearchResultsSortOption,
   SearchResultsSummary,
   type SearchResultsVariant,
 } from "@/components/uai/search-results";
@@ -1471,9 +1477,9 @@ export function SearchResultsPreview({ variant = "list" }: { variant?: SearchRes
             {results.length} {results.length === 1 ? "result" : "results"}
             {term ? \` for “\${query.trim()}”\` : ""}
           </SearchResultsSummary>
-          <SearchResultsSort value={sort} onChange={(event) => setSort(event.target.value)}>
-            <option value="relevance">Best match</option>
-            <option value="title">Title A–Z</option>
+          <SearchResultsSort value={sort} onValueChange={setSort}>
+            <SearchResultsSortOption value="relevance">Best match</SearchResultsSortOption>
+            <SearchResultsSortOption value="title">Title A–Z</SearchResultsSortOption>
           </SearchResultsSort>
         </SearchResultsBar>
         {results.length === 0 ? (

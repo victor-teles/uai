@@ -13,6 +13,7 @@ import {
   ImportWorkflowHeading,
   ImportWorkflowIssues,
   ImportWorkflowMapping,
+  ImportWorkflowMappingOption,
   ImportWorkflowMappingRow,
   ImportWorkflowMappingSample,
   ImportWorkflowMappingSource,
@@ -148,19 +149,19 @@ export function ImportWorkflowPreview({ variant = "wizard" }: { variant?: Import
                 </ImportWorkflowMappingSource>
                 <ImportWorkflowMappingTarget
                   value={mapping[position]}
-                  onChange={(event) =>
+                  onValueChange={(next) =>
                     setMapping((current) =>
-                      current.map((target, item) =>
-                        item === position ? event.target.value : target,
-                      ),
+                      current.map((target, item) => (item === position ? next : target)),
                     )
                   }
                 >
-                  <option value="">Skip this column</option>
-                  <option value="email">Email</option>
-                  <option value="name">Name</option>
-                  <option value="account">Account</option>
-                  <option value="phone">Phone</option>
+                  <ImportWorkflowMappingOption value="">
+                    Skip this column
+                  </ImportWorkflowMappingOption>
+                  <ImportWorkflowMappingOption value="email">Email</ImportWorkflowMappingOption>
+                  <ImportWorkflowMappingOption value="name">Name</ImportWorkflowMappingOption>
+                  <ImportWorkflowMappingOption value="account">Account</ImportWorkflowMappingOption>
+                  <ImportWorkflowMappingOption value="phone">Phone</ImportWorkflowMappingOption>
                 </ImportWorkflowMappingTarget>
               </ImportWorkflowMappingRow>
             ))}

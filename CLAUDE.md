@@ -86,6 +86,11 @@ For Prompt Composer and other installed AI chrome:
   The `uai-theme` registry item fills those tokens with the Uai palette. Never write
   `var(--uai-*)`, inline style objects, or injected `<style>` strings; keep `style`
   for runtime-computed values only. See `plans/shadcn-migration.md`.
+- Compose shadcn primitives (`@/components/ui/button`, `input`, `select`, `card`,
+  `dropdown-menu`, …) instead of native or hand-rolled controls, list each one by
+  bare name in the item's `registryDependencies`, and apply the Uai contract
+  through `className`. Never edit the stock primitives in `src/components/ui/*.tsx`.
+  See `plans/shadcn-primitives.md`.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

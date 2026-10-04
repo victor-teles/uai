@@ -3,6 +3,7 @@
 import { cva } from "class-variance-authority";
 import { Mail, MailOpen } from "lucide-react";
 import { type ComponentProps, createContext, useContext, useId, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   EmptyState,
   type EmptyStateProps,
@@ -44,7 +45,7 @@ const emptyVariants: Record<NotificationCenterVariant, EmptyStateVariant> = {
   compact: "compact",
 };
 const buttonInteraction =
-  "[transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] bg-transparent text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring motion-reduce:transition-none";
+  "transition-[background-color,color,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] bg-transparent text-muted-foreground focus-visible:ring-0 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring motion-reduce:transition-none";
 
 const notificationCenterVariants = cva(
   "grid min-w-0 content-start text-[13px]/[18px] text-foreground",
@@ -145,12 +146,13 @@ export function NotificationCenterAction({
 }: ComponentProps<"button">) {
   const context = useCenter("NotificationCenterAction");
   return (
-    <button
+    <Button
       data-slot="notification-center-action"
+      variant="ghost"
       className={cn(
-        "inline-flex cursor-pointer items-center gap-1.5 rounded-full border-0 px-2.5 text-[12.5px] font-medium",
+        "cursor-pointer justify-start gap-1.5 rounded-full border-0 px-2.5 py-0 text-[12.5px] has-[>svg]:px-2.5",
         buttonInteraction,
-        "hover:enabled:bg-accent hover:enabled:text-foreground active:enabled:scale-[0.97] motion-reduce:active:enabled:scale-100",
+        "hover:bg-accent hover:text-foreground active:enabled:scale-[0.97] motion-reduce:active:enabled:scale-100 dark:hover:bg-accent",
         "disabled:cursor-not-allowed disabled:text-subtle-foreground disabled:opacity-55",
         context.variant === "compact" ? "h-6.5" : "h-7",
         className,
@@ -350,8 +352,10 @@ export function NotificationCenterItemToggle({
   const item = useItem("NotificationCenterItemToggle");
   const Icon = item.read ? Mail : MailOpen;
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="icon"
       aria-label={item.read ? "Mark as unread" : "Mark as read"}
       aria-describedby={`${item.id}-title`}
       title={item.read ? "Mark as unread" : "Mark as read"}
@@ -359,7 +363,7 @@ export function NotificationCenterItemToggle({
       className={cn(
         "grid cursor-pointer place-items-center rounded-lg border-0 p-0",
         buttonInteraction,
-        "hover:bg-accent hover:text-foreground active:scale-[0.97] motion-reduce:active:scale-100",
+        "hover:bg-accent hover:text-foreground active:scale-[0.97] motion-reduce:active:scale-100 dark:hover:bg-accent",
         "opacity-70 group-hover/notification-item:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100",
         variant === "compact" ? "size-6" : "size-7",
         className,
@@ -370,8 +374,8 @@ export function NotificationCenterItemToggle({
         if (!event.defaultPrevented) item.setRead(!item.read);
       }}
     >
-      <Icon size={15} strokeWidth={1.75} aria-hidden="true" />
-    </button>
+      <Icon size={15} strokeWidth={1.75} aria-hidden="true" className="size-[15px]" />
+    </Button>
   );
 }
 

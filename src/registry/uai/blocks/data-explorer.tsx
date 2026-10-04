@@ -3,6 +3,17 @@
 import { cva } from "class-variance-authority";
 import { Play } from "lucide-react";
 import { type ComponentProps, createContext, useContext, useId } from "react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 import {
   DataTableToolbar,
   type DataTableToolbarProps,
@@ -51,18 +62,18 @@ const dataExplorerVariants = cva("grid min-w-0 content-start text-[13px]/[18px] 
 });
 
 const dataExplorerActionVariants = cva(
-  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap [transition:filter_120ms_ease-out,box-shadow_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
+  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap [transition:filter_120ms_ease-out,box-shadow_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] py-0 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid enabled:active:scale-[0.97] disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:enabled:active:scale-100 [&_svg:not([class*='size-'])]:size-3.5",
   {
     variants: {
       emphasis: {
         primary:
-          "bg-primary text-primary-foreground enabled:hover:shadow-none enabled:hover:brightness-108",
+          "bg-primary text-primary-foreground hover:bg-primary enabled:hover:shadow-none enabled:hover:brightness-108",
         secondary:
-          "bg-secondary text-secondary-foreground enabled:hover:shadow-[inset_0_0_0_999px_color-mix(in_oklab,var(--foreground)_9%,transparent)]",
+          "bg-secondary text-secondary-foreground hover:bg-secondary enabled:hover:shadow-[inset_0_0_0_999px_color-mix(in_oklab,var(--foreground)_9%,transparent)]",
       },
       compact: {
-        true: "h-6.5 px-2.75 text-[12px]/4",
-        false: "h-7.5 px-3.25 text-[12.5px]/4",
+        true: "h-6.5 px-2.75 has-[>svg]:px-2.75 text-[12px]/4",
+        false: "h-7.5 px-3.25 has-[>svg]:px-3.25 text-[12.5px]/4",
       },
     },
   },
@@ -157,8 +168,9 @@ export function DataExplorerAction({
 }: ComponentProps<"button"> & { emphasis?: "primary" | "secondary" }) {
   const context = useExplorer("DataExplorerAction");
   return (
-    <button
+    <Button
       data-slot="data-explorer-action"
+      variant={emphasis === "primary" ? "default" : "secondary"}
       data-emphasis={emphasis}
       type={type}
       className={cn(
@@ -218,14 +230,17 @@ export function DataExplorerQuery({
 export function DataExplorerQueryLabel({ className, children, ...props }: ComponentProps<"label">) {
   const context = useExplorer("DataExplorerQueryLabel");
   return (
-    <label
+    <Label
       data-slot="data-explorer-query-label"
-      className={cn("px-0.5 text-[11.5px]/4 font-medium text-subtle-foreground", className)}
+      className={cn(
+        "block px-0.5 text-[11.5px]/4 font-medium text-subtle-foreground select-auto",
+        className,
+      )}
       {...props}
       htmlFor={`${context.id}-query`}
     >
       {children}
-    </label>
+    </Label>
   );
 }
 
@@ -236,18 +251,18 @@ export function DataExplorerQueryInput({
   const context = useExplorer("DataExplorerQueryInput");
   const compact = context.variant === "compact";
   return (
-    <textarea
+    <Textarea
       spellCheck={false}
       rows={compact ? 3 : 5}
       data-slot="data-explorer-query-input"
       className={cn(
-        "box-border w-full min-w-0 resize-y border-0 font-[family-name:var(--font-mono,ui-monospace,monospace)] text-inherit transition-shadow duration-120 ease-out placeholder:text-subtle-foreground focus:shadow-[0_0_0_1px_var(--border-strong),0_0_0_4px_color-mix(in_oklab,var(--primary)_22%,transparent)] focus:outline-none motion-reduce:transition-none",
+        "box-border block field-sizing-fixed min-h-0 w-full min-w-0 resize-y border-0 font-[family-name:var(--font-mono,ui-monospace,monospace)] text-inherit shadow-none transition-shadow duration-120 ease-out placeholder:text-subtle-foreground focus:shadow-[0_0_0_1px_var(--border-strong),0_0_0_4px_color-mix(in_oklab,var(--primary)_22%,transparent)] focus:outline-none focus-visible:ring-0 motion-reduce:transition-none",
         compact
-          ? "rounded-lg px-2.5 py-2 text-[11.5px]/[17px]"
-          : "rounded-[10px] px-3 py-2.5 text-[12px]/[19px]",
+          ? "rounded-lg px-2.5 py-2 text-[11.5px]/[17px] md:text-[11.5px]/[17px]"
+          : "rounded-[10px] px-3 py-2.5 text-[12px]/[19px] md:text-[12px]/[19px]",
         context.variant === "workbench"
-          ? "bg-background"
-          : "bg-[color-mix(in_oklab,var(--background)_60%,var(--card))]",
+          ? "bg-background dark:bg-background"
+          : "bg-[color-mix(in_oklab,var(--background)_60%,var(--card))] dark:bg-[color-mix(in_oklab,var(--background)_60%,var(--card))]",
         className,
       )}
       {...props}
@@ -263,7 +278,7 @@ export function DataExplorerRun({
 }: Omit<ComponentProps<"button">, "type">) {
   const context = useExplorer("DataExplorerRun");
   return (
-    <button
+    <Button
       data-slot="data-explorer-run"
       data-emphasis="primary"
       className={cn(
@@ -274,9 +289,9 @@ export function DataExplorerRun({
       {...props}
       type="submit"
     >
-      <Play size={12} strokeWidth={2} fill="currentColor" aria-hidden="true" />
+      <Play strokeWidth={2} fill="currentColor" aria-hidden="true" className="size-3" />
       {children}
-    </button>
+    </Button>
   );
 }
 
@@ -321,11 +336,11 @@ export function DataExplorerTable({
       tabIndex={0}
       data-slot="data-explorer-table-scroll"
       className={cn(
-        "min-w-0 overflow-x-auto border bg-card shadow-[0_1px_2px_oklch(0_0_0/0.04)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+        "min-w-0 overflow-x-auto border bg-card shadow-[0_1px_2px_oklch(0_0_0/0.04)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring *:data-[slot=table-container]:overflow-visible",
         compact ? "rounded-xl px-1 py-0.5" : "rounded-[14px] px-1.5 py-1",
       )}
     >
-      <table
+      <Table
         data-slot="data-explorer-table"
         className={cn(
           "w-full border-collapse",
@@ -340,24 +355,30 @@ export function DataExplorerTable({
 
 export function DataExplorerTableHead({ className, ...props }: ComponentProps<"thead">) {
   return (
-    <thead
+    <TableHeader
       data-slot="data-explorer-table-head"
-      className={cn("bg-transparent", className)}
+      className={cn("bg-transparent [&_tr]:border-b-0", className)}
       {...props}
     />
   );
 }
 
 export function DataExplorerTableBody({ className, ...props }: ComponentProps<"tbody">) {
-  return <tbody data-slot="data-explorer-table-body" className={className} {...props} />;
+  return (
+    <TableBody
+      data-slot="data-explorer-table-body"
+      className={cn("[&_tr:last-child]:border-t", className)}
+      {...props}
+    />
+  );
 }
 
 export function DataExplorerTableRow({ className, ...props }: ComponentProps<"tr">) {
   return (
-    <tr
+    <TableRow
       data-slot="data-explorer-table-row"
       className={cn(
-        "border-t border-border/70 [transition:background-color_120ms_ease-out] motion-reduce:transition-none [tbody>&]:animate-[enter_240ms_var(--ease-out-quint)_both] [tbody>&]:fade-in-0 [tbody>&]:slide-in-from-bottom-1 [tbody>&]:hover:bg-foreground/4 [tbody>&]:nth-2:[animation-delay:40ms] [tbody>&]:nth-3:[animation-delay:80ms] [tbody>&]:nth-4:[animation-delay:120ms] [tbody>&]:nth-5:[animation-delay:160ms] [tbody>&]:nth-[n+6]:[animation-delay:200ms] [tbody>&]:motion-reduce:animate-none [tbody>&>td:first-child]:font-medium",
+        "border-t border-b-0 border-border/70 hover:bg-transparent [transition:background-color_120ms_ease-out] motion-reduce:transition-none [tbody>&]:animate-[enter_240ms_var(--ease-out-quint)_both] [tbody>&]:fade-in-0 [tbody>&]:slide-in-from-bottom-1 [tbody>&]:hover:bg-foreground/4 [tbody>&]:nth-2:[animation-delay:40ms] [tbody>&]:nth-3:[animation-delay:80ms] [tbody>&]:nth-4:[animation-delay:120ms] [tbody>&]:nth-5:[animation-delay:160ms] [tbody>&]:nth-[n+6]:[animation-delay:200ms] [tbody>&]:motion-reduce:animate-none [tbody>&>td:first-child]:font-medium",
         className,
       )}
       {...props}
@@ -374,7 +395,7 @@ export function DataExplorerHeaderCell({
   const context = useExplorer("DataExplorerHeaderCell");
   const compact = context.variant === "compact";
   return (
-    <th
+    <TableHead
       scope={scope}
       data-slot="data-explorer-header-cell"
       className={cn(
@@ -395,10 +416,10 @@ export function DataExplorerCell({
 }: Omit<ComponentProps<"td">, "align"> & { align?: "start" | "end" }) {
   const context = useExplorer("DataExplorerCell");
   return (
-    <td
+    <TableCell
       data-slot="data-explorer-cell"
       className={cn(
-        "whitespace-nowrap",
+        "py-0 whitespace-nowrap",
         context.variant === "compact" ? "h-8 px-2" : "h-9.5 px-2.5",
         align === "end" ? "text-right tabular-nums" : "text-left",
         className,

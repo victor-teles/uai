@@ -3,6 +3,16 @@
 import { cva } from "class-variance-authority";
 import { ArrowRight } from "lucide-react";
 import { type ComponentProps, createContext, useContext, useId, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Table, TableCell, TableHead, TableRow } from "@/components/ui/table";
 import {
   FileUpload,
   type FileUploadProps,
@@ -91,20 +101,20 @@ const importWorkflowVariants = cva(
 );
 
 const focusRing =
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
+  "focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
 
 const importWorkflowActionVariants = cva(
-  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap [transition:filter_120ms_ease-out,box-shadow_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
+  "cursor-pointer gap-1.5 rounded-full border-0 py-0 transition-[filter,box-shadow,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
   {
     variants: {
       emphasis: {
-        primary: "bg-primary text-primary-foreground enabled:hover:brightness-108",
+        primary: "bg-primary text-primary-foreground hover:bg-primary enabled:hover:brightness-108",
         secondary:
-          "bg-secondary text-secondary-foreground enabled:hover:shadow-[inset_0_0_0_999px_color-mix(in_oklab,var(--foreground)_9%,transparent)]",
+          "bg-secondary text-secondary-foreground hover:bg-secondary enabled:hover:shadow-[inset_0_0_0_999px_color-mix(in_oklab,var(--foreground)_9%,transparent)]",
       },
       compact: {
-        true: "h-[26px] px-[11px] text-[12px]/4",
-        false: "h-[30px] px-[13px] text-[12.5px]/4",
+        true: "h-[26px] px-[11px] text-[12px]/4 has-[>svg]:px-[11px]",
+        false: "h-[30px] px-[13px] text-[12.5px]/4 has-[>svg]:px-[13px]",
       },
     },
   },
@@ -329,19 +339,22 @@ export function ImportWorkflowMappingSource({
   const id = useMappingRow("ImportWorkflowMappingSource");
   return (
     <>
-      <label
+      <Label
         data-slot="import-workflow-mapping-source"
-        className={cn("grid min-w-0 flex-[1_1_160px] gap-px font-medium wrap-anywhere", className)}
+        className={cn(
+          "grid min-w-0 flex-[1_1_160px] gap-px text-[length:inherit] leading-[inherit] font-medium wrap-anywhere select-auto",
+          className,
+        )}
         {...props}
         htmlFor={id}
       >
         {children}
-      </label>
+      </Label>
       <ArrowRight
         size={14}
         aria-hidden="true"
         strokeWidth={1.75}
-        className="shrink-0 text-subtle-foreground"
+        className="shrink-0 text-subtle-foreground size-3.5"
       />
     </>
   );
@@ -358,23 +371,97 @@ export function ImportWorkflowMappingSample({ className, ...props }: ComponentPr
   );
 }
 
+export type ImportWorkflowMappingTargetProps = Omit<
+  ComponentProps<typeof SelectTrigger>,
+  "id" | "size" | "value" | "defaultValue" | "onChange" | "name"
+> & {
+  /** Target field. An empty string means the column is skipped. */
+  value?: string;
+  defaultValue?: string;
+  onValueChange?: (value: string) => void;
+  name?: string;
+  /** Shown while no target is chosen. */
+  placeholder?: string;
+};
+
+// Radix Select forbids empty item values, so the skip option ("") maps to this private value.
+const SKIP_VALUE = "__uai-import-skip__";
+
+/** A select of target fields for one column. Compose ImportWorkflowMappingOption items inside. */
 export function ImportWorkflowMappingTarget({
+  value,
+  defaultValue,
+  onValueChange,
+  name,
+  placeholder,
   className,
+  children,
   ...props
-}: Omit<ComponentProps<"select">, "id">) {
+}: ImportWorkflowMappingTargetProps) {
   const id = useMappingRow("ImportWorkflowMappingTarget");
   const context = useWorkflow("ImportWorkflowMappingTarget");
+  const [internal, setInternal] = useState(defaultValue);
+  const current = value ?? internal;
   return (
-    <select
-      data-slot="import-workflow-mapping-target"
+    <Select
+      name={name}
+      value={current === "" ? SKIP_VALUE : (current ?? "")}
+      onValueChange={(next) => {
+        const target = next === SKIP_VALUE ? "" : next;
+        if (value === undefined) setInternal(target);
+        onValueChange?.(target);
+      }}
+    >
+      <SelectTrigger
+        data-slot="import-workflow-mapping-target"
+        data-skipped={current === "" ? "" : undefined}
+        className={cn(
+          "w-auto min-w-0 flex-[1_1_160px] cursor-pointer gap-1.5 rounded-lg border-0 bg-card py-0 pr-1.5 pl-2 text-inherit shadow-none inset-ring-1 inset-ring-border transition-shadow duration-120 ease-out hover:inset-ring-border-strong focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring focus-visible:outline-solid motion-reduce:transition-none data-[placeholder]:text-subtle-foreground data-skipped:text-subtle-foreground dark:bg-card dark:hover:bg-card [&_svg]:size-3.5",
+          context.variant === "compact"
+            ? "text-[12px]/[18px] data-[size=default]:h-[26px]"
+            : "text-[13px]/[18px] data-[size=default]:h-[30px]",
+          className,
+        )}
+        {...props}
+        id={id}
+      >
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent
+        position="popper"
+        className="rounded-[14px] border-0 bg-popover text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_12px_28px_-10px_oklch(0_0_0/0.32),0_2px_6px_-2px_oklch(0_0_0/0.12)] duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-[state=open]:zoom-in-96 data-[state=open]:[--tw-enter-translate-x:0]! data-[state=open]:[--tw-enter-translate-y:0]! motion-reduce:data-[state=closed]:animate-none motion-reduce:data-[state=open]:animate-none"
+      >
+        {children}
+      </SelectContent>
+    </Select>
+  );
+}
+
+export type ImportWorkflowMappingOptionProps = Omit<ComponentProps<typeof SelectItem>, "value"> & {
+  /** Target field. Use an empty string for the "skip this column" option. */
+  value: string;
+};
+
+/** One target field inside ImportWorkflowMappingTarget. */
+export function ImportWorkflowMappingOption({
+  value,
+  className,
+  ...props
+}: ImportWorkflowMappingOptionProps) {
+  const context = useWorkflow("ImportWorkflowMappingOption");
+  return (
+    <SelectItem
+      data-slot="import-workflow-mapping-option"
       className={cn(
-        "min-w-0 flex-[1_1_160px] cursor-pointer rounded-lg border-0 bg-card px-2 inset-ring-1 inset-ring-border transition-shadow duration-120 ease-out hover:inset-ring-border-strong focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring motion-reduce:transition-none",
-        context.variant === "compact" ? "h-[26px] text-[12px]" : "h-[30px] text-[13px]",
-        props.value === "" ? "text-subtle-foreground" : "text-inherit",
+        "cursor-pointer rounded-[10px] text-foreground focus:bg-accent focus:text-foreground",
+        value === "" && "text-subtle-foreground",
+        context.variant === "compact"
+          ? "min-h-7 py-1 pr-7 pl-2 text-[12px]/[18px]"
+          : "min-h-8 py-1.5 pr-8 pl-2.5 text-[13px]/[18px]",
         className,
       )}
       {...props}
-      id={id}
+      value={value === "" ? SKIP_VALUE : value}
     />
   );
 }
@@ -398,12 +485,12 @@ export function ImportWorkflowTable({
       // biome-ignore lint/a11y/noNoninteractiveTabindex: a scrollable region must be reachable by keyboard.
       tabIndex={0}
       className={cn(
-        "min-w-0 overflow-x-auto border px-1.5 py-0.5",
+        "min-w-0 overflow-x-auto border px-1.5 py-0.5 [&>[data-slot=table-container]]:overflow-visible",
         context.variant === "compact" ? "rounded-xl" : "rounded-[14px]",
         focusRing,
       )}
     >
-      <table
+      <Table
         data-slot="import-workflow-table"
         className={cn(
           "w-full border-collapse",
@@ -418,9 +505,12 @@ export function ImportWorkflowTable({
 
 export function ImportWorkflowTableRow({ className, ...props }: ComponentProps<"tr">) {
   return (
-    <tr
+    <TableRow
       data-slot="import-workflow-table-row"
-      className={cn("border-t border-border/70 [tbody>&>td:first-child]:font-medium", className)}
+      className={cn(
+        "border-t border-b-0 border-border/70 hover:bg-transparent [tbody>&>td:first-child]:font-medium",
+        className,
+      )}
       {...props}
     />
   );
@@ -432,7 +522,7 @@ export function ImportWorkflowHeaderCell({
   ...props
 }: ComponentProps<"th">) {
   return (
-    <th
+    <TableHead
       scope={scope}
       data-slot="import-workflow-header-cell"
       className={cn(
@@ -451,10 +541,10 @@ export function ImportWorkflowCell({
   ...props
 }: ComponentProps<"td"> & { tone?: "default" | "error" }) {
   return (
-    <td
+    <TableCell
       data-slot="import-workflow-cell"
       className={cn(
-        "h-9 px-2.5 whitespace-nowrap",
+        "h-9 px-2.5 py-0 whitespace-nowrap",
         tone === "error" &&
           "bg-destructive/10 text-[color-mix(in_oklab,var(--destructive)_80%,var(--foreground))]",
         className,
@@ -495,8 +585,9 @@ export function ImportWorkflowAction({
 }: ComponentProps<"button"> & { emphasis?: "primary" | "secondary" }) {
   const context = useWorkflow("ImportWorkflowAction");
   return (
-    <button
+    <Button
       data-slot="import-workflow-action"
+      variant={emphasis === "primary" ? "default" : "secondary"}
       data-emphasis={emphasis}
       className={cn(
         importWorkflowActionVariants({ emphasis, compact: context.variant === "compact" }),

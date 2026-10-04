@@ -10,6 +10,7 @@ import {
   useId,
   useState,
 } from "react";
+import { Button } from "@/components/ui/button";
 import {
   StatusBanner,
   StatusBannerContent,
@@ -47,7 +48,7 @@ const contactSectionVariants = cva("@container min-w-0 text-[13px]/[18px] text-f
 });
 
 const actionClass =
-  "justify-self-start rounded-full border-0 font-medium [transition:filter_120ms_ease-out,box-shadow_120ms_ease-out,background-color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:not-aria-disabled:scale-[0.97] motion-reduce:transition-none motion-reduce:active:not-aria-disabled:scale-100";
+  "justify-self-start rounded-full border-0 py-0 [transition:filter_120ms_ease-out,box-shadow_120ms_ease-out,background-color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:not-aria-disabled:scale-[0.97] motion-reduce:transition-none motion-reduce:active:not-aria-disabled:scale-100";
 
 /** Contact options, availability, a message form with its states, and response expectations. */
 export function ContactSection({
@@ -195,7 +196,7 @@ export function ContactSectionOptionLink({ className, ...props }: ComponentProps
     <a
       data-slot="contact-section-option-link"
       className={cn(
-        "col-start-2 mt-0.5 justify-self-start text-[12.5px] font-medium text-foreground underline decoration-border-strong underline-offset-3 wrap-anywhere transition-[text-decoration-color] duration-120 ease-[ease-out] hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none",
+        "col-start-2 mt-0.5 justify-self-start text-[12.5px] font-medium text-foreground underline decoration-border-strong underline-offset-3 wrap-anywhere transition-[text-decoration-color] duration-120 ease-[ease-out] hover:decoration-current focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none",
         className,
       )}
       {...props}
@@ -259,7 +260,7 @@ export function ContactSectionExpectation({ children, className, ...props }: Com
         size={14}
         strokeWidth={2}
         aria-hidden="true"
-        className="mt-0.5 flex-none text-subtle-foreground"
+        className="mt-0.5 flex-none text-subtle-foreground size-3.5"
       />
       <span>{children}</span>
     </li>
@@ -334,14 +335,14 @@ export function ContactSectionSubmit({
   const section = useSection("ContactSectionSubmit");
   const pending = section.status === "submitting";
   return (
-    <button
+    <Button
       data-slot="contact-section-submit"
       className={cn(
         actionClass,
-        "h-8.5 px-4 text-[13px] whitespace-nowrap",
+        "h-8.5 px-4 text-[13px] whitespace-nowrap has-[>svg]:px-4",
         pending
-          ? "cursor-progress bg-muted text-muted-foreground"
-          : "cursor-pointer bg-primary text-primary-foreground hover:not-aria-disabled:brightness-[1.08]",
+          ? "cursor-progress bg-muted text-muted-foreground hover:bg-muted"
+          : "cursor-pointer bg-primary text-primary-foreground hover:bg-primary hover:not-aria-disabled:brightness-[1.08]",
         className,
       )}
       {...props}
@@ -357,7 +358,7 @@ export function ContactSectionSubmit({
       ) : (
         children
       )}
-    </button>
+    </Button>
   );
 }
 
@@ -394,12 +395,13 @@ export function ContactSectionReset({ onClick, className, ...props }: ComponentP
   const section = useSection("ContactSectionReset");
   if (section.status !== "success") return null;
   return (
-    <button
+    <Button
       type="button"
+      variant="secondary"
       data-slot="contact-section-reset"
       className={cn(
         actionClass,
-        "h-7.5 cursor-pointer bg-secondary px-[13px] text-[12.5px] text-secondary-foreground hover:shadow-[inset_0_0_0_999px_color-mix(in_oklab,var(--foreground)_9%,transparent)]",
+        "h-7.5 cursor-pointer bg-secondary px-[13px] text-[12.5px] text-secondary-foreground hover:bg-secondary hover:shadow-[inset_0_0_0_999px_color-mix(in_oklab,var(--foreground)_9%,transparent)] has-[>svg]:px-[13px]",
         className,
       )}
       {...props}

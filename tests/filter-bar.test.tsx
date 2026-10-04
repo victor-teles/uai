@@ -15,13 +15,16 @@ test("removes chips and resets all composed controls", async () => {
   render(<FilterBarPreview />);
   await user.click(screen.getByRole("checkbox"));
   await user.click(screen.getByRole("button", { name: "Remove Status: Open filter" }));
-  expect((screen.getByRole("combobox") as HTMLSelectElement).value).toBe("");
+  expect(screen.getByRole("combobox", { name: "Status" }).textContent).toBe("All statuses");
   await user.click(screen.getByRole("button", { name: "Reset filters" }));
   expect((screen.getByRole("checkbox") as HTMLInputElement).checked).toBe(false);
   expect(
     (screen.getByRole("button", { name: "Reset filters" }) as HTMLButtonElement).disabled,
   ).toBe(true);
   expect(screen.getByRole("status").textContent).toBe("24 example results");
+  await user.click(screen.getByRole("combobox", { name: "Status" }));
+  await user.click(screen.getByRole("option", { name: "Closed" }));
+  expect(screen.getByRole("button", { name: "Remove Status: Closed filter" })).toBeTruthy();
 });
 test("does not remove or reset disabled filters or submit a parent form", async () => {
   const action = mock(() => {});

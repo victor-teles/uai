@@ -9,6 +9,9 @@ import {
   useId,
   useState,
 } from "react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   ConfirmationDialog,
   type ConfirmationDialogProps,
@@ -418,16 +421,20 @@ export function SubscriptionManagementPlans({
   );
 }
 
+export type SubscriptionManagementPlanOptionsProps = Omit<
+  ComponentProps<typeof RadioGroup>,
+  "value" | "defaultValue" | "onValueChange" | "name"
+>;
+
 /** A radio group of plans. */
 export function SubscriptionManagementPlanOptions({
   "aria-label": ariaLabel = "Plans",
   className,
   ...props
-}: ComponentProps<"div">) {
-  usePlans("SubscriptionManagementPlanOptions");
+}: SubscriptionManagementPlanOptionsProps) {
+  const plans = usePlans("SubscriptionManagementPlanOptions");
   return (
-    <div
-      role="radiogroup"
+    <RadioGroup
       aria-label={ariaLabel}
       data-slot="subscription-management-plan-options"
       className={cn(
@@ -435,13 +442,16 @@ export function SubscriptionManagementPlanOptions({
         className,
       )}
       {...props}
+      name={plans.name}
+      value={plans.selected}
+      onValueChange={plans.select}
     />
   );
 }
 
 export type SubscriptionManagementPlanOptionProps = Omit<
-  ComponentProps<"input">,
-  "type" | "name" | "value" | "children"
+  ComponentProps<typeof RadioGroupItem>,
+  "value" | "children"
 > & {
   value: string;
   children: ReactNode;
@@ -454,7 +464,6 @@ export function SubscriptionManagementPlanOption({
   value,
   children,
   currentLabel = "Current plan",
-  onChange,
   className,
   style,
   ...props
@@ -463,26 +472,19 @@ export function SubscriptionManagementPlanOption({
   const { variant } = useManagement("SubscriptionManagementPlanOption");
   const current = plans.current === value;
   return (
-    <label
+    <Label
       data-slot="subscription-management-plan-option"
       className={cn(
-        "relative grid min-w-0 cursor-pointer content-start gap-1 bg-muted transition-[background-color,box-shadow] duration-120 ease-[ease-out] hover:bg-[color-mix(in_oklab,var(--muted)_88%,var(--foreground))] has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-ring has-[input:checked]:bg-[color-mix(in_oklab,var(--primary)_8%,var(--card))] has-[input:checked]:shadow-[inset_0_0_0_1.5px_var(--primary)] has-[input:disabled]:cursor-not-allowed has-[input:disabled]:opacity-55 motion-reduce:transition-none",
+        "relative grid min-w-0 cursor-pointer content-start items-stretch gap-1 bg-muted text-[length:inherit] leading-[inherit] font-normal select-auto transition-[background-color,box-shadow] duration-120 ease-[ease-out] hover:bg-[color-mix(in_oklab,var(--muted)_88%,var(--foreground))] has-[[role=radio]:focus-visible]:outline-2 has-[[role=radio]:focus-visible]:outline-offset-2 has-[[role=radio]:focus-visible]:outline-ring has-[[role=radio][data-state=checked]]:bg-[color-mix(in_oklab,var(--primary)_8%,var(--card))] has-[[role=radio][data-state=checked]]:shadow-[inset_0_0_0_1.5px_var(--primary)] has-[[role=radio]:disabled]:cursor-not-allowed has-[[role=radio]:disabled]:opacity-55 motion-reduce:transition-none",
         variant === "compact" ? "rounded-lg p-2.5" : "rounded-[10px] p-3",
         className,
       )}
       style={style}
     >
-      <input
+      <RadioGroupItem
         {...props}
-        type="radio"
-        name={plans.name}
         value={value}
-        checked={plans.selected === value}
-        onChange={(event) => {
-          onChange?.(event);
-          if (!event.defaultPrevented) plans.select(value);
-        }}
-        className="absolute inset-0 m-0 cursor-[inherit] opacity-0"
+        className="absolute inset-0 m-0 aspect-auto size-auto cursor-[inherit] rounded-[inherit] border-0 opacity-0 shadow-none focus-visible:ring-0 dark:bg-transparent"
       />
       {children}
       {current ? (
@@ -490,7 +492,7 @@ export function SubscriptionManagementPlanOption({
           {currentLabel}
         </span>
       ) : null}
-    </label>
+    </Label>
   );
 }
 
@@ -527,14 +529,15 @@ export function SubscriptionManagementPlanSubmit({
   const { variant } = useManagement("SubscriptionManagementPlanSubmit");
   const blocked = disabled || plans.selected === plans.current;
   return (
-    <button
+    <Button
       data-slot="subscription-management-plan-submit"
+      variant="default"
       className={cn(
-        "justify-self-start rounded-full border-0 px-3.5 text-[13px] font-medium [transition:background-color_120ms_ease-out,filter_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:hover:brightness-108 enabled:active:[transform:scale(0.97)] motion-reduce:transition-none motion-reduce:enabled:active:[transform:none]",
+        "justify-self-start rounded-full border-0 px-3.5 py-0 text-[13px] transition-[background-color,filter,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring has-[>svg]:px-3.5 enabled:hover:brightness-108 enabled:active:scale-[0.97] disabled:pointer-events-auto disabled:opacity-100 motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
         variant === "compact" ? "h-7" : "h-8",
         blocked
-          ? "cursor-not-allowed bg-secondary text-subtle-foreground"
-          : "cursor-pointer bg-primary text-primary-foreground",
+          ? "cursor-not-allowed bg-secondary text-subtle-foreground hover:bg-secondary"
+          : "cursor-pointer bg-primary text-primary-foreground hover:bg-primary",
         className,
       )}
       {...props}
@@ -542,7 +545,7 @@ export function SubscriptionManagementPlanSubmit({
       disabled={blocked}
     >
       {children}
-    </button>
+    </Button>
   );
 }
 

@@ -17,6 +17,7 @@ import {
   SearchResultsPagination,
   SearchResultsQuery,
   SearchResultsSort,
+  SearchResultsSortOption,
   SearchResultsSummary,
   type SearchResultsVariant,
 } from "@/components/uai/search-results";
@@ -139,9 +140,9 @@ export function SearchResultsPreview({ variant = "list" }: { variant?: SearchRes
             {results.length} {results.length === 1 ? "result" : "results"}
             {term ? ` for “${query.trim()}”` : ""}
           </SearchResultsSummary>
-          <SearchResultsSort value={sort} onChange={(event) => setSort(event.target.value)}>
-            <option value="relevance">Best match</option>
-            <option value="title">Title A–Z</option>
+          <SearchResultsSort value={sort} onValueChange={setSort}>
+            <SearchResultsSortOption value="relevance">Best match</SearchResultsSortOption>
+            <SearchResultsSortOption value="title">Title A–Z</SearchResultsSortOption>
           </SearchResultsSort>
         </SearchResultsBar>
         {results.length === 0 ? (

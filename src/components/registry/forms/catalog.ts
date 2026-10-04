@@ -160,7 +160,15 @@ export function SearchFieldPreview({ variant = "rounded" }: { variant?: SearchFi
     description: "Composable filters, removable chips, result counts, and reset actions.",
     usage: `"use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   FilterBar,
   FilterBarChip,
@@ -172,6 +180,7 @@ import {
 } from "@/components/ui/uai/filter-bar";
 
 export function FilterBarPreview({ variant = "toolbar" }: { variant?: FilterBarVariant }) {
+  const statusId = useId();
   const [status, setStatus] = useState("Open");
   const [mine, setMine] = useState(false);
   return (
@@ -184,28 +193,28 @@ export function FilterBarPreview({ variant = "toolbar" }: { variant?: FilterBarV
       }}
     >
       <FilterBarControls>
-        <label style={{ display: "flex", gap: 8, alignItems: "center", color: "var(--uai-muted)" }}>
-          Status
-          <select
-            value={status}
-            onChange={(event) => setStatus(event.target.value)}
-            style={{
-              height: 28,
-              padding: "0 10px",
-              border: 0,
-              borderRadius: 999,
-              background: "var(--uai-surface-raised)",
-              color: "var(--uai-text)",
-              font: "inherit",
-              fontSize: 12.5,
-              fontWeight: 500,
-            }}
+        <span style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <Label htmlFor={statusId} className="font-normal text-muted-foreground">
+            Status
+          </Label>
+          <Select
+            value={status || "all"}
+            onValueChange={(next) => setStatus(next === "all" ? "" : next)}
           >
-            <option value="">All statuses</option>
-            <option>Open</option>
-            <option>Closed</option>
-          </select>
-        </label>
+            <SelectTrigger
+              id={statusId}
+              size="sm"
+              className="h-7 gap-1.5 rounded-full border-0 bg-secondary px-2.5 text-[12.5px] font-medium shadow-none dark:bg-secondary"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All statuses</SelectItem>
+              <SelectItem value="Open">Open</SelectItem>
+              <SelectItem value="Closed">Closed</SelectItem>
+            </SelectContent>
+          </Select>
+        </span>
         <label style={{ display: "flex", gap: 6, alignItems: "center", color: "var(--uai-muted)" }}>
           <input
             type="checkbox"
@@ -351,7 +360,7 @@ export function FileUploadPreview({ variant = "dropzone" }: { variant?: FileUplo
 `,
     accessibility: [
       "Choose files is the keyboard alternative to dropping files. Both routes apply accept, maxSize, and count limits.",
-      "Upload progress has a native progress element; provide a file-specific accessible label.",
+      "Upload progress is a progressbar that exposes its value; provide a file-specific accessible label.",
       "The consumer owns upload requests, cancellation, progress, retry, removal, and server validation. fileCount includes existing files. Client checks are usability feedback, not a security boundary.",
     ],
   },

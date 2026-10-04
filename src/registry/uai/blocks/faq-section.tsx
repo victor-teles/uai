@@ -1,7 +1,6 @@
 "use client";
 
 import { cva } from "class-variance-authority";
-import { ChevronDown } from "lucide-react";
 import {
   type ComponentProps,
   createContext,
@@ -13,6 +12,12 @@ import {
   useRef,
   useState,
 } from "react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import {
   SearchField,
   type SearchFieldProps,
@@ -38,7 +43,7 @@ function useSection(part: string) {
   if (!context) throw new Error(`${part} must be used within FaqSection`);
   return context;
 }
-type ItemContext = { id: string; open: boolean; toggle: () => void };
+type ItemContext = { id: string; open: boolean };
 const ItemContext = createContext<ItemContext | null>(null);
 function useItem(part: string) {
   const context = useContext(ItemContext);
@@ -61,10 +66,10 @@ const faqSectionLayoutVariants = cva("grid min-w-0 items-start gap-5", {
 const faqSectionItemVariants = cva("min-w-0 border-solid motion-reduce:transition-none", {
   variants: {
     variant: {
-      list: "rounded-none border-b bg-transparent p-0",
+      list: "rounded-none border-b bg-transparent p-0 last:border-b",
       cards:
-        "rounded-[14px] border bg-card px-4 shadow-[0_1px_2px_oklch(0_0_0/0.04)] transition-[border-color] duration-120 ease-out hover:border-border-strong",
-      split: "rounded-none border-b bg-transparent p-0",
+        "rounded-[14px] border bg-card px-4 shadow-[0_1px_2px_oklch(0_0_0/0.04)] transition-[border-color] duration-120 ease-out last:border-b hover:border-border-strong",
+      split: "rounded-none border-b bg-transparent p-0 last:border-b",
     },
   },
 });
@@ -212,24 +217,32 @@ export function FaqSectionItem({
   }, [id, query, report]);
   useEffect(() => () => report(id, null), [id, report]);
   return (
-    <ItemContext.Provider
-      value={{
-        id,
-        open: current,
-        toggle: () => {
-          if (open === undefined) setInternal(!current);
-          onOpenChange?.(!current);
-        },
-      }}
-    >
-      <li
-        data-slot="faq-section-item"
-        data-variant={section.variant}
-        className={cn(faqSectionItemVariants({ variant: section.variant }), className)}
-        {...props}
-        ref={ref}
-        hidden={hidden}
-      />
+    <ItemContext.Provider value={{ id, open: current }}>
+      <Accordion
+        type="single"
+        collapsible
+        asChild
+        value={current ? id : ""}
+        onValueChange={(value) => {
+          const next = value === id;
+          if (open === undefined) setInternal(next);
+          onOpenChange?.(next);
+        }}
+      >
+        <AccordionItem
+          value={id}
+          asChild
+          className={cn(faqSectionItemVariants({ variant: section.variant }), className)}
+        >
+          <li
+            data-slot="faq-section-item"
+            data-variant={section.variant}
+            {...props}
+            ref={ref}
+            hidden={hidden}
+          />
+        </AccordionItem>
+      </Accordion>
     </ItemContext.Provider>
   );
 }
@@ -237,68 +250,57 @@ export function FaqSectionItem({
 export function FaqSectionQuestion({ children, className, ...props }: ComponentProps<"button">) {
   const item = useItem("FaqSectionQuestion");
   return (
-    <h3 className="m-0 text-sm/5 font-medium">
-      <button
-        type="button"
-        data-slot="faq-section-question"
-        className={cn(
-          "group/faq-question flex min-h-13 w-full cursor-pointer items-center justify-between gap-3 border-0 bg-transparent py-3.5 text-start text-foreground focus-visible:rounded-[6px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
-          className,
-        )}
-        {...props}
-        id={`${item.id}-question`}
-        aria-expanded={item.open}
-        aria-controls={`${item.id}-answer`}
-        onClick={(event) => {
-          props.onClick?.(event);
-          if (!event.defaultPrevented) item.toggle();
-        }}
-      >
-        <span className="min-w-0">{children}</span>
-        <ChevronDown
-          size={16}
-          strokeWidth={1.75}
-          aria-hidden="true"
-          className="flex-none text-subtle-foreground [transition:rotate_180ms_cubic-bezier(0.23,1,0.32,1),color_120ms_ease-out] group-hover/faq-question:text-foreground group-aria-expanded/faq-question:rotate-180 motion-reduce:transition-none"
-        />
-      </button>
-    </h3>
+    <AccordionTrigger
+      data-slot="faq-section-question"
+      className={cn(
+        "group/faq-question min-h-13 w-full cursor-pointer items-center gap-3 rounded-[6px] border-0 bg-transparent py-3.5 text-start text-sm/5 font-medium text-foreground hover:no-underline focus-visible:ring-0 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+        "[&>svg]:translate-y-0 [&>svg]:stroke-[1.75] [&>svg]:text-subtle-foreground [&>svg]:[transition:rotate_180ms_cubic-bezier(0.23,1,0.32,1),color_120ms_ease-out] hover:[&>svg]:text-foreground motion-reduce:[&>svg]:transition-none",
+        className,
+      )}
+      {...props}
+      aria-controls={`${item.id}-answer`}
+    >
+      <span className="min-w-0">{children}</span>
+    </AccordionTrigger>
   );
 }
 
-/** The answer expands with its row height and stays in the DOM until the collapse finishes. */
+/**
+ * The answer stays mounted while collapsed so the search can match its text, and hides once
+ * the collapse animation finishes.
+ */
 export function FaqSectionAnswer({ className, children, ...props }: ComponentProps<"div">) {
   const item = useItem("FaqSectionAnswer");
+  const ref = useRef<HTMLDivElement>(null);
   const [rendered, setRendered] = useState(item.open);
   useEffect(() => {
     if (item.open) {
       setRendered(true);
       return;
     }
-    const timer = window.setTimeout(() => setRendered(false), 300);
-    return () => window.clearTimeout(timer);
+    const node = ref.current;
+    const animation = node ? window.getComputedStyle(node).animationName : "";
+    if (!animation || animation === "none") setRendered(false);
   }, [item.open]);
-  const shown = item.open || rendered;
   return (
-    <div
+    <AccordionContent
+      forceMount
       data-slot="faq-section-answer"
-      className="grid min-w-0 grid-rows-[0fr] opacity-0 [transition:grid-template-rows_300ms_cubic-bezier(0.23,1,0.32,1),opacity_200ms_ease-out] data-[state=open]:grid-rows-[1fr] data-[state=open]:opacity-100 data-[state=open]:starting:grid-rows-[0fr] data-[state=open]:starting:opacity-0 motion-reduce:transition-none"
+      className={cn(
+        "grid max-w-[64ch] gap-2 pb-4 text-[13px]/5 text-pretty text-muted-foreground",
+        className,
+      )}
       {...props}
+      ref={ref}
       id={`${item.id}-answer`}
-      hidden={!shown}
-      data-state={item.open ? "open" : "closed"}
+      hidden={!item.open && !rendered}
+      onAnimationEnd={(event) => {
+        props.onAnimationEnd?.(event);
+        if (event.target === event.currentTarget && !item.open) setRendered(false);
+      }}
     >
-      <div className="min-h-0 overflow-hidden">
-        <div
-          className={cn(
-            "grid max-w-[64ch] gap-2 pb-4 leading-5 text-pretty text-muted-foreground",
-            className,
-          )}
-        >
-          {children}
-        </div>
-      </div>
-    </div>
+      {children}
+    </AccordionContent>
   );
 }
 

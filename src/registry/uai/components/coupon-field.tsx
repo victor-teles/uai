@@ -12,6 +12,9 @@ import {
   useState,
 } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/uai-utils";
 
 export const COUPON_FIELD_STATUSES = ["idle", "applying", "applied", "error"] as const;
@@ -40,16 +43,18 @@ function couponFieldChrome(variant: CouponFieldVariant) {
     controlClass: compact ? "gap-0.5 p-0.5" : "gap-1 p-1",
     controlRadius: pill ? "rounded-full" : compact ? "rounded-xl" : "rounded-[14px]",
     inputClass: compact
-      ? "h-7 px-2 text-[12.5px] leading-4"
-      : "h-8 px-2.5 text-[13px] leading-[18px]",
+      ? "h-7 px-2 text-[12.5px] leading-4 md:text-[12.5px] md:leading-4"
+      : "h-8 px-2.5 text-[13px] leading-[18px] md:text-[13px] md:leading-[18px]",
     applyClass: compact
-      ? "h-7 min-w-[64px] px-3 text-[12px] leading-4"
-      : "h-8 min-w-[76px] px-3.5 text-[12.5px] leading-4",
+      ? "h-7 min-w-[64px] px-3 text-[12px] leading-4 has-[>svg]:px-3"
+      : "h-8 min-w-[76px] px-3.5 text-[12.5px] leading-4 has-[>svg]:px-3.5",
     applyRadius: "rounded-full",
     feedbackClass: compact
       ? "mt-1.5 min-h-6 gap-1.5 px-0.5 text-[11.5px] leading-4"
       : "mt-2 min-h-7 gap-2 px-1 text-[12px] leading-4",
-    removeClass: compact ? "-mt-0.5 h-[22px] px-1.5" : "-mt-1 h-6 px-2",
+    removeClass: compact
+      ? "-mt-0.5 h-[22px] px-1.5 has-[>svg]:px-1.5"
+      : "-mt-1 h-6 px-2 has-[>svg]:px-2",
     iconClass: compact ? "size-3" : "size-3.5",
   };
 }
@@ -168,10 +173,10 @@ export function CouponFieldLabel({
   const context = useCouponField("CouponFieldLabel");
 
   return (
-    <label
+    <Label
       data-slot="coupon-field-label"
       className={cn(
-        "block font-medium text-muted-foreground",
+        "block font-medium text-muted-foreground select-auto",
         context.chrome.labelClass,
         className,
       )}
@@ -180,7 +185,7 @@ export function CouponFieldLabel({
       htmlFor={context.inputId}
     >
       {children}
-    </label>
+    </Label>
   );
 }
 
@@ -241,10 +246,10 @@ export function CouponFieldInput({
   };
 
   return (
-    <input
+    <Input
       data-slot="coupon-field-input"
       className={cn(
-        "min-w-0 flex-1 bg-transparent font-medium tracking-[0.04em] uppercase outline-none placeholder:font-normal placeholder:tracking-normal placeholder:normal-case placeholder:text-subtle-foreground disabled:cursor-not-allowed",
+        "min-w-0 flex-1 rounded-none border-0 bg-transparent py-0 font-medium tracking-[0.04em] uppercase shadow-none outline-none placeholder:font-normal placeholder:tracking-normal placeholder:normal-case placeholder:text-subtle-foreground focus-visible:ring-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-100 dark:bg-transparent",
         context.chrome.inputClass,
         className,
       )}
@@ -280,18 +285,19 @@ export function CouponFieldApply({
   const label = isApplying ? "Applying…" : context.isReplacing ? "Replace" : "Apply";
 
   return (
-    <button
+    <Button
       type="button"
       data-slot="coupon-field-apply"
+      variant={isDisabled && !isApplying ? "secondary" : "default"}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center gap-1.5 font-medium transition-[scale,background-color,color,filter] duration-[140ms] ease-out-quint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none",
+        "inline-flex shrink-0 items-center justify-center gap-1.5 py-0 font-medium transition-[scale,background-color,color,filter] duration-[140ms] ease-out-quint focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid disabled:pointer-events-auto motion-reduce:transition-none",
         context.chrome.applyClass,
         context.chrome.applyRadius,
         isApplying
-          ? "cursor-progress bg-primary text-primary-foreground opacity-80"
+          ? "cursor-progress bg-primary text-primary-foreground opacity-80 hover:bg-primary disabled:opacity-80"
           : isDisabled
-            ? "cursor-not-allowed bg-secondary text-subtle-foreground"
-            : "bg-primary text-primary-foreground hover:brightness-[1.08] active:scale-[0.97] motion-reduce:active:scale-100",
+            ? "cursor-not-allowed bg-secondary text-subtle-foreground hover:bg-secondary disabled:opacity-100"
+            : "bg-primary text-primary-foreground hover:bg-primary hover:brightness-[1.08] active:scale-[0.97] motion-reduce:active:scale-100",
         className,
       )}
       {...props}
@@ -308,7 +314,7 @@ export function CouponFieldApply({
         />
       ) : null}
       {children ?? label}
-    </button>
+    </Button>
   );
 }
 
@@ -396,11 +402,13 @@ export function CouponFieldRemove({
   if (!context.appliedCode) return null;
 
   return (
-    <button
+    <Button
       type="button"
       data-slot="coupon-field-remove"
+      variant="ghost"
+      size="sm"
       className={cn(
-        "inline-flex shrink-0 items-center gap-1 rounded-full text-[11.5px] font-medium text-subtle-foreground transition-[color,background-color,scale] duration-[120ms] ease-out hover:bg-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] disabled:cursor-not-allowed motion-reduce:transition-none motion-reduce:active:scale-100",
+        "inline-flex shrink-0 items-center gap-1 rounded-full text-[11.5px] font-medium text-subtle-foreground transition-[color,background-color,scale] duration-[120ms] ease-out hover:bg-accent hover:text-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.97] disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-100 motion-reduce:transition-none motion-reduce:active:scale-100 dark:hover:bg-accent",
         context.chrome.removeClass,
         className,
       )}
@@ -413,6 +421,6 @@ export function CouponFieldRemove({
     >
       <X className={context.chrome.iconClass} aria-hidden="true" />
       {children}
-    </button>
+    </Button>
   );
 }

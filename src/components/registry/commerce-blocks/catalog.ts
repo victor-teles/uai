@@ -212,7 +212,7 @@ export function ProductDetailPreview({ variant = "split" }: { variant?: ProductD
     description: "Categories, filters, sorting, result counts, and pagination.",
     usage: `"use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import {
   ProductListing,
   ProductListingAside,
@@ -236,10 +236,19 @@ import {
   ProductListingProductPrice,
   ProductListingResults,
   ProductListingSort,
+  ProductListingSortOption,
   ProductListingTitle,
   ProductListingToolbar,
   type ProductListingVariant,
 } from "@/components/uai/product-listing";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   EmptyState,
   EmptyStateAction,
@@ -266,6 +275,7 @@ const products = [
 ];
 
 export function ProductListingPreview({ variant = "grid" }: { variant?: ProductListingVariant }) {
+  const glazeId = useId();
   const [glaze, setGlaze] = useState("");
   const [inStock, setInStock] = useState(false);
   const [sort, setSort] = useState("featured");
@@ -283,15 +293,27 @@ export function ProductListingPreview({ variant = "grid" }: { variant?: ProductL
       }}
     >
       <FilterBarControls>
-        <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          Glaze
-          <select value={glaze} onChange={(event) => setGlaze(event.target.value)}>
-            <option value="">All glazes</option>
-            <option>Ash</option>
-            <option>Moss</option>
-            <option>Clay</option>
-          </select>
-        </label>
+        <span style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <Label htmlFor={glazeId}>Glaze</Label>
+          <Select
+            value={glaze || "all"}
+            onValueChange={(next) => setGlaze(next === "all" ? "" : next)}
+          >
+            <SelectTrigger
+              id={glazeId}
+              size="sm"
+              className="h-7 gap-1.5 rounded-full border-0 bg-secondary px-2.5 text-[12.5px] font-medium shadow-none dark:bg-secondary"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All glazes</SelectItem>
+              <SelectItem value="Ash">Ash</SelectItem>
+              <SelectItem value="Moss">Moss</SelectItem>
+              <SelectItem value="Clay">Clay</SelectItem>
+            </SelectContent>
+          </Select>
+        </span>
         <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
           <input
             type="checkbox"
@@ -333,9 +355,13 @@ export function ProductListingPreview({ variant = "grid" }: { variant?: ProductL
               {results.length} of {products.length} products
             </ProductListingCount>
             <ProductListingSort value={sort} onValueChange={setSort}>
-              <option value="featured">Featured</option>
-              <option value="price-asc">Price: low to high</option>
-              <option value="price-desc">Price: high to low</option>
+              <ProductListingSortOption value="featured">Featured</ProductListingSortOption>
+              <ProductListingSortOption value="price-asc">
+                Price: low to high
+              </ProductListingSortOption>
+              <ProductListingSortOption value="price-desc">
+                Price: high to low
+              </ProductListingSortOption>
             </ProductListingSort>
           </ProductListingToolbar>
           {results.length === 0 ? (
@@ -401,7 +427,7 @@ export function ProductListingPreview({ variant = "grid" }: { variant?: ProductL
     accessibility: [
       'Categories and pagination are labelled nav landmarks of real links; the current entry carries aria-current="page".',
       "The result count is a polite status region, so filter and sort changes are announced without moving focus.",
-      "Sort is a labelled native select; filters are Filter Bar controls with named remove buttons on each chip.",
+      "Sort is a labelled select that opens a listbox; filters are Filter Bar controls with named remove buttons on each chip.",
       "Each product is a list item labelled by its h3 name; the name link stretches across the card and shows one visible focus ring on the card.",
       "Disabled previous and next links drop their href and set aria-disabled.",
     ],
@@ -625,7 +651,7 @@ export function CartDrawerPreview({ variant = "side" }: { variant?: CartDrawerVa
 }
 `,
     accessibility: [
-      "The drawer is a native modal dialog labelled by its title; the page behind it is inert while it is open.",
+      "The drawer is a modal dialog labelled by its title; it traps focus and hides the page behind it from assistive technology while open.",
       "Opening moves focus to the close button (or an autofocus element); Escape, the backdrop, Close, and Continue shopping return focus to the trigger.",
       "The trigger includes the item count in its accessible name and exposes aria-haspopup, aria-expanded, and aria-controls.",
       "Cart lines are list items built on Cart Item; quantity uses Quantity Picker and discounts use Coupon Field with live feedback.",
@@ -1194,7 +1220,7 @@ export function SubscriptionManagementPreview({
 }
 `,
     accessibility: [
-      "Plan choices are native radio inputs in a labelled radio group; the current plan is named in text.",
+      "Plan choices are radios in a labelled radio group, so arrow keys move the selection; the current plan is named in text.",
       "The billing period is a Pricing Toggle radio group with arrow-key navigation, and every plan price follows it.",
       "Change plan stays disabled until a different plan is selected.",
       'Usage limits use role="meter" with aria-valuetext; the visible text matches, and the bar turns warning-toned at 80%.',

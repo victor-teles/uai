@@ -11,6 +11,7 @@ import {
   useEffectEvent,
   useState,
 } from "react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/uai-utils";
 
 export const INLINE_FEEDBACK_VARIANTS = ["text", "pill", "outlined"] as const;
@@ -91,11 +92,12 @@ export function InlineFeedbackAction({
   const context = useFeedback("InlineFeedbackAction");
   const pending = context.status === "pending";
   return (
-    <button
+    <Button
       type="button"
+      variant="secondary"
       data-slot="inline-feedback-action"
       className={cn(
-        "h-7 cursor-pointer rounded-full border-0 bg-secondary px-3 text-[12.5px]/4 font-medium whitespace-nowrap text-secondary-foreground [transition:background-color_120ms_ease-out,scale_140ms_var(--ease-out-quint)] hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] aria-busy:cursor-progress motion-reduce:transition-none motion-reduce:active:scale-100",
+        "h-7 cursor-pointer rounded-full px-3 py-0 text-[12.5px]/4 has-[>svg]:px-3 [transition:background-color_120ms_ease-out,scale_140ms_var(--ease-out-quint)] hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] aria-busy:cursor-progress motion-reduce:transition-none motion-reduce:active:scale-100",
         className,
       )}
       {...props}
@@ -186,6 +188,7 @@ export function InlineFeedbackMessage({
         strokeWidth={2}
         aria-hidden="true"
         className={cn(
+          "size-3.5",
           "flex-none",
           status === "success" && "text-success",
           pending &&

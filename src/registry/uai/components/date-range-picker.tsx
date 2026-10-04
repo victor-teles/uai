@@ -11,6 +11,10 @@ import {
   useRef,
   useState,
 } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Toggle } from "@/components/ui/toggle";
 import { cn } from "@/lib/uai-utils";
 
 export const DATE_RANGE_PICKER_VARIANTS = ["card", "split", "compact"] as const;
@@ -82,9 +86,11 @@ const dateRangePickerVariants = cva(
 );
 const focusRing =
   "focus-visible:relative focus-visible:z-1 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring";
-// Shared ghost treatment for presets, month navigation, and the clear button.
+// Shared ghost treatment for presets, month navigation, and the clear button. The neutral
+// hover, ring and pointer-event resets replace the Button/Toggle base so only enabled
+// controls react and disabled ones keep the not-allowed cursor.
 const ghostButton = cn(
-  "cursor-pointer border-0 bg-transparent text-muted-foreground [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_var(--ease-out-quint)] enabled:hover:bg-accent enabled:hover:text-foreground enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-35 motion-reduce:transition-none",
+  "cursor-pointer border-0 bg-transparent text-muted-foreground [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_var(--ease-out-quint)] hover:bg-transparent hover:text-muted-foreground enabled:hover:bg-accent enabled:hover:text-foreground enabled:active:scale-[0.97] focus-visible:ring-0 focus-visible:outline-solid disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-35 motion-reduce:transition-none dark:hover:bg-transparent",
   focusRing,
 );
 function useRange() {
@@ -154,17 +160,19 @@ export function DateRangePickerInput({
   const id = `${context.id}-${boundary}`;
   const compact = context.variant === "compact";
   return (
-    <label
+    <Label
       htmlFor={id}
       data-slot="date-range-picker-input-label"
-      className="grid min-w-0 flex-[1_1_120px] gap-1.5 text-xs/4 font-medium text-muted-foreground"
+      className="grid min-w-0 flex-[1_1_120px] items-stretch gap-1.5 text-xs/4 font-medium text-muted-foreground select-auto"
     >
       {children ?? (boundary === "start" ? "Start date" : "End date")}
-      <input
+      <Input
         data-slot="date-range-picker-input"
         className={cn(
-          "box-border w-full min-w-0 border bg-background px-2.5 font-normal text-foreground tabular-nums transition-[border-color,box-shadow] duration-120 ease-[ease-out] enabled:hover:not-focus:border-border-strong focus:border-border-strong focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--primary)_24%,transparent)] focus:outline-none motion-reduce:transition-none [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-55",
-          compact ? "h-[30px] rounded-lg text-[12.5px]" : "h-[34px] rounded-[10px] text-[13px]",
+          "box-border w-full min-w-0 border border-border bg-background px-2.5 py-0 font-normal text-foreground tabular-nums shadow-none transition-[border-color,box-shadow] duration-120 ease-[ease-out] enabled:hover:not-focus:border-border-strong focus:border-border-strong focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--primary)_24%,transparent)] focus:outline-none focus-visible:border-border-strong focus-visible:ring-0 disabled:pointer-events-auto disabled:opacity-100 motion-reduce:transition-none dark:bg-background [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-55",
+          compact
+            ? "h-[30px] rounded-lg text-[12.5px] md:text-[12.5px]"
+            : "h-[34px] rounded-[10px] text-[13px] md:text-[13px]",
           className,
         )}
         {...props}
@@ -186,7 +194,7 @@ export function DateRangePickerInput({
           else context.change({ ...context.value, end: date });
         }}
       />
-    </label>
+    </Label>
   );
 }
 export function DateRangePickerBody({ className, ...props }: ComponentProps<"div">) {
@@ -233,17 +241,17 @@ export function DateRangePickerPreset({
     inBounds(value.end, context.min, context.max) &&
     value.start <= value.end;
   return (
-    <button
+    <Toggle
       data-slot="date-range-picker-preset"
       className={cn(
         ghostButton,
-        "h-7 px-3 text-left text-[12.5px] font-medium whitespace-nowrap aria-pressed:bg-accent aria-pressed:text-foreground",
+        "h-7 min-w-0 justify-start px-3 text-left text-[12.5px] font-medium whitespace-nowrap aria-pressed:bg-accent aria-pressed:text-foreground data-[state=on]:bg-accent data-[state=on]:text-foreground",
         context.variant === "split" ? "rounded-lg" : "rounded-full",
         className,
       )}
       {...props}
       type="button"
-      aria-pressed={selected}
+      pressed={selected}
       disabled={context.disabled || !allowed || props.disabled}
       onClick={(event) => {
         onClick?.(event);
@@ -295,27 +303,31 @@ export function DateRangePickerCalendar({
       ref={ref}
     >
       <div className="mb-2 flex items-center justify-between">
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon"
           aria-label="Previous month"
           disabled={context.disabled || Boolean(context.min && month <= context.min.slice(0, 7))}
           onClick={() => navigate(moveMonth(`${month}-01`, -1), false)}
           className={monthButton}
         >
           <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" />
-        </button>
+        </Button>
         <span id={titleId} aria-live="polite" className="font-medium">
           {new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }).format(first)}
         </span>
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon"
           aria-label="Next month"
           disabled={context.disabled || Boolean(context.max && month >= context.max.slice(0, 7))}
           onClick={() => navigate(moveMonth(`${month}-01`, 1), false)}
           className={monthButton}
         >
           <ChevronRight size={16} strokeWidth={1.75} aria-hidden="true" />
-        </button>
+        </Button>
       </div>
       <table
         aria-labelledby={titleId}
@@ -445,11 +457,12 @@ export function DateRangePickerClear({
 }: ComponentProps<"button">) {
   const context = useRange();
   return (
-    <button
+    <Button
       data-slot="date-range-picker-clear"
+      variant="ghost"
       className={cn(
         ghostButton,
-        "-ml-3 h-7 justify-self-start rounded-full px-3 text-[12.5px] font-medium",
+        "-ml-3 h-7 justify-self-start rounded-full px-3 py-0 text-[12.5px] font-medium has-[>svg]:px-3",
         className,
       )}
       {...props}
@@ -461,6 +474,6 @@ export function DateRangePickerClear({
       }}
     >
       {children}
-    </button>
+    </Button>
   );
 }

@@ -11,6 +11,7 @@ import {
   useLayoutEffect,
   useRef,
 } from "react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/uai-utils";
 
 export const RESPONSE_STATUS_VARIANTS = ["inline", "pill", "bar"] as const;
@@ -72,7 +73,7 @@ const responseStatusVariants = cva(
 );
 
 const responseStatusActionVariants = cva(
-  "inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-full border-0 px-3 text-[12.5px] font-medium text-foreground [transition:background-color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100",
+  "h-7 cursor-pointer gap-1.5 rounded-full px-3 text-[12.5px] text-foreground has-[>svg]:px-3 [transition:background-color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100",
   {
     variants: {
       variant: {
@@ -177,11 +178,11 @@ function StreamingDots() {
 export function ResponseStatusIndicator({ children, className, ...props }: ComponentProps<"span">) {
   const context = useResponseStatus("ResponseStatusIndicator");
   const icon = {
-    queued: <CircleDashed size={14} />,
+    queued: <CircleDashed size={14} className="size-3.5" />,
     streaming: <StreamingDots />,
-    stopped: <Square size={11} fill="currentColor" strokeWidth={0} />,
-    complete: <Check size={14} />,
-    failed: <CircleAlert size={14} />,
+    stopped: <Square size={11} className="size-[11px]" fill="currentColor" strokeWidth={0} />,
+    complete: <Check size={14} className="size-3.5" />,
+    failed: <CircleAlert size={14} className="size-3.5" />,
   }[context.status];
   const color = {
     queued: "text-subtle-foreground",
@@ -277,8 +278,10 @@ export function ResponseStatusStop({
   const { context, ref, onFocus: track, onBlur: untrack } = useAction("stop", "ResponseStatusStop");
   if (!context.active) return null;
   return (
-    <button
+    <Button
       type="button"
+      variant="secondary"
+      size="sm"
       aria-describedby={`${context.id}-label`}
       data-slot="response-status-stop"
       className={cn(responseStatusActionVariants({ variant: context.variant }), className)}
@@ -295,11 +298,11 @@ export function ResponseStatusStop({
     >
       {children ?? (
         <>
-          <Square size={9} fill="currentColor" strokeWidth={0} aria-hidden="true" />
+          <Square className="size-2.25" fill="currentColor" strokeWidth={0} aria-hidden="true" />
           Stop
         </>
       )}
-    </button>
+    </Button>
   );
 }
 
@@ -318,8 +321,10 @@ export function ResponseStatusRetry({
   } = useAction("retry", "ResponseStatusRetry");
   if (context.status !== "failed" && context.status !== "stopped") return null;
   return (
-    <button
+    <Button
       type="button"
+      variant="secondary"
+      size="sm"
       aria-describedby={`${context.id}-label`}
       data-slot="response-status-retry"
       className={cn(responseStatusActionVariants({ variant: context.variant }), className)}
@@ -336,10 +341,10 @@ export function ResponseStatusRetry({
     >
       {children ?? (
         <>
-          <RotateCw size={12} aria-hidden="true" />
+          <RotateCw className="size-3" aria-hidden="true" />
           {context.status === "failed" ? "Retry" : "Regenerate"}
         </>
       )}
-    </button>
+    </Button>
   );
 }

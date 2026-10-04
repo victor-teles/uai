@@ -352,7 +352,7 @@ export function ConfirmationDialogPreview({
 }
 `,
     accessibility: [
-      'Content renders a native modal <dialog> with role="alertdialog", labelled by the title and described by the impact copy.',
+      'Content renders a modal with role="alertdialog" that traps focus, labelled by the title and described by the impact copy.',
       "Opening focuses Cancel (or an element marked autofocus); Escape and Cancel close it, and focus returns to the trigger.",
       "ConfirmationDialogInput adds an optional typed confirmation with a visible label; Confirm stays disabled until the text matches exactly.",
     ],

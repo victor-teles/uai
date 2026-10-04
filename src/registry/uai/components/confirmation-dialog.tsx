@@ -11,6 +11,16 @@ import {
   useRef,
   useState,
 } from "react";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/uai-utils";
 
 export const CONFIRMATION_DIALOG_VARIANTS = ["centered", "sheet", "compact"] as const;
@@ -41,35 +51,36 @@ function useConfirmation(part: string) {
   return context;
 }
 const buttonTones = cva(
-  "cursor-pointer whitespace-nowrap rounded-full border-0 font-medium transition-[background-color,filter,color,transform] duration-[120ms,120ms,120ms,140ms] ease-[ease-out,ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.97] motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
+  "cursor-pointer whitespace-nowrap rounded-full border-0 py-0 font-medium transition-[background-color,filter,color,transform] duration-[120ms,120ms,120ms,140ms] ease-[ease-out,ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.97] motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
   {
     variants: {
       tone: {
-        trigger: "bg-destructive/12 text-destructive hover:bg-destructive/18",
+        trigger:
+          "bg-destructive/12 text-destructive hover:bg-destructive/18 hover:text-destructive dark:hover:bg-destructive/18",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
         danger:
-          "bg-destructive text-[oklch(0.99_0_0)] enabled:hover:brightness-108 disabled:cursor-not-allowed disabled:bg-muted disabled:text-subtle-foreground",
+          "bg-destructive text-[oklch(0.99_0_0)] hover:bg-destructive enabled:hover:brightness-108 disabled:bg-muted disabled:text-subtle-foreground disabled:opacity-100 dark:bg-destructive dark:disabled:bg-muted",
       },
       size: {
-        default: "h-8 px-3.5 text-[13px]/[18px]",
-        compact: "h-7 px-3 text-[12.5px]/[18px]",
+        default: "h-8 px-3.5 text-[13px]/[18px] has-[>svg]:px-3.5",
+        compact: "h-7 px-3 text-[12.5px]/[18px] has-[>svg]:px-3",
       },
     },
   },
 );
 
 const dialogVariants = cva(
-  "box-border max-w-full border-0 bg-popover text-[13px]/[18px] text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_18px_48px_-16px_oklch(0_0_0/0.36)] open:animate-in open:fade-in-0 backdrop:bg-background/62 backdrop:backdrop-blur-[2px] backdrop:animate-in backdrop:fade-in-0 backdrop:duration-180 backdrop:ease-out motion-reduce:open:animate-none motion-reduce:backdrop:animate-none",
+  "box-border border-0 bg-popover text-[13px]/[18px] text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_18px_48px_-16px_oklch(0_0_0/0.36)] motion-reduce:data-[state=closed]:animate-none motion-reduce:data-[state=open]:animate-none",
   {
     variants: {
       variant: {
         centered:
-          "m-auto w-[min(100%_-_32px,440px)] rounded-[14px] p-5 open:zoom-in-96 open:duration-180 open:ease-[cubic-bezier(0.16,1,0.3,1)]",
+          "w-[min(100%_-_32px,440px)] gap-4 rounded-[14px] p-5 duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-[state=open]:zoom-in-96",
         sheet:
-          "mx-auto mt-auto mb-0 w-[min(100%,560px)] rounded-t-3xl rounded-b-none px-5 pt-5 pb-6 open:slide-in-from-bottom-[24px] open:duration-300 open:ease-out-quint",
+          "top-auto bottom-0 w-[min(100%,560px)] max-w-full translate-y-0 gap-4 rounded-t-3xl rounded-b-none px-5 pt-5 pb-6 duration-300 ease-out-quint data-[size=default]:sm:max-w-[560px] data-[state=closed]:slide-out-to-bottom-[24px] data-[state=open]:slide-in-from-bottom-[24px] data-[state=closed]:[--tw-exit-scale:1]! data-[state=open]:[--tw-enter-scale:1]!",
         compact:
-          "m-auto w-[min(100%_-_32px,360px)] rounded-xl p-4 open:zoom-in-96 open:duration-180 open:ease-[cubic-bezier(0.16,1,0.3,1)]",
+          "w-[min(100%_-_32px,360px)] gap-3 rounded-xl p-4 duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-[state=open]:zoom-in-96",
       },
     },
   },
@@ -110,9 +121,11 @@ export function ConfirmationDialog({
         cancelRef,
       }}
     >
-      <div data-slot="confirmation-dialog" data-variant={variant} className="contents">
-        {children}
-      </div>
+      <AlertDialog open={current} onOpenChange={setOpen}>
+        <div data-slot="confirmation-dialog" data-variant={variant} className="contents">
+          {children}
+        </div>
+      </AlertDialog>
     </Context.Provider>
   );
 }
@@ -124,83 +137,60 @@ export function ConfirmationDialogTrigger({
 }: ComponentProps<"button">) {
   const context = useConfirmation("ConfirmationDialogTrigger");
   return (
-    <button
-      type="button"
-      aria-haspopup="dialog"
-      data-slot="confirmation-dialog-trigger"
-      className={cn(buttonTones({ tone: "trigger", size: "compact" }), className)}
-      {...props}
-      ref={context.triggerRef}
-      data-tone="trigger"
-      onClick={(event) => {
-        onClick?.(event);
-        if (!event.defaultPrevented) context.setOpen(true);
-      }}
-    />
+    <AlertDialogTrigger asChild onClick={onClick}>
+      <Button
+        type="button"
+        variant="ghost"
+        data-slot="confirmation-dialog-trigger"
+        className={cn(buttonTones({ tone: "trigger", size: "compact" }), className)}
+        {...props}
+        ref={context.triggerRef}
+        data-tone="trigger"
+      />
+    </AlertDialogTrigger>
   );
 }
 
 export function ConfirmationDialogContent({
-  children,
   className,
-  onKeyDown,
+  onOpenAutoFocus,
+  onCloseAutoFocus,
   ...props
-}: Omit<ComponentProps<"dialog">, "open">) {
+}: Omit<ComponentProps<typeof AlertDialogContent>, "size">) {
   const context = useConfirmation("ConfirmationDialogContent");
-  const ref = useRef<HTMLDialogElement>(null);
   const returnRef = useRef<HTMLElement | null>(null);
-  const { open, cancelRef, triggerRef } = context;
-  useLayoutEffect(() => {
-    const dialog = ref.current;
-    if (!dialog) return;
-    if (open && !dialog.open) {
-      const active = document.activeElement;
-      returnRef.current =
-        active instanceof HTMLElement && active !== document.body ? active : triggerRef.current;
-      if (typeof dialog.showModal === "function") dialog.showModal();
-      else dialog.setAttribute("open", "");
-      const preferred = dialog.querySelector<HTMLElement>("[autofocus], [data-autofocus]");
-      (preferred ?? cancelRef.current)?.focus();
-    }
-    if (!open && dialog.open) {
-      dialog.close();
-      (returnRef.current ?? triggerRef.current)?.focus();
-    }
-  }, [open, cancelRef, triggerRef]);
-  const compact = context.variant === "compact";
+  const { cancelRef, triggerRef } = context;
   return (
-    <dialog
-      role="alertdialog"
-      aria-labelledby={`${context.id}-title`}
-      aria-describedby={`${context.id}-description`}
+    <AlertDialogContent
       data-slot="confirmation-dialog-content"
       className={cn(dialogVariants({ variant: context.variant }), className)}
       {...props}
-      ref={ref}
       data-variant={context.variant}
-      onCancel={(event) => {
+      onOpenAutoFocus={(event) => {
+        const active = document.activeElement;
+        returnRef.current =
+          active instanceof HTMLElement && active !== document.body ? active : triggerRef.current;
+        onOpenAutoFocus?.(event);
+        if (event.defaultPrevented) return;
         event.preventDefault();
-        context.setOpen(false);
+        const content = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
+        const preferred = content?.querySelector<HTMLElement>("[autofocus], [data-autofocus]");
+        (preferred ?? cancelRef.current)?.focus();
       }}
-      onKeyDown={(event) => {
-        onKeyDown?.(event);
-        if (!event.defaultPrevented && event.key === "Escape") {
-          event.preventDefault();
-          context.setOpen(false);
-        }
+      onCloseAutoFocus={(event) => {
+        onCloseAutoFocus?.(event);
+        if (event.defaultPrevented) return;
+        event.preventDefault();
+        (returnRef.current ?? triggerRef.current)?.focus();
       }}
-    >
-      {context.open ? (
-        <div className={cn("grid", compact ? "gap-3" : "gap-4")}>{children}</div>
-      ) : null}
-    </dialog>
+    />
   );
 }
 
 export function ConfirmationDialogTitle({ className, ...props }: ComponentProps<"h2">) {
   const context = useConfirmation("ConfirmationDialogTitle");
   return (
-    <h2
+    <AlertDialogTitle
       data-slot="confirmation-dialog-title"
       className={cn(
         "m-0 font-semibold tracking-[-0.01em]",
@@ -208,20 +198,24 @@ export function ConfirmationDialogTitle({ className, ...props }: ComponentProps<
         className,
       )}
       {...props}
-      id={`${context.id}-title`}
     />
   );
 }
 
-export function ConfirmationDialogDescription({ className, ...props }: ComponentProps<"div">) {
-  const context = useConfirmation("ConfirmationDialogDescription");
+export function ConfirmationDialogDescription({
+  className,
+  children,
+  ...props
+}: ComponentProps<"div">) {
+  useConfirmation("ConfirmationDialogDescription");
   return (
-    <div
+    <AlertDialogDescription
+      asChild
       data-slot="confirmation-dialog-description"
-      className={cn("grid gap-2.5 text-pretty text-muted-foreground", className)}
-      {...props}
-      id={`${context.id}-description`}
-    />
+      className={cn("grid gap-2.5 text-[13px]/[18px] text-pretty text-muted-foreground", className)}
+    >
+      <div {...props}>{children}</div>
+    </AlertDialogDescription>
   );
 }
 
@@ -257,7 +251,10 @@ export function ConfirmationDialogInput({
   const inputId = `${context.id}-input`;
   return (
     <div className="grid gap-1.5">
-      <label htmlFor={inputId} className="text-[12px] text-muted-foreground">
+      <Label
+        htmlFor={inputId}
+        className="block text-[12px]/[18px] font-normal text-muted-foreground select-auto"
+      >
         {children ?? (
           <>
             Type{" "}
@@ -267,13 +264,13 @@ export function ConfirmationDialogInput({
             to confirm
           </>
         )}
-      </label>
-      <input
+      </Label>
+      <Input
         autoComplete="off"
         spellCheck={false}
         data-slot="confirmation-dialog-input"
         className={cn(
-          "h-8 rounded-[10px] border bg-background px-2.5 text-[13px] text-inherit transition-[border-color,box-shadow] duration-120 ease-out hover:border-border-strong focus:border-border-strong focus:outline-none focus:ring-3 focus:ring-primary/18 motion-reduce:transition-none",
+          "h-8 rounded-[10px] border-border bg-background px-2.5 py-0 text-[13px] text-inherit shadow-none transition-[border-color,box-shadow] duration-120 ease-out hover:border-border-strong focus-visible:border-border-strong focus-visible:ring-3 focus-visible:ring-primary/18 md:text-[13px] motion-reduce:transition-none dark:bg-background",
           className,
         )}
         {...props}
@@ -306,7 +303,8 @@ export function ConfirmationDialogCancel({
 }: ComponentProps<"button">) {
   const context = useConfirmation("ConfirmationDialogCancel");
   return (
-    <button
+    <Button
+      variant="secondary"
       data-slot="confirmation-dialog-cancel"
       className={cn(
         buttonTones({
@@ -325,7 +323,7 @@ export function ConfirmationDialogCancel({
       }}
     >
       {children}
-    </button>
+    </Button>
   );
 }
 
@@ -338,7 +336,8 @@ export function ConfirmationDialogConfirm({
   const context = useConfirmation("ConfirmationDialogConfirm");
   const blocked = disabled || (context.phrase !== null && context.typed !== context.phrase);
   return (
-    <button
+    <Button
+      variant="destructive"
       data-slot="confirmation-dialog-confirm"
       className={cn(
         buttonTones({

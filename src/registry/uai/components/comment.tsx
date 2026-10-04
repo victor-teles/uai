@@ -11,6 +11,10 @@ import {
   useRef,
   useState,
 } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/uai-utils";
 
 export const COMMENT_VARIANTS = ["thread", "card", "compact"] as const;
@@ -41,17 +45,21 @@ function useComment(part: string) {
 }
 type ControlTone = "ghost" | "secondary" | "primary" | "link";
 const controlVariants = cva(
-  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap [transition:background-color_120ms_ease-out,color_120ms_ease-out,filter_120ms_ease-out,scale_140ms_var(--ease-out-quint)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.97] motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
+  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 py-0 font-medium whitespace-nowrap [transition:background-color_120ms_ease-out,color_120ms_ease-out,filter_120ms_ease-out,scale_140ms_var(--ease-out-quint)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid enabled:active:scale-[0.97] motion-reduce:transition-none motion-reduce:enabled:active:scale-100 [&_svg:not([class*='size-'])]:size-auto",
   {
     variants: {
-      compact: { true: "h-6 px-2 text-[12px]", false: "h-7 px-2.5 text-[12.5px]" },
+      compact: {
+        true: "h-6 px-2 text-[12px] has-[>svg]:px-2",
+        false: "h-7 px-2.5 text-[12.5px] has-[>svg]:px-2.5",
+      },
       tone: {
-        ghost: "bg-transparent text-muted-foreground hover:bg-accent hover:text-foreground",
+        ghost:
+          "bg-transparent text-muted-foreground hover:bg-accent hover:text-foreground dark:hover:bg-accent",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
         primary:
-          "bg-primary text-primary-foreground enabled:hover:brightness-[1.08] disabled:cursor-not-allowed disabled:opacity-45",
-        link: "h-auto bg-transparent p-0 text-foreground underline decoration-border-strong underline-offset-2 hover:decoration-current",
+          "bg-primary text-primary-foreground hover:bg-primary enabled:hover:brightness-[1.08] disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-45",
+        link: "h-auto bg-transparent p-0 text-foreground underline decoration-border-strong underline-offset-2 hover:decoration-current has-[>svg]:p-0",
       },
     },
     defaultVariants: { compact: false, tone: "ghost" },
@@ -59,6 +67,12 @@ const controlVariants = cva(
 );
 const controlClasses = (compact: boolean, tone: ControlTone = "ghost") =>
   cn(controlVariants({ compact, tone }));
+const buttonVariantFor = {
+  ghost: "ghost",
+  secondary: "secondary",
+  primary: "default",
+  link: "link",
+} as const;
 
 const commentVariants = cva("grid min-w-0 rounded-[14px] text-[13px]/[18px] text-foreground", {
   variants: {
@@ -148,9 +162,9 @@ export function CommentAvatar({
   ...props
 }: Omit<ComponentProps<"span">, "children"> & { name: string; src?: string }) {
   const { variant } = useComment("CommentAvatar");
-  const [failed, setFailed] = useState(false);
+  // Radix shows the image only once it loads and falls back to initials otherwise.
   return (
-    <span
+    <Avatar
       aria-hidden="true"
       data-slot="comment-avatar"
       className={cn(
@@ -160,13 +174,9 @@ export function CommentAvatar({
       )}
       {...props}
     >
-      {src && !failed ? (
-        // biome-ignore lint/performance/noImgElement: distributed source cannot depend on next/image.
-        <img src={src} alt="" onError={() => setFailed(true)} className="size-full object-cover" />
-      ) : (
-        initials(name)
-      )}
-    </span>
+      {src ? <AvatarImage src={src} alt="" className="object-cover" /> : null}
+      <AvatarFallback className="text-[length:inherit]">{initials(name)}</AvatarFallback>
+    </Avatar>
   );
 }
 
@@ -229,41 +239,48 @@ export function CommentBody({ className, children, ...props }: ComponentProps<"d
       </p>
     );
   const hidden = context.moderation === "hidden";
-  const text = (
-    <div
-      id={bodyId}
-      className="min-w-0 text-pretty whitespace-pre-line text-foreground wrap-anywhere"
-    >
-      {children}
-    </div>
-  );
   return (
-    <div data-slot="comment-body" className={cn("grid min-w-0 gap-1.5", className)} {...props}>
-      {context.moderation === "flagged" && (
-        <p className={noticeClasses}>
-          <span className="inline-flex items-center gap-1.25 rounded-full bg-warning/14 px-2 py-0.5 text-[11.5px]/4 font-medium text-warning">
-            <Flag size={12} strokeWidth={2} aria-hidden="true" />
-            Flagged for review
-          </span>
-        </p>
-      )}
-      {hidden && (
-        <p className={noticeClasses}>
-          <EyeOff size={13} strokeWidth={1.75} aria-hidden="true" />
-          This comment is hidden.
-          <button
-            type="button"
-            aria-expanded={context.revealed}
-            aria-controls={context.revealed ? bodyId : undefined}
-            onClick={() => context.setRevealed(!context.revealed)}
-            className={controlClasses(true, "link")}
+    <Collapsible
+      asChild
+      open={!hidden || context.revealed}
+      onOpenChange={(open) => context.setRevealed(open)}
+    >
+      <div data-slot="comment-body" className={cn("grid min-w-0 gap-1.5", className)} {...props}>
+        {context.moderation === "flagged" && (
+          <p className={noticeClasses}>
+            <span className="inline-flex items-center gap-1.25 rounded-full bg-warning/14 px-2 py-0.5 text-[11.5px]/4 font-medium text-warning">
+              <Flag size={12} className="size-3" strokeWidth={2} aria-hidden="true" />
+              Flagged for review
+            </span>
+          </p>
+        )}
+        {hidden && (
+          <p className={noticeClasses}>
+            <EyeOff size={13} className="size-[13px]" strokeWidth={1.75} aria-hidden="true" />
+            This comment is hidden.
+            <CollapsibleTrigger asChild>
+              <Button
+                type="button"
+                variant="link"
+                size="sm"
+                aria-controls={context.revealed ? bodyId : undefined}
+                className={controlClasses(true, "link")}
+              >
+                {context.revealed ? "Hide" : "Show"}
+              </Button>
+            </CollapsibleTrigger>
+          </p>
+        )}
+        <CollapsibleContent asChild>
+          <div
+            id={bodyId}
+            className="min-w-0 text-pretty whitespace-pre-line text-foreground wrap-anywhere"
           >
-            {context.revealed ? "Hide" : "Show"}
-          </button>
-        </p>
-      )}
-      {(!hidden || context.revealed) && text}
-    </div>
+            {children}
+          </div>
+        </CollapsibleContent>
+      </div>
+    </Collapsible>
   );
 }
 
@@ -312,7 +329,7 @@ export function CommentEditor({
         save();
       }}
     >
-      <textarea
+      <Textarea
         ref={textareaRef}
         aria-label={label}
         value={value}
@@ -328,26 +345,30 @@ export function CommentEditor({
           }
         }}
         className={cn(
-          "box-border w-full min-w-0 resize-y border-0 px-2.5 py-2 text-[13px]/[18px] text-inherit shadow-[0_0_0_1px_var(--border)] transition-shadow duration-120 ease-[ease-out] placeholder:text-subtle-foreground focus-visible:shadow-[0_0_0_1px_var(--border-strong),0_0_0_4px_color-mix(in_oklab,var(--primary)_14%,transparent)] focus-visible:outline-none motion-reduce:transition-none",
+          "box-border block field-sizing-fixed min-h-0 w-full min-w-0 resize-y border-0 px-2.5 py-2 text-[13px]/[18px] text-inherit shadow-[0_0_0_1px_var(--border)] transition-shadow duration-120 ease-[ease-out] placeholder:text-subtle-foreground focus-visible:shadow-[0_0_0_1px_var(--border-strong),0_0_0_4px_color-mix(in_oklab,var(--primary)_14%,transparent)] focus-visible:ring-0 focus-visible:outline-none md:text-[13px]/[18px] motion-reduce:transition-none",
           compact ? "rounded-lg" : "rounded-[10px]",
-          context.variant === "card" ? "bg-background" : "bg-card",
+          context.variant === "card" ? "bg-background dark:bg-background" : "bg-card dark:bg-card",
         )}
       />
       <div className="flex justify-end gap-1.5">
-        <button
+        <Button
           type="button"
+          variant={buttonVariantFor.secondary}
+          size="sm"
           onClick={finish}
           className={cn(controlClasses(compact, "secondary"), buttonPadding)}
         >
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
+          variant={buttonVariantFor.primary}
+          size="sm"
           disabled={!value.trim()}
           className={cn(controlClasses(compact, "primary"), buttonPadding)}
         >
           Save
-        </button>
+        </Button>
       </div>
     </form>
   );
@@ -378,8 +399,10 @@ export function CommentActions({
 export function CommentAction({ className, ...props }: ComponentProps<"button">) {
   const context = useComment("CommentAction");
   return (
-    <button
+    <Button
       type="button"
+      variant={buttonVariantFor.ghost}
+      size="sm"
       data-slot="comment-action"
       className={cn(controlClasses(context.variant === "compact"), className)}
       {...props}
@@ -395,8 +418,10 @@ export function CommentEditTrigger({
 }: ComponentProps<"button">) {
   const context = useComment("CommentEditTrigger");
   return (
-    <button
+    <Button
       ref={context.editTriggerRef}
+      variant={buttonVariantFor.ghost}
+      size="sm"
       data-slot="comment-edit-trigger"
       className={cn(controlClasses(context.variant === "compact"), className)}
       {...props}
@@ -406,9 +431,9 @@ export function CommentEditTrigger({
         if (!event.defaultPrevented) context.setEditing(true);
       }}
     >
-      <Pencil size={12} strokeWidth={1.75} aria-hidden="true" />
+      <Pencil size={12} strokeWidth={1.75} aria-hidden="true" className="size-3" />
       {children}
-    </button>
+    </Button>
   );
 }
 

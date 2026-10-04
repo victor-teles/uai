@@ -157,7 +157,7 @@ export function DataTableToolbarPreview({
 `,
     accessibility: [
       "Search is a labelled native search input; Escape and the Clear button empty it and keep focus in the field.",
-      "The Columns button is a disclosure with aria-expanded; its panel is a fieldset of native checkboxes, and Escape or an outside click closes it and returns focus.",
+      "The Columns button is a disclosure with aria-expanded; its panel is a labelled popover with a fieldset of checkboxes, and Escape or an outside click closes it and returns focus.",
       "Bulk actions appear only while rows are selected, and a polite status region announces the selection count.",
       "Filtering, sorting, export, and row selection remain consumer-owned; the toolbar only exposes the controls.",
     ],

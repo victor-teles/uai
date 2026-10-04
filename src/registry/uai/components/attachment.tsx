@@ -16,6 +16,8 @@ import {
   X,
 } from "lucide-react";
 import { type ComponentProps, createContext, useContext, useId } from "react";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/uai-utils";
 
 export const ATTACHMENT_VARIANTS = ["row", "card", "chip"] as const;
@@ -208,26 +210,22 @@ export function AttachmentProgress({ className, ...props }: ComponentProps<"div"
   if (context.status !== "uploading") return null;
   const value = context.progress;
   return (
-    <div
-      role="progressbar"
+    <Progress
       aria-labelledby={`${context.id}-name`}
-      aria-valuemin={0}
-      aria-valuemax={100}
       aria-valuenow={value}
       aria-valuetext={value === undefined ? "Uploading" : `${Math.round(value)}% uploaded`}
       data-slot="attachment-progress"
-      className={cn("mt-1.25 h-0.75 overflow-hidden rounded-full bg-muted", className)}
+      data-indeterminate={value === undefined || undefined}
+      value={value ?? null}
+      className={cn(
+        "mt-1.25 h-0.75 bg-muted",
+        "*:data-[slot=progress-indicator]:rounded-full *:data-[slot=progress-indicator]:bg-foreground *:data-[slot=progress-indicator]:transition-transform *:data-[slot=progress-indicator]:duration-240 *:data-[slot=progress-indicator]:ease-out-quint motion-reduce:*:data-[slot=progress-indicator]:transition-none",
+        "data-indeterminate:*:data-[slot=progress-indicator]:w-[35%] data-indeterminate:*:data-[slot=progress-indicator]:animate-[indeterminate_1.2s_cubic-bezier(0.65,0,0.35,1)_infinite] data-indeterminate:*:data-[slot=progress-indicator]:opacity-60",
+        "motion-reduce:data-indeterminate:*:data-[slot=progress-indicator]:animate-none motion-reduce:data-indeterminate:*:data-[slot=progress-indicator]:transform-none!",
+        className,
+      )}
       {...props}
-    >
-      <span
-        className={cn(
-          "block h-full rounded-full bg-foreground transition-[width] duration-240 ease-out-quint motion-reduce:transition-none",
-          value === undefined &&
-            "animate-[indeterminate_1.2s_cubic-bezier(0.65,0,0.35,1)_infinite] opacity-60 motion-reduce:animate-none",
-        )}
-        style={{ width: `${value ?? 35}%` }}
-      />
-    </div>
+    />
   );
 }
 
@@ -253,8 +251,10 @@ export function AttachmentError({ className, children, ...props }: ComponentProp
 
 function controlClass(variant: AttachmentVariant, right: string) {
   return cn(
-    "grid flex-none cursor-pointer place-items-center border-0 bg-transparent p-0 text-subtle-foreground [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring active:scale-[0.92] motion-reduce:transition-none motion-reduce:active:scale-100",
-    variant === "chip" ? "size-5.5 rounded-full" : "size-7 rounded-lg",
+    "flex-none cursor-pointer p-0 text-subtle-foreground [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-accent hover:text-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-1 focus-visible:outline-ring active:scale-[0.92] motion-reduce:transition-none motion-reduce:active:scale-100 dark:hover:bg-accent",
+    variant === "chip"
+      ? "size-5.5 rounded-full [&_svg:not([class*='size-'])]:size-3"
+      : "size-7 rounded-lg [&_svg:not([class*='size-'])]:size-3.5",
     variant === "card" &&
       cn(
         "absolute top-2.5 size-6 rounded-full bg-card/82 text-foreground shadow-[0_0_0_1px_color-mix(in_oklab,var(--foreground)_10%,transparent)] backdrop-blur-[8px]",
@@ -267,8 +267,10 @@ export function AttachmentRetry({ children, className, ...props }: ComponentProp
   const context = useAttachment("AttachmentRetry");
   if (context.status !== "error") return null;
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="icon"
       aria-label="Retry upload"
       title="Retry upload"
       aria-describedby={`${context.id}-name`}
@@ -277,7 +279,7 @@ export function AttachmentRetry({ children, className, ...props }: ComponentProp
       {...props}
     >
       {children ?? <RotateCw size={context.variant === "chip" ? 12 : 14} aria-hidden="true" />}
-    </button>
+    </Button>
   );
 }
 
@@ -285,8 +287,10 @@ export function AttachmentRemove({ children, className, ...props }: ComponentPro
   const context = useAttachment("AttachmentRemove");
   const label = context.status === "uploading" ? "Cancel upload" : "Remove attachment";
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="icon"
       aria-label={label}
       title={label}
       aria-describedby={`${context.id}-name`}
@@ -295,6 +299,6 @@ export function AttachmentRemove({ children, className, ...props }: ComponentPro
       {...props}
     >
       {children ?? <X size={context.variant === "chip" ? 12 : 14} aria-hidden="true" />}
-    </button>
+    </Button>
   );
 }

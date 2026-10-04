@@ -14,6 +14,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { Button } from "@/components/ui/button";
 import {
   InlineFeedback,
   InlineFeedbackAction,
@@ -83,7 +84,7 @@ const codeVerificationVariants = cva(
 );
 
 const codeVerificationActionMotion =
-  "[transition:background-color_120ms_ease-out,color_120ms_ease-out,filter_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none";
+  "[transition:background-color_120ms_ease-out,color_120ms_ease-out,filter_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none";
 
 const formatTime = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
@@ -451,16 +452,16 @@ export function CodeVerificationSubmit({
   const pending = context.status === "verifying";
   const ready = context.code.length === context.length && context.status !== "verified";
   return (
-    <button
+    <Button
       type="submit"
       data-slot="code-verification-submit"
       className={cn(
-        "rounded-full border-0 px-4 text-[13px] font-medium",
+        "rounded-full border-0 px-4 py-0 text-[13px] has-[>svg]:px-4",
         codeVerificationActionMotion,
         context.variant === "compact" ? "h-7.5" : "h-8.5",
         ready || pending
-          ? "bg-primary text-primary-foreground hover:brightness-108 active:scale-[0.97] motion-reduce:active:scale-100"
-          : "bg-muted text-subtle-foreground",
+          ? "bg-primary text-primary-foreground hover:bg-primary hover:brightness-108 active:scale-[0.97] motion-reduce:active:scale-100"
+          : "bg-muted text-subtle-foreground hover:bg-muted",
         pending ? "cursor-progress" : ready ? "cursor-pointer" : "cursor-not-allowed",
         className,
       )}
@@ -476,7 +477,7 @@ export function CodeVerificationSubmit({
       ) : (
         children
       )}
-    </button>
+    </Button>
   );
 }
 
@@ -536,11 +537,12 @@ export function CodeVerificationAlternatives({ className, ...props }: ComponentP
 
 export function CodeVerificationAlternative({ className, ...props }: ComponentProps<"button">) {
   return (
-    <button
+    <Button
       type="button"
+      variant="secondary"
       data-slot="code-verification-alternative"
       className={cn(
-        "h-7 cursor-pointer rounded-full border-0 bg-muted px-3 text-[12.5px] font-medium text-foreground hover:bg-[color-mix(in_oklab,var(--muted)_85%,var(--foreground))] active:scale-[0.97] motion-reduce:active:scale-100",
+        "h-7 cursor-pointer rounded-full border-0 bg-muted px-3 py-0 text-[12.5px] text-foreground hover:bg-[color-mix(in_oklab,var(--muted)_85%,var(--foreground))] active:scale-[0.97] motion-reduce:active:scale-100 has-[>svg]:px-3",
         codeVerificationActionMotion,
         className,
       )}

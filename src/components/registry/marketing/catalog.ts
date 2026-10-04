@@ -337,7 +337,7 @@ export function ProductGalleryPreview({
     accessibility: [
       "Every image requires alt text, which names its thumbnail button and the main image.",
       "Thumbnails use one tab stop; arrow keys, Home, and End move between them and a polite message announces the position.",
-      "Fullscreen opens a native modal dialog that focuses Close, supports Left and Right arrows, and returns focus on Escape. Zoom is a toggle button and animation respects reduced motion.",
+      "Fullscreen opens a modal dialog that traps focus, focuses Close, supports Left and Right arrows, and returns focus on Escape. Zoom is a toggle button and animation respects reduced motion.",
     ],
   },
   {

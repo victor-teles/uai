@@ -19,6 +19,7 @@ import {
   TeamManagementMemberStatus,
   TeamManagementMembers,
   TeamManagementRemove,
+  TeamManagementRoleOption,
   TeamManagementRoleSelect,
   TeamManagementTitle,
   TeamManagementToolbar,
@@ -116,11 +117,13 @@ export function TeamManagementPreview({ variant = "table" }: { variant?: TeamMan
         <TeamManagementRoleSelect
           aria-label="Role for new member"
           value={inviteRole}
-          onChange={(event) => setInviteRole(event.target.value)}
+          onValueChange={setInviteRole}
           style={{ height: 32 }}
         >
           {roles.map((role) => (
-            <option key={role}>{role}</option>
+            <TeamManagementRoleOption key={role} value={role}>
+              {role}
+            </TeamManagementRoleOption>
           ))}
         </TeamManagementRoleSelect>
         <TeamManagementButton type="submit" emphasis="primary" style={{ height: 32 }}>
@@ -165,10 +168,12 @@ export function TeamManagementPreview({ variant = "table" }: { variant?: TeamMan
                 <TeamManagementRoleSelect
                   value={member.role}
                   disabled={member.owner}
-                  onChange={(event) => update(member.email, { role: event.target.value })}
+                  onValueChange={(role) => update(member.email, { role })}
                 >
                   {roles.map((role) => (
-                    <option key={role}>{role}</option>
+                    <TeamManagementRoleOption key={role} value={role}>
+                      {role}
+                    </TeamManagementRoleOption>
                   ))}
                 </TeamManagementRoleSelect>
                 {member.owner ? null : (

@@ -10,6 +10,7 @@ import {
   ChangelogPageCount,
   ChangelogPageEmpty,
   ChangelogPageFilter,
+  ChangelogPageFilterOption,
   ChangelogPageFilters,
   ChangelogPageGroup,
   ChangelogPageGroupTitle,
@@ -25,15 +26,15 @@ function Fixture(props: Omit<ChangelogPageProps, "children">) {
       <ChangelogPageCount />
       <ChangelogPageFilters>
         <ChangelogPageFilter name="category" label="Category">
-          <option value="">All categories</option>
-          <option value="added">Added</option>
-          <option value="fixed">Fixed</option>
-          <option value="security">Security</option>
+          <ChangelogPageFilterOption value="">All categories</ChangelogPageFilterOption>
+          <ChangelogPageFilterOption value="added">Added</ChangelogPageFilterOption>
+          <ChangelogPageFilterOption value="fixed">Fixed</ChangelogPageFilterOption>
+          <ChangelogPageFilterOption value="security">Security</ChangelogPageFilterOption>
         </ChangelogPageFilter>
         <ChangelogPageFilter name="area" label="Product area">
-          <option value="">All areas</option>
-          <option value="Builds">Builds</option>
-          <option value="Images">Images</option>
+          <ChangelogPageFilterOption value="">All areas</ChangelogPageFilterOption>
+          <ChangelogPageFilterOption value="Builds">Builds</ChangelogPageFilterOption>
+          <ChangelogPageFilterOption value="Images">Images</ChangelogPageFilterOption>
         </ChangelogPageFilter>
         <FilterBarReset />
       </ChangelogPageFilters>
@@ -74,26 +75,40 @@ test("filters by category and area, hides empty groups, and resets", async () =>
   const user = userEvent.setup();
   const onCategoryChange = mock();
   render(<Fixture onCategoryChange={onCategoryChange} />);
-  await user.selectOptions(screen.getByLabelText("Category"), "fixed");
+  await user.click(screen.getByRole("combobox", { name: "Category" }));
+  await user.click(screen.getByRole("option", { name: "Fixed" }));
   expect(onCategoryChange).toHaveBeenCalledWith("fixed");
   expect(screen.getAllByRole("article")).toHaveLength(1);
   expect(screen.getByRole("article", { name: "Safer reloads" })).toBeTruthy();
   expect(screen.queryByRole("region", { name: "August 2026" })).toBeNull();
   expect(screen.getByRole("status").textContent).toBe("Showing 1 of 3 releases");
 
-  await user.selectOptions(screen.getByLabelText("Product area"), "Images");
+  await user.click(screen.getByRole("combobox", { name: "Product area" }));
+  await user.click(screen.getByRole("option", { name: "Images" }));
   expect(screen.queryAllByRole("article")).toHaveLength(0);
   expect(screen.getByRole("heading", { name: "No releases match" })).toBeTruthy();
 
   await user.click(screen.getByRole("button", { name: "Reset filters" }));
   expect(screen.getAllByRole("article")).toHaveLength(3);
+  expect(screen.getByRole("combobox", { name: "Category" }).textContent).toBe("All categories");
   expect(screen.queryByRole("heading", { name: "No releases match" })).toBeNull();
+});
+
+test('maps the empty "All" option back to an empty filter', async () => {
+  const user = userEvent.setup();
+  const onCategoryChange = mock();
+  render(<Fixture defaultCategory="fixed" onCategoryChange={onCategoryChange} />);
+  expect(screen.getAllByRole("article")).toHaveLength(1);
+  await user.click(screen.getByRole("combobox", { name: "Category" }));
+  await user.click(screen.getByRole("option", { name: "All categories" }));
+  expect(onCategoryChange).toHaveBeenCalledWith("");
+  expect(screen.getAllByRole("article")).toHaveLength(3);
 });
 
 test("respects controlled filters", () => {
   render(<Fixture category="added" area="Images" />);
   expect(screen.getAllByRole("article")).toHaveLength(1);
-  expect((screen.getByLabelText("Category") as HTMLSelectElement).value).toBe("added");
+  expect(screen.getByRole("combobox", { name: "Category" }).textContent).toBe("Added");
 });
 
 test("renders every variant and guards its parts", () => {

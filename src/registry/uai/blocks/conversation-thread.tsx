@@ -295,7 +295,7 @@ export function ConversationThreadSourceLink({ className, ...props }: ComponentP
     <a
       data-slot="conversation-thread-source-link"
       className={cn(
-        "font-medium wrap-anywhere text-foreground no-underline decoration-border-strong underline-offset-3 hover:underline focus-visible:rounded-[4px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+        "font-medium wrap-anywhere text-foreground no-underline decoration-border-strong underline-offset-3 hover:underline focus-visible:rounded-[4px] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring",
         className,
       )}
       {...props}

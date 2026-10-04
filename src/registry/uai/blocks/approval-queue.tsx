@@ -1,6 +1,16 @@
 "use client";
 
-import { type ComponentProps, createContext, useContext, useId, useState } from "react";
+import {
+  type ComponentProps,
+  createContext,
+  type ReactNode,
+  useContext,
+  useId,
+  useState,
+} from "react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   ApprovalCard,
   type ApprovalCardProps,
@@ -34,7 +44,7 @@ function useQueue(part: string) {
   if (!context) throw new Error(`${part} must be used within ApprovalQueue`);
   return context;
 }
-type GroupByContext = { name: string; value: string; select: (value: string) => void };
+type GroupByContext = { value: string };
 const GroupByCtx = createContext<GroupByContext | null>(null);
 const GroupContext = createContext<string | null>(null);
 function useGroup(part: string) {
@@ -158,14 +168,17 @@ export function ApprovalQueueAction({
   const context = useQueue("ApprovalQueueAction");
   const compact = context.variant === "compact";
   return (
-    <button
+    <Button
       data-slot="approval-queue-action"
+      variant={emphasis === "primary" ? "default" : "secondary"}
       className={cn(
-        "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap [transition:filter_120ms_ease-out,box-shadow_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring not-disabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:not-disabled:active:scale-100",
-        compact ? "h-6.5 px-2.75 text-[12px]/4" : "h-7.5 px-3.25 text-[12.5px]/4",
+        "gap-1.5 rounded-full border-0 py-0 [transition:filter_120ms_ease-out,box-shadow_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid not-disabled:active:scale-[0.97] disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:not-disabled:active:scale-100 [&_svg:not([class*='size-'])]:size-3.5",
+        compact
+          ? "h-6.5 px-2.75 text-[12px]/4 has-[>svg]:px-2.75"
+          : "h-7.5 px-3.25 text-[12.5px]/4 has-[>svg]:px-3.25",
         emphasis === "primary"
-          ? "bg-primary text-primary-foreground not-disabled:hover:brightness-108"
-          : "bg-secondary text-foreground not-disabled:hover:shadow-[inset_0_0_0_999px_color-mix(in_oklab,var(--foreground)_9%,transparent)]",
+          ? "bg-primary text-primary-foreground hover:bg-primary not-disabled:hover:brightness-108"
+          : "bg-secondary text-foreground hover:bg-secondary not-disabled:hover:shadow-[inset_0_0_0_999px_color-mix(in_oklab,var(--foreground)_9%,transparent)]",
         className,
       )}
       {...props}
@@ -227,69 +240,65 @@ export function ApprovalQueueGroupBy({
   const [internal, setInternal] = useState(defaultValue);
   const current = value ?? internal;
   return (
-    <GroupByCtx.Provider
-      value={{
-        name,
-        value: current,
-        select: (next) => {
+    <GroupByCtx.Provider value={{ value: current }}>
+      <RadioGroup
+        asChild
+        name={name}
+        value={current}
+        onValueChange={(next) => {
           if (value === undefined) setInternal(next);
           onValueChange?.(next);
-        },
-      }}
-    >
-      <fieldset
-        data-slot="approval-queue-group-by"
+        }}
         className={cn(
           "m-0 flex flex-wrap items-center gap-0.5 rounded-full border-0 bg-card p-0.75 shadow-[inset_0_0_0_1px_var(--border)]",
           className,
         )}
-        {...props}
       >
-        <legend className="float-left pr-1.5 pl-2.5 text-[12px] text-subtle-foreground">
-          {label}
-        </legend>
-        {children}
-      </fieldset>
+        <fieldset data-slot="approval-queue-group-by" {...props}>
+          <legend className="float-left pr-1.5 pl-2.5 text-[12px] text-subtle-foreground">
+            {label}
+          </legend>
+          {children}
+        </fieldset>
+      </RadioGroup>
     </GroupByCtx.Provider>
   );
 }
+
+export type ApprovalQueueGroupByOptionProps = Omit<
+  ComponentProps<typeof RadioGroupItem>,
+  "value" | "children"
+> & { value: string; children?: ReactNode };
 
 export function ApprovalQueueGroupByOption({
   value,
   children,
   className,
   ...props
-}: Omit<ComponentProps<"input">, "value" | "type" | "name" | "checked"> & { value: string }) {
+}: ApprovalQueueGroupByOptionProps) {
   const group = useContext(GroupByCtx);
   if (!group)
     throw new Error("ApprovalQueueGroupByOption must be used within ApprovalQueueGroupBy");
   const checked = group.value === value;
   return (
-    <label
+    <Label
       data-slot="approval-queue-group-by-option"
       data-checked={checked || undefined}
       className={cn(
-        "relative inline-flex h-6 cursor-pointer items-center rounded-full px-2.5 text-[12px] font-medium [transition:background-color_160ms_cubic-bezier(0.23,1,0.32,1),color_120ms_ease-out,box-shadow_160ms_cubic-bezier(0.23,1,0.32,1)] has-focus-visible:outline-2 has-focus-visible:outline-offset-1 has-focus-visible:outline-ring motion-reduce:transition-none",
+        "relative inline-flex h-6 cursor-pointer items-center rounded-full px-2.5 text-[12px] leading-[inherit] font-medium select-auto [transition:background-color_160ms_cubic-bezier(0.23,1,0.32,1),color_120ms_ease-out,box-shadow_160ms_cubic-bezier(0.23,1,0.32,1)] has-focus-visible:outline-2 has-focus-visible:outline-offset-1 has-focus-visible:outline-ring motion-reduce:transition-none",
         checked
           ? "bg-accent text-foreground shadow-[0_1px_2px_oklch(0_0_0/0.08)]"
           : "bg-transparent text-subtle-foreground hover:text-foreground",
         className,
       )}
     >
-      <input
+      <RadioGroupItem
         {...props}
-        type="radio"
-        name={group.name}
         value={value}
-        checked={checked}
-        onChange={(event) => {
-          props.onChange?.(event);
-          if (!event.defaultPrevented) group.select(value);
-        }}
-        className="absolute inset-0 m-0 cursor-pointer opacity-0"
+        className="absolute inset-0 m-0 size-auto cursor-pointer rounded-full border-0 opacity-0 shadow-none focus-visible:ring-0 dark:bg-transparent"
       />
       {children}
-    </label>
+    </Label>
   );
 }
 

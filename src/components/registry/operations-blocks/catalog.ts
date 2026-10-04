@@ -340,7 +340,7 @@ export function ResourceManagerPreview({
     accessibility: [
       "The record list is a labelled list of buttons; the inspected record carries aria-current, and Arrow keys, Home, and End move between records.",
       "The inspector is a region labelled by the record title, and record facts use description list semantics.",
-      "Deletion runs through a native modal alertdialog that traps focus, starts on Cancel, and returns focus to the trigger.",
+      "Deletion runs through a modal alertdialog that traps focus, starts on Cancel, and returns focus to the trigger.",
       "Status pills pair text with color, so archived and active states never rely on color alone.",
     ],
   },
@@ -594,6 +594,7 @@ import {
   ImportWorkflowHeading,
   ImportWorkflowIssues,
   ImportWorkflowMapping,
+  ImportWorkflowMappingOption,
   ImportWorkflowMappingRow,
   ImportWorkflowMappingSample,
   ImportWorkflowMappingSource,
@@ -729,19 +730,19 @@ export function ImportWorkflowPreview({ variant = "wizard" }: { variant?: Import
                 </ImportWorkflowMappingSource>
                 <ImportWorkflowMappingTarget
                   value={mapping[position]}
-                  onChange={(event) =>
+                  onValueChange={(next) =>
                     setMapping((current) =>
-                      current.map((target, item) =>
-                        item === position ? event.target.value : target,
-                      ),
+                      current.map((target, item) => (item === position ? next : target)),
                     )
                   }
                 >
-                  <option value="">Skip this column</option>
-                  <option value="email">Email</option>
-                  <option value="name">Name</option>
-                  <option value="account">Account</option>
-                  <option value="phone">Phone</option>
+                  <ImportWorkflowMappingOption value="">
+                    Skip this column
+                  </ImportWorkflowMappingOption>
+                  <ImportWorkflowMappingOption value="email">Email</ImportWorkflowMappingOption>
+                  <ImportWorkflowMappingOption value="name">Name</ImportWorkflowMappingOption>
+                  <ImportWorkflowMappingOption value="account">Account</ImportWorkflowMappingOption>
+                  <ImportWorkflowMappingOption value="phone">Phone</ImportWorkflowMappingOption>
                 </ImportWorkflowMappingTarget>
               </ImportWorkflowMappingRow>
             ))}
@@ -1099,7 +1100,7 @@ export function ApprovalQueuePreview({ variant = "grouped" }: { variant?: Approv
 }
 `,
     accessibility: [
-      "Group by is a fieldset of native radios, so arrow keys move the selection and a visible focus ring follows the focused option.",
+      "Group by is a labelled radio group, so arrow keys move the selection and a visible focus ring follows the focused option.",
       "Each group is a section labelled by its heading, and its decisions form a list labelled by the same heading.",
       "Approval cards name their risk in text, mark busy decisions with aria-busy, and replace actions with the outcome once decided.",
       "Filter chips have named remove buttons, and the result count is a polite status message.",

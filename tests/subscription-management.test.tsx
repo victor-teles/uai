@@ -83,8 +83,8 @@ test("changes plan and billing period with the keyboard", async () => {
   render(<Fixture onPlanChange={onPlanChange} />);
   expect(screen.getByRole("region", { name: "Subscription" })).toBeTruthy();
   const submit = screen.getByRole("button", { name: "Change plan" }) as HTMLButtonElement;
-  const studio = screen.getByRole("radio", { name: /Studio/ }) as HTMLInputElement;
-  expect(studio.checked).toBe(true);
+  const studio = screen.getByRole("radio", { name: /Studio/ });
+  expect(studio.getAttribute("aria-checked")).toBe("true");
   expect(studio.closest("label")?.textContent).toContain("Current plan");
   expect(submit.disabled).toBe(true);
   expect(screen.getByText("$12")).toBeTruthy();

@@ -2,6 +2,7 @@
 
 import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, useContext, useEffect } from "react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/uai-utils";
 
 export const UNSAVED_CHANGES_BAR_VARIANTS = ["bar", "floating", "compact"] as const;
@@ -34,7 +35,7 @@ const unsavedChangesBarVariants = cva(
   },
 );
 const actionClass =
-  "h-7.5 cursor-pointer whitespace-nowrap rounded-full border-0 px-3.5 text-[12.5px] font-medium transition-[background-color,filter,transform] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none";
+  "h-7.5 cursor-pointer whitespace-nowrap rounded-full border-0 px-3.5 py-0 text-[12.5px] font-medium transition-[background-color,filter,transform] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid enabled:active:scale-[0.97] disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-60 has-[>svg]:px-3.5 motion-reduce:transition-none";
 function useChanges() {
   const context = useContext(Context);
   if (!context) throw new Error("UnsavedChangesBar children must be used within UnsavedChangesBar");
@@ -133,11 +134,12 @@ export function UnsavedChangesBarSave({
 }: ComponentProps<"button">) {
   const context = useChanges();
   return (
-    <button
+    <Button
       data-slot="unsaved-changes-bar-save"
+      variant="default"
       className={cn(
         actionClass,
-        "bg-primary text-primary-foreground enabled:hover:brightness-108",
+        "bg-primary text-primary-foreground hover:bg-primary enabled:hover:brightness-108",
         className,
       )}
       {...props}
@@ -149,7 +151,7 @@ export function UnsavedChangesBarSave({
       }}
     >
       {context.status === "saving" ? "Saving…" : children}
-    </button>
+    </Button>
   );
 }
 export function UnsavedChangesBarDiscard({
@@ -160,11 +162,12 @@ export function UnsavedChangesBarDiscard({
 }: ComponentProps<"button">) {
   const context = useChanges();
   return (
-    <button
+    <Button
       data-slot="unsaved-changes-bar-discard"
+      variant="secondary"
       className={cn(
         actionClass,
-        "bg-secondary text-secondary-foreground enabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+        "bg-secondary text-secondary-foreground hover:bg-secondary enabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
         className,
       )}
       {...props}
@@ -176,6 +179,6 @@ export function UnsavedChangesBarDiscard({
       }}
     >
       {children}
-    </button>
+    </Button>
   );
 }
