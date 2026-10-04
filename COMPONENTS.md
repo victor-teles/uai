@@ -89,6 +89,13 @@ Components should solve one reusable interaction contract. Blocks should combine
 - [x] **Response Status** — Show queued, streaming, stopped, complete, and failed responses.
 - [x] **Run Summary** — Summarize completed work, changed artifacts, warnings, and next actions.
 
+### Brazil components
+
+- [x] **Document Field** — Mask and validate CPF and CNPJ, including the alphanumeric CNPJ.
+- [x] **CEP Field** — Mask a CEP, look up the address, and report loading and failure.
+- [x] **Pix Payment** — Present a Pix charge with QR code, copy-and-paste code, countdown, and status.
+- [x] **Installment Picker** — Choose card installments with amounts, interest terms, and totals.
+
 ## Block ideas
 
 ### Marketing sites
