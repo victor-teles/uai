@@ -89,6 +89,15 @@ Components should solve one reusable interaction contract. Blocks should combine
 - [x] **Response Status** — Show queued, streaming, stopped, complete, and failed responses.
 - [x] **Run Summary** — Summarize completed work, changed artifacts, warnings, and next actions.
 
+### Map components
+
+- [x] **Map Frame** — Host any map library, anchor overlays to its edges, and show a placeholder basemap.
+- [x] **Map Controls** — Group zoom, compass, locate, and custom camera buttons.
+- [x] **Map Marker** — Present selectable pins, dots, and price labels, plus cluster counts.
+- [x] **Map Legend** — Explain layer symbols and color ramps, and toggle layer visibility.
+- [x] **Place Card** — Present a place's rating, opening status, contact facts, and actions.
+- [x] **Route Summary** — Combine travel modes, stops, totals, and turn-by-turn steps.
+
 ## Block ideas
 
 ### Marketing sites

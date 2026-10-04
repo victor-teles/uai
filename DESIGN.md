@@ -1055,6 +1055,23 @@ Author Card uses a bordered 14px card with a 48px avatar, an inline row with a 4
 
 Follow persistence, comment storage, permissions, moderation policy, reaction counts, share destinations, link formatting, and release content remain consumer-owned. Reaction counts are passed in, including the current person's reaction. Native sharing appears only where `navigator.share` exists. Copy results are announced in a polite live region.
 
+## Maps
+
+All six map components use the warm graphite tokens in light and dark themes, 13px / 18px body type, visible native keyboard focus, and consumer-composed content. Visual values live in the distributed source as Tailwind classes; only marker positions in previews, swatch colors, the color ramp, and the compass bearing use runtime `style` values. They are chrome for a map, not a map: Map Frame stacks the consumer's map surface under edge-anchored overlays, and every overlay keeps the map draggable around its own controls.
+
+| Component | Visual variants | Interaction contract |
+| --- | --- | --- |
+| Map Frame | card / inset / compact | A labelled map region with a surface slot, a decorative placeholder basemap, six overlay positions, and attribution. |
+| Map Controls | stacked / bar / compact | Zoom in and out with limits, a compass that resets bearing, locate with idle, locating, active, and error states, and custom buttons. |
+| Map Marker | pin / dot / label | Selectable places with tones, an icon, a caption or price, and a cluster count. |
+| Map Legend | card / floating / compact | A titled list of layer symbols, values, visibility checkboxes, and a continuous color ramp. |
+| Place Card | card / popup / compact | Media, name, category, rating, opening status, contact facts, close, and one primary action. |
+| Route Summary | card / plain / compact | Travel modes, a stop rail, duration and totals, turn-by-turn steps, and actions. |
+
+Map Frame Card uses 14px corners and a hairline ring, Inset has no chrome for full-bleed maps, and Compact uses 12px corners and tighter 8px overlay padding. The placeholder basemap is a street grid in card-colored strokes over the muted surface, with tinted parks in success and water in primary at low opacity; it is never interactive. Attribution is 10.5px subtle text on a translucent card corner. Map Controls Stacked joins related buttons into 14px card columns with an offset shadow, Bar is one full pill with hairline-separated groups, and Compact uses 12px columns with 24px buttons; buttons are ghost and 32px, 28px, or 24px. Locate turns the icon to the accent while following, pulses while locating, and turns danger on error. The compass needle rotates with the bearing in 300ms `cubic-bezier(0.23, 1, 0.32, 1)`. Map Marker Pin is a 32px teardrop card with a strong-border ring, Dot is a 12px tone dot with a card halo, and Label is a 28px pill with a tail; a selected marker fills with its tone, a selected pin lifts 4px, and a selected dot adds a pulsing ring. Captions under pins and dots are 11.5px chips. Clusters are ink circles that grow at 10 and 100 places. Map Legend Card is a 14px hairline card, Floating is a translucent blurred card with the floating-menu outline and shadow, and Compact a 12px card at 12px type; hidden layers fade their swatch to 35% and their label to subtle. Place Card Card is a 320px card with 16:9 media and three actions, Popup is a 288px floating card with a tail that pops in from `scale(0.96)` in 180ms, and Compact a 256px 12px card. Opening status uses a 6px tone dot beside text in success, warning, or danger. Route Summary travel modes are a muted pill track with a raised card thumb; the stop rail is a dotted strong-border line from an ink ring origin through muted stops to an accent destination with a soft halo. Duration is 22px / 600 in tabular figures. Directions, Start, and other primary actions use the accent pill; secondary actions use the raised surface. All motion stops under reduced motion.
+
+The map library, tiles, camera, geolocation, marker placement and clustering, layer styling, place data, routing, and attribution remain consumer-owned.
+
 ## Marketing and conversion
 
 All six marketing components use the the warm graphite tokens in light and dark themes, 13px / 18px body type, visible native keyboard focus, and consumer-composed content. Visual values live in the distributed source as Tailwind classes. Only Product Gallery animates: the zoom transform and the fullscreen pop-in use Tailwind motion classes and stop under reduced motion.

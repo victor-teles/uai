@@ -24,6 +24,7 @@ import { type CommunityBlocksItemId, communityBlocksCatalog } from "./community-
 import { type DataDisplayItemId, dataDisplayCatalog } from "./data-display/catalog";
 import { type FeedbackItemId, feedbackCatalog } from "./feedback/catalog";
 import { formsCatalog } from "./forms/catalog";
+import { type MapsItemId, mapsCatalog } from "./maps/catalog";
 import { type MarketingItemId, marketingCatalog } from "./marketing/catalog";
 import { type MarketingBlocksItemId, marketingBlocksCatalog } from "./marketing-blocks/catalog";
 import { type NavigationItemId, navigationCatalog } from "./navigation/catalog";
@@ -59,6 +60,7 @@ export type RegistryItemId =
   | MarketingItemId
   | CommunityItemId
   | AiItemId
+  | MapsItemId
   | MarketingBlocksItemId
   | OnboardingBlocksItemId
   | AppBlocksItemId
@@ -78,6 +80,7 @@ export type RegistryCategory =
   | "Commerce"
   | "Marketing"
   | "Content"
+  | "Maps"
   | "Application"
   | "Operations";
 
@@ -1010,6 +1013,7 @@ export function WorkspaceHeader() {
   ...marketingCatalog,
   ...communityCatalog,
   ...aiCatalog,
+  ...mapsCatalog,
   ...marketingBlocksCatalog,
   ...onboardingBlocksCatalog,
   ...appBlocksCatalog,
@@ -1030,6 +1034,7 @@ export const registryCategories: readonly RegistryCategory[] = [
   "Commerce",
   "Marketing",
   "Content",
+  "Maps",
   "Application",
   "Operations",
 ] as const;

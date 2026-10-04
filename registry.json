@@ -1357,6 +1357,125 @@
       "categories": ["ai", "agents"]
     },
     {
+      "name": "map-frame",
+      "type": "registry:ui",
+      "title": "Map Frame",
+      "description": "A labelled map region that hosts any map library, anchors overlays to its edges, and shows a placeholder basemap.",
+      "dependencies": ["class-variance-authority"],
+      "registryDependencies": [
+        "https://uaiblocks.vercel.app/r/uai-theme.json",
+        "https://uaiblocks.vercel.app/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/map-frame.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/map-frame.tsx"
+        }
+      ],
+      "categories": ["maps"]
+    },
+    {
+      "name": "map-controls",
+      "type": "registry:ui",
+      "title": "Map Controls",
+      "description": "Zoom, compass, locate, and custom camera buttons for any map library.",
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "button",
+        "https://uaiblocks.vercel.app/r/uai-theme.json",
+        "https://uaiblocks.vercel.app/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/map-controls.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/map-controls.tsx"
+        }
+      ],
+      "categories": ["maps", "navigation"]
+    },
+    {
+      "name": "map-marker",
+      "type": "registry:ui",
+      "title": "Map Marker",
+      "description": "Selectable map pins, dots, and price labels with tones, captions, and cluster counts.",
+      "dependencies": ["class-variance-authority"],
+      "registryDependencies": [
+        "https://uaiblocks.vercel.app/r/uai-theme.json",
+        "https://uaiblocks.vercel.app/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/map-marker.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/map-marker.tsx"
+        }
+      ],
+      "categories": ["maps"]
+    },
+    {
+      "name": "map-legend",
+      "type": "registry:ui",
+      "title": "Map Legend",
+      "description": "Layer symbols, counts, a color ramp, and visibility toggles for a map.",
+      "dependencies": ["class-variance-authority"],
+      "registryDependencies": [
+        "checkbox",
+        "https://uaiblocks.vercel.app/r/uai-theme.json",
+        "https://uaiblocks.vercel.app/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/map-legend.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/map-legend.tsx"
+        }
+      ],
+      "categories": ["maps", "data-display"]
+    },
+    {
+      "name": "place-card",
+      "type": "registry:ui",
+      "title": "Place Card",
+      "description": "Place details with rating, opening status, contact facts, and actions as a card or map popup.",
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "button",
+        "https://uaiblocks.vercel.app/r/uai-theme.json",
+        "https://uaiblocks.vercel.app/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/place-card.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/place-card.tsx"
+        }
+      ],
+      "categories": ["maps"]
+    },
+    {
+      "name": "route-summary",
+      "type": "registry:ui",
+      "title": "Route Summary",
+      "description": "Travel modes, stops, totals, and turn-by-turn directions for a route.",
+      "dependencies": ["class-variance-authority"],
+      "registryDependencies": [
+        "button",
+        "toggle-group",
+        "https://uaiblocks.vercel.app/r/uai-theme.json",
+        "https://uaiblocks.vercel.app/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/route-summary.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/route-summary.tsx"
+        }
+      ],
+      "categories": ["maps", "navigation"]
+    },
+    {
       "name": "hero-section",
       "type": "registry:block",
       "title": "Hero Section",
