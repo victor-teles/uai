@@ -13,6 +13,7 @@ import {
   ImportWorkflowFooter,
   ImportWorkflowIssues,
   ImportWorkflowMapping,
+  ImportWorkflowMappingOption,
   ImportWorkflowMappingRow,
   ImportWorkflowMappingSample,
   ImportWorkflowMappingSource,
@@ -61,12 +62,9 @@ function Fixture({
                 email_address
                 <ImportWorkflowMappingSample>ana@fieldnote.io</ImportWorkflowMappingSample>
               </ImportWorkflowMappingSource>
-              <ImportWorkflowMappingTarget
-                defaultValue=""
-                onChange={(event) => onMap?.(event.target.value)}
-              >
-                <option value="">Skip this column</option>
-                <option value="email">Email</option>
+              <ImportWorkflowMappingTarget defaultValue="" onValueChange={onMap}>
+                <ImportWorkflowMappingOption value="">Skip this column</ImportWorkflowMappingOption>
+                <ImportWorkflowMappingOption value="email">Email</ImportWorkflowMappingOption>
               </ImportWorkflowMappingTarget>
             </ImportWorkflowMappingRow>
           </ImportWorkflowMapping>
@@ -118,11 +116,17 @@ test("labels each mapping select by its source column and supports keyboard sele
   const user = userEvent.setup();
   const map = mock((_value: string) => {});
   render(<Fixture onMap={map} />);
-  const select = screen.getByLabelText(/email_address/) as HTMLSelectElement;
-  expect(select.tagName).toBe("SELECT");
-  await user.selectOptions(select, "email");
+  const select = screen.getByLabelText(/email_address/);
+  expect(select.getAttribute("role")).toBe("combobox");
+  expect(select.textContent).toBe("Skip this column");
+  expect(select.hasAttribute("data-skipped")).toBe(true);
+  select.focus();
+  await user.keyboard("{Enter}");
+  expect(screen.getByRole("option", { name: "Skip this column" })).toBeTruthy();
+  await user.keyboard("{ArrowDown}{Enter}");
   expect(map).toHaveBeenCalledWith("email");
-  expect(select.value).toBe("email");
+  expect(select.textContent).toBe("Email");
+  expect(select.hasAttribute("data-skipped")).toBe(false);
 });
 
 test("maps each layout variant onto the step indicator and guards its parts", () => {

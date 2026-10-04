@@ -3,6 +3,7 @@
 import { cva } from "class-variance-authority";
 import { Check } from "lucide-react";
 import { type ComponentProps, createContext, useContext, useId } from "react";
+import { Button } from "@/components/ui/button";
 import { TrustPanelBadge, TrustPanelBadges } from "@/components/ui/uai/trust-panel";
 import { cn } from "@/lib/uai-utils";
 
@@ -126,12 +127,14 @@ export type CallToActionActionProps = ComponentProps<"a"> & {
 };
 
 const callToActionActionVariants = cva(
-  "inline-flex h-9 items-center justify-center gap-1.5 rounded-full text-[13px]/[18px] font-medium whitespace-nowrap decoration-border-strong underline-offset-3 [transition:filter_120ms_ease-out,text-decoration-color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100",
+  "h-9 gap-1.5 rounded-full py-0 text-[13px]/[18px] decoration-border-strong underline-offset-3 transition-[filter,text-decoration-color,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100",
   {
     variants: {
       priority: {
-        primary: "bg-primary px-4 text-primary-foreground no-underline hover:brightness-[1.08]",
-        secondary: "bg-transparent px-3 text-foreground underline hover:decoration-current",
+        primary:
+          "bg-primary px-4 text-primary-foreground no-underline hover:bg-primary hover:brightness-[1.08] has-[>svg]:px-4",
+        secondary:
+          "bg-transparent px-3 text-foreground underline hover:underline hover:decoration-current has-[>svg]:px-3",
       },
     },
   },
@@ -143,12 +146,13 @@ export function CallToActionAction({
   ...props
 }: CallToActionActionProps) {
   return (
-    <a
-      data-slot="call-to-action-action"
-      data-priority={priority}
+    <Button
+      asChild
+      variant={priority === "primary" ? "default" : "link"}
       className={cn(callToActionActionVariants({ priority }), className)}
-      {...props}
-    />
+    >
+      <a data-slot="call-to-action-action" data-priority={priority} {...props} />
+    </Button>
   );
 }
 
@@ -169,7 +173,7 @@ export function CallToActionReassurance({ className, ...props }: ComponentProps<
 }
 
 export function CallToActionReassuranceItem({
-  icon = <Check size={14} strokeWidth={2} aria-hidden="true" />,
+  icon = <Check size={14} className="size-3.5" strokeWidth={2} aria-hidden="true" />,
   ...props
 }: ComponentProps<typeof TrustPanelBadge>) {
   useCta("CallToActionReassuranceItem");

@@ -1,6 +1,7 @@
 import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, useContext, useId } from "react";
 
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/uai-utils";
 
 export const EMPTY_STATE_VARIANTS = ["card", "plain", "compact", "page"] as const;
@@ -77,17 +78,17 @@ const emptyStateNoteVariants = cva("max-w-[50ch] text-subtle-foreground wrap-any
 });
 
 const emptyStateActionVariants = cva(
-  "inline-flex items-center justify-center gap-1.5 rounded-full font-medium whitespace-nowrap no-underline transition-[scale,background-color,filter,opacity] duration-140 ease-out-quint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100 [&>svg]:size-3.5 [&>svg]:shrink-0",
+  "h-auto gap-1.5 rounded-full py-0 no-underline transition-[scale,background-color,filter,opacity] duration-140 ease-out-quint focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 [&_svg:not([class*='size-'])]:size-3.5",
   {
     variants: {
       variant: {
-        card: "min-h-8 px-3.5 text-[13px]/4",
-        plain: "min-h-8 px-3.5 text-[13px]/4",
-        compact: "min-h-7 px-3 text-[12.5px]/4",
-        page: "min-h-8.5 px-3.5 text-[13px]/4",
+        card: "min-h-8 px-3.5 text-[13px]/4 has-[>svg]:px-3.5",
+        plain: "min-h-8 px-3.5 text-[13px]/4 has-[>svg]:px-3.5",
+        compact: "min-h-7 px-3 text-[12.5px]/4 has-[>svg]:px-3",
+        page: "min-h-8.5 px-3.5 text-[13px]/4 has-[>svg]:px-3.5",
       },
       emphasis: {
-        primary: "bg-primary text-primary-foreground hover:brightness-[1.08]",
+        primary: "bg-primary text-primary-foreground hover:bg-primary hover:brightness-[1.08]",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
       },
@@ -268,14 +269,21 @@ export function EmptyStateAction({
   const { variant } = useEmptyState("EmptyStateAction");
   const actionClassName = cn(emptyStateActionVariants({ variant, emphasis }), className);
 
+  const buttonVariant = emphasis === "primary" ? "default" : "secondary";
+
   if (typeof props.href === "string") {
-    return <a data-slot="empty-state-action" {...props} className={actionClassName} />;
+    return (
+      <Button asChild variant={buttonVariant} className={actionClassName}>
+        <a data-slot="empty-state-action" {...props} />
+      </Button>
+    );
   }
 
   const { type = "button", ...buttonProps } = props;
   return (
-    <button
+    <Button
       data-slot="empty-state-action"
+      variant={buttonVariant}
       {...buttonProps}
       type={type}
       className={actionClassName}

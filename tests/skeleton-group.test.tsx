@@ -61,7 +61,7 @@ test("applies motion per variant with a reduced-motion override", () => {
     expect(view.container.firstElementChild?.getAttribute("data-variant")).toBe(variant);
     const shape = view.container.querySelector("[data-slot='skeleton-group-block']");
     expect(shape?.getAttribute("data-motion")).toBe(variant);
-    if (variant === "static") expect(shape?.className).not.toContain("animate-");
+    if (variant === "static") expect(shape?.className).not.toMatch(/(^|\s)animate-(?!none(\s|$))/);
     else expect(shape?.className).toContain("motion-reduce:animate-none");
     expect(view.container.querySelector("style")).toBeNull();
     view.unmount();

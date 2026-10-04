@@ -5,6 +5,7 @@ import { getRegistryItem, registryCatalog } from "@/components/registry/catalog"
 type RegistryItem = {
   name: string;
   registryDependencies?: string[];
+  files?: { path: string }[];
 };
 
 type Registry = {
@@ -20,6 +21,20 @@ describe("Uai registry", () => {
     expect([...itemNames].sort()).toEqual(
       ["uai-theme", "uai-utils", ...registryCatalog.map((item) => item.id)].sort(),
     );
+  });
+
+  test("declares every shadcn primitive a source file imports", async () => {
+    for (const item of registry.items) {
+      for (const file of item.files ?? []) {
+        const source = await Bun.file(file.path).text();
+        for (const [, primitive] of source.matchAll(/from "@\/components\/ui\/([\w-]+)"/g)) {
+          expect({ item: item.name, dependencies: item.registryDependencies }).toEqual({
+            item: item.name,
+            dependencies: expect.arrayContaining([primitive]),
+          });
+        }
+      }
+    }
   });
 
   test("builds a public JSON document for every item", async () => {

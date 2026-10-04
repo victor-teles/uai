@@ -27,6 +27,7 @@ import {
   TeamManagementMemberStatus,
   TeamManagementMembers,
   TeamManagementRemove,
+  TeamManagementRoleOption,
   TeamManagementRoleSelect,
   TeamManagementTitle,
   TeamManagementToolbar,
@@ -53,8 +54,8 @@ function Fixture({ variant }: { variant?: TeamManagementVariant }) {
         }}
       >
         <TeamManagementRoleSelect aria-label="Role for new member" defaultValue="Viewer">
-          <option>Editor</option>
-          <option>Viewer</option>
+          <TeamManagementRoleOption value="Editor">Editor</TeamManagementRoleOption>
+          <TeamManagementRoleOption value="Viewer">Viewer</TeamManagementRoleOption>
         </TeamManagementRoleSelect>
         <TeamManagementButton type="submit" emphasis="primary">
           Send invite
@@ -83,16 +84,14 @@ function Fixture({ variant }: { variant?: TeamManagementVariant }) {
               <TeamManagementMemberActions>
                 <TeamManagementRoleSelect
                   value={member.role}
-                  onChange={(event) =>
+                  onValueChange={(role) =>
                     setMembers((current) =>
-                      current.map((item) =>
-                        item.name === member.name ? { ...item, role: event.target.value } : item,
-                      ),
+                      current.map((item) => (item.name === member.name ? { ...item, role } : item)),
                     )
                   }
                 >
-                  <option>Admin</option>
-                  <option>Editor</option>
+                  <TeamManagementRoleOption value="Admin">Admin</TeamManagementRoleOption>
+                  <TeamManagementRoleOption value="Editor">Editor</TeamManagementRoleOption>
                 </TeamManagementRoleSelect>
                 <TeamManagementRemove>
                   <ConfirmationDialogTrigger aria-label={`Remove ${member.name}`}>
@@ -135,9 +134,10 @@ test("names each role select after its member and lists members", () => {
 test("changes roles, submits invitations, and filters with an empty state", async () => {
   const user = userEvent.setup();
   render(<Fixture />);
-  const role = screen.getByRole("combobox", { name: "Role for Tomás Rivera" }) as HTMLSelectElement;
-  await user.selectOptions(role, "Admin");
-  expect(role.value).toBe("Admin");
+  const role = screen.getByRole("combobox", { name: "Role for Tomás Rivera" });
+  await user.click(role);
+  await user.click(screen.getByRole("option", { name: "Admin" }));
+  expect(role.textContent).toBe("Admin");
   await user.click(screen.getByRole("button", { name: "Send invite" }));
   expect(screen.getByText("1 invited")).toBeTruthy();
   const search = screen.getByRole("searchbox", { name: "Search members" });

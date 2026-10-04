@@ -4,7 +4,6 @@ import { cva } from "class-variance-authority";
 import {
   type ComponentProps,
   createContext,
-  type KeyboardEvent,
   useContext,
   useEffect,
   useId,
@@ -12,11 +11,12 @@ import {
   useRef,
   useState,
 } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/uai-utils";
 
 export const PAGE_TABS_VARIANTS = ["underline", "pill", "segmented"] as const;
 export type PageTabsVariant = (typeof PAGE_TABS_VARIANTS)[number];
-export type PageTabsProps = Omit<ComponentProps<"div">, "defaultValue"> & {
+export type PageTabsProps = Omit<ComponentProps<"div">, "defaultValue" | "dir"> & {
   variant?: PageTabsVariant;
   value?: string;
   defaultValue?: string;
@@ -51,22 +51,18 @@ export function PageTabs({
   const id = useId();
   const [internal, setInternal] = useState(defaultValue);
   const current = value ?? internal;
+  const select = (next: string) => {
+    if (next === current) return;
+    if (value === undefined) setInternal(next);
+    onValueChange?.(next);
+  };
   return (
-    <Context.Provider
-      value={{
-        id,
-        value: current,
-        variant,
-        select: (next) => {
-          if (next === current) return;
-          if (value === undefined) setInternal(next);
-          onValueChange?.(next);
-        },
-      }}
-    >
-      <div
+    <Context.Provider value={{ id, value: current, variant, select }}>
+      <Tabs
         data-slot="page-tabs"
         data-variant={variant}
+        value={current}
+        onValueChange={select}
         className={cn("grid min-w-0 gap-4 text-[13px]/[18px] text-foreground", className)}
         {...props}
       />
@@ -124,7 +120,7 @@ function thumbStyle(variant: PageTabsVariant, thumb: Thumb): React.CSSProperties
   };
 }
 
-export function PageTabsList({ className, onKeyDown, children, ...props }: ComponentProps<"div">) {
+export function PageTabsList({ className, children, ...props }: ComponentProps<"div">) {
   const context = useTabs("PageTabsList");
   const ref = useRef<HTMLDivElement>(null);
   const [thumb, setThumb] = useState<Thumb | null>(null);
@@ -165,39 +161,22 @@ export function PageTabsList({ className, onKeyDown, children, ...props }: Compo
     const frame = requestAnimationFrame(() => setSettled(true));
     return () => cancelAnimationFrame(frame);
   }, [thumb, settled]);
-  const move = (event: KeyboardEvent<HTMLDivElement>) => {
-    const tabs = Array.from(
-      event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="tab"]:not(:disabled)'),
-    );
-    const index = tabs.indexOf(document.activeElement as HTMLButtonElement);
-    const target = {
-      ArrowRight: tabs[(index + 1) % tabs.length],
-      ArrowLeft: tabs[(index - 1 + tabs.length) % tabs.length],
-      Home: tabs[0],
-      End: tabs[tabs.length - 1],
-    }[event.key];
-    if (!target || index === -1) return;
-    event.preventDefault();
-    target.focus();
-    target.click();
-  };
+  // Radix owns arrow, Home, and End navigation through roving focus.
   return (
-    <div
-      role="tablist"
-      aria-orientation="horizontal"
+    <TabsList
       data-slot="page-tabs-list"
+      // The Uai variant replaces the shadcn list variant so its active-tab shadow and line styles stay off.
+      data-variant={context.variant}
       className={cn(
-        "relative isolate flex min-w-0 flex-[1_1_auto] items-center overflow-x-auto overscroll-x-contain [scrollbar-width:none]",
+        "relative isolate flex h-auto w-auto min-w-0 flex-[1_1_auto] items-center justify-start overflow-x-auto overscroll-x-contain [scrollbar-width:none] group-data-[orientation=horizontal]/tabs:h-auto",
         context.variant === "underline" ? "gap-1" : "gap-0.5",
-        context.variant === "segmented" && "rounded-xl bg-muted p-0.75",
+        context.variant === "segmented"
+          ? "rounded-xl bg-muted p-0.75"
+          : "rounded-none bg-transparent p-0",
         className,
       )}
       {...props}
       ref={ref}
-      onKeyDown={(event) => {
-        onKeyDown?.(event);
-        if (!event.defaultPrevented) move(event);
-      }}
     >
       {thumb ? (
         <span
@@ -212,12 +191,12 @@ export function PageTabsList({ className, onKeyDown, children, ...props }: Compo
         />
       ) : null}
       <ListContext.Provider value={thumb !== null}>{children}</ListContext.Provider>
-    </div>
+    </TabsList>
   );
 }
 
 const pageTabsTabVariants = cva(
-  "relative inline-flex flex-none cursor-pointer items-center gap-1.5 border-0 bg-transparent font-medium whitespace-nowrap [transition:color_120ms_ease-out,background-color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none motion-reduce:active:scale-100",
+  "relative inline-flex flex-none cursor-pointer items-center justify-start gap-1.5 border-0 bg-transparent py-0 font-medium whitespace-nowrap [transition:color_120ms_ease-out,background-color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring enabled:active:scale-[0.97] disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none motion-reduce:active:scale-100",
   {
     variants: {
       variant: {
@@ -225,19 +204,28 @@ const pageTabsTabVariants = cva(
         pill: "h-7 rounded-full px-3 text-[12.5px]",
         segmented: "h-7 rounded-[9px] px-3 text-[12.5px]",
       },
-      fallback: { true: "", false: "" },
+      fallback: {
+        true: "",
+        false: "data-[state=active]:bg-transparent dark:data-[state=active]:bg-transparent",
+      },
     },
     compoundVariants: [
       {
         variant: "underline",
         fallback: true,
-        className: "shadow-[inset_0_-2px_0_var(--foreground)]",
+        className:
+          "shadow-[inset_0_-2px_0_var(--foreground)] data-[state=active]:bg-transparent dark:data-[state=active]:bg-transparent",
       },
-      { variant: "pill", fallback: true, className: "bg-accent" },
+      {
+        variant: "pill",
+        fallback: true,
+        className: "data-[state=active]:bg-accent dark:data-[state=active]:bg-accent",
+      },
       {
         variant: "segmented",
         fallback: true,
-        className: "bg-card shadow-[0_0_0_1px_var(--border),0_1px_2px_oklch(0_0_0/0.08)]",
+        className:
+          "shadow-[0_0_0_1px_var(--border),0_1px_2px_oklch(0_0_0/0.08)] data-[state=active]:bg-card dark:data-[state=active]:bg-card",
       },
     ],
   },
@@ -258,32 +246,30 @@ export function PageTabsTab({
   const fallback = selected && !thumb;
   return (
     <TabContext.Provider value={selected}>
-      <button
+      <TabsTrigger
         type="button"
-        role="tab"
         data-slot="page-tabs-tab"
         className={cn(
           pageTabsTabVariants({ variant, fallback }),
           selected
-            ? "text-foreground"
-            : "text-subtle-foreground enabled:hover:text-muted-foreground",
+            ? "text-foreground hover:text-foreground dark:text-foreground dark:hover:text-foreground"
+            : "text-subtle-foreground hover:text-muted-foreground dark:text-subtle-foreground dark:hover:text-muted-foreground",
           className,
         )}
         {...props}
+        value={value}
         id={`${context.id}-tab-${slug(value)}`}
-        aria-selected={selected}
         aria-controls={`${context.id}-panel-${slug(value)}`}
+        // Keep the selected tab in the tab order before the list has been focused.
         tabIndex={selected ? 0 : -1}
-        data-state={selected ? "active" : "inactive"}
         onClick={(event) => {
           onClick?.(event);
           if (event.defaultPrevented) return;
-          context.select(value);
           event.currentTarget.scrollIntoView?.({ block: "nearest", inline: "nearest" });
         }}
       >
         {children}
-      </button>
+      </TabsTrigger>
     </TabContext.Provider>
   );
 }
@@ -341,13 +327,16 @@ export function PageTabsPanel({
     );
   }, [selected]);
   return (
-    <div
-      role="tabpanel"
-      // biome-ignore lint/a11y/noNoninteractiveTabindex: APG tabs make panels focusable so panels without focusable content stay reachable.
-      tabIndex={0}
+    <TabsContent
+      // Inactive panels stay mounted so their state survives tab switches.
+      forceMount
       data-slot="page-tabs-panel"
-      className={cn("min-w-0", className)}
+      className={cn(
+        "min-w-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid",
+        className,
+      )}
       {...props}
+      value={value}
       id={`${context.id}-panel-${slug(value)}`}
       aria-labelledby={`${context.id}-tab-${slug(value)}`}
       ref={ref}

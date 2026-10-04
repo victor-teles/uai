@@ -13,6 +13,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { Button } from "@/components/ui/button";
 import {
   PriceSummary,
   type PriceSummaryProps,
@@ -339,7 +340,7 @@ export function CheckoutSectionTitle({ children, className, ...props }: Componen
           aria-hidden="true"
           className="grid size-[18px] place-items-center rounded-full bg-success/16 text-success"
         >
-          <Check size={11} strokeWidth={2.5} />
+          <Check size={11} className="size-[11px]" strokeWidth={2.5} />
         </span>
       ) : null}
       {children}
@@ -349,23 +350,23 @@ export function CheckoutSectionTitle({ children, className, ...props }: Componen
 }
 
 const checkoutButtonBase = [
-  "cursor-pointer border-0 font-medium rounded-full",
+  "cursor-pointer border-0 py-0 font-medium rounded-full [&_svg:not([class*='size-'])]:size-3.5",
   "[transition:background-color_120ms_ease-out,filter_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)]",
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-97",
+  "focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid enabled:active:scale-97",
   "motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
 ];
 
 const checkoutPrimaryVariants = cva(
   [
     ...checkoutButtonBase,
-    "inline-flex items-center justify-center justify-self-start gap-2 px-[18px] text-[13px] text-primary-foreground enabled:hover:brightness-108",
+    "inline-flex items-center justify-center justify-self-start gap-2 px-[18px] text-[13px] text-primary-foreground has-[>svg]:px-[18px] enabled:hover:brightness-108 disabled:pointer-events-auto disabled:opacity-100",
   ],
   {
     variants: {
       compact: { true: "h-8", false: "h-10" },
       blocked: {
-        true: "cursor-not-allowed bg-[color-mix(in_oklab,var(--primary)_55%,var(--card))]",
-        false: "bg-primary",
+        true: "cursor-not-allowed bg-[color-mix(in_oklab,var(--primary)_55%,var(--card))] hover:bg-[color-mix(in_oklab,var(--primary)_55%,var(--card))]",
+        false: "bg-primary hover:bg-primary",
       },
     },
     defaultVariants: { blocked: false },
@@ -383,13 +384,14 @@ export function CheckoutSectionEdit({
   const section = useSection("CheckoutSectionEdit");
   if (section.status !== "complete" || checkout.status === "placed") return null;
   return (
-    <button
+    <Button
       type="button"
+      variant="secondary"
       aria-describedby={`${section.id}-title`}
       data-slot="checkout-section-edit"
       className={cn(
         checkoutButtonBase,
-        "h-[26px] flex-none bg-secondary px-3 text-[12.5px] text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+        "h-[26px] flex-none bg-secondary px-3 text-[12.5px] text-secondary-foreground has-[>svg]:px-3 hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
         className,
       )}
       {...props}
@@ -399,7 +401,7 @@ export function CheckoutSectionEdit({
       }}
     >
       {children}
-    </button>
+    </Button>
   );
 }
 
@@ -468,7 +470,7 @@ export function CheckoutSectionContinue({
   const checkout = useCheckout("CheckoutSectionContinue");
   useSection("CheckoutSectionContinue");
   return (
-    <button
+    <Button
       data-slot="checkout-section-continue"
       className={cn(
         checkoutPrimaryVariants({ compact: checkout.variant === "compact" }),
@@ -478,7 +480,7 @@ export function CheckoutSectionContinue({
       type="submit"
     >
       {children}
-    </button>
+    </Button>
   );
 }
 
@@ -516,7 +518,12 @@ export function CheckoutPaymentNote({ children, className, ...props }: Component
       className={cn("m-0 flex items-start gap-1.5 text-xs/4 text-subtle-foreground", className)}
       {...props}
     >
-      <LockKeyhole size={12} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 flex-none" />
+      <LockKeyhole
+        size={12}
+        strokeWidth={1.75}
+        aria-hidden="true"
+        className="mt-0.5 flex-none size-3"
+      />
       <span>{children}</span>
     </p>
   );
@@ -537,7 +544,7 @@ export function CheckoutPlaceOrder({
   const placing = checkout.status === "placing";
   const blocked = disabled || placing;
   return (
-    <button
+    <Button
       type="button"
       data-slot="checkout-place-order"
       className={cn(
@@ -555,16 +562,15 @@ export function CheckoutPlaceOrder({
       {placing ? (
         <>
           <LoaderCircle
-            size={14}
             aria-hidden="true"
-            className="animate-spin [animation-duration:900ms] motion-reduce:animate-none"
+            className="size-3.5 animate-spin [animation-duration:900ms] motion-reduce:animate-none"
           />
           {pendingLabel}
         </>
       ) : (
         children
       )}
-    </button>
+    </Button>
   );
 }
 

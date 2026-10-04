@@ -2,6 +2,7 @@
 
 import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, useContext, useId } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Attachment,
   type AttachmentProps,
@@ -144,17 +145,17 @@ export function FileAnalysisDescription({ className, ...props }: ComponentProps<
 }
 
 const fileAnalysisActionVariants = cva(
-  "inline-flex cursor-pointer items-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap [transition:background-color_120ms_ease-out,filter_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:not-disabled:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:not-disabled:scale-100",
+  "cursor-pointer gap-1.5 rounded-full border-0 py-0 transition-[background-color,filter,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:not-disabled:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:not-disabled:scale-100",
   {
     variants: {
       emphasis: {
-        primary: "bg-primary text-primary-foreground hover:not-disabled:brightness-[1.08]",
+        primary: "bg-primary text-primary-foreground hover:bg-primary hover:brightness-[1.08]",
         secondary:
-          "bg-secondary text-secondary-foreground hover:not-disabled:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+          "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
       },
       size: {
-        default: "h-7.5 px-[13px] text-[12.5px]",
-        compact: "h-6.5 px-2.5 text-[12px]",
+        default: "h-7.5 px-[13px] text-[12.5px] has-[>svg]:px-[13px]",
+        compact: "h-6.5 px-2.5 text-[12px] has-[>svg]:px-2.5",
       },
     },
   },
@@ -168,8 +169,9 @@ export function FileAnalysisAction({
 }: ComponentProps<"button"> & { emphasis?: "primary" | "secondary" }) {
   const { variant } = useAnalysis("FileAnalysisAction");
   return (
-    <button
+    <Button
       data-slot="file-analysis-action"
+      variant={emphasis === "primary" ? "default" : "secondary"}
       data-emphasis={emphasis}
       className={cn(
         fileAnalysisActionVariants({

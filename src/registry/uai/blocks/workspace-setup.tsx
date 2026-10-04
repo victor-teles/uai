@@ -12,6 +12,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { Button } from "@/components/ui/button";
 import {
   FormField,
   FormFieldError,
@@ -79,11 +80,11 @@ const slugify = (text: string) =>
 const transition =
   "[transition:background-color_120ms_ease-out,color_120ms_ease-out,box-shadow_120ms_ease-out,filter_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none";
 const focusRing =
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
+  "focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring";
 const buttonBase = cn(
   transition,
   focusRing,
-  "cursor-pointer rounded-full border-0 font-medium not-disabled:active:scale-[0.97] motion-reduce:not-disabled:active:scale-100",
+  "cursor-pointer rounded-full border-0 py-0 not-disabled:active:scale-[0.97] disabled:opacity-100 motion-reduce:not-disabled:active:scale-100",
 );
 const workspaceSetupVariants = cva(
   "@container box-border min-w-0 text-[13px]/[18px] text-foreground",
@@ -412,12 +413,13 @@ export function WorkspaceSetupInviteAdd({
 }: ComponentProps<"button">) {
   const context = useSetup("WorkspaceSetupInviteAdd");
   return (
-    <button
+    <Button
       type="button"
+      variant="secondary"
       data-slot="workspace-setup-invite-add"
       className={cn(
         buttonBase,
-        "h-7.5 flex-none self-center bg-secondary px-3.25 text-[12.5px] text-foreground not-disabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+        "h-7.5 flex-none self-center bg-secondary px-3.25 text-[12.5px] text-foreground not-disabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] has-[>svg]:px-3.25",
         className,
       )}
       {...props}
@@ -458,18 +460,20 @@ export function WorkspaceSetupInviteList({ children, className, ...props }: Comp
           className="inline-flex h-6.5 max-w-full min-w-0 animate-in items-center gap-0.5 rounded-md bg-muted pr-0.75 pl-2.25 text-[12px] font-medium duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] fade-in-0 zoom-in-96 fill-mode-both motion-reduce:animate-none"
         >
           <span className="truncate">{email}</span>
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon-xs"
             aria-label={`Remove ${email}`}
             onClick={() => context.removeInvite(email)}
             className={cn(
               transition,
               focusRing,
-              "grid size-5 flex-none cursor-pointer place-items-center rounded-sm border-0 bg-transparent p-0 text-subtle-foreground hover:bg-foreground/10 hover:text-foreground",
+              "size-5 flex-none cursor-pointer rounded-sm border-0 bg-transparent p-0 text-subtle-foreground hover:bg-foreground/10 hover:text-foreground disabled:opacity-100 dark:hover:bg-foreground/10",
             )}
           >
-            <X size={12} strokeWidth={2} aria-hidden="true" />
-          </button>
+            <X size={12} className="size-3" strokeWidth={2} aria-hidden="true" />
+          </Button>
         </li>
       ))}
     </ul>
@@ -494,7 +498,7 @@ export function WorkspaceSetupChoice({
       data-slot="workspace-setup-choice"
       className={cn(
         transition,
-        "flex min-w-0 cursor-pointer items-start gap-2.5 bg-card shadow-[inset_0_0_0_1px_var(--border)] hover:bg-[color-mix(in_oklab,var(--muted)_50%,var(--card))] has-checked:bg-[color-mix(in_oklab,var(--primary)_6%,var(--card))] has-checked:shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_55%,transparent)] has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring",
+        "flex min-w-0 cursor-pointer items-start gap-2.5 bg-card shadow-[inset_0_0_0_1px_var(--border)] hover:bg-[color-mix(in_oklab,var(--muted)_50%,var(--card))] has-checked:bg-[color-mix(in_oklab,var(--primary)_6%,var(--card))] has-checked:shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_55%,transparent)] has-focus-visible:outline-2 focus-visible:outline-solid has-focus-visible:outline-offset-2 has-focus-visible:outline-ring",
         variant === "compact" ? "rounded-lg p-2.5" : "rounded-[10px] p-3",
         className,
       )}
@@ -633,13 +637,15 @@ export function WorkspaceSetupSubmit({
   const pending = context.status === "creating";
   const compact = context.variant === "compact";
   return (
-    <button
+    <Button
       type="submit"
       data-slot="workspace-setup-submit"
       className={cn(
         buttonBase,
-        "bg-primary text-primary-foreground not-disabled:hover:brightness-108 disabled:cursor-default disabled:bg-secondary disabled:text-subtle-foreground",
-        compact ? "h-7 px-3 text-[12.5px]" : "h-8 px-3.5 text-[13px]",
+        "bg-primary text-primary-foreground hover:bg-primary not-disabled:hover:brightness-108 disabled:cursor-default disabled:bg-secondary disabled:text-subtle-foreground",
+        compact
+          ? "h-7 px-3 text-[12.5px] has-[>svg]:px-3"
+          : "h-8 px-3.5 text-[13px] has-[>svg]:px-3.5",
         pending && "cursor-progress",
         className,
       )}
@@ -654,6 +660,6 @@ export function WorkspaceSetupSubmit({
       ) : (
         children
       )}
-    </button>
+    </Button>
   );
 }

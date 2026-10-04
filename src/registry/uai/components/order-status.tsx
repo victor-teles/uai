@@ -2,6 +2,8 @@ import { cva } from "class-variance-authority";
 import { Check, Circle, CircleAlert } from "lucide-react";
 import { type ComponentProps, createContext, type ReactNode, useContext, useId } from "react";
 
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/uai-utils";
 
 export const ORDER_STATUS_VARIANTS = ["card", "plain", "compact"] as const;
@@ -36,7 +38,9 @@ function orderStatusChrome(variant: OrderStatusVariant) {
     detailClass: compact ? "text-xs/4" : "text-[12.5px]/[18px]",
     detailLabelClass: compact ? "text-[11px]/4" : "text-[11.5px]/4",
     actionsClass: compact ? "mt-4 gap-1.5" : "mt-5 gap-2",
-    actionClass: compact ? "h-7 px-3 text-[12px]" : "h-8 px-3.5 text-[12.5px]",
+    actionClass: compact
+      ? "h-7 px-3 text-[12px] has-[>svg]:px-3"
+      : "h-8 px-3.5 text-[12.5px] has-[>svg]:px-3.5",
   };
 }
 
@@ -169,18 +173,19 @@ export function OrderStatusBadge({
   useOrderStatus("OrderStatusBadge");
 
   return (
-    <span
+    <Badge
+      variant="secondary"
       data-slot="order-status-badge"
       data-tone={tone}
       className={cn(
-        "inline-flex h-[22px] shrink-0 items-center gap-1.5 rounded-full px-2 text-[11.5px]/4 font-medium whitespace-nowrap tabular-nums before:size-1.5 before:shrink-0 before:rounded-full before:bg-current before:content-['']",
+        "h-[22px] shrink-0 gap-1.5 rounded-full border-0 px-2 py-0 text-[11.5px]/4 font-medium whitespace-nowrap tabular-nums before:size-1.5 before:shrink-0 before:rounded-full before:bg-current before:content-['']",
         orderStatusBadgeToneClass[tone],
         className,
       )}
       {...props}
     >
       {children}
-    </span>
+    </Badge>
   );
 }
 
@@ -437,20 +442,21 @@ export function OrderStatusAction({
   const context = useOrderStatus("OrderStatusAction");
 
   return (
-    <a
-      data-slot="order-status-action"
-      data-emphasis={emphasis}
+    <Button
+      asChild
+      variant={emphasis === "primary" ? "default" : "secondary"}
       className={cn(
-        "inline-flex items-center justify-center rounded-full font-medium no-underline transition-[scale,background-color,filter] duration-140 ease-out-quint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-97 motion-reduce:transition-none motion-reduce:active:scale-100",
+        "rounded-full py-0 no-underline transition-[scale,background-color,filter] duration-140 ease-out-quint focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-97 motion-reduce:transition-none motion-reduce:active:scale-100",
         context.chrome.actionClass,
         emphasis === "primary"
-          ? "bg-primary text-primary-foreground hover:brightness-[1.08]"
+          ? "bg-primary text-primary-foreground hover:bg-primary hover:brightness-[1.08]"
           : "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
         className,
       )}
-      {...props}
     >
-      {children}
-    </a>
+      <a data-slot="order-status-action" data-emphasis={emphasis} {...props}>
+        {children}
+      </a>
+    </Button>
   );
 }

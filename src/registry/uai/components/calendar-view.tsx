@@ -3,6 +3,8 @@
 import { cva } from "class-variance-authority";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { type ComponentProps, createContext, useContext, useId, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/uai-utils";
 
 export const CALENDAR_VIEW_VARIANTS = ["card", "plain", "compact"] as const;
@@ -200,8 +202,10 @@ function controlClass(variant: CalendarViewVariant) {
 }
 const press =
   "[transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_var(--ease-out-quint)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100";
+// Primitive controls swap their ring for the Uai outline; `outline-solid` undoes their `outline-none`.
+const primitiveFocus = "focus-visible:ring-0 focus-visible:outline-solid";
 // Ghost icon button and secondary pill, per the shared button rules.
-const ghostClass = `bg-transparent text-muted-foreground hover:bg-accent hover:text-foreground ${press}`;
+const ghostClass = `bg-transparent text-muted-foreground hover:bg-accent hover:text-foreground dark:hover:bg-accent ${press}`;
 const secondaryClass = `bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] ${press}`;
 const modeThumbOffset: Record<CalendarViewMode, string> = {
   month: "translate-x-0",
@@ -217,7 +221,13 @@ export function CalendarViewNavigation({ className, ...props }: ComponentProps<"
       context.setDate(new Date(date.getFullYear(), date.getMonth() + direction, 1));
     else context.setDate(addDays(date, direction * (view === "week" ? 7 : 1)));
   };
-  const iconButton = cn(controlClass(context.variant), "rounded-lg p-0", ghostClass);
+  const iconButton = cn(
+    controlClass(context.variant),
+    "rounded-lg p-0 has-[>svg]:p-0",
+    context.variant === "compact" ? "size-6" : "size-7",
+    ghostClass,
+    primitiveFocus,
+  );
   return (
     // biome-ignore lint/a11y/useSemanticElements: a fieldset would add form semantics to calendar navigation buttons.
     <div
@@ -227,46 +237,59 @@ export function CalendarViewNavigation({ className, ...props }: ComponentProps<"
       className={cn("flex items-center gap-0.5", className)}
       {...props}
     >
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="icon-sm"
         aria-label={`Previous ${context.view}`}
         onClick={() => step(-1)}
         className={iconButton}
       >
         <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" />
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
+        variant="secondary"
+        size="sm"
         onClick={() => context.setDate(context.today)}
-        className={cn(controlClass(context.variant), "mx-0.5", secondaryClass)}
+        className={cn(controlClass(context.variant), "mx-0.5", secondaryClass, primitiveFocus)}
       >
         Today
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
+        variant="ghost"
+        size="icon-sm"
         aria-label={`Next ${context.view}`}
         onClick={() => step(1)}
         className={iconButton}
       >
         <ChevronRight size={16} strokeWidth={1.75} aria-hidden="true" />
-      </button>
+      </Button>
     </div>
   );
 }
 
-export function CalendarViewModes({ className, ...props }: ComponentProps<"div">) {
+export function CalendarViewModes({
+  className,
+  ...props
+}: Omit<ComponentProps<"div">, "defaultValue" | "dir">) {
   const context = useCalendar("CalendarViewModes");
   return (
-    // biome-ignore lint/a11y/useSemanticElements: the layout buttons are a toggle group, not a form fieldset.
-    <div
-      role="group"
+    <ToggleGroup
+      type="single"
       aria-label="Calendar layout"
       data-slot="calendar-view-modes"
       className={cn(
-        "relative isolate inline-grid grid-cols-3 rounded-full bg-muted p-0.5",
+        "relative isolate inline-grid w-auto grid-cols-3 gap-0 rounded-full bg-muted p-0.5",
         className,
       )}
       {...props}
+      value={context.view}
+      // A single toggle group clears its value when the active layout is pressed again.
+      onValueChange={(next) => {
+        if (next) context.setView(next as CalendarViewMode);
+      }}
     >
       {/* One thumb slides under the active layout instead of each button repainting. */}
       <span
@@ -279,24 +302,27 @@ export function CalendarViewModes({ className, ...props }: ComponentProps<"div">
       {CALENDAR_VIEW_MODES.map((mode) => {
         const active = context.view === mode;
         return (
-          <button
+          <ToggleGroupItem
             key={mode}
             type="button"
-            aria-pressed={active}
-            onClick={() => context.setView(mode)}
+            value={mode}
             className={cn(
               controlClass(context.variant),
               context.variant === "compact" ? "h-5.5" : "h-6.5",
-              "bg-transparent",
-              active ? "text-foreground" : "text-subtle-foreground hover:text-muted-foreground",
+              // The thumb paints the active layout; the items stay transparent and fully rounded.
+              "bg-transparent hover:bg-transparent data-[spacing=0]:rounded-full data-[spacing=0]:first:rounded-full data-[spacing=0]:last:rounded-full data-[state=on]:bg-transparent",
+              active
+                ? "text-foreground hover:text-foreground data-[state=on]:text-foreground"
+                : "text-subtle-foreground hover:text-muted-foreground",
               press,
+              primitiveFocus,
             )}
           >
             {mode.charAt(0).toUpperCase() + mode.slice(1)}
-          </button>
+          </ToggleGroupItem>
         );
       })}
-    </div>
+    </ToggleGroup>
   );
 }
 

@@ -2,6 +2,7 @@
 
 import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, useContext, useId } from "react";
+import { Button } from "@/components/ui/button";
 import {
   TrustPanel,
   type TrustPanelProps,
@@ -151,18 +152,19 @@ export function HeroSectionAction({
 }: HeroSectionActionProps) {
   const primary = priority === "primary";
   return (
-    <a
-      data-slot="hero-section-action"
-      data-priority={priority}
+    <Button
+      asChild
+      variant={primary ? "default" : "secondary"}
       className={cn(
-        "inline-flex h-9 items-center justify-center gap-1.5 rounded-full px-4 text-[13px]/[18px] font-medium whitespace-nowrap no-underline [transition:filter_120ms_ease-out,box-shadow_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100",
+        "h-9 gap-1.5 rounded-full px-4 py-0 text-[13px]/[18px] no-underline has-[>svg]:px-4 transition-[filter,box-shadow,transform] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100",
         primary
-          ? "bg-primary text-primary-foreground hover:brightness-108"
-          : "bg-secondary text-secondary-foreground hover:shadow-[inset_0_0_0_999px_color-mix(in_oklab,var(--foreground)_9%,transparent)]",
+          ? "bg-primary text-primary-foreground hover:bg-primary hover:brightness-108"
+          : "bg-secondary text-secondary-foreground hover:bg-secondary hover:shadow-[inset_0_0_0_999px_color-mix(in_oklab,var(--foreground)_9%,transparent)]",
         className,
       )}
-      {...props}
-    />
+    >
+      <a data-slot="hero-section-action" data-priority={priority} {...props} />
+    </Button>
   );
 }
 

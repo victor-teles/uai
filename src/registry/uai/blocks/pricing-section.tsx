@@ -3,6 +3,8 @@
 import { cva } from "class-variance-authority";
 import { Check, Minus } from "lucide-react";
 import { type ComponentProps, createContext, useContext, useId } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { PricingToggle, type PricingToggleVariant } from "@/components/ui/uai/pricing-toggle";
 import { cn } from "@/lib/uai-utils";
 
@@ -178,10 +180,10 @@ export function PricingSectionPlanName({ className, ...props }: ComponentProps<"
 
 export function PricingSectionPlanBadge({ className, ...props }: ComponentProps<"span">) {
   return (
-    <span
+    <Badge
       data-slot="pricing-section-plan-badge"
       className={cn(
-        "inline-flex h-5 items-center rounded-full bg-primary/16 px-2 text-[11.5px]/4 font-medium text-[color-mix(in_oklab,var(--primary)_70%,var(--foreground))]",
+        "h-5 rounded-full border-0 bg-primary/16 px-2 py-0 text-[11.5px]/4 text-[color-mix(in_oklab,var(--primary)_70%,var(--foreground))]",
         className,
       )}
       {...props}
@@ -268,6 +270,7 @@ export function PricingSectionPlanFeature({
         strokeWidth={2}
         aria-hidden="true"
         className={cn(
+          "size-3.5",
           "mt-0.5 flex-none",
           included ? "text-muted-foreground" : "text-border-strong",
         )}
@@ -282,17 +285,17 @@ export function PricingSectionPlanFeature({
 
 const pricingSectionPlanActionVariants = cva(
   [
-    "mt-auto inline-flex items-center justify-center rounded-full px-3.5 font-medium whitespace-nowrap no-underline",
-    "[transition:filter_120ms_ease-out,box-shadow_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)]",
-    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-97",
+    "mt-auto gap-2 rounded-full px-3.5 py-0 no-underline has-[>svg]:px-3.5",
+    "transition-[filter,box-shadow,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)]",
+    "focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-97",
     "motion-reduce:transition-none motion-reduce:active:scale-100",
   ],
   {
     variants: {
       featured: {
-        true: "bg-primary text-primary-foreground hover:brightness-108",
+        true: "bg-primary text-primary-foreground hover:bg-primary hover:brightness-108",
         false:
-          "bg-secondary text-secondary-foreground hover:shadow-[inset_0_0_0_999px_color-mix(in_oklab,var(--foreground)_9%,transparent)]",
+          "bg-secondary text-secondary-foreground hover:bg-secondary hover:shadow-[inset_0_0_0_999px_color-mix(in_oklab,var(--foreground)_9%,transparent)]",
       },
       compact: { true: "h-[30px] text-[12.5px]", false: "h-[34px] text-[13px]" },
     },
@@ -304,8 +307,9 @@ export function PricingSectionPlanAction({ className, ...props }: ComponentProps
   const plan = usePlan("PricingSectionPlanAction");
   const { variant } = useSection("PricingSectionPlanAction");
   return (
-    <a
-      data-slot="pricing-section-plan-action"
+    <Button
+      asChild
+      variant={plan.featured ? "default" : "secondary"}
       className={cn(
         pricingSectionPlanActionVariants({
           featured: plan.featured,
@@ -313,9 +317,13 @@ export function PricingSectionPlanAction({ className, ...props }: ComponentProps
         }),
         className,
       )}
-      {...props}
-      data-emphasis={plan.featured ? "primary" : "secondary"}
-    />
+    >
+      <a
+        data-slot="pricing-section-plan-action"
+        {...props}
+        data-emphasis={plan.featured ? "primary" : "secondary"}
+      />
+    </Button>
   );
 }
 

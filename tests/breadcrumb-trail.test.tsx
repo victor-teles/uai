@@ -9,6 +9,10 @@ import {
   type BreadcrumbTrailProps,
 } from "@/registry/uai/components/breadcrumb-trail";
 
+// shadcn's BreadcrumbPage marks the current page as a disabled link; count navigable links only.
+const navigableLinks = () =>
+  screen.getAllByRole("link").filter((link) => link.getAttribute("aria-current") !== "page");
+
 function Fixture(props: Omit<BreadcrumbTrailProps, "children">) {
   return (
     <BreadcrumbTrail {...props}>
@@ -32,11 +36,14 @@ test("renders a labelled breadcrumb with the current page and decorative separat
   const current = screen.getByText("Accessibility review checklist");
   expect(current.getAttribute("aria-current")).toBe("page");
   expect(current.getAttribute("title")).toBe("Accessibility review checklist");
-  expect(screen.getAllByRole("link").map((link) => link.textContent)).toEqual([
+  expect(current.getAttribute("aria-disabled")).toBe("true");
+  expect(navigableLinks().map((link) => link.textContent)).toEqual([
     "Northwind",
     "Q3 mobile release",
   ]);
-  for (const separator of nav.querySelectorAll("li > span[aria-hidden='true']")) {
+  const separators = nav.querySelectorAll("[data-slot='breadcrumb-separator']");
+  expect(separators.length).toBe(3);
+  for (const separator of separators) {
     expect(separator.getAttribute("aria-hidden")).toBe("true");
   }
 });
@@ -48,7 +55,7 @@ test("reveals collapsed levels and moves focus to the first revealed link", asyn
   expect(reveal.getAttribute("aria-expanded")).toBe("false");
   await user.click(reveal);
   expect(screen.queryByRole("button", { name: "Show 2 more levels" })).toBeNull();
-  expect(screen.getAllByRole("link")).toHaveLength(4);
+  expect(navigableLinks()).toHaveLength(4);
   expect(document.activeElement?.textContent).toBe("Projects");
 });
 

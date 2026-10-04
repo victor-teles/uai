@@ -53,6 +53,10 @@ test("follows the APG menu button keyboard pattern", async () => {
   await user.keyboard("{Escape}");
   expect(screen.queryByRole("menu")).toBeNull();
   expect(document.activeElement).toBe(trigger);
+  await user.keyboard("{ArrowUp}");
+  expect(document.activeElement).toBe(screen.getAllByRole("menuitem")[1] as HTMLElement);
+  await user.keyboard("{Escape}");
+  expect(screen.queryByRole("menu")).toBeNull();
 });
 
 test("copies the link and announces the result", async () => {

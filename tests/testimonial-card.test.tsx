@@ -42,22 +42,42 @@ test("ties the quote to its attribution with figure semantics", () => {
   expect(caption?.textContent).toContain("Mara Lindqvist");
   expect(caption?.textContent).toContain("Head of Support");
   expect(caption?.textContent).toContain("Brightmoor");
-  expect(view.getByText("ML").getAttribute("aria-hidden")).toBe("true");
+  expect(
+    view
+      .getByText("ML")
+      .closest("[data-slot='testimonial-card-avatar']")
+      ?.getAttribute("aria-hidden"),
+  ).toBe("true");
   expect(screen.getByRole("link", { name: "Read the case study" }).getAttribute("href")).toBe(
     "https://example.com/case-study",
   );
 });
 
 test("renders an image avatar decoratively", () => {
-  const view = render(
-    <TestimonialCard>
-      <TestimonialCardAuthor>
-        <TestimonialCardAvatar src="/avatar.png" />
-        <TestimonialCardName>Mara</TestimonialCardName>
-      </TestimonialCardAuthor>
-    </TestimonialCard>,
-  );
-  expect(view.container.querySelector("img")?.getAttribute("alt")).toBe("");
+  // The Avatar primitive renders its image only after it loads; happy-dom never loads images.
+  const prototype = window.HTMLImageElement.prototype;
+  const complete = Object.getOwnPropertyDescriptor(prototype, "complete");
+  const naturalWidth = Object.getOwnPropertyDescriptor(prototype, "naturalWidth");
+  Object.defineProperty(prototype, "complete", { configurable: true, get: () => true });
+  Object.defineProperty(prototype, "naturalWidth", { configurable: true, get: () => 32 });
+  try {
+    const view = render(
+      <TestimonialCard>
+        <TestimonialCardAuthor>
+          <TestimonialCardAvatar src="/avatar.png" />
+          <TestimonialCardName>Mara</TestimonialCardName>
+        </TestimonialCardAuthor>
+      </TestimonialCard>,
+    );
+    const image = view.container.querySelector("img");
+    expect(image?.getAttribute("alt")).toBe("");
+    expect(image?.closest("[aria-hidden='true']")).toBeTruthy();
+  } finally {
+    if (complete) Object.defineProperty(prototype, "complete", complete);
+    else Reflect.deleteProperty(prototype, "complete");
+    if (naturalWidth) Object.defineProperty(prototype, "naturalWidth", naturalWidth);
+    else Reflect.deleteProperty(prototype, "naturalWidth");
+  }
 });
 
 test("renders every variant and guards compound children", () => {

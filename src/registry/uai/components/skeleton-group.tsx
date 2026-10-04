@@ -2,6 +2,7 @@
 
 import { cva } from "class-variance-authority";
 import { type ComponentProps, type CSSProperties, createContext, useContext } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/uai-utils";
 
 export const SKELETON_GROUP_VARIANTS = ["shimmer", "pulse", "static"] as const;
@@ -52,7 +53,7 @@ const shapeVariants = cva("block max-w-full flex-none bg-muted", {
       shimmer:
         "animate-[skeleton-shimmer_1.8s_cubic-bezier(0.4,0,0.6,1)_infinite] bg-[linear-gradient(90deg,transparent_0%,color-mix(in_oklab,var(--foreground)_7%,transparent)_50%,transparent_100%)] bg-size-[200%_100%] bg-no-repeat motion-reduce:animate-none motion-reduce:bg-none",
       pulse: "animate-[pulse_1.6s_ease-in-out_infinite] motion-reduce:animate-none",
-      static: "",
+      static: "animate-none",
     },
   },
 });
@@ -65,10 +66,10 @@ function Shape({
   className,
   style,
   ...props
-}: ComponentProps<"span"> & { part: string; slot: string; width: Size; height: Size }) {
+}: ComponentProps<typeof Skeleton> & { part: string; slot: string; width: Size; height: Size }) {
   const variant = useVariant(part);
   return (
-    <span
+    <Skeleton
       data-slot={slot}
       className={cn(shapeVariants({ motion: variant }), className)}
       {...props}
@@ -83,7 +84,7 @@ export function SkeletonGroupLine({
   height = 10,
   className,
   ...props
-}: ComponentProps<"span"> & { width?: Size; height?: Size }) {
+}: ComponentProps<typeof Skeleton> & { width?: Size; height?: Size }) {
   return (
     <Shape
       {...props}
@@ -100,7 +101,7 @@ export function SkeletonGroupCircle({
   size = 28,
   className,
   ...props
-}: ComponentProps<"span"> & { size?: number }) {
+}: ComponentProps<typeof Skeleton> & { size?: number }) {
   return (
     <Shape
       {...props}
@@ -118,7 +119,7 @@ export function SkeletonGroupBlock({
   height = 96,
   className,
   ...props
-}: ComponentProps<"span"> & { width?: Size; height?: Size }) {
+}: ComponentProps<typeof Skeleton> & { width?: Size; height?: Size }) {
   return (
     <Shape
       {...props}

@@ -11,6 +11,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/uai-utils";
 
 export const KANBAN_BOARD_VARIANTS = ["board", "plain", "compact"] as const;
@@ -294,17 +295,18 @@ export function KanbanBoardColumnCount({ className, ...props }: ComponentProps<"
   const column = useColumn("KanbanBoardColumnCount");
   const count = board.value[column.value]?.length ?? 0;
   return (
-    <span
+    <Badge
+      variant="secondary"
       data-slot="kanban-board-column-count"
       className={cn(
-        "min-w-5 rounded-full bg-foreground/7 px-1.5 text-center text-[11px]/[18px] font-medium text-subtle-foreground tabular-nums",
+        "min-w-5 gap-0 rounded-full border-0 bg-foreground/7 px-1.5 py-0 text-center text-[11px]/[18px] font-medium text-subtle-foreground tabular-nums",
         className,
       )}
       {...props}
     >
       {count}
       <span className="sr-only"> {count === 1 ? "card" : "cards"}</span>
-    </span>
+    </Badge>
   );
 }
 
@@ -351,7 +353,7 @@ export function KanbanBoardCard({
     <li
       data-slot="kanban-board-card"
       className={cn(
-        "grid min-w-0 cursor-grab bg-card [transition:box-shadow_120ms_ease-out,transform_160ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:cursor-grabbing motion-reduce:transition-none",
+        "grid min-w-0 cursor-grab bg-card [transition:box-shadow_120ms_ease-out,transform_160ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:cursor-grabbing motion-reduce:transition-none",
         board.variant === "compact"
           ? "gap-1 rounded-lg px-2.5 py-2"
           : "gap-1.5 rounded-[10px] px-3 py-2.5",

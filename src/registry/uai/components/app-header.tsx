@@ -11,6 +11,8 @@ import {
   useState,
 } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/uai-utils";
 
 export const APP_HEADER_VARIANTS = ["bar", "floating", "compact"] as const;
@@ -208,12 +210,16 @@ export function AppHeaderSearch({
   label = "Search",
   className,
   placeholder = "Search",
+  id,
   ...props
 }: AppHeaderSearchProps) {
   const context = useAppHeader("AppHeaderSearch");
+  const generatedId = useId();
+  const inputId = id ?? generatedId;
 
   return (
     <label
+      htmlFor={inputId}
       data-slot="app-header-search"
       className={cn(
         "flex w-full min-w-0 items-center gap-2 rounded-full border border-transparent bg-muted px-3 text-subtle-foreground transition-[border-color,background-color,color] duration-[120ms] ease-out hover:text-muted-foreground focus-within:border-border-strong focus-within:bg-card focus-within:text-muted-foreground md:ml-auto motion-reduce:transition-none",
@@ -222,15 +228,16 @@ export function AppHeaderSearch({
     >
       <Search className="size-3.5 shrink-0" strokeWidth={1.8} aria-hidden="true" />
       <span className="sr-only">{label}</span>
-      <input
+      <Input
         type="search"
         data-slot="app-header-search-input"
         className={cn(
-          "min-w-0 flex-1 bg-transparent text-[12.5px] text-foreground outline-none placeholder:text-subtle-foreground [&::-webkit-search-cancel-button]:hidden",
+          "h-auto min-w-0 flex-1 rounded-none border-0 bg-transparent p-0 text-[12.5px] text-foreground shadow-none outline-none placeholder:text-subtle-foreground focus-visible:border-0 focus-visible:ring-0 md:text-[12.5px] dark:bg-transparent [&::-webkit-search-cancel-button]:hidden",
           className,
         )}
         placeholder={placeholder}
         {...props}
+        id={inputId}
       />
     </label>
   );
@@ -266,22 +273,24 @@ export function AppHeaderAction({
   const context = useAppHeader("AppHeaderAction");
 
   return (
-    <button
+    <Button
       type={type}
       data-slot="app-header-action"
       data-emphasis={emphasis}
+      variant={emphasis === "primary" ? "default" : "ghost"}
+      size="icon"
       className={cn(
-        "inline-flex shrink-0 items-center justify-center font-medium tabular-nums outline-none transition-[background-color,color,filter,scale] duration-[120ms] ease-out focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100",
+        "gap-0 font-medium tabular-nums transition-[background-color,color,filter,scale] duration-[120ms] ease-out focus-visible:border-transparent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100",
         emphasis === "primary"
-          ? "rounded-full bg-primary text-primary-foreground shadow-[0_0_0_1px_oklch(1_0_0_/_0.08)] hover:brightness-[1.08]"
-          : "rounded-lg bg-transparent text-muted-foreground hover:bg-accent hover:text-foreground",
+          ? "rounded-full bg-primary text-primary-foreground shadow-[0_0_0_1px_oklch(1_0_0_/_0.08)] hover:bg-primary hover:brightness-[1.08]"
+          : "rounded-lg bg-transparent text-muted-foreground hover:bg-accent hover:text-foreground dark:hover:bg-accent",
         context.chrome.actionClass,
         className,
       )}
       {...props}
     >
       {children}
-    </button>
+    </Button>
   );
 }
 
@@ -301,10 +310,12 @@ export function AppHeaderMenuButton({
   const Icon = context.open ? X : Menu;
 
   return (
-    <button
+    <Button
       data-slot="app-header-menu-button"
+      variant="ghost"
+      size="icon"
       className={cn(
-        "inline-flex shrink-0 items-center justify-center rounded-lg text-muted-foreground outline-none transition-[background-color,color,scale] duration-[120ms] ease-out hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card active:scale-[0.97] md:hidden motion-reduce:transition-none motion-reduce:active:scale-100",
+        "rounded-lg text-muted-foreground transition-[background-color,color,scale] duration-[120ms] ease-out hover:bg-accent hover:text-foreground focus-visible:border-transparent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card active:scale-[0.97] md:hidden motion-reduce:transition-none motion-reduce:active:scale-100 dark:hover:bg-accent",
         context.chrome.actionClass,
         className,
       )}
@@ -319,6 +330,6 @@ export function AppHeaderMenuButton({
       }}
     >
       <Icon className="size-4" strokeWidth={1.8} aria-hidden="true" />
-    </button>
+    </Button>
   );
 }

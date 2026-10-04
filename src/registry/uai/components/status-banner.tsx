@@ -3,6 +3,7 @@
 import { cva } from "class-variance-authority";
 import { CircleAlert, CircleCheck, Info, TriangleAlert, X } from "lucide-react";
 import { type ComponentProps, createContext, useContext, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/uai-utils";
 
 export const STATUS_BANNER_VARIANTS = ["card", "tinted", "bar"] as const;
@@ -148,13 +149,13 @@ export function StatusBannerActions({ className, ...props }: ComponentProps<"div
 }
 
 const actionVariants = cva(
-  "cursor-pointer rounded-full border-0 font-medium whitespace-nowrap text-foreground [transition:background-color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100",
+  "cursor-pointer rounded-full py-0 text-foreground [transition:background-color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100",
   {
     variants: {
       variant: {
-        card: "h-7 bg-secondary px-3 text-[12.5px]/4 hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
-        tinted: "h-7 bg-foreground/8 px-3 text-[12.5px]/4 hover:bg-foreground/14",
-        bar: "h-6 bg-secondary px-2.5 text-xs/4 hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+        card: "h-7 bg-secondary px-3 text-[12.5px]/4 hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] has-[>svg]:px-3",
+        tinted: "h-7 bg-foreground/8 px-3 text-[12.5px]/4 hover:bg-foreground/14 has-[>svg]:px-3",
+        bar: "h-6 bg-secondary px-2.5 text-xs/4 hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] has-[>svg]:px-2.5",
       },
     },
   },
@@ -163,8 +164,9 @@ const actionVariants = cva(
 export function StatusBannerAction({ className, ...props }: ComponentProps<"button">) {
   const context = useBanner("StatusBannerAction");
   return (
-    <button
+    <Button
       type="button"
+      variant="secondary"
       data-slot="status-banner-action"
       className={cn(actionVariants({ variant: context.variant }), className)}
       {...props}
@@ -173,18 +175,20 @@ export function StatusBannerAction({ className, ...props }: ComponentProps<"butt
 }
 
 export function StatusBannerDismiss({
-  children = <X size={14} aria-hidden="true" />,
+  children = <X size={14} className="size-3.5" aria-hidden="true" />,
   onClick,
   className,
   ...props
 }: ComponentProps<"button">) {
   const context = useBanner("StatusBannerDismiss");
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="icon"
       aria-label="Dismiss"
       data-slot="status-banner-dismiss"
       className={cn(
-        "grid flex-none cursor-pointer place-items-center rounded-lg border-0 bg-transparent text-subtle-foreground [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-foreground/8 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.94] motion-reduce:transition-none motion-reduce:active:scale-100",
+        "flex-none cursor-pointer rounded-lg text-subtle-foreground [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-foreground/8 hover:text-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.94] motion-reduce:transition-none motion-reduce:active:scale-100 dark:hover:bg-foreground/8 [&_svg:not([class*='size-'])]:size-3.5",
         context.variant === "bar"
           ? "-my-0.75 mr-[-4px] ml-0 size-6"
           : "-my-[5px] mr-[-6px] ml-0 size-7",
@@ -198,6 +202,6 @@ export function StatusBannerDismiss({
       }}
     >
       {children}
-    </button>
+    </Button>
   );
 }

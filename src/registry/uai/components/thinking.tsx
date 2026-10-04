@@ -17,10 +17,10 @@ import {
   createContext,
   type ReactNode,
   useContext,
-  useId,
   useState,
 } from "react";
 
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/uai-utils";
 
 export const THINKING_STATUSES = ["thinking", "complete", "error"] as const;
@@ -59,8 +59,6 @@ const statusDetails: Record<
 type ThinkingContextValue = {
   status: ThinkingStatus;
   open: boolean;
-  setOpen: (open: boolean) => void;
-  contentId: string;
 };
 
 const ThinkingContext = createContext<ThinkingContextValue | null>(null);
@@ -79,23 +77,25 @@ export function Thinking({
   ...props
 }: ThinkingProps) {
   const [open, setOpen] = useState(defaultOpen);
-  const contentId = useId();
 
   return (
-    <ThinkingContext.Provider value={{ status, open, setOpen, contentId }}>
-      <section
-        data-slot="thinking"
-        className={cn(
-          "overflow-hidden rounded-[14px] border bg-card text-card-foreground transition-colors duration-150 motion-reduce:transition-none",
-          status === "error" && "border-[color-mix(in_oklab,var(--destructive)_40%,var(--border))]",
-          className,
-        )}
-        {...props}
-        data-status={status}
-        aria-busy={status === "thinking"}
-      >
-        {children}
-      </section>
+    <ThinkingContext.Provider value={{ status, open }}>
+      <Collapsible asChild open={open} onOpenChange={setOpen}>
+        <section
+          data-slot="thinking"
+          className={cn(
+            "overflow-hidden rounded-[14px] border bg-card text-card-foreground transition-colors duration-150 motion-reduce:transition-none",
+            status === "error" &&
+              "border-[color-mix(in_oklab,var(--destructive)_40%,var(--border))]",
+            className,
+          )}
+          {...props}
+          data-status={status}
+          aria-busy={status === "thinking"}
+        >
+          {children}
+        </section>
+      </Collapsible>
     </ThinkingContext.Provider>
   );
 }
@@ -111,7 +111,6 @@ export function ThinkingTrigger({
   summary,
   duration,
   className,
-  onClick,
   ...props
 }: ThinkingTriggerProps) {
   const context = useThinking("ThinkingTrigger");
@@ -119,7 +118,7 @@ export function ThinkingTrigger({
   const StatusIcon = copy.icon;
 
   return (
-    <button
+    <CollapsibleTrigger
       type="button"
       data-slot="thinking-trigger"
       className={cn(
@@ -127,12 +126,6 @@ export function ThinkingTrigger({
         className,
       )}
       {...props}
-      aria-controls={context.contentId}
-      aria-expanded={context.open}
-      onClick={(event) => {
-        onClick?.(event);
-        if (!event.defaultPrevented) context.setOpen(!context.open);
-      }}
     >
       <span
         className={cn(
@@ -195,7 +188,7 @@ export function ThinkingTrigger({
         )}
         aria-hidden="true"
       />
-    </button>
+    </CollapsibleTrigger>
   );
 }
 
@@ -216,19 +209,16 @@ export function ThinkingContent({
   ...props
 }: ThinkingContentProps) {
   const context = useThinking("ThinkingContent");
-  if (!context.open) return null;
-
   const hasActivity = Children.count(children) > 0;
 
   return (
-    <div
+    <CollapsibleContent
       data-slot="thinking-content"
       className={cn(
         "border-t px-3.5 pt-1 pb-1.5 animate-in fade-in-0 slide-in-from-top-1 duration-240 ease-out-quint motion-reduce:animate-none",
         className,
       )}
       {...props}
-      id={context.contentId}
     >
       {hasActivity ? (
         <div role="log" aria-live="polite" aria-relevant="additions text">
@@ -239,7 +229,7 @@ export function ThinkingContent({
           {emptyLabel ?? getEmptyLabel(context.status)}
         </p>
       )}
-    </div>
+    </CollapsibleContent>
   );
 }
 

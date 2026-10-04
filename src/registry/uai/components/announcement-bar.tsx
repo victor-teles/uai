@@ -3,6 +3,7 @@
 import { cva } from "class-variance-authority";
 import { ArrowRight, X } from "lucide-react";
 import { type ComponentProps, createContext, useContext, useEffect, useId, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/uai-utils";
 
 export const ANNOUNCEMENT_BAR_VARIANTS = ["bar", "card", "pill"] as const;
@@ -136,13 +137,13 @@ export function AnnouncementBarActions({ className, ...props }: ComponentProps<"
 }
 
 const actionVariants = cva(
-  "inline-flex items-center gap-1 rounded-full font-medium whitespace-nowrap no-underline [transition:background-color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 [&_svg]:[transition:translate_140ms_cubic-bezier(0.23,1,0.32,1)] hover:[&_svg]:translate-x-0.5 motion-reduce:[&_svg]:transition-none motion-reduce:hover:[&_svg]:translate-x-0",
+  "inline-flex items-center gap-1 rounded-full font-medium whitespace-nowrap no-underline [transition:background-color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-solid active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 [&_svg]:[transition:translate_140ms_cubic-bezier(0.23,1,0.32,1)] hover:[&_svg]:translate-x-0.5 motion-reduce:[&_svg]:transition-none motion-reduce:hover:[&_svg]:translate-x-0",
   {
     variants: {
       variant: {
-        bar: "h-7 bg-primary pr-2.5 pl-3.5 text-[13px] text-primary-foreground hover:bg-primary hover:brightness-108",
-        card: "h-7 bg-secondary pr-2.5 pl-3.5 text-[13px] text-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
-        pill: "h-6.5 bg-secondary pr-2.5 pl-3 text-[12.5px] text-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+        bar: "h-7 bg-primary pr-2.5 pl-3.5 text-[13px] text-primary-foreground hover:bg-primary hover:brightness-108 has-[>svg]:pr-2.5 has-[>svg]:pl-3.5",
+        card: "h-7 bg-secondary pr-2.5 pl-3.5 text-[13px] text-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] has-[>svg]:pr-2.5 has-[>svg]:pl-3.5",
+        pill: "h-6.5 bg-secondary pr-2.5 pl-3 text-[12.5px] text-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] has-[>svg]:pr-2.5 has-[>svg]:pl-3",
       },
     },
   },
@@ -151,19 +152,22 @@ const actionVariants = cva(
 export function AnnouncementBarAction({ children, className, ...props }: ComponentProps<"a">) {
   const context = useAnnouncement("AnnouncementBarAction");
   return (
-    <a
-      data-slot="announcement-bar-action"
+    <Button
+      asChild
+      variant={context.variant === "bar" ? "default" : "secondary"}
+      size="sm"
       className={cn(actionVariants({ variant: context.variant }), className)}
-      {...props}
     >
-      {children}
-      <ArrowRight size={14} strokeWidth={1.75} aria-hidden="true" />
-    </a>
+      <a data-slot="announcement-bar-action" {...props}>
+        {children}
+        <ArrowRight size={14} strokeWidth={1.75} aria-hidden="true" className="size-3.5" />
+      </a>
+    </Button>
   );
 }
 
 export function AnnouncementBarDismiss({
-  children = <X size={14} strokeWidth={1.75} aria-hidden="true" />,
+  children = <X size={14} strokeWidth={1.75} aria-hidden="true" className="size-3.5" />,
   onClick,
   className,
   ...props
@@ -171,13 +175,17 @@ export function AnnouncementBarDismiss({
   const context = useAnnouncement("AnnouncementBarDismiss");
   const pill = context.variant === "pill";
   return (
-    <button
+    <Button
       aria-label="Dismiss announcement"
       data-slot="announcement-bar-dismiss"
+      variant="ghost"
+      size="icon-sm"
       className={cn(
-        "grid cursor-pointer place-items-center border-0 bg-transparent p-0 text-muted-foreground [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:text-foreground active:scale-[0.94] motion-reduce:transition-none motion-reduce:active:scale-100",
+        "grid cursor-pointer place-items-center border-0 bg-transparent p-0 text-muted-foreground [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:text-foreground focus-visible:ring-0 focus-visible:outline-solid active:scale-[0.94] motion-reduce:transition-none motion-reduce:active:scale-100",
         pill ? "size-6.5 rounded-full" : "size-7 rounded-lg",
-        context.variant === "bar" ? "hover:bg-foreground/8" : "hover:bg-accent",
+        context.variant === "bar"
+          ? "hover:bg-foreground/8 dark:hover:bg-foreground/8"
+          : "hover:bg-accent dark:hover:bg-accent",
         className,
       )}
       {...props}
@@ -188,6 +196,6 @@ export function AnnouncementBarDismiss({
       }}
     >
       {children}
-    </button>
+    </Button>
   );
 }

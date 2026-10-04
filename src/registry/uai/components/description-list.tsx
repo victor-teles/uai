@@ -2,6 +2,7 @@
 
 import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, useContext } from "react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/uai-utils";
 
 export const DESCRIPTION_LIST_VARIANTS = ["inline", "stacked", "grid"] as const;
@@ -95,10 +96,12 @@ export function DescriptionListDetails({ className, ...props }: ComponentProps<"
 
 export function DescriptionListAction({ className, ...props }: ComponentProps<"button">) {
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="sm"
       data-slot="description-list-action"
       className={cn(
-        "inline-flex h-6.5 min-w-6.5 shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 bg-transparent px-2.5 text-[12px] font-medium text-muted-foreground [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100",
+        "inline-flex h-6.5 min-w-6.5 shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 bg-transparent px-2.5 text-[12px] font-medium text-muted-foreground [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-accent hover:text-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.97] has-[>svg]:px-2.5 motion-reduce:transition-none motion-reduce:active:scale-100 dark:hover:bg-accent [&_svg:not([class*='size-'])]:size-auto",
         className,
       )}
       {...props}

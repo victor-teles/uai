@@ -9,6 +9,7 @@ import {
   useId,
   useState,
 } from "react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { AuthorCard, type AuthorCardProps } from "@/components/ui/uai/author-card";
 import {
   ShareMenu,
@@ -227,16 +228,25 @@ export function ArticlePageToolbar({
   );
 }
 
+export type ArticlePageTextSizeControlProps = Omit<ComponentProps<"div">, "defaultValue" | "dir">;
+
 /** A radio group that sets the reading size of ArticlePageContent. Arrow keys move the selection. */
 export function ArticlePageTextSizeControl({
   "aria-label": label = "Text size",
   onKeyDown,
   className,
   ...props
-}: ComponentProps<"div">) {
-  const { variant } = useArticle("ArticlePageTextSizeControl");
+}: ArticlePageTextSizeControlProps) {
+  const { variant, textSize, setTextSize } = useArticle("ArticlePageTextSizeControl");
   return (
-    <div
+    <ToggleGroup
+      type="single"
+      rovingFocus={false}
+      spacing={0.5}
+      value={textSize}
+      onValueChange={(next) => {
+        if (next) setTextSize(next as ArticlePageTextSize);
+      }}
       role="radiogroup"
       aria-label={label}
       data-slot="article-page-text-size-control"
@@ -254,7 +264,10 @@ export function ArticlePageTextSizeControl({
   );
 }
 
-export type ArticlePageTextSizeOptionProps = Omit<ComponentProps<"button">, "value"> & {
+export type ArticlePageTextSizeOptionProps = Omit<
+  ComponentProps<typeof ToggleGroupItem>,
+  "value"
+> & {
   value: ArticlePageTextSize;
 };
 
@@ -266,7 +279,6 @@ const optionTextSize: Record<ArticlePageTextSize, string> = {
 
 export function ArticlePageTextSizeOption({
   value,
-  onClick,
   className,
   ...props
 }: ArticlePageTextSizeOptionProps) {
@@ -274,30 +286,23 @@ export function ArticlePageTextSizeOption({
   const checked = context.textSize === value;
   const compact = context.variant === "compact";
   return (
-    // biome-ignore lint/a11y/useSemanticElements: APG radio group built from buttons for custom segmented styling.
-    <button
+    <ToggleGroupItem
       data-slot="article-page-text-size-option"
       className={cn(
         "grid cursor-pointer place-items-center rounded-full border-0 px-1.5 font-medium",
         "[transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)]",
-        "focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring active:scale-94",
+        "focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring focus-visible:outline-solid active:scale-94",
         "motion-reduce:transition-none motion-reduce:active:scale-100",
         compact ? "h-[22px] min-w-6" : "h-6 min-w-7",
         checked
-          ? "bg-accent text-accent-foreground"
-          : "bg-transparent text-subtle-foreground hover:text-foreground",
+          ? "bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground"
+          : "bg-transparent text-subtle-foreground hover:bg-transparent hover:text-foreground",
         optionTextSize[value],
         className,
       )}
       {...props}
-      type="button"
-      role="radio"
-      aria-checked={checked}
+      value={value}
       tabIndex={checked ? 0 : -1}
-      onClick={(event) => {
-        onClick?.(event);
-        if (!event.defaultPrevented) context.setTextSize(value);
-      }}
     />
   );
 }

@@ -10,6 +10,8 @@ import {
   useId,
   useState,
 } from "react";
+import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   DescriptionList,
   type DescriptionListProps,
@@ -46,7 +48,7 @@ const detailsVariants: Record<OrderTrackingVariant, DescriptionListVariant> = {
 };
 
 const actionButton =
-  "transition-[background-color,filter,transform] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100";
+  "transition-[background-color,filter,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100";
 
 const orderTrackingVariants = cva(
   "@container box-border min-w-0 text-[13px]/[18px] text-foreground",
@@ -322,45 +324,47 @@ export function OrderTrackingEarlierEvents({
   const id = useId();
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div
-      data-slot="order-tracking-earlier-events"
-      className={cn("grid gap-2", className)}
-      {...props}
-    >
-      <ol
-        id={id}
-        hidden={!open}
-        className={cn(
-          open ? "grid" : "hidden",
-          "m-0 list-none p-0",
-          "[&>li]:animate-in [&>li]:fade-in-0 [&>li]:slide-in-from-bottom-1 [&>li]:duration-240 [&>li]:ease-out-quint [&>li]:fill-mode-both motion-reduce:[&>li]:animate-none",
-          "[&>li:nth-child(2)]:[animation-delay:40ms] [&>li:nth-child(3)]:[animation-delay:80ms] [&>li:nth-child(4)]:[animation-delay:120ms] [&>li:nth-child(n+5)]:[animation-delay:160ms]",
-        )}
+    <Collapsible open={open} onOpenChange={setOpen} asChild>
+      <div
+        data-slot="order-tracking-earlier-events"
+        className={cn("grid gap-2", className)}
+        {...props}
       >
-        {children}
-      </ol>
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-controls={id}
-        onClick={() => setOpen(!open)}
-        className={cn(
-          actionButton,
-          "-mt-1 mr-0 mb-0 ml-[13px] inline-flex h-7 cursor-pointer items-center gap-1.5 justify-self-start rounded-lg border-0 bg-transparent px-2.5 text-[12.5px] font-medium text-muted-foreground hover:bg-accent hover:text-foreground",
-        )}
-      >
-        {open ? expandedLabel : label}
-        <ChevronDown
-          size={14}
-          strokeWidth={1.75}
-          aria-hidden="true"
-          className={cn(
-            "transition-transform duration-180 ease-out-quint motion-reduce:transition-none",
-            open && "rotate-180",
-          )}
-        />
-      </button>
-    </div>
+        <CollapsibleContent id={id}>
+          <ol
+            className={cn(
+              "m-0 grid list-none p-0",
+              "[&>li]:animate-in [&>li]:fade-in-0 [&>li]:slide-in-from-bottom-1 [&>li]:duration-240 [&>li]:ease-out-quint [&>li]:fill-mode-both motion-reduce:[&>li]:animate-none",
+              "[&>li:nth-child(2)]:[animation-delay:40ms] [&>li:nth-child(3)]:[animation-delay:80ms] [&>li:nth-child(4)]:[animation-delay:120ms] [&>li:nth-child(n+5)]:[animation-delay:160ms]",
+            )}
+          >
+            {children}
+          </ol>
+        </CollapsibleContent>
+        <CollapsibleTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            aria-controls={id}
+            className={cn(
+              actionButton,
+              "-mt-1 mr-0 mb-0 ml-[13px] h-7 cursor-pointer gap-1.5 justify-self-start rounded-lg border-0 bg-transparent px-2.5 py-0 text-[12.5px] text-muted-foreground hover:bg-accent hover:text-foreground has-[>svg]:px-2.5 dark:hover:bg-accent",
+            )}
+          >
+            {open ? expandedLabel : label}
+            <ChevronDown
+              size={14}
+              strokeWidth={1.75}
+              aria-hidden="true"
+              className={cn(
+                "size-3.5 transition-transform duration-180 ease-out-quint motion-reduce:transition-none",
+                open && "rotate-180",
+              )}
+            />
+          </Button>
+        </CollapsibleTrigger>
+      </div>
+    </Collapsible>
   );
 }
 
@@ -407,19 +411,20 @@ export function OrderTrackingSupportAction({
 }: ComponentProps<"a"> & { emphasis?: "primary" | "secondary" }) {
   const { variant } = useTracking("OrderTrackingSupportAction");
   return (
-    <a
-      data-slot="order-tracking-support-action"
+    <Button
+      asChild
+      variant={emphasis === "primary" ? "default" : "secondary"}
       className={cn(
         actionButton,
-        "inline-flex items-center rounded-full px-3.5 text-[12.5px] font-medium no-underline",
+        "rounded-full px-3.5 py-0 text-[12.5px] no-underline has-[>svg]:px-3.5",
         variant === "compact" ? "h-7" : "h-8",
         emphasis === "primary"
-          ? "bg-primary text-primary-foreground hover:brightness-108"
+          ? "bg-primary text-primary-foreground hover:bg-primary hover:brightness-108"
           : "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
         className,
       )}
-      {...props}
-      data-kind={emphasis}
-    />
+    >
+      <a data-slot="order-tracking-support-action" {...props} data-kind={emphasis} />
+    </Button>
   );
 }

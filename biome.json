@@ -15,7 +15,8 @@
       "!.source",
       "!videos/.agents",
       "!.impeccable/mocks",
-      "!.impeccable/questions"
+      "!.impeccable/questions",
+      "!src/components/ui/*.tsx"
     ]
   },
   "formatter": {

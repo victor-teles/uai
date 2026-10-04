@@ -107,7 +107,9 @@ test("exposes progress, failed retry and removal as consumer actions", async () 
       </FileUploadList>
     </FileUpload>,
   );
-  expect((screen.getByRole("progressbar") as HTMLProgressElement).value).toBe(42);
+  const progressbar = screen.getByRole("progressbar", { name: "Uploading brief.pdf" });
+  expect(progressbar.getAttribute("aria-valuenow")).toBe("42");
+  expect(progressbar.getAttribute("aria-valuemax")).toBe("100");
   expect(screen.queryByRole("button", { name: "Retry upload" })).toBeNull();
   view.rerender(
     <FileUpload>

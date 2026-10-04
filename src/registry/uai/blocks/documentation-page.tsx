@@ -11,6 +11,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { Button } from "@/components/ui/button";
 import {
   AppSidebar,
   type AppSidebarProps,
@@ -220,11 +221,11 @@ export function DocumentationPageActions({
 
 type ActionStyleProps = { emphasis?: "primary" | "secondary" };
 const documentationPageActionVariants = cva(
-  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 px-3 text-[12.5px] font-medium whitespace-nowrap no-underline [transition:background-color_120ms_ease-out,filter_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:[transform:scale(0.97)] motion-reduce:transition-none motion-reduce:active:[transform:none]",
+  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 px-3 has-[>svg]:px-3 text-[12.5px] font-medium whitespace-nowrap no-underline [transition:background-color_120ms_ease-out,filter_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] py-0 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:[transform:scale(0.97)] motion-reduce:transition-none motion-reduce:active:[transform:none] [&_svg:not([class*='size-'])]:size-3.5",
   {
     variants: {
       emphasis: {
-        primary: "bg-primary text-primary-foreground hover:brightness-108",
+        primary: "bg-primary text-primary-foreground hover:bg-primary hover:brightness-108",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
       },
@@ -241,8 +242,9 @@ export function DocumentationPageAction({
 }: ComponentProps<"button"> & ActionStyleProps) {
   const { variant } = useDocs("DocumentationPageAction");
   return (
-    <button
+    <Button
       data-slot="documentation-page-action"
+      variant={emphasis === "primary" ? "default" : "secondary"}
       className={cn(
         documentationPageActionVariants({ emphasis, compact: variant === "compact" }),
         className,
@@ -261,15 +263,16 @@ export function DocumentationPageActionLink({
 }: ComponentProps<"a"> & ActionStyleProps) {
   const { variant } = useDocs("DocumentationPageActionLink");
   return (
-    <a
-      data-slot="documentation-page-action-link"
+    <Button
+      asChild
+      variant={emphasis === "primary" ? "default" : "secondary"}
       className={cn(
         documentationPageActionVariants({ emphasis, compact: variant === "compact" }),
         className,
       )}
-      {...props}
-      data-emphasis={emphasis}
-    />
+    >
+      <a data-slot="documentation-page-action-link" {...props} data-emphasis={emphasis} />
+    </Button>
   );
 }
 
@@ -503,9 +506,9 @@ export function DocumentationPagePagerLink({
       {...props}
     >
       <span className="inline-flex items-center gap-1 text-[12px] text-subtle-foreground">
-        {next ? null : <Icon size={12} strokeWidth={1.75} aria-hidden="true" />}
+        {next ? null : <Icon size={12} className="size-3" strokeWidth={1.75} aria-hidden="true" />}
         {label ?? (next ? "Next" : "Previous")}
-        {next ? <Icon size={12} strokeWidth={1.75} aria-hidden="true" /> : null}
+        {next ? <Icon size={12} className="size-3" strokeWidth={1.75} aria-hidden="true" /> : null}
       </span>
       <span className="font-medium wrap-anywhere">{children}</span>
     </a>

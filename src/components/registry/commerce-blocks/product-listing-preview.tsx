@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import {
   ProductListing,
   ProductListingAside,
@@ -24,10 +24,19 @@ import {
   ProductListingProductPrice,
   ProductListingResults,
   ProductListingSort,
+  ProductListingSortOption,
   ProductListingTitle,
   ProductListingToolbar,
   type ProductListingVariant,
 } from "@/components/uai/product-listing";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   EmptyState,
   EmptyStateAction,
@@ -54,6 +63,7 @@ const products = [
 ];
 
 export function ProductListingPreview({ variant = "grid" }: { variant?: ProductListingVariant }) {
+  const glazeId = useId();
   const [glaze, setGlaze] = useState("");
   const [inStock, setInStock] = useState(false);
   const [sort, setSort] = useState("featured");
@@ -71,15 +81,27 @@ export function ProductListingPreview({ variant = "grid" }: { variant?: ProductL
       }}
     >
       <FilterBarControls>
-        <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          Glaze
-          <select value={glaze} onChange={(event) => setGlaze(event.target.value)}>
-            <option value="">All glazes</option>
-            <option>Ash</option>
-            <option>Moss</option>
-            <option>Clay</option>
-          </select>
-        </label>
+        <span style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <Label htmlFor={glazeId}>Glaze</Label>
+          <Select
+            value={glaze || "all"}
+            onValueChange={(next) => setGlaze(next === "all" ? "" : next)}
+          >
+            <SelectTrigger
+              id={glazeId}
+              size="sm"
+              className="h-7 gap-1.5 rounded-full border-0 bg-secondary px-2.5 text-[12.5px] font-medium shadow-none dark:bg-secondary"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All glazes</SelectItem>
+              <SelectItem value="Ash">Ash</SelectItem>
+              <SelectItem value="Moss">Moss</SelectItem>
+              <SelectItem value="Clay">Clay</SelectItem>
+            </SelectContent>
+          </Select>
+        </span>
         <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
           <input
             type="checkbox"
@@ -121,9 +143,13 @@ export function ProductListingPreview({ variant = "grid" }: { variant?: ProductL
               {results.length} of {products.length} products
             </ProductListingCount>
             <ProductListingSort value={sort} onValueChange={setSort}>
-              <option value="featured">Featured</option>
-              <option value="price-asc">Price: low to high</option>
-              <option value="price-desc">Price: high to low</option>
+              <ProductListingSortOption value="featured">Featured</ProductListingSortOption>
+              <ProductListingSortOption value="price-asc">
+                Price: low to high
+              </ProductListingSortOption>
+              <ProductListingSortOption value="price-desc">
+                Price: high to low
+              </ProductListingSortOption>
             </ProductListingSort>
           </ProductListingToolbar>
           {results.length === 0 ? (

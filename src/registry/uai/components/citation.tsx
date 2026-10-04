@@ -10,6 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/uai-utils";
 
 export const CITATION_VARIANTS = ["number", "chip", "underline"] as const;
@@ -137,19 +138,20 @@ export function CitationTrigger({
   const press = useRef<{ pointerType: string; wasOpen: boolean } | null>(null);
   const chip = context.variant === "chip";
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
       data-slot="citation-trigger"
       aria-label={children === undefined ? `Source ${context.index ?? ""}`.trim() : undefined}
       className={cn(
-        "mx-0.5 inline-flex cursor-pointer items-center justify-center gap-1 border-0 bg-muted font-medium text-muted-foreground tabular-nums",
-        "[transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)]",
-        "hover:bg-[color-mix(in_oklab,var(--muted)_80%,var(--foreground))] hover:text-foreground aria-expanded:bg-[color-mix(in_oklab,var(--muted)_80%,var(--foreground))] aria-expanded:text-foreground",
-        "focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring active:scale-94",
+        "mx-0.5 inline-flex shrink cursor-pointer items-center justify-center gap-1 border-0 bg-muted py-0 font-medium text-muted-foreground tabular-nums",
+        "transition-[background-color,color,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)]",
+        "hover:bg-[color-mix(in_oklab,var(--muted)_80%,var(--foreground))] hover:text-foreground aria-expanded:bg-[color-mix(in_oklab,var(--muted)_80%,var(--foreground))] aria-expanded:text-foreground dark:hover:bg-[color-mix(in_oklab,var(--muted)_80%,var(--foreground))]",
+        "focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-1 focus-visible:outline-ring active:scale-94",
         "motion-reduce:transition-none motion-reduce:active:scale-100",
         chip
-          ? "h-5 rounded-md px-[7px] align-[1px] font-mono text-[11px]/none"
-          : "h-[17px] min-w-[17px] rounded-full px-[5px] align-[2px] text-[10.5px]/none",
+          ? "h-5 rounded-md px-[7px] align-[1px] font-mono text-[11px]/none has-[>svg]:px-[7px]"
+          : "h-[17px] min-w-[17px] rounded-full px-[5px] align-[2px] text-[10.5px]/none has-[>svg]:px-[5px]",
         className,
       )}
       {...props}
@@ -176,7 +178,7 @@ export function CitationTrigger({
       }}
     >
       {children ?? context.index}
-    </button>
+    </Button>
   );
 }
 
@@ -263,7 +265,7 @@ export function CitationLink({ children, className, ...props }: ComponentProps<"
         size={14}
         strokeWidth={1.75}
         aria-hidden="true"
-        className="flex-none text-muted-foreground"
+        className="flex-none text-muted-foreground size-3.5"
       />
     </a>
   );

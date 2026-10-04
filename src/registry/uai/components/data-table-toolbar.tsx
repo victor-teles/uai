@@ -7,12 +7,16 @@ import {
   createContext,
   type ReactNode,
   useContext,
-  useEffect,
   useId,
   useLayoutEffect,
   useRef,
   useState,
 } from "react";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/uai-utils";
 
 export const DATA_TABLE_TOOLBAR_VARIANTS = ["toolbar", "stacked", "compact"] as const;
@@ -45,15 +49,15 @@ type ColumnsContext = { value: string[]; toggle: (column: string, visible: boole
 const ColumnsCtx = createContext<ColumnsContext | null>(null);
 
 const easeOut = "cubic-bezier(0.23, 1, 0.32, 1)";
-// Secondary pill: raised fill, lighter on hover, a small press.
+// Secondary pill on the shadcn Button: raised fill, lighter on hover, a small press.
 const controlVariants = cva(
-  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 bg-secondary font-medium whitespace-nowrap text-foreground [transition:background-color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 aria-expanded:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] motion-reduce:transition-none motion-reduce:active:scale-100 [&>svg]:text-muted-foreground",
+  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 bg-secondary py-0 font-medium whitespace-nowrap text-foreground [transition:background-color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 aria-expanded:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] motion-reduce:transition-none motion-reduce:active:scale-100 [&_svg:not([class*='size-'])]:size-3.5 [&>svg]:text-muted-foreground",
   {
     variants: {
       variant: {
-        toolbar: "h-7 px-3 text-[12.5px]/[18px]",
-        stacked: "h-7 px-3 text-[12.5px]/[18px]",
-        compact: "h-6 px-2.5 text-[12px]/[18px]",
+        toolbar: "h-7 px-3 text-[12.5px]/[18px] has-[>svg]:px-3",
+        stacked: "h-7 px-3 text-[12.5px]/[18px] has-[>svg]:px-3",
+        compact: "h-6 px-2.5 text-[12px]/[18px] has-[>svg]:px-2.5",
       },
     },
   },
@@ -149,14 +153,16 @@ export function DataTableToolbarSearch({
         size={14}
         strokeWidth={1.75}
         aria-hidden="true"
-        className="shrink-0 text-subtle-foreground"
+        className="shrink-0 text-subtle-foreground size-3.5"
       />
-      <input
+      <Input
         aria-label={label}
         data-slot="data-table-toolbar-search-input"
         className={cn(
-          "w-full min-w-0 flex-1 border-0 bg-transparent text-inherit outline-none placeholder:text-subtle-foreground [&::-webkit-search-cancel-button]:hidden",
-          compact ? "text-[12px]/[18px]" : "text-[12.5px]/[18px]",
+          "h-auto w-full min-w-0 flex-1 rounded-none border-0 bg-transparent p-0 text-inherit shadow-none outline-none placeholder:text-subtle-foreground focus-visible:ring-0 dark:bg-transparent [&::-webkit-search-cancel-button]:hidden",
+          compact
+            ? "text-[12px]/[18px] md:text-[12px]/[18px]"
+            : "text-[12.5px]/[18px] md:text-[12.5px]/[18px]",
           className,
         )}
         {...props}
@@ -177,17 +183,22 @@ export function DataTableToolbarSearch({
         }}
       />
       {context.search ? (
-        <button
+        <Button
           type="button"
+          variant="secondary"
+          size="icon"
           aria-label="Clear search"
           onClick={() => {
             context.setSearch("");
             inputRef.current?.focus();
           }}
-          className={cn(controlVariants({ variant: context.variant }), "size-5 p-0")}
+          className={cn(
+            controlVariants({ variant: context.variant }),
+            "size-5 p-0 has-[>svg]:p-0 [&_svg:not([class*='size-'])]:size-3",
+          )}
         >
-          <X size={12} strokeWidth={2} aria-hidden="true" />
-        </button>
+          <X size={12} className="size-3" strokeWidth={2} aria-hidden="true" />
+        </Button>
       ) : null}
     </div>
   );
@@ -196,8 +207,9 @@ export function DataTableToolbarSearch({
 export function DataTableToolbarButton({ className, ...props }: ComponentProps<"button">) {
   const context = useToolbar("DataTableToolbarButton");
   return (
-    <button
+    <Button
       data-slot="data-table-toolbar-button"
+      variant="secondary"
       className={cn(controlVariants({ variant: context.variant }), className)}
       {...props}
       type="button"
@@ -211,7 +223,7 @@ export function DataTableToolbarExport({
 }: ComponentProps<"button">) {
   return (
     <DataTableToolbarButton data-slot="data-table-toolbar-export" {...props}>
-      <Download size={14} strokeWidth={1.75} aria-hidden="true" />
+      <Download size={14} className="size-3.5" strokeWidth={1.75} aria-hidden="true" />
       {children}
     </DataTableToolbarButton>
   );
@@ -235,36 +247,8 @@ export function DataTableToolbarColumns({
 }: DataTableToolbarColumnsProps) {
   const context = useToolbar("DataTableToolbarColumns");
   const [internal, setInternal] = useState(defaultValue);
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const panelRef = useRef<HTMLFieldSetElement>(null);
   const panelId = `${context.id}-columns`;
   const visible = value ?? internal;
-
-  useEffect(() => {
-    if (!open) return;
-    const close = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
-    };
-    document.addEventListener("pointerdown", close);
-    return () => document.removeEventListener("pointerdown", close);
-  }, [open]);
-
-  useLayoutEffect(() => {
-    const panel = panelRef.current;
-    if (!open || !panel) return;
-    panel.querySelector("input")?.focus();
-    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    if (reduce || typeof panel.animate !== "function") return;
-    panel.animate(
-      [
-        { opacity: 0, transform: "scale(0.96)" },
-        { opacity: 1, transform: "scale(1)" },
-      ],
-      { duration: 180, easing: "cubic-bezier(0.16, 1, 0.3, 1)" },
-    );
-  }, [open]);
 
   const columns: ColumnsContext = {
     value: visible,
@@ -277,42 +261,31 @@ export function DataTableToolbarColumns({
 
   return (
     <ColumnsCtx.Provider value={columns}>
-      {/* biome-ignore lint/a11y/noStaticElementInteractions: Escape from the trigger or any checkbox closes the panel. */}
-      <div
-        data-slot="data-table-toolbar-columns"
-        className={cn("relative", className)}
-        {...props}
-        ref={rootRef}
-        onKeyDown={(event) => {
-          if (event.key === "Escape" && open) {
-            event.preventDefault();
-            event.stopPropagation();
-            setOpen(false);
-            triggerRef.current?.focus();
-          }
-        }}
-      >
-        <button
-          ref={triggerRef}
-          type="button"
-          aria-expanded={open}
-          aria-controls={panelId}
-          onClick={() => setOpen((current) => !current)}
-          className={controlVariants({ variant: context.variant })}
-        >
-          <Columns3 size={14} strokeWidth={1.75} aria-hidden="true" />
-          {label}
-        </button>
-        {open ? (
-          <fieldset
-            ref={panelRef}
+      <div data-slot="data-table-toolbar-columns" className={cn("relative", className)} {...props}>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              type="button"
+              variant="secondary"
+              className={controlVariants({ variant: context.variant })}
+            >
+              <Columns3 size={14} className="size-3.5" strokeWidth={1.75} aria-hidden="true" />
+              {label}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent
             id={panelId}
-            className="absolute top-[calc(100%+6px)] right-0 z-20 m-0 grid min-w-[184px] origin-top-right gap-px rounded-[14px] border-0 bg-popover p-1 text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_16px_32px_-12px_oklch(0_0_0/0.32),0_4px_8px_-4px_oklch(0_0_0/0.12)]"
+            align="end"
+            sideOffset={6}
+            aria-label={`Visible ${label.toLowerCase()}`}
+            className="w-auto min-w-[184px] rounded-[14px] border-0 bg-popover p-1 text-[13px]/[18px] text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_16px_32px_-12px_oklch(0_0_0/0.32),0_4px_8px_-4px_oklch(0_0_0/0.12)] data-[side=bottom]:slide-in-from-top-0 data-[side=left]:slide-in-from-right-0 data-[side=right]:slide-in-from-left-0 data-[side=top]:slide-in-from-bottom-0 data-[state=open]:zoom-in-96 data-[state=open]:duration-180 data-[state=open]:ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:animate-none"
           >
-            <legend className="sr-only">{`Visible ${label.toLowerCase()}`}</legend>
-            {children}
-          </fieldset>
-        ) : null}
+            <fieldset className="m-0 grid min-w-0 gap-px border-0 p-0">
+              <legend className="sr-only">{`Visible ${label.toLowerCase()}`}</legend>
+              {children}
+            </fieldset>
+          </PopoverContent>
+        </Popover>
       </div>
     </ColumnsCtx.Provider>
   );
@@ -333,25 +306,24 @@ export function DataTableToolbarColumn({
   if (!columns)
     throw new Error("DataTableToolbarColumn must be used within DataTableToolbarColumns");
   return (
-    <label
+    <Label
       data-slot="data-table-toolbar-column"
       className={cn(
-        "flex min-h-[30px] items-center gap-2 rounded-lg px-2 py-1 text-[13px] font-medium",
+        "flex min-h-[30px] items-center gap-2 rounded-lg px-2 py-1 text-[13px] leading-[18px] font-medium select-auto",
         disabled
           ? "cursor-default opacity-45"
           : "cursor-pointer [transition:background-color_120ms_ease-out] hover:bg-accent motion-reduce:transition-none",
         className,
       )}
     >
-      <input
-        type="checkbox"
+      <Checkbox
         disabled={disabled}
         checked={columns.value.includes(value)}
-        onChange={(event) => columns.toggle(value, event.target.checked)}
-        className="m-0 size-3.5 accent-primary"
+        onCheckedChange={(checked) => columns.toggle(value, checked === true)}
+        className="m-0 size-3.5 shadow-none focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid disabled:cursor-default disabled:opacity-100 [&_svg]:size-3"
       />
       {children}
-    </label>
+    </Label>
   );
 }
 

@@ -10,6 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { Button } from "@/components/ui/button";
 import {
   NewsletterForm,
   type NewsletterFormProps,
@@ -212,7 +213,7 @@ export function WaitlistSectionConfirmation({ className, ...props }: ComponentPr
       tabIndex={-1}
       data-slot="waitlist-section-confirmation"
       className={cn(
-        "grid min-w-0 animate-in gap-2 rounded-[14px] bg-[color-mix(in_oklab,var(--success)_10%,var(--card))] p-5 text-start outline-offset-2 fade-in-0 zoom-in-98 slide-in-from-bottom-1 duration-240 ease-[cubic-bezier(0.16,1,0.3,1)] fill-mode-both focus-visible:outline-2 focus-visible:outline-ring motion-reduce:animate-none",
+        "grid min-w-0 animate-in gap-2 rounded-[14px] bg-[color-mix(in_oklab,var(--success)_10%,var(--card))] p-5 text-start outline-offset-2 fade-in-0 zoom-in-98 slide-in-from-bottom-1 duration-240 ease-[cubic-bezier(0.16,1,0.3,1)] fill-mode-both focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-ring motion-reduce:animate-none",
         className,
       )}
       {...props}
@@ -251,11 +252,12 @@ export function WaitlistSectionEmail({ className, ...props }: ComponentProps<"st
 export function WaitlistSectionRestart({ onClick, className, ...props }: ComponentProps<"button">) {
   const waitlist = useWaitlist("WaitlistSectionRestart");
   return (
-    <button
+    <Button
       type="button"
+      variant="link"
       data-slot="waitlist-section-restart"
       className={cn(
-        "h-7 cursor-pointer justify-self-start border-0 bg-transparent p-0 text-[12.5px] font-medium text-foreground underline decoration-border-strong underline-offset-3 transition-[text-decoration-color] duration-120 ease-out hover:decoration-current focus-visible:rounded-[4px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none",
+        "h-7 cursor-pointer justify-self-start rounded-none border-0 bg-transparent p-0 text-[12.5px] text-foreground underline decoration-border-strong underline-offset-3 transition-[text-decoration-color] duration-120 ease-out hover:decoration-current focus-visible:rounded-[4px] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none has-[>svg]:px-0",
         className,
       )}
       {...props}
