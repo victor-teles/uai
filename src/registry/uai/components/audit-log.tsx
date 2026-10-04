@@ -12,6 +12,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/uai-utils";
 
 export const AUDIT_LOG_VARIANTS = ["card", "timeline", "compact"] as const;
@@ -133,45 +134,42 @@ export function AuditLogEvent({
   const timeline = log.variant === "timeline";
   return (
     <EventCtx.Provider value={{ id, open: current, setOpen }}>
-      <li
-        data-slot="audit-log-event"
-        className={cn(
-          "relative grid min-w-0",
-          log.variant === "compact" ? "gap-1" : "gap-1.5",
-          log.variant === "card" && "ml-0 border-b py-1 last:border-b-0",
-          timeline && "ml-1 border-l pt-0 pr-0 pb-2.5 pl-4 last:border-l-transparent",
-          log.variant === "compact" && "ml-0 p-0",
-          className,
-        )}
-        {...props}
-        data-state={current ? "open" : "closed"}
-      >
-        {timeline ? (
-          <span
-            aria-hidden="true"
-            className={cn(
-              "absolute top-2.75 -left-1 size-1.75 rounded-full shadow-[0_0_0_3px_var(--background)] transition-colors duration-120 ease-[ease-out]",
-              current ? "bg-foreground" : "bg-border-strong",
-            )}
-          />
-        ) : null}
-        {children}
-      </li>
+      <Collapsible asChild open={current} onOpenChange={setOpen}>
+        <li
+          data-slot="audit-log-event"
+          className={cn(
+            "relative grid min-w-0",
+            log.variant === "compact" ? "gap-1" : "gap-1.5",
+            log.variant === "card" && "ml-0 border-b py-1 last:border-b-0",
+            timeline && "ml-1 border-l pt-0 pr-0 pb-2.5 pl-4 last:border-l-transparent",
+            log.variant === "compact" && "ml-0 p-0",
+            className,
+          )}
+          {...props}
+          data-state={current ? "open" : "closed"}
+        >
+          {timeline ? (
+            <span
+              aria-hidden="true"
+              className={cn(
+                "absolute top-2.75 -left-1 size-1.75 rounded-full shadow-[0_0_0_3px_var(--background)] transition-colors duration-120 ease-[ease-out]",
+                current ? "bg-foreground" : "bg-border-strong",
+              )}
+            />
+          ) : null}
+          {children}
+        </li>
+      </Collapsible>
     </EventCtx.Provider>
   );
 }
 
-export function AuditLogEventSummary({
-  className,
-  children,
-  onClick,
-  ...props
-}: ComponentProps<"button">) {
+export function AuditLogEventSummary({ className, children, ...props }: ComponentProps<"button">) {
   const log = useLog("AuditLogEventSummary");
   const event = useEvent("AuditLogEventSummary");
   const compact = log.variant === "compact";
   return (
-    <button
+    <CollapsibleTrigger
       data-slot="audit-log-event-summary"
       className={cn(
         "flex w-full cursor-pointer flex-wrap items-baseline gap-x-1.5 gap-y-0.5 border-0 text-left text-inherit [transition:background-color_120ms_ease-out] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none",
@@ -185,22 +183,19 @@ export function AuditLogEventSummary({
       type="button"
       aria-expanded={event.open}
       aria-controls={`${event.id}-details`}
-      onClick={(clickEvent) => {
-        onClick?.(clickEvent);
-        if (!clickEvent.defaultPrevented) event.setOpen(!event.open);
-      }}
     >
       <ChevronRight
         size={14}
         strokeWidth={1.75}
         aria-hidden="true"
         className={cn(
+          "size-3.5",
           "shrink-0 self-center text-subtle-foreground transition-[rotate] duration-180 ease-out-quint",
           event.open && "rotate-90",
         )}
       />
       {children}
-    </button>
+    </CollapsibleTrigger>
   );
 }
 
@@ -266,21 +261,24 @@ export function AuditLogEventDetails({ className, ...props }: ComponentProps<"dl
   }, [event.open]);
   const compact = log.variant === "compact";
   return (
-    <dl
-      data-slot="audit-log-event-details"
-      className={cn(
-        "grid-cols-[minmax(88px,max-content)_minmax(0,1fr)] gap-x-4 gap-y-1.5 bg-background text-xs/4 shadow-[inset_0_0_0_1px_var(--border)]",
-        event.open ? "grid" : "hidden",
-        compact
-          ? "mt-0 mr-0 mb-1 ml-6.5 rounded-lg px-2.5 py-2"
-          : "mt-0 mr-0 mb-2 ml-7 rounded-[10px] px-3 py-2.5",
-        className,
-      )}
-      {...props}
-      ref={ref}
-      id={`${event.id}-details`}
-      hidden={!event.open}
-    />
+    // Details stay mounted while closed so `aria-controls` always points at an element.
+    <CollapsibleContent asChild forceMount>
+      <dl
+        data-slot="audit-log-event-details"
+        className={cn(
+          "grid-cols-[minmax(88px,max-content)_minmax(0,1fr)] gap-x-4 gap-y-1.5 bg-background text-xs/4 shadow-[inset_0_0_0_1px_var(--border)]",
+          event.open ? "grid" : "hidden",
+          compact
+            ? "mt-0 mr-0 mb-1 ml-6.5 rounded-lg px-2.5 py-2"
+            : "mt-0 mr-0 mb-2 ml-7 rounded-[10px] px-3 py-2.5",
+          className,
+        )}
+        {...props}
+        ref={ref}
+        id={`${event.id}-details`}
+        hidden={!event.open}
+      />
+    </CollapsibleContent>
   );
 }
 

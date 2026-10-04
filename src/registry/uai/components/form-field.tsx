@@ -2,6 +2,9 @@
 
 import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, useContext, useId, useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/uai-utils";
 
 export const FORM_FIELD_VARIANTS = ["outlined", "filled", "compact"] as const;
@@ -46,20 +49,23 @@ const formFieldVariants = cva("grid min-w-0 text-[13px]/[18px] text-foreground",
 
 const formFieldControlVariants = cva(
   [
-    "box-border block w-full min-w-0 border text-foreground outline-none",
+    "box-border block h-auto w-full min-w-0 border text-foreground shadow-none outline-none",
     "transition-[border-color,background-color,box-shadow] duration-120 ease-[ease-out] motion-reduce:transition-none",
     "placeholder:text-subtle-foreground",
     "hover:enabled:not-focus:border-border-strong",
-    "focus:border-border-strong focus:ring-3 focus:ring-primary/24",
-    "aria-invalid:border-destructive/70 aria-invalid:focus:border-destructive aria-invalid:focus:ring-destructive/22",
+    "focus-visible:border-border-strong focus-visible:ring-3 focus-visible:ring-primary/24",
+    "aria-invalid:border-destructive/70 aria-invalid:focus-visible:border-destructive aria-invalid:focus-visible:ring-destructive/22",
     "disabled:cursor-not-allowed disabled:opacity-55",
   ],
   {
     variants: {
       variant: {
-        outlined: "rounded-[10px] border-border bg-background px-3 py-2.25 text-[13px]/[18px]",
-        filled: "rounded-[10px] border-transparent bg-muted px-3 py-2.25 text-[13px]/[18px]",
-        compact: "rounded-lg border-border bg-background px-2.5 py-1.5 text-[12.5px]/[18px]",
+        outlined:
+          "rounded-[10px] border-border bg-background px-3 py-2.25 text-[13px]/[18px] md:text-[13px]/[18px] dark:bg-background",
+        filled:
+          "rounded-[10px] border-transparent bg-muted px-3 py-2.25 text-[13px]/[18px] md:text-[13px]/[18px] dark:bg-muted",
+        compact:
+          "rounded-lg border-border bg-background px-2.5 py-1.5 text-[12.5px]/[18px] md:text-[12.5px]/[18px] dark:bg-background",
       },
     },
   },
@@ -110,10 +116,10 @@ export function FormField({
 export function FormFieldLabel({ className, children, ...props }: ComponentProps<"label">) {
   const context = useField();
   return (
-    <label
+    <Label
       data-slot="form-field-label"
       className={cn(
-        "font-medium",
+        "block font-medium leading-[18px] select-auto",
         context.variant === "compact" ? "text-[12.5px]" : "text-[13px]",
         className,
       )}
@@ -124,7 +130,7 @@ export function FormFieldLabel({ className, children, ...props }: ComponentProps
       {context.required && (
         <span className="text-[12px] font-normal text-subtle-foreground"> (required)</span>
       )}
-    </label>
+    </Label>
   );
 }
 function fieldControl(context: FieldContext) {
@@ -148,7 +154,7 @@ export function FormFieldInput({
 >) {
   const context = useField();
   return (
-    <input
+    <Input
       data-slot="form-field-input"
       className={cn(formFieldControlVariants({ variant: context.variant }), className)}
       {...props}
@@ -170,12 +176,12 @@ export function FormFieldTextarea({
 >) {
   const context = useField();
   return (
-    <textarea
+    <Textarea
       rows={3}
       data-slot="form-field-textarea"
       className={cn(
         formFieldControlVariants({ variant: context.variant }),
-        "resize-y",
+        "field-sizing-fixed resize-y",
         context.variant === "compact" ? "min-h-14" : "min-h-19",
         className,
       )}

@@ -3,6 +3,15 @@
 import { cva } from "class-variance-authority";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { type ComponentProps, createContext, useContext, useId, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   EmptyState,
   type EmptyStateProps,
@@ -51,9 +60,9 @@ const emptyVariants: Record<SearchResultsVariant, EmptyStateVariant> = {
 };
 
 const interactiveTransition =
-  "[transition:background-color_120ms_ease-out,color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none";
+  "transition-[background-color,color,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none";
 const focusRing =
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
+  "focus-visible:ring-0 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
 
 const searchResultsVariants = cva(
   "flex min-w-0 flex-wrap items-start text-[13px]/[18px] text-foreground",
@@ -160,32 +169,85 @@ export function SearchResultsSummary({ className, ...props }: ComponentProps<"p"
   );
 }
 
-/** A labelled native select for ranking. The consumer supplies the options. */
+export type SearchResultsSortProps = Omit<
+  ComponentProps<typeof SelectTrigger>,
+  "id" | "size" | "value" | "defaultValue" | "onChange" | "name"
+> & {
+  label?: string;
+  value?: string;
+  defaultValue?: string;
+  onValueChange?: (value: string) => void;
+  name?: string;
+};
+
+/** A labelled select for ranking. Compose SearchResultsSortOption items inside. */
 export function SearchResultsSort({
   label = "Sort by",
+  value,
+  defaultValue,
+  onValueChange,
+  name,
   className,
+  children,
   ...props
-}: Omit<ComponentProps<"select">, "id"> & { label?: string }) {
+}: SearchResultsSortProps) {
   const context = useResults("SearchResultsSort");
   const compact = context.variant === "compact";
   return (
     <span className="inline-flex items-center gap-2">
-      <label htmlFor={`${context.id}-sort`} className="text-[12px] text-subtle-foreground">
+      <Label
+        htmlFor={`${context.id}-sort`}
+        className="text-[12px] leading-[inherit] font-normal text-subtle-foreground select-auto"
+      >
         {label}
-      </label>
-      <select
-        data-slot="search-results-sort"
-        className={cn(
-          "cursor-pointer rounded-lg border-0 bg-secondary pr-1.5 pl-2.5 font-medium text-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
-          compact ? "h-[26px] text-[12px]" : "h-7 text-[12.5px]",
-          interactiveTransition,
-          focusRing,
-          className,
-        )}
-        {...props}
-        id={`${context.id}-sort`}
-      />
+      </Label>
+      <Select name={name} value={value} defaultValue={defaultValue} onValueChange={onValueChange}>
+        <SelectTrigger
+          data-slot="search-results-sort"
+          className={cn(
+            "w-auto cursor-pointer gap-1 rounded-lg border-0 bg-secondary py-0 pr-1.5 pl-2.5 font-medium text-foreground shadow-none hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] dark:bg-secondary dark:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] [&_svg]:size-3.5",
+            compact
+              ? "text-[12px]/[18px] data-[size=default]:h-[26px]"
+              : "text-[12.5px]/[18px] data-[size=default]:h-7",
+            interactiveTransition,
+            focusRing,
+            className,
+          )}
+          {...props}
+          id={`${context.id}-sort`}
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent
+          position="popper"
+          align="end"
+          className="min-w-36 rounded-[14px] border-0 bg-popover text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_12px_28px_-10px_oklch(0_0_0/0.32),0_2px_6px_-2px_oklch(0_0_0/0.12)] duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-[state=open]:zoom-in-96 data-[state=open]:[--tw-enter-translate-x:0]! data-[state=open]:[--tw-enter-translate-y:0]! motion-reduce:data-[state=closed]:animate-none motion-reduce:data-[state=open]:animate-none"
+        >
+          {children}
+        </SelectContent>
+      </Select>
     </span>
+  );
+}
+
+/** One ranking option inside SearchResultsSort. */
+export function SearchResultsSortOption({
+  className,
+  ...props
+}: ComponentProps<typeof SelectItem>) {
+  const context = useResults("SearchResultsSortOption");
+  return (
+    <SelectItem
+      data-slot="search-results-sort-option"
+      className={cn(
+        "cursor-pointer rounded-[10px] text-foreground focus:bg-accent focus:text-foreground",
+        context.variant === "compact"
+          ? "min-h-7 py-1 pr-7 pl-2 text-[12.5px]/[18px]"
+          : "min-h-8 py-1.5 pr-8 pl-2.5 text-[13px]/[18px]",
+        className,
+      )}
+      {...props}
+    />
   );
 }
 
@@ -345,7 +407,7 @@ export function SearchResultsPagination({
   };
   const size = variant === "compact" ? "min-w-6" : "min-w-7";
   const button = cn(
-    "inline-grid cursor-pointer place-items-center rounded-lg border-0 bg-transparent px-1.5 text-[12.5px] font-medium text-muted-foreground tabular-nums enabled:hover:bg-accent enabled:hover:text-foreground enabled:active:scale-[0.97] disabled:cursor-default disabled:opacity-40 aria-[current=page]:bg-accent aria-[current=page]:text-foreground motion-reduce:enabled:active:scale-100",
+    "inline-grid cursor-pointer place-items-center gap-0 rounded-lg border-0 bg-transparent px-1.5 py-0 text-[12.5px] text-muted-foreground tabular-nums has-[>svg]:px-1.5 hover:bg-accent hover:text-foreground enabled:active:scale-[0.97] disabled:cursor-default disabled:opacity-40 aria-[current=page]:bg-accent aria-[current=page]:text-foreground motion-reduce:enabled:active:scale-100 dark:hover:bg-accent",
     size,
     variant === "compact" ? "h-6" : "h-7",
     interactiveTransition,
@@ -361,15 +423,16 @@ export function SearchResultsPagination({
     >
       <ul className="m-0 flex list-none flex-wrap items-center gap-0.5 p-0">
         <li>
-          <button
+          <Button
             type="button"
+            variant="ghost"
             aria-label="Previous page"
             disabled={current === 1}
             onClick={() => go(current - 1)}
             className={button}
           >
-            <ChevronLeft size={15} strokeWidth={1.75} aria-hidden="true" />
-          </button>
+            <ChevronLeft size={15} strokeWidth={1.75} aria-hidden="true" className="size-[15px]" />
+          </Button>
         </li>
         {visiblePages(current, pageCount).map((value, index) =>
           value === "gap" ? (
@@ -383,28 +446,30 @@ export function SearchResultsPagination({
             </li>
           ) : (
             <li key={value}>
-              <button
+              <Button
                 type="button"
+                variant="ghost"
                 aria-label={`Page ${value}`}
                 aria-current={value === current ? "page" : undefined}
                 onClick={() => go(value)}
                 className={button}
               >
                 {value}
-              </button>
+              </Button>
             </li>
           ),
         )}
         <li>
-          <button
+          <Button
             type="button"
+            variant="ghost"
             aria-label="Next page"
             disabled={current === pageCount}
             onClick={() => go(current + 1)}
             className={button}
           >
-            <ChevronRight size={15} strokeWidth={1.75} aria-hidden="true" />
-          </button>
+            <ChevronRight size={15} strokeWidth={1.75} aria-hidden="true" className="size-[15px]" />
+          </Button>
         </li>
       </ul>
     </nav>

@@ -33,6 +33,7 @@ type ManualSource = {
   code: string;
   path: string;
   packages: readonly string[];
+  primitives: readonly string[];
   registryItems: readonly string[];
 };
 
@@ -72,13 +73,17 @@ function useManualSource(selectedId: RegistryItemId, enabled: boolean) {
             ? toProjectPath(sourceFile.target)
             : (sourceFile.path ?? `components/ui/uai/${selectedId}.tsx`),
           packages: document.dependencies ?? [],
-          registryItems: (document.registryDependencies ?? []).map(
-            (url) =>
-              url
-                .split("/")
-                .at(-1)
-                ?.replace(/\.json$/, "") ?? url,
-          ),
+          // Bare names are shadcn primitives; full URLs are Uai registry items.
+          primitives: (document.registryDependencies ?? []).filter((dep) => !dep.includes("/")),
+          registryItems: (document.registryDependencies ?? [])
+            .filter((dep) => dep.includes("/"))
+            .map(
+              (url) =>
+                url
+                  .split("/")
+                  .at(-1)
+                  ?.replace(/\.json$/, "") ?? url,
+            ),
         });
       } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") return;
@@ -136,6 +141,9 @@ function ManualInstall({ selectedId }: { selectedId: RegistryItemId }) {
   const installPackages = manualSource?.packages.length
     ? `bun add ${manualSource.packages.join(" ")}`
     : null;
+  const installPrimitives = manualSource?.primitives.length
+    ? `bunx shadcn@latest add ${manualSource.primitives.join(" ")}`
+    : null;
 
   return (
     <section
@@ -160,6 +168,15 @@ function ManualInstall({ selectedId }: { selectedId: RegistryItemId }) {
               <div className="uai-manual__command">
                 <code>{installPackages}</code>
                 <CopyButton text={installPackages} label="Copy package install command" />
+              </div>
+            </li>
+          ) : null}
+          {installPrimitives ? (
+            <li>
+              <p>Add the shadcn primitives it composes.</p>
+              <div className="uai-manual__command">
+                <code>{installPrimitives}</code>
+                <CopyButton text={installPrimitives} label="Copy primitive install command" />
               </div>
             </li>
           ) : null}

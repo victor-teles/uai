@@ -10,6 +10,8 @@ import {
   useId,
   useState,
 } from "react";
+import { Button } from "@/components/ui/button";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { AuthorCard, type AuthorCardProps } from "@/components/ui/uai/author-card";
 import { EmptyState, type EmptyStateProps } from "@/components/ui/uai/empty-state";
 import {
@@ -59,6 +61,9 @@ const pill =
 const pillIdle =
   "bg-transparent text-muted-foreground enabled:hover:bg-accent enabled:hover:text-foreground";
 const pillSelected = "bg-accent text-foreground";
+/** Replaces the primitive focus ring and size defaults with the Uai outline. */
+const pillFocus =
+  "focus-visible:ring-0 focus-visible:outline-solid [&_svg:not([class*='size-'])]:size-3.5";
 const feedLink =
   "no-underline transition-[color] duration-120 ease-out hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none";
 
@@ -169,20 +174,29 @@ export function CommunityFeedDescription({ className, ...props }: ComponentProps
   );
 }
 
+export type CommunityFeedFiltersProps = Omit<ComponentProps<"div">, "defaultValue" | "dir">;
+
 /** A radio group of feed filters. Arrow keys move the selection; changing it returns to page 1. */
 export function CommunityFeedFilters({
   "aria-label": label = "Filter posts",
   onKeyDown,
   className,
   ...props
-}: ComponentProps<"div">) {
-  useFeed("CommunityFeedFilters");
+}: CommunityFeedFiltersProps) {
+  const { filter, setFilter } = useFeed("CommunityFeedFilters");
   return (
-    <div
+    <ToggleGroup
+      type="single"
+      rovingFocus={false}
+      spacing={1}
+      value={filter}
+      onValueChange={(next) => {
+        if (next) setFilter(next);
+      }}
       role="radiogroup"
       aria-label={label}
       data-slot="community-feed-filters"
-      className={cn("flex flex-wrap items-center gap-1", className)}
+      className={cn("flex w-auto flex-wrap items-center gap-1 rounded-none", className)}
       {...props}
       onKeyDown={(event) => {
         onKeyDown?.(event);
@@ -192,34 +206,28 @@ export function CommunityFeedFilters({
   );
 }
 
-export function CommunityFeedFilter({
-  value,
-  onClick,
-  className,
-  ...props
-}: Omit<ComponentProps<"button">, "value"> & { value: string }) {
+export type CommunityFeedFilterProps = Omit<ComponentProps<typeof ToggleGroupItem>, "value"> & {
+  value: string;
+};
+
+export function CommunityFeedFilter({ value, className, ...props }: CommunityFeedFilterProps) {
   const context = useFeed("CommunityFeedFilter");
   const checked = context.filter === value;
   return (
-    // biome-ignore lint/a11y/useSemanticElements: APG radio group built from buttons for custom segmented styling.
-    <button
+    <ToggleGroupItem
       data-slot="community-feed-filter"
       className={cn(
-        "inline-flex cursor-pointer items-center gap-1.5 rounded-full border-0 px-3 text-[12.5px] font-medium whitespace-nowrap",
+        "inline-flex min-w-0 cursor-pointer items-center gap-1.5 rounded-full border-0 px-3 text-[12.5px] font-medium whitespace-nowrap",
         context.variant === "compact" ? "h-6" : "h-7",
         checked ? pillSelected : pillIdle,
+        "hover:bg-accent hover:text-foreground data-[state=on]:text-foreground",
         pill,
+        pillFocus,
         className,
       )}
       {...props}
-      type="button"
-      role="radio"
-      aria-checked={checked}
+      value={value}
       tabIndex={checked ? 0 : -1}
-      onClick={(event) => {
-        onClick?.(event);
-        if (!event.defaultPrevented) context.setFilter(value);
-      }}
     />
   );
 }
@@ -434,10 +442,12 @@ export function CommunityFeedPagination({
   if (pageCount <= 1) return null;
   const button = (current: boolean) =>
     cn(
-      "inline-grid cursor-pointer place-items-center rounded-full border-0 px-1.5 text-[12.5px] font-medium tabular-nums disabled:opacity-40",
+      "inline-grid cursor-pointer place-items-center gap-0 rounded-full border-0 px-1.5 py-0 text-[12.5px] font-medium tabular-nums has-[>svg]:px-1.5 disabled:opacity-40",
       context.variant === "compact" ? "h-6 min-w-6" : "h-7 min-w-7",
       current ? pillSelected : pillIdle,
+      "hover:bg-accent hover:text-foreground dark:hover:bg-accent",
       pill,
+      pillFocus,
     );
   const { page, setPage } = context;
   return (
@@ -447,15 +457,16 @@ export function CommunityFeedPagination({
       className={cn("flex flex-wrap items-center justify-center gap-0.5", className)}
       {...props}
     >
-      <button
+      <Button
+        variant="ghost"
         type="button"
         aria-label="Previous page"
         disabled={page <= 1}
         onClick={() => setPage(page - 1)}
         className={button(false)}
       >
-        <ChevronLeft size={14} strokeWidth={1.75} aria-hidden="true" />
-      </button>
+        <ChevronLeft size={14} className="size-3.5" strokeWidth={1.75} aria-hidden="true" />
+      </Button>
       {pageItems(page, pageCount).map((item, index) =>
         item === "gap" ? (
           <span
@@ -467,7 +478,8 @@ export function CommunityFeedPagination({
             …
           </span>
         ) : (
-          <button
+          <Button
+            variant="ghost"
             key={item}
             type="button"
             aria-label={`Page ${item}`}
@@ -476,18 +488,19 @@ export function CommunityFeedPagination({
             className={button(item === page)}
           >
             {item}
-          </button>
+          </Button>
         ),
       )}
-      <button
+      <Button
+        variant="ghost"
         type="button"
         aria-label="Next page"
         disabled={page >= pageCount}
         onClick={() => setPage(page + 1)}
         className={button(false)}
       >
-        <ChevronRight size={14} strokeWidth={1.75} aria-hidden="true" />
-      </button>
+        <ChevronRight size={14} className="size-3.5" strokeWidth={1.75} aria-hidden="true" />
+      </Button>
     </nav>
   );
 }

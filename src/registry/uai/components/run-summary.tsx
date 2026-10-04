@@ -12,6 +12,7 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { type ComponentProps, createContext, type ReactNode, useContext, useId } from "react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/uai-utils";
 
 export const RUN_SUMMARY_VARIANTS = ["card", "plain", "compact"] as const;
@@ -274,7 +275,12 @@ export function RunSummaryArtifact({
       {...props}
       data-change={change}
     >
-      <Icon size={13} strokeWidth={2} aria-hidden="true" className={cn("flex-none", changeClass)} />
+      <Icon
+        size={13}
+        strokeWidth={2}
+        aria-hidden="true"
+        className={cn("size-[13px]", "flex-none", changeClass)}
+      />
       <span className="sr-only">{label}: </span>
       <span
         className={cn(
@@ -335,7 +341,11 @@ export function RunSummaryWarning({ className, children, ...props }: ComponentPr
       )}
       {...props}
     >
-      <TriangleAlert size={14} aria-hidden="true" className="mt-0.5 flex-none text-warning" />
+      <TriangleAlert
+        size={14}
+        aria-hidden="true"
+        className="mt-0.5 flex-none text-warning size-3.5"
+      />
       <span className="min-w-0 wrap-anywhere">{children}</span>
     </li>
   );
@@ -365,7 +375,7 @@ export function RunSummaryNextStep({ className, children, ...props }: ComponentP
         size={13}
         strokeWidth={1.75}
         aria-hidden="true"
-        className="mt-0.75 flex-none text-subtle-foreground"
+        className="mt-0.75 flex-none text-subtle-foreground size-[13px]"
       />
       <span className="min-w-0">{children}</span>
     </li>
@@ -392,17 +402,20 @@ export function RunSummaryAction({ primary = false, className, ...props }: RunSu
   const context = useRunSummary("RunSummaryAction");
   const compact = context.variant === "compact";
   return (
-    <button
+    <Button
       type="button"
+      variant={primary ? "default" : "secondary"}
       data-slot="run-summary-action"
       data-emphasis={primary ? "primary" : "secondary"}
       className={cn(
-        "cursor-pointer rounded-full border-0 font-medium",
+        "cursor-pointer rounded-full py-0",
         "[transition:background-color_120ms_ease-out,filter_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100",
-        "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
-        compact ? "h-7 px-3 text-[12.5px]" : "h-8 px-3.5 text-[13px]",
+        "focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring",
+        compact
+          ? "h-7 px-3 text-[12.5px] has-[>svg]:px-3"
+          : "h-8 px-3.5 text-[13px] has-[>svg]:px-3.5",
         primary
-          ? "bg-primary text-primary-foreground hover:brightness-[1.08]"
+          ? "bg-primary text-primary-foreground hover:bg-primary hover:brightness-[1.08]"
           : "bg-secondary text-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
         className,
       )}

@@ -101,7 +101,7 @@ test("labels native account fields, consent, and provider actions", () => {
   expect(screen.getByRole("button", { name: "Continue with SSO" }).getAttribute("type")).toBe(
     "button",
   );
-  expect((screen.getByRole("checkbox") as HTMLInputElement).required).toBe(true);
+  expect(screen.getByRole("checkbox").getAttribute("aria-required")).toBe("true");
   expect(screen.getByRole("button", { name: "Create account" }).getAttribute("type")).toBe(
     "submit",
   );

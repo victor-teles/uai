@@ -12,6 +12,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { Button } from "@/components/ui/button";
 import {
   StatusBanner,
   StatusBannerContent,
@@ -82,19 +83,19 @@ const onboardingWizardVariants = cva(
 );
 
 const onboardingWizardButtonVariants = cva(
-  "cursor-pointer rounded-full border-0 font-medium [transition:background-color_120ms_ease-out,color_120ms_ease-out,filter_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
+  "cursor-pointer rounded-full border-0 py-0 [transition:background-color_120ms_ease-out,color_120ms_ease-out,filter_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
   {
     variants: {
       emphasis: {
-        primary: "bg-primary text-primary-foreground enabled:hover:brightness-108",
+        primary: "bg-primary text-primary-foreground hover:bg-primary enabled:hover:brightness-108",
         secondary:
           "bg-secondary text-secondary-foreground enabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
         ghost:
           "bg-transparent text-muted-foreground enabled:hover:bg-accent enabled:hover:text-accent-foreground",
       },
       size: {
-        default: "h-8 px-3.5 text-[13px]",
-        compact: "h-7 px-3 text-[12.5px]",
+        default: "h-8 px-3.5 text-[13px] has-[>svg]:px-3.5",
+        compact: "h-7 px-3 text-[12.5px] has-[>svg]:px-3",
       },
     },
   },
@@ -322,7 +323,7 @@ export function OnboardingWizardProgressStep({
         <button
           type="button"
           onClick={() => context.goTo(value)}
-          className="grid cursor-pointer gap-0.5 border-0 bg-transparent p-0 text-start text-inherit hover:text-foreground focus-visible:rounded-[6px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          className="grid cursor-pointer gap-0.5 border-0 bg-transparent p-0 text-start text-inherit hover:text-foreground focus-visible:rounded-[6px] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring"
         >
           {children}
         </button>
@@ -465,8 +466,9 @@ export function OnboardingWizardBack({ onClick, className, ...props }: Component
   const context = useWizard("OnboardingWizardBack");
   if (context.index === 0) return null;
   return (
-    <button
+    <Button
       type="button"
+      variant="secondary"
       data-slot="onboarding-wizard-back"
       className={cn(
         onboardingWizardButtonVariants({
@@ -491,8 +493,9 @@ export function OnboardingWizardSkip({ onClick, className, ...props }: Component
   const context = useWizard("OnboardingWizardSkip");
   if (!context.steps[context.index]?.optional) return null;
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
       data-slot="onboarding-wizard-skip"
       className={cn(
         onboardingWizardButtonVariants({ emphasis: "ghost", size: buttonSize(context.variant) }),
@@ -526,7 +529,7 @@ function Advance({
   const context = useWizard(part);
   if ((context.index === context.steps.length - 1) !== last) return null;
   return (
-    <button
+    <Button
       type="button"
       data-slot={slot}
       className={cn(
@@ -548,7 +551,7 @@ function Advance({
       ) : (
         children
       )}
-    </button>
+    </Button>
   );
 }
 

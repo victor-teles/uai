@@ -1,6 +1,7 @@
 import { cva } from "class-variance-authority";
 import { ArrowUpRight } from "lucide-react";
 import { type ComponentProps, createContext, useContext, useId } from "react";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/uai-utils";
 
 export const CHANGELOG_ENTRY_VARIANTS = ["timeline", "card", "compact"] as const;
@@ -78,10 +79,11 @@ export function ChangelogEntryHeader({ className, ...props }: ComponentProps<"di
 export function ChangelogEntryVersion({ className, ...props }: ComponentProps<"span">) {
   const { variant } = useEntry("ChangelogEntryVersion");
   return (
-    <span
+    <Badge
+      variant="secondary"
       data-slot="changelog-entry-version"
       className={cn(
-        "inline-flex items-center rounded-md bg-muted px-1.75 font-mono text-[11.5px] font-medium text-foreground tabular-nums",
+        "gap-0 rounded-md border-0 bg-muted px-1.75 py-0 font-mono text-[11.5px] font-medium text-foreground tabular-nums",
         variant === "compact" ? "h-5" : "h-5.5",
         className,
       )}
@@ -165,18 +167,19 @@ export function ChangelogEntryCategory({
 }: ComponentProps<"li"> & { tone?: ChangelogEntryCategoryTone }) {
   useEntry("ChangelogEntryCategory");
   return (
-    <li
-      data-slot="changelog-entry-category"
+    <Badge
+      asChild
+      variant="secondary"
       className={cn(
-        "inline-flex h-5 items-center rounded-full px-2 text-[11.5px]/4 font-medium",
+        "h-5 rounded-full border-0 px-2 py-0 text-[11.5px]/4 font-medium",
         toneClasses[tone],
         className,
       )}
-      {...props}
-      data-tone={tone}
     >
-      {children}
-    </li>
+      <li data-slot="changelog-entry-category" {...props} data-tone={tone}>
+        {children}
+      </li>
+    </Badge>
   );
 }
 
@@ -222,14 +225,14 @@ export function ChangelogEntryChange({
       {href ? (
         <a
           href={href}
-          className="group/link text-foreground underline decoration-border-strong underline-offset-3 transition-[text-decoration-color] duration-120 ease-[ease-out] hover:decoration-current focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none"
+          className="group/link text-foreground underline decoration-border-strong underline-offset-3 transition-[text-decoration-color] duration-120 ease-[ease-out] hover:decoration-current focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none"
         >
           {children}
           <ArrowUpRight
             size={12}
             strokeWidth={2}
             aria-hidden="true"
-            className="ms-0.5 inline-block align-[-1px] text-subtle-foreground [transition:translate_140ms_var(--ease-out-quint),color_120ms_ease-out] group-hover/link:translate-x-px group-hover/link:-translate-y-px group-hover/link:text-foreground motion-reduce:transition-none"
+            className="ms-0.5 inline-block align-[-1px] text-subtle-foreground [transition:translate_140ms_var(--ease-out-quint),color_120ms_ease-out] group-hover/link:translate-x-px group-hover/link:-translate-y-px group-hover/link:text-foreground motion-reduce:transition-none size-3"
           />
         </a>
       ) : (

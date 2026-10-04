@@ -67,21 +67,24 @@ function Fixture({
   );
 }
 
-test("chooses the grouping key with native radios", async () => {
+test("chooses the grouping key with a radio group", async () => {
   const user = userEvent.setup();
   const groupBy = mock((_value: string) => {});
   render(<Fixture onGroupBy={groupBy} />);
-  const group = screen.getByRole("group", { name: "Group by" });
+  const group = screen.getByRole("radiogroup", { name: "Group by" });
   expect(group.tagName).toBe("FIELDSET");
-  const risk = screen.getByRole("radio", { name: "Risk" }) as HTMLInputElement;
-  const age = screen.getByRole("radio", { name: "Age" }) as HTMLInputElement;
-  expect(risk.checked).toBe(true);
-  expect(risk.name).toBe(age.name);
+  const risk = screen.getByRole("radio", { name: "Risk" });
+  const age = screen.getByRole("radio", { name: "Age" });
+  expect(risk.getAttribute("aria-checked")).toBe("true");
+  expect(group.contains(risk) && group.contains(age)).toBe(true);
   await user.click(age);
   expect(groupBy).toHaveBeenCalledWith("age");
-  expect(age.checked).toBe(true);
+  expect(age.getAttribute("aria-checked")).toBe("true");
   await user.keyboard(" ");
-  expect(age.checked).toBe(true);
+  expect(age.getAttribute("aria-checked")).toBe("true");
+  await user.click(screen.getByText("Risk"));
+  expect(groupBy).toHaveBeenLastCalledWith("risk");
+  expect(risk.getAttribute("aria-checked")).toBe("true");
 });
 
 test("labels groups and their decision lists and settles decided requests", async () => {

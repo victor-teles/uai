@@ -66,7 +66,8 @@ test("renders a month table with today marked and overflow collapsed", async () 
   expect(more.textContent).toBe("+2 more");
   await user.click(more);
   expect(screen.getByRole("heading", { name: "Wednesday, September 30, 2026" })).toBeTruthy();
-  expect(screen.getByRole("button", { name: "Day" }).getAttribute("aria-pressed")).toBe("true");
+  // The layout switch is a single-choice toggle group: Radix exposes its items as checked radios.
+  expect(screen.getByRole("radio", { name: "Day" }).getAttribute("aria-checked")).toBe("true");
   expect(screen.getAllByRole("listitem")).toHaveLength(4);
 });
 
@@ -76,7 +77,7 @@ test("navigates by month, week, and day and returns to today", async () => {
   render(<Fixture onDateChange={change} />);
   await user.click(screen.getByRole("button", { name: "Next month" }));
   expect(screen.getByRole("heading", { name: "October 2026" })).toBeTruthy();
-  await user.click(screen.getByRole("button", { name: "Week" }));
+  await user.click(screen.getByRole("radio", { name: "Week" }));
   expect(screen.getByRole("heading").textContent).toBe("Sep 27 – Oct 3, 2026");
   await user.click(screen.getByRole("button", { name: "Previous week" }));
   expect(screen.getByRole("heading").textContent).toBe("Sep 20 – 26, 2026");

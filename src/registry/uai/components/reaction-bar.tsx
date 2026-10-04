@@ -5,13 +5,20 @@ import { SmilePlus } from "lucide-react";
 import {
   type ComponentProps,
   createContext,
+  type FocusEvent,
   type KeyboardEvent,
   useContext,
-  useEffect,
-  useId,
   useRef,
   useState,
 } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Toggle } from "@/components/ui/toggle";
 import { cn } from "@/lib/uai-utils";
 
 export const REACTION_BAR_VARIANTS = ["pill", "outlined", "compact"] as const;
@@ -25,7 +32,6 @@ export type ReactionBarProps = Omit<ComponentProps<"div">, "defaultValue"> & {
   disabled?: boolean;
 };
 type ReactionContext = {
-  id: string;
   variant: ReactionBarVariant;
   selected: readonly string[];
   disabled: boolean;
@@ -37,7 +43,7 @@ function useReactions(part: string) {
   if (!context) throw new Error(`${part} must be used within ReactionBar`);
   return context;
 }
-type PickerContext = { close: (restoreFocus: boolean) => void };
+type PickerContext = { close: () => void };
 const PickerContextValue = createContext<PickerContext | null>(null);
 function usePicker(part: string) {
   const context = useContext(PickerContextValue);
@@ -45,7 +51,7 @@ function usePicker(part: string) {
   return context;
 }
 const transitionChip =
-  "[transition:background-color_120ms_ease-out,color_120ms_ease-out,box-shadow_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none";
+  "transition-[background-color,color,box-shadow,scale] duration-[120ms,120ms,120ms,140ms] ease-[ease-out,ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none";
 
 const reactionBarVariants = cva(
   "flex min-w-0 flex-wrap items-center text-[13px]/[18px] text-foreground",
@@ -53,7 +59,7 @@ const reactionBarVariants = cva(
 );
 
 const reactionBarItemVariants = cva(
-  `group/reaction-item inline-flex cursor-pointer items-center rounded-full border-0 bg-secondary font-medium text-muted-foreground tabular-nums shadow-none ${transitionChip} enabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] enabled:hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.94] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:enabled:active:scale-100 aria-pressed:bg-primary/14 aria-pressed:text-[color-mix(in_oklab,var(--primary)_55%,var(--foreground))] aria-pressed:shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_42%,transparent)] aria-pressed:enabled:hover:bg-primary/20 aria-pressed:enabled:hover:text-[color-mix(in_oklab,var(--primary)_55%,var(--foreground))] aria-pressed:enabled:hover:shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_55%,transparent)]`,
+  `group/reaction-item inline-flex min-w-0 cursor-pointer items-center rounded-full border-0 bg-secondary font-medium text-muted-foreground tabular-nums shadow-none ${transitionChip} enabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] enabled:hover:text-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.94] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:enabled:active:scale-100 data-[state=on]:bg-primary/14 data-[state=on]:text-[color-mix(in_oklab,var(--primary)_55%,var(--foreground))] data-[state=on]:shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_42%,transparent)] data-[state=on]:enabled:hover:bg-primary/20 data-[state=on]:enabled:hover:text-[color-mix(in_oklab,var(--primary)_55%,var(--foreground))] data-[state=on]:enabled:hover:shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_55%,transparent)]`,
   {
     variants: {
       variant: {
@@ -66,13 +72,6 @@ const reactionBarItemVariants = cva(
   },
 );
 
-function reducedMotion() {
-  return (
-    typeof window.matchMedia === "function" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  );
-}
-
 export function ReactionBar({
   variant = "pill",
   value,
@@ -84,7 +83,6 @@ export function ReactionBar({
   children,
   ...props
 }: ReactionBarProps) {
-  const id = useId();
   const [internal, setInternal] = useState<readonly string[]>(defaultValue);
   const selected = value ?? internal;
   const toggle = (reaction: string) => {
@@ -96,7 +94,7 @@ export function ReactionBar({
     onValueChange?.(updated);
   };
   return (
-    <Context.Provider value={{ id, variant, selected, disabled, toggle }}>
+    <Context.Provider value={{ variant, selected, disabled, toggle }}>
       {/* biome-ignore lint/a11y/useSemanticElements: a labelled group of toggle buttons, not a fieldset. */}
       <div
         data-slot="reaction-bar"
@@ -134,18 +132,16 @@ export function ReactionBarItem({
   const pressed = context.selected.includes(value);
   const compact = context.variant === "compact";
   return (
-    <button
+    <Toggle
       data-slot="reaction-bar-item"
       type="button"
       className={cn(reactionBarItemVariants({ variant: context.variant }), className)}
       {...props}
-      aria-pressed={pressed}
+      pressed={pressed}
+      onPressedChange={() => context.toggle(value)}
       aria-label={`${label}, ${count} ${count === 1 ? "reaction" : "reactions"}`}
       disabled={context.disabled || props.disabled}
-      onClick={(event) => {
-        onClick?.(event);
-        if (!event.defaultPrevented) context.toggle(value);
-      }}
+      onClick={onClick}
     >
       <span
         aria-hidden="true"
@@ -157,13 +153,13 @@ export function ReactionBarItem({
         {emoji}
       </span>
       <span aria-hidden="true">{count}</span>
-    </button>
+    </Toggle>
   );
 }
 
 function menuItems(menu: HTMLElement | null) {
   return Array.from(
-    menu?.querySelectorAll<HTMLElement>('[role^="menuitem"]:not([aria-disabled="true"])') ?? [],
+    menu?.querySelectorAll<HTMLElement>('[role^="menuitem"]:not([data-disabled])') ?? [],
   );
 }
 
@@ -175,102 +171,82 @@ export function ReactionBarPicker({
 }: ComponentProps<"div">) {
   const context = useReactions("ReactionBarPicker");
   const [open, setOpen] = useState(false);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const rootRef = useRef<HTMLDivElement>(null);
   const focusTarget = useRef<"first" | "last">("first");
   const compact = context.variant === "compact";
-  const close = (restoreFocus: boolean) => {
-    setOpen(false);
-    if (restoreFocus) triggerRef.current?.focus();
+  const close = () => setOpen(false);
+  // ArrowUp on the trigger opens the menu on its last option.
+  const onMenuFocus = (event: FocusEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget) return;
+    const target = focusTarget.current;
+    focusTarget.current = "first";
+    if (target !== "last") return;
+    event.preventDefault();
+    menuItems(event.currentTarget).at(-1)?.focus();
   };
-  useEffect(() => {
-    if (!open) return;
-    const items = menuItems(menuRef.current);
-    (focusTarget.current === "last" ? items.at(-1) : items[0])?.focus();
-    if (!reducedMotion())
-      menuRef.current?.animate?.(
-        [
-          { opacity: 0, transform: "scale(0.96)" },
-          { opacity: 1, transform: "scale(1)" },
-        ],
-        { duration: 180, easing: "cubic-bezier(0.16, 1, 0.3, 1)" },
-      );
-    const onPointerDown = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
-    };
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => document.removeEventListener("pointerdown", onPointerDown);
-  }, [open]);
-  const openMenu = (target: "first" | "last") => {
-    focusTarget.current = target;
-    setOpen(true);
-  };
+  // The picker is a horizontal row, so Left/Right rove like Up/Down.
   const onMenuKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    const items = menuItems(menuRef.current);
+    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+    const items = menuItems(event.currentTarget);
     const index = items.indexOf(document.activeElement as HTMLElement);
-    const move = (next: number) => {
-      event.preventDefault();
-      items[(next + items.length) % items.length]?.focus();
-    };
-    if (event.key === "ArrowDown" || event.key === "ArrowRight") move(index + 1);
-    else if (event.key === "ArrowUp" || event.key === "ArrowLeft") move(index - 1);
-    else if (event.key === "Home") move(0);
-    else if (event.key === "End") move(items.length - 1);
-    else if (event.key === "Escape") {
-      event.preventDefault();
-      close(true);
-    } else if (event.key === "Tab") close(false);
+    const next = index + (event.key === "ArrowRight" ? 1 : -1);
+    event.preventDefault();
+    items[(next + items.length) % items.length]?.focus();
   };
   return (
     <PickerContextValue.Provider value={{ close }}>
-      <div
-        ref={rootRef}
-        data-slot="reaction-bar-picker"
-        className={cn("relative inline-flex", className)}
-        {...props}
-      >
-        <button
-          ref={triggerRef}
-          type="button"
-          aria-label={label}
-          aria-haspopup="menu"
-          aria-expanded={open}
-          aria-controls={open ? `${context.id}-picker` : undefined}
-          disabled={context.disabled}
-          onClick={() => (open ? close(false) : openMenu("first"))}
-          onKeyDown={(event) => {
-            if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-              event.preventDefault();
-              openMenu(event.key === "ArrowUp" ? "last" : "first");
-            }
-          }}
-          className={cn(
-            "grid cursor-pointer place-items-center rounded-full border-0 bg-transparent p-0 text-muted-foreground [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] enabled:hover:bg-accent enabled:hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.94] aria-expanded:bg-accent aria-expanded:text-accent-foreground motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
-            compact ? "size-5.5" : "size-7",
-          )}
+      <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
+        <div
+          data-slot="reaction-bar-picker"
+          className={cn("relative inline-flex", className)}
+          {...props}
         >
-          <SmilePlus size={compact ? 13 : 15} strokeWidth={1.75} aria-hidden="true" />
-        </button>
-        {open && (
-          <div
-            ref={menuRef}
-            id={`${context.id}-picker`}
-            role="menu"
+          <DropdownMenuTrigger
+            asChild
+            disabled={context.disabled}
+            onKeyDown={(event) => {
+              focusTarget.current = event.key === "ArrowUp" ? "last" : "first";
+              if (event.key === "ArrowUp") {
+                event.preventDefault();
+                setOpen(true);
+              }
+            }}
+          >
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label={label}
+              className={cn(
+                "rounded-full border-0 bg-transparent p-0 text-muted-foreground transition-[background-color,color,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring enabled:hover:bg-accent enabled:hover:text-accent-foreground enabled:active:scale-[0.94] aria-expanded:bg-accent aria-expanded:text-accent-foreground motion-reduce:transition-none motion-reduce:enabled:active:scale-100 dark:hover:bg-accent",
+                compact
+                  ? "size-5.5 [&_svg:not([class*='size-'])]:size-[13px]"
+                  : "size-7 [&_svg:not([class*='size-'])]:size-[15px]",
+              )}
+            >
+              <SmilePlus strokeWidth={1.75} aria-hidden="true" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
             aria-label={label}
-            tabIndex={-1}
+            align="start"
+            sideOffset={6}
+            loop
             onKeyDown={onMenuKeyDown}
-            className="absolute start-0 top-[calc(100%+6px)] z-20 flex origin-top-left gap-0.5 rounded-[14px] bg-popover p-1 text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_12px_28px_-10px_oklch(0_0_0/0.32),0_2px_6px_-2px_oklch(0_0_0/0.12)]"
+            onFocus={onMenuFocus}
+            className="z-20 flex min-w-0 gap-0.5 rounded-[14px] border-0 bg-popover p-1 text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_12px_28px_-10px_oklch(0_0_0/0.32),0_2px_6px_-2px_oklch(0_0_0/0.12)] duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-[state=open]:zoom-in-96 data-[state=open]:[--tw-enter-translate-x:0]! data-[state=open]:[--tw-enter-translate-y:0]! motion-reduce:data-[state=closed]:animate-none motion-reduce:data-[state=open]:animate-none"
           >
             {children}
-          </div>
-        )}
-      </div>
+          </DropdownMenuContent>
+        </div>
+      </DropdownMenu>
     </PickerContextValue.Provider>
   );
 }
 
-export type ReactionBarPickerOptionProps = Omit<ComponentProps<"button">, "value" | "children"> & {
+export type ReactionBarPickerOptionProps = Omit<
+  ComponentProps<typeof DropdownMenuCheckboxItem>,
+  "value" | "children" | "checked" | "onCheckedChange"
+> & {
   value: string;
   emoji: React.ReactNode;
   label: string;
@@ -279,32 +255,23 @@ export function ReactionBarPickerOption({
   value,
   emoji,
   label,
-  onClick,
   className,
   ...props
 }: ReactionBarPickerOptionProps) {
   const context = useReactions("ReactionBarPickerOption");
-  const picker = usePicker("ReactionBarPickerOption");
+  usePicker("ReactionBarPickerOption");
   const checked = context.selected.includes(value);
   return (
-    <button
+    <DropdownMenuCheckboxItem
       data-slot="reaction-bar-picker-option"
-      type="button"
       className={cn(
-        "group/reaction-option grid size-8 cursor-pointer place-items-center rounded-[10px] border-0 bg-transparent p-0 text-[16px]/none [transition:background-color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-accent focus-visible:bg-accent focus-visible:outline-none enabled:active:scale-[0.94] aria-checked:bg-primary/16 motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
+        "group/reaction-option grid size-8 cursor-pointer place-items-center rounded-[10px] border-0 bg-transparent p-0 text-[16px]/none transition-[background-color,scale] duration-[120ms,140ms] ease-[ease-out,cubic-bezier(0.23,1,0.32,1)] focus:bg-accent focus:outline-none active:scale-[0.94] aria-checked:bg-primary/16 motion-reduce:transition-none motion-reduce:active:scale-100 [&>span:first-child]:hidden",
         className,
       )}
       {...props}
-      role="menuitemcheckbox"
-      aria-checked={checked}
+      checked={checked}
+      onCheckedChange={() => context.toggle(value)}
       aria-label={label}
-      tabIndex={-1}
-      onClick={(event) => {
-        onClick?.(event);
-        if (event.defaultPrevented) return;
-        context.toggle(value);
-        picker.close(true);
-      }}
     >
       <span
         aria-hidden="true"
@@ -312,6 +279,6 @@ export function ReactionBarPickerOption({
       >
         {emoji}
       </span>
-    </button>
+    </DropdownMenuCheckboxItem>
   );
 }

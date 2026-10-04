@@ -13,6 +13,10 @@ import {
 } from "lucide-react";
 import { type ComponentProps, createContext, useContext, useId, useState } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Toggle } from "@/components/ui/toggle";
 import { cn } from "@/lib/uai-utils";
 
 export const PASSWORD_RECOVERY_VARIANTS = ["card", "split", "compact"] as const;
@@ -69,7 +73,9 @@ function passwordRecoveryChrome(variant: PasswordRecoveryVariant): PasswordRecov
       ? "mt-1 text-[12.5px] leading-[18px]"
       : "mt-1.5 text-[13px] leading-[18px]",
     groupGapClass: compact ? "gap-2.5" : "gap-3",
-    controlClass: compact ? "h-[34px] text-[12.5px]" : "h-[38px] text-[13px]",
+    controlClass: compact
+      ? "h-[34px] py-0 text-[12.5px] md:text-[12.5px]"
+      : "h-[38px] py-0 text-[13px] md:text-[13px]",
     controlRadiusClass: compact ? "rounded-lg" : "rounded-[10px]",
     footerClass: compact ? "mt-4 pt-3.5" : "mt-5 pt-4",
   };
@@ -397,14 +403,14 @@ export function PasswordRecoveryLabel({
   const { controlId } = usePasswordRecoveryField("PasswordRecoveryLabel");
 
   return (
-    <label
+    <Label
       data-slot="password-recovery-label"
       htmlFor={htmlFor ?? controlId}
-      className={cn("text-[12.5px] leading-4 font-medium", className)}
+      className={cn("block text-[12.5px] leading-4 font-medium select-auto", className)}
       {...props}
     >
       {children}
-    </label>
+    </Label>
   );
 }
 
@@ -428,21 +434,22 @@ export function PasswordRecoveryInput({
   const inputType = revealable ? (revealed ? "text" : "password") : type;
   const describedBy = [ariaDescribedby, invalid ? messageId : undefined].filter(Boolean).join(" ");
   const input = (
-    <input
+    <Input
       data-slot="password-recovery-input"
       {...props}
       id={id ?? controlId}
       type={inputType}
       disabled={disabled || submitting}
       className={cn(
-        "min-w-0 w-full bg-transparent px-3 text-foreground outline-none placeholder:text-subtle-foreground disabled:cursor-not-allowed disabled:opacity-50",
+        "w-full min-w-0 bg-transparent px-3 text-foreground shadow-none outline-none placeholder:text-subtle-foreground disabled:cursor-not-allowed disabled:opacity-50 dark:bg-transparent",
         !revealable &&
-          "border bg-background transition-[border-color,box-shadow] duration-120 ease-out hover:border-border-strong focus:border-border-strong focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--primary)_24%,transparent)] motion-reduce:transition-none",
+          "border border-border bg-background transition-[border-color,box-shadow] duration-120 ease-out hover:border-border-strong focus-visible:border-border-strong focus-visible:ring-3 focus-visible:ring-primary/24 motion-reduce:transition-none aria-invalid:border-destructive/70 dark:bg-background",
         !revealable &&
           invalid &&
-          "border-destructive/70 hover:border-destructive focus:border-destructive focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--destructive)_22%,transparent)]",
+          "border-destructive/70 hover:border-destructive focus-visible:border-destructive focus-visible:ring-destructive/22 aria-invalid:hover:border-destructive aria-invalid:focus-visible:border-destructive aria-invalid:focus-visible:ring-destructive/22 dark:aria-invalid:ring-destructive/22",
         !revealable && chrome.controlRadiusClass,
-        revealable && "pr-10",
+        revealable &&
+          "rounded-none border-0 pr-10 focus-visible:ring-0 aria-invalid:ring-0 dark:aria-invalid:ring-0",
         chrome.controlClass,
         className,
       )}
@@ -463,20 +470,20 @@ export function PasswordRecoveryInput({
       )}
     >
       {input}
-      <button
+      <Toggle
         type="button"
-        className="absolute inset-y-0 right-0 inline-flex w-10 items-center justify-center rounded-[inherit] text-subtle-foreground transition-colors duration-120 ease-out hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none [&_svg]:size-4 [&_svg]:stroke-[1.75]"
+        className="absolute inset-y-0 right-0 h-auto w-10 min-w-0 rounded-[inherit] px-0 text-subtle-foreground transition-colors duration-120 ease-out hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-[-3px] focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50 data-[state=on]:bg-transparent data-[state=on]:text-subtle-foreground data-[state=on]:hover:text-foreground motion-reduce:transition-none [&_svg]:stroke-[1.75]"
         disabled={disabled || submitting}
         aria-label={revealed ? "Hide password" : "Show password"}
-        aria-pressed={revealed}
-        onClick={() => setRevealed((current) => !current)}
+        pressed={revealed}
+        onPressedChange={setRevealed}
       >
         {revealed ? (
           <EyeOff className="size-4" aria-hidden="true" />
         ) : (
           <Eye className="size-4" aria-hidden="true" />
         )}
-      </button>
+      </Toggle>
     </div>
   );
 }
@@ -612,13 +619,13 @@ export function PasswordRecoverySubmit({
   const copy = passwordRecoverySubmitCopy[step];
 
   return (
-    <button
+    <Button
       data-slot="password-recovery-submit"
       {...props}
       type={type}
       disabled={disabled || submitting}
       className={cn(
-        "inline-flex w-full items-center justify-center gap-2 rounded-full border-0 bg-primary px-4 font-medium text-primary-foreground transition-[filter,scale] duration-140 ease-out-quint hover:brightness-[1.08] active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100 motion-reduce:active:scale-100 motion-reduce:transition-none",
+        "w-full gap-2 rounded-full border-0 px-4 transition-[filter,scale] duration-140 ease-out-quint hover:bg-primary hover:brightness-[1.08] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100 motion-reduce:transition-none motion-reduce:active:scale-100 has-[>svg]:px-4",
         chrome.controlClass,
         className,
       )}
@@ -631,7 +638,7 @@ export function PasswordRecoverySubmit({
         />
       ) : null}
       {submitting ? copy.submitting : (children ?? copy.idle)}
-    </button>
+    </Button>
   );
 }
 
@@ -712,18 +719,19 @@ export function PasswordRecoveryAction({
 }: PasswordRecoveryActionProps) {
   const { submitting } = usePasswordRecovery("PasswordRecoveryAction");
   return (
-    <button
+    <Button
       data-slot="password-recovery-action"
+      variant="ghost"
       {...props}
       type={type}
       disabled={disabled || submitting}
       className={cn(
-        "inline-flex h-7 items-center rounded-full px-3 text-[12.5px] font-medium text-muted-foreground transition-[background-color,color,scale] duration-140 ease-out-quint hover:bg-accent hover:text-foreground active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:active:scale-100 motion-reduce:transition-none",
+        "h-7 rounded-full px-3 py-0 text-[12.5px] text-muted-foreground transition-[background-color,color,scale] duration-140 ease-out-quint hover:bg-accent hover:text-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100 has-[>svg]:px-3 dark:hover:bg-accent",
         className,
       )}
     >
       {children}
-    </button>
+    </Button>
   );
 }
 

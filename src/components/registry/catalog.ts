@@ -512,7 +512,7 @@ export function WorkspaceSignUp() {
       "The form is labelled by its composed heading and keeps native submit behavior.",
       "Every account field has a programmatic label and browser autocomplete purpose.",
       "Password requirements include visible met and not-met text in addition to icons.",
-      "Terms consent uses a native required checkbox and remains consumer-authored.",
+      "Terms consent uses a required checkbox (aria-required) and remains consumer-authored.",
       "Submitting disables duplicate provider, field, consent, and submit actions.",
       "Verification feedback uses a polite status while errors use assertive alerts.",
       "Card, split, and compact variants preserve the same form and keyboard contract.",

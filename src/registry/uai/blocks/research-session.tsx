@@ -330,7 +330,7 @@ export function ResearchSessionSourceLink({ className, ...props }: ComponentProp
     <a
       data-slot="research-session-source-link"
       className={cn(
-        "font-medium text-foreground no-underline decoration-border-strong underline-offset-3 wrap-anywhere hover:underline focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+        "font-medium text-foreground no-underline decoration-border-strong underline-offset-3 wrap-anywhere hover:underline focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring",
         className,
       )}
       {...props}

@@ -20,6 +20,9 @@ import {
   useState,
 } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/uai-utils";
 
 export const APPROVAL_CARD_RISKS = ["low", "medium", "high", "critical"] as const;
@@ -334,9 +337,9 @@ export function ApprovalCardConfirmation({ className, ...props }: ApprovalCardCo
 
   return (
     <div data-slot="approval-card-confirmation" className={cn("mt-4", className)} {...props}>
-      <label
+      <Label
         htmlFor={context.confirmationId}
-        className="block text-[12.5px] leading-[18px] text-muted-foreground"
+        className="block text-[12.5px] leading-[18px] font-normal text-muted-foreground select-auto"
       >
         {context.confirmation.label ?? (
           <>
@@ -347,8 +350,8 @@ export function ApprovalCardConfirmation({ className, ...props }: ApprovalCardCo
             to confirm.
           </>
         )}
-      </label>
-      <input
+      </Label>
+      <Input
         id={context.confirmationId}
         type="text"
         value={context.confirmationValue}
@@ -357,7 +360,7 @@ export function ApprovalCardConfirmation({ className, ...props }: ApprovalCardCo
         spellCheck={false}
         disabled={context.disabled || context.isSubmitting}
         onChange={(event) => context.setConfirmationValue(event.target.value)}
-        className="mt-2 h-9 w-full rounded-[10px] border border-transparent bg-background px-3 font-mono text-[12.5px] text-foreground caret-foreground outline-none transition-[border-color,box-shadow] duration-[120ms] ease-out placeholder:text-subtle-foreground focus-visible:border-border-strong focus-visible:ring-2 focus-visible:ring-ring/45 selection:bg-foreground/18 disabled:cursor-not-allowed motion-reduce:transition-none"
+        className="mt-2 h-9 w-full rounded-[10px] border border-transparent bg-background px-3 font-mono text-[12.5px] text-foreground caret-foreground shadow-none outline-none transition-[border-color,box-shadow] duration-[120ms] ease-out selection:bg-foreground/18 selection:text-foreground placeholder:text-subtle-foreground focus-visible:border-border-strong focus-visible:ring-2 focus-visible:ring-ring/45 disabled:cursor-not-allowed disabled:opacity-100 motion-reduce:transition-none md:text-[12.5px] dark:bg-background"
       />
     </div>
   );
@@ -413,18 +416,19 @@ export function ApprovalCardReject({
   const context = useApprovalCard("ApprovalCardReject");
 
   return (
-    <button
+    <Button
       data-slot="approval-card-reject"
+      variant="secondary"
       {...props}
       type="button"
       className={cn(
-        "h-8 rounded-full bg-secondary px-3.5 text-[13px] font-medium text-secondary-foreground outline-none transition-[background-color,transform] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] enabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] focus-visible:ring-2 focus-visible:ring-ring enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100",
+        "h-8 rounded-full px-3.5 py-0 text-[13px] has-[>svg]:px-3.5 transition-[background-color,transform] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] focus-visible:ring-2 focus-visible:ring-ring enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100",
         className,
       )}
       disabled={context.disabled || !context.isActionable || disabled}
     >
       {children}
-    </button>
+    </Button>
   );
 }
 
@@ -441,20 +445,21 @@ export function ApprovalCardApprove({
     context.disabled || !context.isActionable || !context.confirmationMatches || disabledProp;
 
   return (
-    <button
+    <Button
       data-slot="approval-card-approve"
+      variant={context.risk === "critical" ? "destructive" : "default"}
       {...props}
       type="button"
       className={cn(
-        "h-8 rounded-full px-3.5 text-[13px] font-medium outline-none transition-[filter,opacity,transform] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] enabled:hover:brightness-[1.08] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none motion-reduce:active:scale-100",
+        "h-8 rounded-full px-3.5 py-0 text-[13px] has-[>svg]:px-3.5 transition-[filter,opacity,transform] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] enabled:hover:brightness-[1.08] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none motion-reduce:active:scale-100 dark:focus-visible:ring-ring",
         context.risk === "critical"
-          ? "bg-destructive text-primary-foreground"
-          : "bg-primary text-primary-foreground",
+          ? "bg-destructive text-primary-foreground hover:bg-destructive dark:bg-destructive"
+          : "bg-primary text-primary-foreground hover:bg-primary",
         className,
       )}
       disabled={disabled}
     >
       {context.isSubmitting && context.pendingDecision === "approved" ? "Approving…" : children}
-    </button>
+    </Button>
   );
 }

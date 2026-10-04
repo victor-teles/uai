@@ -21,6 +21,7 @@ import {
   type ProductListingProps,
   ProductListingResults,
   ProductListingSort,
+  ProductListingSortOption,
   ProductListingTitle,
 } from "@/registry/uai/blocks/product-listing";
 
@@ -45,8 +46,10 @@ function Fixture({
           </ProductListingFilters>
           <ProductListingCount>2 products</ProductListingCount>
           <ProductListingSort defaultValue="featured" onValueChange={onSort}>
-            <option value="featured">Featured</option>
-            <option value="price-asc">Price: low to high</option>
+            <ProductListingSortOption value="featured">Featured</ProductListingSortOption>
+            <ProductListingSortOption value="price-asc">
+              Price: low to high
+            </ProductListingSortOption>
           </ProductListingSort>
           <ProductListingResults>
             <ProductListingProduct>
@@ -96,9 +99,12 @@ test("sorts with a labelled select and resets filters from the keyboard", async 
   const onSort = mock();
   const onReset = mock();
   render(<Fixture onSort={onSort} onReset={onReset} />);
-  await user.selectOptions(screen.getByLabelText("Sort by"), "price-asc");
+  const sort = screen.getByLabelText("Sort by");
+  expect(sort.textContent).toBe("Featured");
+  await user.click(sort);
+  await user.click(screen.getByRole("option", { name: "Price: low to high" }));
   expect(onSort).toHaveBeenCalledWith("price-asc");
-  expect((screen.getByLabelText("Sort by") as HTMLSelectElement).value).toBe("price-asc");
+  expect(sort.textContent).toBe("Price: low to high");
   screen.getByRole("button", { name: "Reset filters" }).focus();
   await user.keyboard("{Enter}");
   expect(onReset).toHaveBeenCalledTimes(1);

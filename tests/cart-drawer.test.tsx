@@ -86,7 +86,11 @@ function Fixture({
 }
 
 function dialog() {
-  return document.querySelector("dialog") as HTMLDialogElement;
+  return screen.queryByRole("dialog");
+}
+
+function isOpen() {
+  return dialog() !== null;
 }
 
 test("opens a labelled modal drawer, focuses Close, and restores focus to the trigger", async () => {
@@ -96,16 +100,16 @@ test("opens a labelled modal drawer, focuses Close, and restores focus to the tr
   const trigger = screen.getByRole("button", { name: "Cart 3 items" });
   expect(trigger.getAttribute("aria-haspopup")).toBe("dialog");
   expect(trigger.getAttribute("aria-expanded")).toBe("false");
-  expect(dialog().open).toBe(false);
+  expect(isOpen()).toBe(false);
   trigger.focus();
   await user.keyboard("{Enter}");
   expect(onOpenChange).toHaveBeenCalledWith(true);
-  expect(dialog().open).toBe(true);
-  expect(trigger.getAttribute("aria-controls")).toBe(dialog().id);
-  expect(dialog().getAttribute("aria-labelledby")).toBe(screen.getByText("Your cart").id);
+  expect(isOpen()).toBe(true);
+  expect(trigger.getAttribute("aria-controls")).toBe(screen.getByRole("dialog").id);
+  expect(dialog()?.getAttribute("aria-labelledby")).toBe(screen.getByText("Your cart").id);
   expect(document.activeElement).toBe(screen.getByRole("button", { name: "Close cart" }));
   await user.keyboard("{Escape}");
-  expect(dialog().open).toBe(false);
+  expect(isOpen()).toBe(false);
   expect(document.activeElement).toBe(trigger);
 });
 
@@ -123,13 +127,14 @@ test("updates quantities, applies discounts, and closes from Continue shopping",
   expect(screen.getByRole("region", { name: "Cart totals" })).toBeTruthy();
   expect(screen.getByRole("link", { name: "Check out" }).getAttribute("href")).toBe("#checkout");
   await user.click(screen.getByRole("button", { name: "Continue shopping" }));
-  expect(dialog().open).toBe(false);
+  expect(isOpen()).toBe(false);
 });
 
 test("renders every variant and guards regions", () => {
   for (const variant of CART_DRAWER_VARIANTS) {
     const view = render(<Fixture variant={variant} defaultOpen />);
-    expect(view.container.querySelector("dialog")?.dataset.variant).toBe(variant);
+    const content = document.querySelector<HTMLElement>("[data-slot='cart-drawer-content']");
+    expect(content?.dataset.variant).toBe(variant);
     view.unmount();
   }
   expect(() => render(<CartDrawerContent />)).toThrow(

@@ -7,11 +7,11 @@
     "class-variance-authority"
   ],
   "registryDependencies": [
-    "https://useuai.vercel.app/r/uai-theme.json",
-    "https://useuai.vercel.app/r/confirmation-dialog.json",
-    "https://useuai.vercel.app/r/form-field.json",
-    "https://useuai.vercel.app/r/unsaved-changes-bar.json",
-    "https://useuai.vercel.app/r/uai-utils.json"
+    "https://uaiblocks.vercel.app/r/uai-theme.json",
+    "https://uaiblocks.vercel.app/r/confirmation-dialog.json",
+    "https://uaiblocks.vercel.app/r/form-field.json",
+    "https://uaiblocks.vercel.app/r/unsaved-changes-bar.json",
+    "https://uaiblocks.vercel.app/r/uai-utils.json"
   ],
   "files": [
     {

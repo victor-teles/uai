@@ -64,12 +64,13 @@ test("toggles column visibility in a disclosure that closes on Escape", async ()
   await user.click(trigger);
   expect(trigger.getAttribute("aria-expanded")).toBe("true");
   expect(screen.getByRole("group", { name: "Visible columns" })).toBeTruthy();
-  const amount = screen.getByRole("checkbox", { name: "Amount" }) as HTMLInputElement;
-  expect((screen.getByRole("checkbox", { name: "Customer" }) as HTMLInputElement).checked).toBe(
-    true,
+  const amount = screen.getByRole("checkbox", { name: "Amount" });
+  expect(document.activeElement).toBe(screen.getByRole("checkbox", { name: "Customer" }));
+  expect(screen.getByRole("checkbox", { name: "Customer" }).getAttribute("aria-checked")).toBe(
+    "true",
   );
   await user.click(amount);
-  expect(amount.checked).toBe(true);
+  expect(amount.getAttribute("aria-checked")).toBe("true");
   expect(change).toHaveBeenLastCalledWith(["customer", "amount"]);
   await user.keyboard("{Escape}");
   expect(screen.queryByRole("checkbox", { name: "Amount" })).toBeNull();

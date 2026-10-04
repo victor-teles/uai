@@ -12,6 +12,8 @@ import {
   useRef,
   useState,
 } from "react";
+import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/uai-utils";
 
 export const APP_SIDEBAR_VARIANTS = ["panel", "inset", "compact"] as const;
@@ -106,7 +108,7 @@ const rowIdle = "bg-transparent text-muted-foreground hover:bg-accent/70 hover:t
 function iconButtonClass(variant: AppSidebarVariant) {
   return cn(
     "grid flex-none cursor-pointer place-items-center border-0 bg-transparent p-0 text-muted-foreground",
-    "[transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-accent hover:text-foreground active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none motion-reduce:active:scale-100",
+    "[transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-accent hover:text-foreground active:scale-[0.97] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid motion-reduce:transition-none motion-reduce:active:scale-100 dark:hover:bg-accent",
     variant === "compact" ? "size-6 rounded-[7px]" : "size-7 rounded-lg",
   );
 }
@@ -262,8 +264,10 @@ export function AppSidebarCollapseToggle({
   if (context.mobile) return null;
   const Icon = context.collapsed ? PanelLeftOpen : PanelLeftClose;
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="icon-sm"
       aria-label={context.collapsed ? "Expand sidebar" : "Collapse sidebar"}
       data-slot="app-sidebar-collapse-toggle"
       className={cn(iconButtonClass(context.variant), className)}
@@ -276,7 +280,7 @@ export function AppSidebarCollapseToggle({
       }}
     >
       <Icon size={16} strokeWidth={1.75} aria-hidden="true" />
-    </button>
+    </Button>
   );
 }
 
@@ -289,8 +293,10 @@ export function AppSidebarMobileTrigger({
   if (!context.mobile) return null;
   const Icon = context.open ? X : Menu;
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="icon-sm"
       aria-label={context.open ? "Close navigation" : "Open navigation"}
       data-slot="app-sidebar-mobile-trigger"
       className={cn(iconButtonClass(context.variant), "ml-auto", className)}
@@ -304,7 +310,7 @@ export function AppSidebarMobileTrigger({
       }}
     >
       <Icon size={16} strokeWidth={1.75} aria-hidden="true" />
-    </button>
+    </Button>
   );
 }
 
@@ -473,16 +479,26 @@ export function AppSidebarSubmenu({
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
 }) {
-  useSidebar("AppSidebarSubmenu");
+  const context = useSidebar("AppSidebarSubmenu");
   const id = useId();
   const [isOpen, setOpen] = useControllable(open, defaultOpen, onOpenChange);
   return (
     <Submenu.Provider value={{ id, open: isOpen, setOpen }}>
-      <li
-        data-slot="app-sidebar-submenu"
-        className={cn("grid min-w-0 gap-px", className)}
-        {...props}
-      />
+      <Collapsible
+        asChild
+        open={isOpen && !context.collapsed}
+        onOpenChange={(next) => {
+          // A collapsed sidebar expands first so the nested list has room to show.
+          if (context.collapsed) context.setCollapsed(false);
+          setOpen(next);
+        }}
+      >
+        <li
+          data-slot="app-sidebar-submenu"
+          className={cn("grid min-w-0 gap-px", className)}
+          {...props}
+        />
+      </Collapsible>
     </Submenu.Provider>
   );
 }
@@ -505,7 +521,7 @@ export function AppSidebarSubmenuTrigger({
   const expanded = submenu.open && !context.collapsed;
   return (
     <ItemContext.Provider value={true}>
-      <button
+      <CollapsibleTrigger
         type="button"
         title={context.collapsed ? label : undefined}
         data-slot="app-sidebar-submenu-trigger"
@@ -513,14 +529,7 @@ export function AppSidebarSubmenuTrigger({
         {...props}
         aria-expanded={expanded}
         aria-controls={`${submenu.id}-list`}
-        onClick={(event) => {
-          onClick?.(event);
-          if (event.defaultPrevented) return;
-          if (context.collapsed) {
-            context.setCollapsed(false);
-            submenu.setOpen(true);
-          } else submenu.setOpen(!submenu.open);
-        }}
+        onClick={onClick}
       >
         {children}
         {context.collapsed ? null : (
@@ -529,12 +538,13 @@ export function AppSidebarSubmenuTrigger({
             strokeWidth={1.75}
             aria-hidden="true"
             className={cn(
+              "size-3.5",
               "ml-auto flex-none text-subtle-foreground transition-transform duration-180 ease-out-quint motion-reduce:transition-none",
               expanded && "rotate-180",
             )}
           />
         )}
-      </button>
+      </CollapsibleTrigger>
     </ItemContext.Provider>
   );
 }
@@ -542,18 +552,18 @@ export function AppSidebarSubmenuTrigger({
 export function AppSidebarSubmenuList({ className, ...props }: ComponentProps<"ul">) {
   const context = useSidebar("AppSidebarSubmenuList");
   const submenu = useSubmenu("AppSidebarSubmenuList");
-  const isHidden = !submenu.open || context.collapsed;
   const ref = useRef<HTMLUListElement>(null);
-  useReveal(ref, !isHidden);
+  useReveal(ref, submenu.open && !context.collapsed);
   return (
-    <ul
-      data-slot="app-sidebar-submenu-list"
-      className={cn("m-0 list-none gap-px p-0", isHidden ? "hidden" : "grid", className)}
-      {...props}
-      ref={ref}
-      id={`${submenu.id}-list`}
-      hidden={isHidden}
-    />
+    <CollapsibleContent asChild>
+      <ul
+        data-slot="app-sidebar-submenu-list"
+        className={cn("m-0 grid list-none gap-px p-0", className)}
+        {...props}
+        ref={ref}
+        id={`${submenu.id}-list`}
+      />
+    </CollapsibleContent>
   );
 }
 

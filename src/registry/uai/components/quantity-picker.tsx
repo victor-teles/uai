@@ -12,6 +12,9 @@ import {
   useState,
 } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/uai-utils";
 
 export const QUANTITY_PICKER_VARIANTS = ["rounded", "pill", "compact"] as const;
@@ -40,8 +43,8 @@ function quantityPickerChrome(variant: QuantityPickerVariant) {
     buttonClass: compact ? "size-7" : "size-8",
     buttonRadius: pill ? "rounded-full" : compact ? "rounded-lg" : "rounded-[10px]",
     inputClass: compact
-      ? "h-7 w-10 text-[12.5px] leading-4"
-      : "h-8 w-12 text-[13px] leading-[18px]",
+      ? "h-7 w-10 text-[12.5px] leading-4 md:text-[12.5px] md:leading-4"
+      : "h-8 w-12 text-[13px] leading-[18px] md:text-[13px] md:leading-[18px]",
     messageClass: compact ? "mt-1.5 text-[11px] leading-4" : "mt-2 text-[11.5px] leading-4",
     iconClass: compact ? "size-3" : "size-3.5",
   };
@@ -191,10 +194,10 @@ export function QuantityPickerLabel({
   const context = useQuantityPicker("QuantityPickerLabel");
 
   return (
-    <label
+    <Label
       data-slot="quantity-picker-label"
       className={cn(
-        "block font-medium text-muted-foreground",
+        "block font-medium text-muted-foreground select-auto",
         context.chrome.labelClass,
         className,
       )}
@@ -203,7 +206,7 @@ export function QuantityPickerLabel({
       htmlFor={context.inputId}
     >
       {children}
-    </label>
+    </Label>
   );
 }
 
@@ -257,11 +260,13 @@ function QuantityPickerStepButton({
   const changeQuantity = decreasing ? context.decrease : context.increase;
 
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="icon"
       data-slot={decreasing ? "quantity-picker-decrease" : "quantity-picker-increase"}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center bg-transparent text-muted-foreground transition-[scale,background-color,color] duration-[140ms] ease-out-quint hover:bg-foreground/8 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.94] disabled:cursor-not-allowed disabled:bg-transparent disabled:text-subtle-foreground/55 disabled:active:scale-100 motion-reduce:transition-none motion-reduce:active:scale-100",
+        "inline-flex shrink-0 items-center justify-center bg-transparent text-muted-foreground transition-[scale,background-color,color] duration-[140ms] ease-out-quint hover:bg-foreground/8 hover:text-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.94] disabled:pointer-events-auto disabled:cursor-not-allowed disabled:bg-transparent disabled:text-subtle-foreground/55 disabled:opacity-100 disabled:active:scale-100 motion-reduce:transition-none motion-reduce:active:scale-100 dark:hover:bg-foreground/8",
         context.chrome.buttonClass,
         context.chrome.buttonRadius,
         className,
@@ -277,7 +282,7 @@ function QuantityPickerStepButton({
       {children ?? (
         <Icon className={context.chrome.iconClass} strokeWidth={1.75} aria-hidden="true" />
       )}
-    </button>
+    </Button>
   );
 }
 
@@ -316,10 +321,10 @@ export function QuantityPickerInput({
   };
 
   return (
-    <input
+    <Input
       data-slot="quantity-picker-input"
       className={cn(
-        "min-w-0 appearance-none bg-transparent text-center font-medium tabular-nums outline-none selection:bg-primary/32 selection:text-foreground focus-visible:outline-none disabled:cursor-not-allowed [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
+        "min-w-0 appearance-none rounded-none border-0 bg-transparent p-0 text-center font-medium tabular-nums shadow-none outline-none selection:bg-primary/32 selection:text-foreground focus-visible:ring-0 focus-visible:outline-none disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-100 dark:bg-transparent [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
         context.chrome.inputClass,
         className,
       )}

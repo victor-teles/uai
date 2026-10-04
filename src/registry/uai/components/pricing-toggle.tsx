@@ -12,6 +12,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/uai-utils";
 
 export const PRICING_TOGGLE_VARIANTS = ["segmented", "pill", "compact"] as const;
@@ -61,15 +62,16 @@ const pricingToggleThumbVariants = cva(
   },
 );
 const pricingToggleOptionVariants = cva(
-  "inline-flex cursor-pointer items-center gap-1.5 border-0 bg-transparent font-medium whitespace-nowrap text-subtle-foreground [transition:color_120ms_ease-out,background-color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring active:[transform:scale(0.97)] aria-checked:text-foreground motion-reduce:transition-none motion-reduce:active:[transform:none]",
+  "inline-flex min-w-0 cursor-pointer items-center justify-start gap-1.5 border-0 bg-transparent font-medium whitespace-nowrap text-subtle-foreground [transition:color_120ms_ease-out,background-color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring focus-visible:outline-solid active:[transform:scale(0.97)] aria-checked:text-foreground data-[state=on]:text-foreground motion-reduce:transition-none motion-reduce:active:[transform:none]",
   {
     variants: {
+      // The thumb paints the checked option once measured; until then the option paints itself.
       variant: {
         segmented:
-          "h-7 rounded-[7px] px-3 text-[13px]/[18px] not-group-data-ready/list:aria-checked:bg-card",
-        pill: "h-7 rounded-full px-3.5 text-[13px]/[18px] not-group-data-ready/list:aria-checked:bg-accent",
+          "h-7 rounded-[7px] px-3 text-[13px]/[18px] data-[state=on]:bg-card group-data-ready/list:data-[state=on]:bg-transparent",
+        pill: "h-7 rounded-full px-3.5 text-[13px]/[18px] data-[state=on]:bg-accent group-data-ready/list:data-[state=on]:bg-transparent",
         compact:
-          "h-6 rounded-md px-2 text-xs/[18px] not-group-data-ready/list:aria-checked:bg-card",
+          "h-6 rounded-md px-2 text-xs/[18px] data-[state=on]:bg-card group-data-ready/list:data-[state=on]:bg-transparent",
       },
     },
   },
@@ -128,7 +130,7 @@ export function PricingToggleList({
   onKeyDown,
   children,
   ...props
-}: ComponentProps<"div">) {
+}: Omit<ComponentProps<"div">, "defaultValue" | "dir">) {
   const context = usePricing("PricingToggleList");
   const ref = useRef<HTMLDivElement>(null);
   const [thumb, setThumb] = useState<{ x: number; y: number; width: number; height: number }>();
@@ -151,6 +153,7 @@ export function PricingToggleList({
     observer.observe(list);
     return () => observer.disconnect();
   }, [context.value]);
+  // Radix roving focus is off: arrows move focus and selection together, as in an APG radio group.
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     onKeyDown?.(event);
     const move = MOVES[event.key];
@@ -166,7 +169,10 @@ export function PricingToggleList({
     if (next?.dataset.value) context.select(next.dataset.value);
   };
   return (
-    <div
+    <ToggleGroup
+      type="single"
+      rovingFocus={false}
+      spacing={0.5}
       role="radiogroup"
       data-slot="pricing-toggle-list"
       className={cn(
@@ -176,6 +182,11 @@ export function PricingToggleList({
       )}
       {...props}
       ref={ref}
+      value={context.value}
+      // A single toggle group clears its value when the checked option is pressed again.
+      onValueChange={(next) => {
+        if (next) context.select(next);
+      }}
       data-ready={thumb ? "" : undefined}
       onKeyDown={handleKeyDown}
     >
@@ -190,37 +201,30 @@ export function PricingToggleList({
         }}
       />
       {children}
-    </div>
+    </ToggleGroup>
   );
 }
 
 export function PricingToggleOption({
   value,
   children,
-  onClick,
   className,
   ...props
 }: Omit<ComponentProps<"button">, "value"> & { value: string }) {
   const context = usePricing("PricingToggleOption");
   const checked = context.value === value;
   return (
-    // biome-ignore lint/a11y/useSemanticElements: APG radio group built from buttons for custom segmented styling.
-    <button
+    <ToggleGroupItem
       data-slot="pricing-toggle-option"
       className={cn(pricingToggleOptionVariants({ variant: context.variant }), className)}
       {...props}
       type="button"
-      role="radio"
-      aria-checked={checked}
+      value={value}
       data-value={value}
       tabIndex={checked || context.value === "" ? 0 : -1}
-      onClick={(event) => {
-        onClick?.(event);
-        if (!event.defaultPrevented) context.select(value);
-      }}
     >
       {children}
-    </button>
+    </ToggleGroupItem>
   );
 }
 

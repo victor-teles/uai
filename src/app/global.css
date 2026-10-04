@@ -6,6 +6,8 @@
 @source "../registry/**/*.{ts,tsx}";
 @source "../components/**/*.{ts,tsx}";
 
+@custom-variant dark (&:is(.dark *));
+
 @theme inline {
   --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono Variable", ui-monospace, monospace;

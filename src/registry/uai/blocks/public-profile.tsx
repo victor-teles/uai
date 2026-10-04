@@ -215,7 +215,7 @@ export function PublicProfileWorkItem({ className, children, ...props }: Compone
         data-slot="public-profile-work-item"
         className={cn(
           "grid min-w-0 content-start gap-1 rounded-[10px] bg-secondary text-foreground no-underline",
-          "transition-[background-color,transform] duration-[120ms,140ms] ease-[ease-out,cubic-bezier(0.23,1,0.32,1)] hover:bg-[color-mix(in_oklab,var(--secondary)_88%,var(--foreground))] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100",
+          "transition-[background-color,transform] duration-[120ms,140ms] ease-[ease-out,cubic-bezier(0.23,1,0.32,1)] hover:bg-[color-mix(in_oklab,var(--secondary)_88%,var(--foreground))] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100",
           variant === "compact" ? "p-2.5" : "p-3",
           className,
         )}

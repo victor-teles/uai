@@ -9,6 +9,7 @@ import {
   PromptComposerAddItem,
   PromptComposerFileItem,
   PromptComposerInput,
+  PromptComposerModelSelect,
   PromptComposerSubmit,
 } from "@/registry/uai/components/prompt-composer";
 
@@ -114,4 +115,38 @@ test("Shift+Enter inserts a line break while busy state blocks submission", asyn
   expect(
     (screen.getByRole("button", { name: "Sending prompt" }) as HTMLButtonElement).disabled,
   ).toBe(true);
+});
+
+test("model select opens a radio menu and reports the chosen model", async () => {
+  const user = userEvent.setup();
+  const onValueChange = mock(() => {});
+
+  render(
+    <PromptComposer>
+      <PromptComposerAdd>
+        <PromptComposerFileItem />
+      </PromptComposerAdd>
+      <PromptComposerInput />
+      <PromptComposerActions>
+        <PromptComposerModelSelect
+          models={[
+            { id: "fast", label: "Fast" },
+            { id: "deep", label: "Deep" },
+          ]}
+          onValueChange={onValueChange}
+        />
+        <PromptComposerSubmit />
+      </PromptComposerActions>
+    </PromptComposer>,
+  );
+
+  await user.click(screen.getByRole("button", { name: "Choose model" }));
+  expect(screen.getByRole("menuitemradio", { name: "Fast" }).getAttribute("aria-checked")).toBe(
+    "true",
+  );
+  await user.click(screen.getByRole("menuitemradio", { name: "Deep" }));
+
+  expect(onValueChange).toHaveBeenCalledWith("deep");
+  expect(screen.queryByRole("menu")).toBeNull();
+  expect(screen.getByRole("button", { name: "Choose model" }).textContent).toContain("Deep");
 });

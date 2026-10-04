@@ -8,11 +8,11 @@ import {
   type ReactNode,
   type RefObject,
   useContext,
-  useId,
-  useLayoutEffect,
   useRef,
   useState,
 } from "react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { CartItem, type CartItemProps, type CartItemVariant } from "@/components/ui/uai/cart-item";
 import {
   CouponField,
@@ -38,7 +38,6 @@ export type CartDrawerProps = {
 };
 
 type DrawerContext = {
-  id: string;
   variant: CartDrawerVariant;
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -53,7 +52,7 @@ function useDrawer(part: string) {
 }
 
 const buttonBase =
-  "[transition:background-color_120ms_ease-out,color_120ms_ease-out,filter_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100";
+  "py-0 transition-[background-color,color,filter,scale] duration-[120ms,120ms,120ms,140ms] ease-[ease-out,ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100";
 const secondaryButton =
   "cursor-pointer rounded-full border-0 bg-secondary text-[13px] font-medium text-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]";
 
@@ -81,7 +80,6 @@ export function CartDrawer({
   onOpenChange,
   children,
 }: CartDrawerProps) {
-  const id = useId();
   const [internal, setInternal] = useState(defaultOpen);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -92,10 +90,12 @@ export function CartDrawer({
     onOpenChange?.(next);
   };
   return (
-    <Context.Provider value={{ id, variant, open: current, setOpen, triggerRef, closeRef }}>
-      <div data-slot="cart-drawer" data-variant={variant} className="contents">
-        {children}
-      </div>
+    <Context.Provider value={{ variant, open: current, setOpen, triggerRef, closeRef }}>
+      <Sheet open={current} onOpenChange={setOpen}>
+        <div data-slot="cart-drawer" data-variant={variant} className="contents">
+          {children}
+        </div>
+      </Sheet>
     </Context.Provider>
   );
 }
@@ -115,118 +115,94 @@ export function CartDrawerTrigger({
 }: CartDrawerTriggerProps) {
   const context = useDrawer("CartDrawerTrigger");
   return (
-    <button
-      type="button"
-      aria-haspopup="dialog"
-      aria-expanded={context.open}
-      aria-controls={`${context.id}-drawer`}
-      data-slot="cart-drawer-trigger"
-      className={cn(
-        buttonBase,
-        secondaryButton,
-        "inline-flex h-8 items-center gap-2 pr-1.5 pl-3",
-        className,
-      )}
-      {...props}
-      ref={context.triggerRef}
-      onClick={(event) => {
-        onClick?.(event);
-        if (!event.defaultPrevented) context.setOpen(true);
-      }}
-    >
-      <ShoppingBag
-        size={14}
-        strokeWidth={1.75}
-        aria-hidden="true"
-        className="text-muted-foreground"
-      />
-      {children}
-      {count === undefined ? null : (
-        <span className="inline-grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1.5 text-[11.5px] font-medium text-primary-foreground tabular-nums">
-          {count}
-          <span className="sr-only">{count === 1 ? " item" : " items"}</span>
-        </span>
-      )}
-    </button>
+    <SheetTrigger asChild onClick={onClick}>
+      <Button
+        type="button"
+        variant="secondary"
+        data-slot="cart-drawer-trigger"
+        className={cn(
+          buttonBase,
+          secondaryButton,
+          "inline-flex h-8 items-center gap-2 pr-1.5 pl-3 has-[>svg]:pr-1.5 has-[>svg]:pl-3",
+          className,
+        )}
+        {...props}
+        ref={context.triggerRef}
+      >
+        <ShoppingBag
+          className="size-3.5 text-muted-foreground"
+          size={14}
+          strokeWidth={1.75}
+          aria-hidden="true"
+        />
+        {children}
+        {count === undefined ? null : (
+          <span className="inline-grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1.5 text-[11.5px] font-medium text-primary-foreground tabular-nums">
+            {count}
+            <span className="sr-only">{count === 1 ? " item" : " items"}</span>
+          </span>
+        )}
+      </Button>
+    </SheetTrigger>
   );
 }
 
 const cartDrawerContentVariants = cva(
-  "fixed box-border max-w-full overflow-hidden border-0 bg-popover p-0 text-[13px]/[18px] text-popover-foreground duration-220 ease-out-quint fade-in-0 backdrop:bg-background/55 backdrop:backdrop-blur-[2px] open:animate-in motion-reduce:open:animate-none",
+  "box-border max-w-full gap-0 overflow-hidden border-0 bg-popover p-0 text-[13px]/[18px] text-popover-foreground ease-out-quint data-[state=closed]:duration-220 data-[state=open]:duration-220 data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 sm:max-w-full motion-reduce:data-[state=closed]:animate-none motion-reduce:data-[state=open]:animate-none",
   {
     variants: {
       variant: {
-        side: "m-0 ml-auto h-full max-h-dvh w-[min(100%,420px)] rounded-none shadow-[0_0_0_1px_var(--border),-12px_0_32px_-16px_oklch(0_0_0/0.24)] slide-in-from-right-6",
+        side: "h-full max-h-dvh w-[min(100%,420px)] rounded-none shadow-[0_0_0_1px_var(--border),-12px_0_32px_-16px_oklch(0_0_0/0.24)] data-[state=closed]:slide-out-to-right-6 data-[state=open]:slide-in-from-right-6",
         sheet:
-          "mx-auto mt-auto mb-0 h-auto max-h-[min(88dvh,720px)] w-[min(100%,640px)] rounded-t-3xl rounded-b-none shadow-[0_0_0_1px_var(--border),0_-12px_32px_-16px_oklch(0_0_0/0.24)] slide-in-from-bottom-6",
+          "mx-auto h-auto max-h-[min(88dvh,720px)] w-[min(100%,640px)] rounded-t-3xl rounded-b-none shadow-[0_0_0_1px_var(--border),0_-12px_32px_-16px_oklch(0_0_0/0.24)] data-[state=closed]:slide-out-to-bottom-6 data-[state=open]:slide-in-from-bottom-6",
         compact:
-          "m-0 ml-auto h-full max-h-dvh w-[min(100%,360px)] rounded-none shadow-[0_0_0_1px_var(--border),-12px_0_32px_-16px_oklch(0_0_0/0.24)] slide-in-from-right-6",
+          "h-full max-h-dvh w-[min(100%,360px)] rounded-none shadow-[0_0_0_1px_var(--border),-12px_0_32px_-16px_oklch(0_0_0/0.24)] data-[state=closed]:slide-out-to-right-6 data-[state=open]:slide-in-from-right-6",
       },
     },
   },
 );
+const cartDrawerSides = { side: "right", sheet: "bottom", compact: "right" } as const;
 
 /**
- * The drawer: a native modal dialog. Focus moves to the close button (or an element marked
- * autofocus) when it opens and returns to the trigger when it closes. Escape and the backdrop close it.
+ * The drawer: a modal Sheet. Focus moves to the close button (or an element marked autofocus)
+ * when it opens and returns to the trigger when it closes. Escape and the overlay close it.
  */
 export function CartDrawerContent({
-  children,
   className,
-  onClick,
-  onKeyDown,
+  onOpenAutoFocus,
+  onCloseAutoFocus,
   ...props
-}: Omit<ComponentProps<"dialog">, "open">) {
+}: Omit<ComponentProps<typeof SheetContent>, "side" | "showCloseButton">) {
   const context = useDrawer("CartDrawerContent");
-  const ref = useRef<HTMLDialogElement>(null);
   const returnRef = useRef<HTMLElement | null>(null);
-  const { open, closeRef, triggerRef, variant } = context;
-  useLayoutEffect(() => {
-    const dialog = ref.current;
-    if (!dialog) return;
-    if (open && !dialog.open) {
-      const active = document.activeElement;
-      returnRef.current =
-        active instanceof HTMLElement && active !== document.body ? active : triggerRef.current;
-      if (typeof dialog.showModal === "function") dialog.showModal();
-      else dialog.setAttribute("open", "");
-      const preferred = dialog.querySelector<HTMLElement>("[autofocus], [data-autofocus]");
-      (preferred ?? closeRef.current)?.focus();
-    }
-    if (!open && dialog.open) {
-      dialog.close();
-      (returnRef.current ?? triggerRef.current)?.focus();
-    }
-  }, [open, closeRef, triggerRef]);
+  const { closeRef, triggerRef, variant } = context;
   return (
-    <dialog
-      aria-labelledby={`${context.id}-title`}
+    <SheetContent
+      aria-describedby={undefined}
       data-slot="cart-drawer-content"
+      side={cartDrawerSides[variant]}
+      showCloseButton={false}
       className={cn(cartDrawerContentVariants({ variant }), className)}
       {...props}
-      id={`${context.id}-drawer`}
-      ref={ref}
       data-variant={variant}
-      onCancel={(event) => {
+      onOpenAutoFocus={(event) => {
+        const active = document.activeElement;
+        returnRef.current =
+          active instanceof HTMLElement && active !== document.body ? active : triggerRef.current;
+        onOpenAutoFocus?.(event);
+        if (event.defaultPrevented) return;
         event.preventDefault();
-        context.setOpen(false);
+        const content = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
+        const preferred = content?.querySelector<HTMLElement>("[autofocus], [data-autofocus]");
+        (preferred ?? closeRef.current)?.focus();
       }}
-      onClick={(event) => {
-        onClick?.(event);
-        if (!event.defaultPrevented && event.target === event.currentTarget) {
-          context.setOpen(false);
-        }
+      onCloseAutoFocus={(event) => {
+        onCloseAutoFocus?.(event);
+        if (event.defaultPrevented) return;
+        event.preventDefault();
+        (returnRef.current ?? triggerRef.current)?.focus();
       }}
-      onKeyDown={(event) => {
-        onKeyDown?.(event);
-        if (!event.defaultPrevented && event.key === "Escape") {
-          event.preventDefault();
-          context.setOpen(false);
-        }
-      }}
-    >
-      {open ? <div className="flex h-full max-h-[inherit] min-h-0 flex-col">{children}</div> : null}
-    </dialog>
+    />
   );
 }
 
@@ -248,13 +224,12 @@ export function CartDrawerHeader({ children, className, ...props }: ComponentPro
 }
 
 export function CartDrawerTitle({ className, ...props }: ComponentProps<"h2">) {
-  const context = useDrawer("CartDrawerTitle");
+  useDrawer("CartDrawerTitle");
   return (
-    <h2
+    <SheetTitle
       data-slot="cart-drawer-title"
       className={cn("m-0 text-[15px]/5 font-semibold tracking-[-0.01em]", className)}
       {...props}
-      id={`${context.id}-title`}
     />
   );
 }
@@ -268,13 +243,15 @@ export function CartDrawerClose({
 }: ComponentProps<"button">) {
   const context = useDrawer("CartDrawerClose");
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="icon"
       aria-label={ariaLabel}
       data-slot="cart-drawer-close"
       className={cn(
         buttonBase,
-        "grid size-7 flex-none cursor-pointer place-items-center rounded-lg border-0 bg-transparent text-muted-foreground hover:bg-accent hover:text-foreground",
+        "grid size-7 flex-none cursor-pointer place-items-center rounded-lg border-0 bg-transparent text-muted-foreground hover:bg-accent hover:text-foreground dark:hover:bg-accent",
         className,
       )}
       {...props}
@@ -285,7 +262,7 @@ export function CartDrawerClose({
       }}
     >
       <X size={16} strokeWidth={1.75} aria-hidden="true" />
-    </button>
+    </Button>
   );
 }
 
@@ -380,16 +357,17 @@ export function CartDrawerActions({ className, ...props }: ComponentProps<"div">
 export function CartDrawerCheckout({ className, ...props }: ComponentProps<"a">) {
   const context = useDrawer("CartDrawerCheckout");
   return (
-    <a
-      data-slot="cart-drawer-checkout"
+    <Button
+      asChild
       className={cn(
         buttonBase,
-        "inline-flex items-center justify-center rounded-full bg-primary px-4 text-[13px] font-medium text-primary-foreground no-underline hover:brightness-108",
+        "inline-flex items-center justify-center rounded-full bg-primary px-4 text-[13px] font-medium text-primary-foreground no-underline hover:bg-primary hover:brightness-108 has-[>svg]:px-4",
         context.variant === "compact" ? "h-8" : "h-10",
         className,
       )}
-      {...props}
-    />
+    >
+      <a data-slot="cart-drawer-checkout" {...props} />
+    </Button>
   );
 }
 
@@ -402,8 +380,9 @@ export function CartDrawerContinue({
 }: ComponentProps<"button">) {
   const context = useDrawer("CartDrawerContinue");
   return (
-    <button
+    <Button
       type="button"
+      variant="secondary"
       data-slot="cart-drawer-continue"
       className={cn(
         buttonBase,
@@ -419,6 +398,6 @@ export function CartDrawerContinue({
       }}
     >
       {children}
-    </button>
+    </Button>
   );
 }

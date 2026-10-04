@@ -2,6 +2,7 @@
 
 import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, useContext, useId } from "react";
+import { Button } from "@/components/ui/button";
 import {
   AppSidebar,
   type AppSidebarProps,
@@ -62,17 +63,17 @@ const dashboardShellVariants = cva(
 );
 
 const dashboardShellActionVariants = cva(
-  "inline-flex cursor-pointer items-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap [transition:background-color_120ms_ease-out,filter_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.97] motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
+  "inline-flex cursor-pointer items-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap [transition:background-color_120ms_ease-out,filter_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] py-0 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid enabled:active:scale-[0.97] motion-reduce:transition-none motion-reduce:enabled:active:scale-100 [&_svg:not([class*='size-'])]:size-3.5",
   {
     variants: {
       emphasis: {
-        primary: "bg-primary text-primary-foreground enabled:hover:brightness-108",
+        primary: "bg-primary text-primary-foreground hover:bg-primary enabled:hover:brightness-108",
         secondary:
           "bg-secondary text-secondary-foreground enabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
       },
       compact: {
-        true: "h-[26px] px-2.5 text-[12px]",
-        false: "h-7.5 px-[13px] text-[12.5px]",
+        true: "h-[26px] px-2.5 has-[>svg]:px-2.5 text-[12px]",
+        false: "h-7.5 px-[13px] has-[>svg]:px-[13px] text-[12.5px]",
       },
     },
   },
@@ -212,8 +213,9 @@ export function DashboardShellAction({
 }: ComponentProps<"button"> & { emphasis?: "primary" | "secondary" }) {
   const context = useShell("DashboardShellAction");
   return (
-    <button
+    <Button
       data-slot="dashboard-shell-action"
+      variant={emphasis === "primary" ? "default" : "secondary"}
       data-emphasis={emphasis}
       className={cn(
         dashboardShellActionVariants({ emphasis, compact: context.variant === "compact" }),

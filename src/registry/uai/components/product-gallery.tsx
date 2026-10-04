@@ -13,6 +13,15 @@ import {
   useRef,
   useState,
 } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Toggle } from "@/components/ui/toggle";
 import { cn } from "@/lib/uai-utils";
 
 export const PRODUCT_GALLERY_VARIANTS = ["stacked", "side", "compact"] as const;
@@ -43,7 +52,7 @@ function useGallery(part: string) {
 }
 const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 const controlClass =
-  "grid size-7 cursor-pointer place-items-center rounded-full border-0 bg-card/84 p-0 text-muted-foreground shadow-[0_0_0_1px_var(--border),0_1px_2px_oklch(0_0_0/0.08)] backdrop-blur-sm [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.94] aria-pressed:bg-accent aria-pressed:text-accent-foreground motion-reduce:transition-none motion-reduce:active:scale-100";
+  "grid size-7 min-w-0 cursor-pointer place-items-center rounded-full border-0 bg-card/84 p-0 text-muted-foreground shadow-[0_0_0_1px_var(--border),0_1px_2px_oklch(0_0_0/0.08)] backdrop-blur-sm transition-[background-color,color,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] hover:bg-accent hover:text-accent-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.94] aria-pressed:bg-accent aria-pressed:text-accent-foreground data-[state=on]:bg-accent data-[state=on]:text-accent-foreground motion-reduce:transition-none motion-reduce:active:scale-100 dark:hover:bg-accent [&_svg:not([class*='size-'])]:size-3.5";
 
 const productGalleryVariants = cva(
   "grid min-w-0 grid-cols-[minmax(0,1fr)] text-[13px]/[18px] text-foreground [grid-template-areas:'view'_'thumbs']",
@@ -160,24 +169,22 @@ export function ProductGalleryViewport({ children, className, ...props }: Compon
 export function ProductGalleryZoom({ onClick, className, ...props }: ComponentProps<"button">) {
   const context = useGallery("ProductGalleryZoom");
   return (
-    <button
+    <Toggle
       data-slot="product-gallery-zoom"
       aria-label="Zoom image"
       className={cn(controlClass, className)}
       {...props}
       type="button"
-      aria-pressed={context.zoomed}
-      onClick={(event) => {
-        onClick?.(event);
-        if (!event.defaultPrevented) context.setZoomed(!context.zoomed);
-      }}
+      pressed={context.zoomed}
+      onPressedChange={context.setZoomed}
+      onClick={onClick}
     >
       {context.zoomed ? (
-        <ZoomOut size={14} strokeWidth={1.75} aria-hidden="true" />
+        <ZoomOut size={14} className="size-3.5" strokeWidth={1.75} aria-hidden="true" />
       ) : (
-        <ZoomIn size={14} strokeWidth={1.75} aria-hidden="true" />
+        <ZoomIn size={14} className="size-3.5" strokeWidth={1.75} aria-hidden="true" />
       )}
-    </button>
+    </Toggle>
   );
 }
 
@@ -188,61 +195,43 @@ export function ProductGalleryFullscreen({
   ...props
 }: ComponentProps<"button">) {
   const context = useGallery("ProductGalleryFullscreen");
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
-  useIsomorphicLayoutEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    if (open && !dialog.open) {
-      if (typeof dialog.showModal === "function") dialog.showModal();
-      else dialog.setAttribute("open", "");
-      closeRef.current?.focus();
-    }
-    if (!open && dialog.open) {
-      if (typeof dialog.close === "function") dialog.close();
-      else dialog.removeAttribute("open");
-      triggerRef.current?.focus();
-    }
-  }, [open]);
   const index = context.items.findIndex((item) => item.value === context.value);
   const media = context.items[index];
-  const handleKeyDown = (event: KeyboardEvent<HTMLDialogElement>) => {
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "ArrowRight") context.step(1);
     else if (event.key === "ArrowLeft") context.step(-1);
-    else if (event.key === "Escape") setOpen(false);
     else return;
     event.preventDefault();
   };
   return (
-    <>
-      <button
-        data-slot="product-gallery-fullscreen"
-        aria-label={label}
-        aria-haspopup="dialog"
-        className={cn(controlClass, className)}
-        {...props}
-        ref={triggerRef}
-        type="button"
-        onClick={(event) => {
-          onClick?.(event);
-          if (!event.defaultPrevented) setOpen(true);
-        }}
-      >
-        <Maximize2 size={14} strokeWidth={1.75} aria-hidden="true" />
-      </button>
-      <dialog
-        ref={dialogRef}
-        aria-label="Fullscreen product images"
-        className="m-auto box-border max-h-[calc(100%_-_32px)] w-[min(100%_-_32px,1040px)] max-w-full rounded-[14px] border-0 bg-popover p-1 text-[13px]/[18px] text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_16px_40px_-12px_oklch(0_0_0/0.32)] backdrop:bg-background/72 backdrop:backdrop-blur-xs open:animate-in open:fade-in-0 open:zoom-in-96 open:duration-180 open:ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:open:animate-none"
-        onCancel={(event) => {
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild onClick={onClick}>
+        <Button
+          variant="ghost"
+          size="icon"
+          data-slot="product-gallery-fullscreen"
+          aria-label={label}
+          className={cn(controlClass, className)}
+          {...props}
+          type="button"
+        >
+          <Maximize2 size={14} className="size-3.5" strokeWidth={1.75} aria-hidden="true" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent
+        showCloseButton={false}
+        aria-describedby={undefined}
+        className="box-border block max-h-[calc(100%_-_32px)] w-[min(100%_-_32px,1040px)] max-w-full gap-0 rounded-[14px] border-0 bg-popover p-1 text-[13px]/[18px] text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_16px_40px_-12px_oklch(0_0_0/0.32)] duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-[state=open]:zoom-in-96 sm:max-w-full motion-reduce:data-[state=closed]:animate-none motion-reduce:data-[state=open]:animate-none"
+        onOpenAutoFocus={(event) => {
           event.preventDefault();
-          setOpen(false);
+          closeRef.current?.focus();
         }}
         onKeyDown={handleKeyDown}
       >
-        {open && media ? (
+        <DialogTitle className="sr-only">Fullscreen product images</DialogTitle>
+        {media ? (
           <div className="grid gap-1">
             {/* biome-ignore lint/performance/noImgElement: registry source is framework-agnostic. */}
             <img
@@ -258,36 +247,48 @@ export function ProductGalleryFullscreen({
                 {index + 1} / {context.items.length}
                 <span className="sr-only">: {media.alt}</span>
               </p>
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 aria-label="Previous image"
                 className={controlClass}
                 onClick={() => context.step(-1)}
               >
-                <ChevronLeft size={14} strokeWidth={1.75} aria-hidden="true" />
-              </button>
-              <button
+                <ChevronLeft size={14} className="size-3.5" strokeWidth={1.75} aria-hidden="true" />
+              </Button>
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 aria-label="Next image"
                 className={controlClass}
                 onClick={() => context.step(1)}
               >
-                <ChevronRight size={14} strokeWidth={1.75} aria-hidden="true" />
-              </button>
-              <button
-                ref={closeRef}
-                type="button"
-                aria-label="Close fullscreen"
-                className={controlClass}
-                onClick={() => setOpen(false)}
-              >
-                <X size={14} strokeWidth={1.75} aria-hidden="true" />
-              </button>
+                <ChevronRight
+                  size={14}
+                  className="size-3.5"
+                  strokeWidth={1.75}
+                  aria-hidden="true"
+                />
+              </Button>
+              <DialogClose asChild>
+                <Button
+                  ref={closeRef}
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Close fullscreen"
+                  className={controlClass}
+                >
+                  <X size={14} className="size-3.5" strokeWidth={1.75} aria-hidden="true" />
+                </Button>
+              </DialogClose>
             </div>
           </div>
         ) : null}
-      </dialog>
-    </>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -357,11 +358,12 @@ export function ProductGalleryItem({
   const orphaned = !context.items.some((item) => item.value === context.value);
   const compact = context.variant === "compact";
   return (
-    <button
+    <Button
+      variant="ghost"
       data-slot="product-gallery-item"
       aria-label={alt}
       className={cn(
-        "flex-none cursor-pointer overflow-hidden border-0 bg-muted p-0 opacity-62 shadow-[inset_0_0_0_1px_var(--border)] [transition:opacity_120ms_ease-out,box-shadow_160ms_cubic-bezier(0.23,1,0.32,1),scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] aria-[current=true]:opacity-100 aria-[current=true]:shadow-[0_0_0_2px_var(--card),0_0_0_3.5px_var(--foreground)] motion-reduce:transition-none motion-reduce:active:scale-100",
+        "block flex-none cursor-pointer overflow-hidden border-0 bg-muted p-0 opacity-62 shadow-[inset_0_0_0_1px_var(--border)] transition-[opacity,box-shadow,scale] duration-[120ms,160ms,140ms] ease-[ease-out,cubic-bezier(0.23,1,0.32,1),cubic-bezier(0.23,1,0.32,1)] hover:bg-muted hover:opacity-90 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring dark:hover:bg-muted active:scale-[0.97] aria-[current=true]:opacity-100 aria-[current=true]:shadow-[0_0_0_2px_var(--card),0_0_0_3.5px_var(--foreground)] motion-reduce:transition-none motion-reduce:active:scale-100",
         compact ? "size-12 rounded-lg" : "size-16 rounded-[10px]",
         className,
       )}
@@ -378,6 +380,6 @@ export function ProductGalleryItem({
     >
       {/* biome-ignore lint/performance/noImgElement: registry source is framework-agnostic. */}
       <img src={src} alt="" draggable={false} className="block size-full object-cover" />
-    </button>
+    </Button>
   );
 }

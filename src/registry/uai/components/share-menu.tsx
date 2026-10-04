@@ -2,16 +2,15 @@
 
 import { cva } from "class-variance-authority";
 import { Check, Link2, Share, Share2 } from "lucide-react";
+import { type ComponentProps, createContext, useContext, useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
-  type ComponentProps,
-  createContext,
-  type KeyboardEvent,
-  useContext,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-} from "react";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/uai-utils";
 
 export const SHARE_MENU_VARIANTS = ["outlined", "ghost", "compact"] as const;
@@ -29,15 +28,13 @@ export type ShareMenuProps = ComponentProps<"div"> & {
   onOpenChange?: (open: boolean) => void;
 };
 type ShareContext = {
-  id: string;
   variant: ShareMenuVariant;
   url: string;
   shareTitle?: string;
   shareText?: string;
   open: boolean;
-  setOpen: (open: boolean, focus?: "trigger" | "first" | "last") => void;
+  setOpen: (open: boolean) => void;
   focusTarget: React.RefObject<"first" | "last">;
-  triggerRef: React.RefObject<HTMLButtonElement | null>;
   copied: boolean;
   announce: (message: string, copied?: boolean) => void;
 };
@@ -48,22 +45,27 @@ function useShare(part: string) {
   return context;
 }
 const shareMenuTriggerVariants = cva(
-  "inline-flex cursor-pointer items-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap [transition:background-color_120ms_ease-out,box-shadow_120ms_ease-out,color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:[transform:scale(0.97)] data-copied:[&_svg]:animate-in data-copied:[&_svg]:fade-in-0 data-copied:[&_svg]:zoom-in-60 data-copied:[&_svg]:text-success data-copied:[&_svg]:duration-220 data-copied:[&_svg]:ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none motion-reduce:active:[transform:none] motion-reduce:data-copied:[&_svg]:animate-none",
+  "gap-1.5 rounded-full border-0 py-0 font-medium whitespace-nowrap transition-[background-color,box-shadow,color,scale] duration-[120ms,120ms,120ms,140ms] ease-[ease-out,ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] data-copied:[&_svg]:animate-in data-copied:[&_svg]:fade-in-0 data-copied:[&_svg]:zoom-in-60 data-copied:[&_svg]:text-success data-copied:[&_svg]:duration-220 data-copied:[&_svg]:ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none motion-reduce:active:scale-100 motion-reduce:data-copied:[&_svg]:animate-none",
   {
     variants: {
       variant: {
         outlined:
-          "h-7 bg-card pr-3 pl-2.5 text-[12.5px] text-foreground shadow-[inset_0_0_0_1px_var(--border)] hover:bg-accent hover:shadow-[inset_0_0_0_1px_var(--border-strong)] aria-expanded:bg-accent aria-expanded:shadow-[inset_0_0_0_1px_var(--border-strong)]",
+          "h-7 bg-card pr-3 pl-2.5 text-[12.5px] text-foreground shadow-[inset_0_0_0_1px_var(--border)] hover:bg-accent hover:text-foreground hover:shadow-[inset_0_0_0_1px_var(--border-strong)] has-[>svg]:pr-3 has-[>svg]:pl-2.5 aria-expanded:bg-accent aria-expanded:shadow-[inset_0_0_0_1px_var(--border-strong)] dark:bg-card dark:hover:bg-accent dark:aria-expanded:bg-accent",
         ghost:
-          "h-7 bg-transparent pr-3 pl-2.5 text-[12.5px] text-muted-foreground shadow-none hover:bg-accent hover:text-foreground aria-expanded:bg-accent aria-expanded:text-foreground",
+          "h-7 bg-transparent pr-3 pl-2.5 text-[12.5px] text-muted-foreground shadow-none hover:bg-accent hover:text-foreground has-[>svg]:pr-3 has-[>svg]:pl-2.5 aria-expanded:bg-accent aria-expanded:text-foreground dark:hover:bg-accent",
         compact:
-          "h-6 bg-secondary pr-2.5 pl-2 text-[12px] text-foreground shadow-none hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] aria-expanded:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+          "h-6 bg-secondary pr-2.5 pl-2 text-[12px] text-foreground shadow-none hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] has-[>svg]:pr-2.5 has-[>svg]:pl-2 aria-expanded:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
       },
     },
   },
 );
+const shareMenuTriggerButtonVariant = {
+  outlined: "outline",
+  ghost: "ghost",
+  compact: "secondary",
+} as const satisfies Record<ShareMenuVariant, ComponentProps<typeof Button>["variant"]>;
 const shareMenuItemVariants = cva(
-  "box-border flex w-full cursor-pointer items-center rounded-[10px] border-0 bg-transparent text-start text-foreground no-underline outline-offset-[-2px] transition-[background-color] duration-120 ease-[ease-out] hover:bg-accent focus:bg-accent focus:outline-none [&_svg]:flex-none [&_svg]:text-muted-foreground [&_svg]:transition-[color] [&_svg]:duration-120 [&_svg]:ease-[ease-out] hover:[&_svg]:text-foreground focus:[&_svg]:text-foreground motion-reduce:transition-none motion-reduce:[&_svg]:transition-none",
+  "box-border flex w-full cursor-pointer items-center rounded-[10px] border-0 bg-transparent py-0 text-start text-foreground no-underline outline-offset-[-2px] transition-[background-color] duration-120 ease-[ease-out] focus:bg-accent focus:text-foreground focus:outline-none [&_svg]:flex-none [&_svg]:text-muted-foreground [&_svg]:transition-[color] [&_svg]:duration-120 [&_svg]:ease-[ease-out] focus:[&_svg]:text-foreground motion-reduce:transition-none motion-reduce:[&_svg]:transition-none [&_svg:not([class*='size-'])]:size-auto",
   {
     variants: {
       variant: {
@@ -74,11 +76,6 @@ const shareMenuItemVariants = cva(
     },
   },
 );
-function menuItems(menu: HTMLElement | null) {
-  return Array.from(
-    menu?.querySelectorAll<HTMLElement>('[role="menuitem"]:not([aria-disabled="true"])') ?? [],
-  );
-}
 
 export function ShareMenu({
   variant = "outlined",
@@ -92,30 +89,15 @@ export function ShareMenu({
   children,
   ...props
 }: ShareMenuProps) {
-  const id = useId();
-  const rootRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
   const focusTarget = useRef<"first" | "last">("first");
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
   const [message, setMessage] = useState("");
   const [copied, setCopied] = useState(false);
   const current = open ?? internalOpen;
-  const setOpen = (next: boolean, focus?: "trigger" | "first" | "last") => {
-    if (focus === "first" || focus === "last") focusTarget.current = focus;
+  const setOpen = (next: boolean) => {
     if (open === undefined) setInternalOpen(next);
     onOpenChange?.(next);
-    if (focus === "trigger") triggerRef.current?.focus();
   };
-  const closeOnOutside = useRef(setOpen);
-  closeOnOutside.current = setOpen;
-  useEffect(() => {
-    if (!current) return;
-    const onPointerDown = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) closeOnOutside.current(false);
-    };
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => document.removeEventListener("pointerdown", onPointerDown);
-  }, [current]);
   useEffect(() => {
     if (!copied) return;
     const timer = window.setTimeout(() => setCopied(false), 2000);
@@ -124,7 +106,6 @@ export function ShareMenu({
   return (
     <Context.Provider
       value={{
-        id,
         variant,
         url,
         shareTitle,
@@ -132,7 +113,6 @@ export function ShareMenu({
         open: current,
         setOpen,
         focusTarget,
-        triggerRef,
         copied,
         announce: (next, didCopy = false) => {
           setMessage(next);
@@ -140,25 +120,25 @@ export function ShareMenu({
         },
       }}
     >
-      <div
-        data-slot="share-menu"
-        data-variant={variant}
-        className={cn("relative inline-flex text-[13px]/[18px] text-foreground", className)}
-        {...props}
-        ref={rootRef}
-      >
-        {children}
-        <span role="status" className="sr-only">
-          {message}
-        </span>
-      </div>
+      <DropdownMenu open={current} onOpenChange={setOpen} modal={false}>
+        <div
+          data-slot="share-menu"
+          data-variant={variant}
+          className={cn("relative inline-flex text-[13px]/[18px] text-foreground", className)}
+          {...props}
+        >
+          {children}
+          <span role="status" className="sr-only">
+            {message}
+          </span>
+        </div>
+      </DropdownMenu>
     </Context.Provider>
   );
 }
 
 export function ShareMenuTrigger({
   children = "Share",
-  onClick,
   onKeyDown,
   className,
   ...props
@@ -167,116 +147,78 @@ export function ShareMenuTrigger({
   const compact = context.variant === "compact";
   const Icon = context.copied ? Check : Share2;
   return (
-    <button
-      data-slot="share-menu-trigger"
-      className={cn(shareMenuTriggerVariants({ variant: context.variant }), className)}
-      {...props}
-      ref={context.triggerRef}
-      type="button"
-      aria-haspopup="menu"
-      aria-expanded={context.open}
-      aria-controls={context.open ? `${context.id}-menu` : undefined}
-      onClick={(event) => {
-        onClick?.(event);
-        if (!event.defaultPrevented) context.setOpen(!context.open, "first");
-      }}
+    <DropdownMenuTrigger
+      asChild
       onKeyDown={(event) => {
         onKeyDown?.(event);
         if (event.defaultPrevented) return;
-        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        context.focusTarget.current = event.key === "ArrowUp" ? "last" : "first";
+        if (event.key === "ArrowUp") {
           event.preventDefault();
-          context.setOpen(true, event.key === "ArrowUp" ? "last" : "first");
+          context.setOpen(true);
         }
       }}
-      data-copied={context.copied ? "" : undefined}
     >
-      <Icon
-        key={context.copied ? "copied" : "share"}
-        size={compact ? 13 : 14}
-        strokeWidth={1.75}
-        aria-hidden="true"
-      />
-      {children}
-    </button>
+      <Button
+        variant={shareMenuTriggerButtonVariant[context.variant]}
+        data-slot="share-menu-trigger"
+        className={cn(shareMenuTriggerVariants({ variant: context.variant }), className)}
+        {...props}
+        type="button"
+        data-copied={context.copied ? "" : undefined}
+      >
+        <Icon
+          key={context.copied ? "copied" : "share"}
+          className={compact ? "size-[13px]" : "size-3.5"}
+          strokeWidth={1.75}
+          aria-hidden="true"
+        />
+        {children}
+      </Button>
+    </DropdownMenuTrigger>
   );
 }
 
 export function ShareMenuContent({
   align = "start",
   "aria-label": label = "Share options",
-  onClick,
-  onKeyDown,
+  onFocus,
   className,
   ...props
-}: ComponentProps<"div"> & { align?: "start" | "end" }) {
+}: Omit<ComponentProps<typeof DropdownMenuContent>, "align"> & { align?: "start" | "end" }) {
   const context = useShare("ShareMenuContent");
-  const menuRef = useRef<HTMLDivElement>(null);
-  const { open, focusTarget } = context;
-  useEffect(() => {
-    if (!open) return;
-    const items = menuItems(menuRef.current);
-    (focusTarget.current === "last" ? items.at(-1) : items[0])?.focus();
-    const reduce =
-      typeof window.matchMedia === "function" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!reduce)
-      menuRef.current?.animate?.(
-        [
-          { opacity: 0, transform: "scale(0.96)" },
-          { opacity: 1, transform: "scale(1)" },
-        ],
-        { duration: 180, easing: "cubic-bezier(0.16, 1, 0.3, 1)" },
-      );
-  }, [open, focusTarget]);
-  if (!open) return null;
+  const { focusTarget } = context;
   return (
-    <div
-      ref={menuRef}
-      id={`${context.id}-menu`}
-      role="menu"
+    <DropdownMenuContent
       aria-label={label}
-      tabIndex={-1}
+      align={align}
+      sideOffset={6}
+      loop
       data-slot="share-menu-content"
       data-align={align}
       className={cn(
-        "absolute top-[calc(100%+6px)] z-20 grid gap-px rounded-[14px] bg-popover p-1 shadow-[0_0_0_1px_var(--border-strong),0_12px_28px_-10px_oklch(0_0_0/0.32),0_2px_6px_-2px_oklch(0_0_0/0.12)]",
-        align === "end" ? "end-0 origin-top-right" : "start-0 origin-top-left",
+        "z-20 grid gap-px rounded-[14px] border-0 bg-popover p-1 shadow-[0_0_0_1px_var(--border-strong),0_12px_28px_-10px_oklch(0_0_0/0.32),0_2px_6px_-2px_oklch(0_0_0/0.12)]",
+        "duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-[state=open]:zoom-in-96 data-[state=open]:[--tw-enter-translate-x:0]! data-[state=open]:[--tw-enter-translate-y:0]! motion-reduce:data-[state=closed]:animate-none motion-reduce:data-[state=open]:animate-none",
         context.variant === "compact" ? "min-w-[184px]" : "min-w-[200px]",
         className,
       )}
       {...props}
-      onClick={(event) => {
-        onClick?.(event);
-        const link = (event.target as HTMLElement).closest('a[role="menuitem"]');
-        if (!event.defaultPrevented && link) context.setOpen(false, "trigger");
-      }}
-      onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
-        onKeyDown?.(event);
-        if (event.defaultPrevented) return;
-        const items = menuItems(menuRef.current);
-        const index = items.indexOf(document.activeElement as HTMLElement);
-        const move = (next: number) => {
-          event.preventDefault();
-          items[(next + items.length) % items.length]?.focus();
-        };
-        if (event.key === "ArrowDown") move(index + 1);
-        else if (event.key === "ArrowUp") move(index - 1);
-        else if (event.key === "Home") move(0);
-        else if (event.key === "End") move(items.length - 1);
-        else if (event.key === "Escape") {
-          event.preventDefault();
-          context.setOpen(false, "trigger");
-        } else if (event.key === "Tab") context.setOpen(false);
+      onFocus={(event) => {
+        onFocus?.(event);
+        if (event.defaultPrevented || event.target !== event.currentTarget) return;
+        // ArrowUp on the trigger opens the menu on its last item.
+        const target = focusTarget.current;
+        focusTarget.current = "first";
+        if (target !== "last") return;
+        event.preventDefault();
+        const items = event.currentTarget.querySelectorAll<HTMLElement>(
+          '[role="menuitem"]:not([data-disabled])',
+        );
+        items[items.length - 1]?.focus();
       }}
     />
   );
 }
-
-const highlight = {
-  onPointerMove: (event: React.PointerEvent<HTMLElement>) => {
-    if (document.activeElement !== event.currentTarget) event.currentTarget.focus();
-  },
-};
 
 /** Opens the operating system share sheet. Renders only where `navigator.share` exists. */
 export function ShareMenuNative({
@@ -284,24 +226,19 @@ export function ShareMenuNative({
   onClick,
   className,
   ...props
-}: ComponentProps<"button">) {
+}: ComponentProps<typeof DropdownMenuItem>) {
   const context = useShare("ShareMenuNative");
   const [supported, setSupported] = useState(false);
   useEffect(() => setSupported(typeof navigator.share === "function"), []);
   if (!supported) return null;
   return (
-    <button
+    <DropdownMenuItem
       data-slot="share-menu-native"
       className={cn(shareMenuItemVariants({ variant: context.variant }), className)}
       {...props}
-      {...highlight}
-      type="button"
-      role="menuitem"
-      tabIndex={-1}
       onClick={async (event) => {
         onClick?.(event);
         if (event.defaultPrevented) return;
-        context.setOpen(false, "trigger");
         try {
           await navigator.share({
             url: context.url,
@@ -313,9 +250,9 @@ export function ShareMenuNative({
         }
       }}
     >
-      <Share size={14} strokeWidth={1.75} aria-hidden="true" />
+      <Share className="size-3.5" strokeWidth={1.75} aria-hidden="true" />
       {children}
-    </button>
+    </DropdownMenuItem>
   );
 }
 
@@ -326,21 +263,16 @@ export function ShareMenuCopy({
   onClick,
   className,
   ...props
-}: ComponentProps<"button"> & { copiedMessage?: string; errorMessage?: string }) {
+}: ComponentProps<typeof DropdownMenuItem> & { copiedMessage?: string; errorMessage?: string }) {
   const context = useShare("ShareMenuCopy");
   return (
-    <button
+    <DropdownMenuItem
       data-slot="share-menu-copy"
       className={cn(shareMenuItemVariants({ variant: context.variant }), className)}
       {...props}
-      {...highlight}
-      type="button"
-      role="menuitem"
-      tabIndex={-1}
       onClick={async (event) => {
         onClick?.(event);
         if (event.defaultPrevented) return;
-        context.setOpen(false, "trigger");
         try {
           await navigator.clipboard.writeText(context.url);
           context.announce(copiedMessage, true);
@@ -349,9 +281,9 @@ export function ShareMenuCopy({
         }
       }}
     >
-      <Link2 size={14} strokeWidth={1.75} aria-hidden="true" />
+      <Link2 className="size-3.5" strokeWidth={1.75} aria-hidden="true" />
       {children}
-    </button>
+    </DropdownMenuItem>
   );
 }
 
@@ -359,23 +291,22 @@ export function ShareMenuCopy({
 export function ShareMenuChannel({ className, ...props }: ComponentProps<"a">) {
   const context = useShare("ShareMenuChannel");
   return (
-    <a
-      target="_blank"
-      rel="noopener noreferrer"
-      data-slot="share-menu-channel"
+    <DropdownMenuItem
+      asChild
       className={cn(shareMenuItemVariants({ variant: context.variant }), className)}
-      {...props}
-      {...highlight}
-      role="menuitem"
-      tabIndex={-1}
-    />
+    >
+      <a target="_blank" rel="noopener noreferrer" data-slot="share-menu-channel" {...props} />
+    </DropdownMenuItem>
   );
 }
 
-export function ShareMenuSeparator({ className, ...props }: ComponentProps<"hr">) {
+export function ShareMenuSeparator({
+  className,
+  ...props
+}: ComponentProps<typeof DropdownMenuSeparator>) {
   useShare("ShareMenuSeparator");
   return (
-    <hr
+    <DropdownMenuSeparator
       data-slot="share-menu-separator"
       className={cn("mx-2 my-1 h-px border-0 bg-border", className)}
       {...props}

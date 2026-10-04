@@ -3,6 +3,7 @@
 import { cva } from "class-variance-authority";
 import { ArrowDownRight, ArrowRight, ArrowUpRight } from "lucide-react";
 import { type ComponentProps, createContext, useContext, useId } from "react";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/uai-utils";
 
 export const METRIC_CARD_VARIANTS = ["card", "plain", "compact"] as const;
@@ -88,7 +89,7 @@ const trendIcons = { up: ArrowUpRight, down: ArrowDownRight, flat: ArrowRight };
 const trendWords = { up: "Increased", down: "Decreased", flat: "Unchanged" };
 
 const metricCardTrendVariants = cva(
-  "inline-flex w-fit items-center gap-0.75 rounded-full py-0.5 pr-2 pl-1.25 text-[11.5px]/4 font-medium tabular-nums",
+  "w-fit gap-0.75 rounded-full border-0 py-0.5 pr-2 pl-1.25 text-[11.5px]/4 font-medium tabular-nums [&>svg]:size-[13px]",
   {
     variants: {
       sentiment: {
@@ -113,17 +114,18 @@ export function MetricCardTrend({
   useMetric("MetricCardTrend");
   const Icon = trendIcons[direction];
   return (
-    <span
+    <Badge
+      variant="secondary"
       data-slot="metric-card-trend"
       data-direction={direction}
       data-sentiment={sentiment}
       className={cn(metricCardTrendVariants({ sentiment }), className)}
       {...props}
     >
-      <Icon size={13} strokeWidth={2} aria-hidden="true" />
+      <Icon size={13} className="size-[13px]" strokeWidth={2} aria-hidden="true" />
       <span className="sr-only">{trendWords[direction]} </span>
       {children}
-    </span>
+    </Badge>
   );
 }
 

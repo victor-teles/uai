@@ -2,6 +2,7 @@
 
 import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, useContext, useId } from "react";
+import { Button } from "@/components/ui/button";
 import {
   FilterBar,
   type FilterBarProps,
@@ -46,17 +47,17 @@ const metricVariants: Record<ReportBuilderVariant, MetricCardVariant> = {
   compact: "compact",
 };
 const reportBuilderActionVariants = cva(
-  "inline-flex items-center justify-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap [transition:filter_120ms_ease-out,box-shadow_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:cursor-pointer enabled:active:[transform:scale(0.97)] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:enabled:active:[transform:none]",
+  "gap-1.5 rounded-full border-0 py-0 transition-[filter,box-shadow,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:cursor-pointer enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
   {
     variants: {
       emphasis: {
-        primary: "bg-primary text-primary-foreground enabled:hover:brightness-108",
+        primary: "bg-primary text-primary-foreground hover:bg-primary enabled:hover:brightness-108",
         secondary:
-          "bg-secondary text-secondary-foreground enabled:hover:shadow-[inset_0_0_0_999px_color-mix(in_oklab,var(--foreground)_9%,transparent)]",
+          "bg-secondary text-secondary-foreground hover:bg-secondary enabled:hover:shadow-[inset_0_0_0_999px_color-mix(in_oklab,var(--foreground)_9%,transparent)]",
       },
       compact: {
-        true: "h-[26px] px-[11px] text-[12px]/4",
-        false: "h-[30px] px-[13px] text-[12.5px]/4",
+        true: "h-[26px] px-[11px] text-[12px]/4 has-[>svg]:px-[11px]",
+        false: "h-[30px] px-[13px] text-[12.5px]/4 has-[>svg]:px-[13px]",
       },
     },
   },
@@ -154,8 +155,9 @@ export function ReportBuilderAction({
 }: ComponentProps<"button"> & { emphasis?: "primary" | "secondary" }) {
   const context = useBuilder("ReportBuilderAction");
   return (
-    <button
+    <Button
       data-slot="report-builder-action"
+      variant={emphasis === "primary" ? "default" : "secondary"}
       className={cn(
         reportBuilderActionVariants({ emphasis, compact: context.variant === "compact" }),
         className,

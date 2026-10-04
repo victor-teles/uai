@@ -171,6 +171,7 @@
       "description": "A composable activity disclosure with explicit states and structured evidence.",
       "dependencies": ["lucide-react"],
       "registryDependencies": [
+        "collapsible",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -190,6 +191,9 @@
       "description": "A composable decision surface that keeps risk, evidence, and impact explicit.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
+        "input",
+        "label",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -208,6 +212,7 @@
       "title": "Empty State",
       "description": "A compound blank-slate surface with card, plain, compact, and page variants.",
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -228,6 +233,7 @@
       "description": "A composable progress list with card, timeline, and compact variants.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "badge",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -247,6 +253,9 @@
       "description": "A compound prompt bar with composable add, input, and action regions.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
+        "dropdown-menu",
+        "textarea",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -266,6 +275,11 @@
       "description": "A compound sign-in form with providers, credentials, recovery, and async feedback.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
+        "input",
+        "label",
+        "separator",
+        "toggle",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -285,6 +299,12 @@
       "description": "A compound account creation form with consent, password guidance, and verification feedback.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
+        "checkbox",
+        "input",
+        "label",
+        "separator",
+        "toggle",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -304,6 +324,10 @@
       "description": "A compound account recovery workflow with request, sent, reset, expired, and success states.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
+        "input",
+        "label",
+        "toggle",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -323,6 +347,9 @@
       "description": "A compound discount field with rounded, pill, and compact variants.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
+        "input",
+        "label",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -342,6 +369,9 @@
       "description": "A compound quantity control with limits, direct input, and stock feedback.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
+        "input",
+        "label",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -361,6 +391,7 @@
       "description": "A compound cart line with product details, availability, quantity, price, and removal.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json",
         "https://uaiblocks.vercel.app/r/quantity-picker.json"
@@ -400,6 +431,8 @@
       "description": "A compound fulfillment timeline with card, plain, and compact variants.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "badge",
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -419,6 +452,8 @@
       "description": "A compound application header with navigation, search, account actions, and responsive overflow.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
+        "input",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -438,6 +473,9 @@
       "description": "Labels, descriptions, requirements, validation, and character counts.",
       "dependencies": ["class-variance-authority"],
       "registryDependencies": [
+        "input",
+        "label",
+        "textarea",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -457,6 +495,9 @@
       "description": "Clearable search with recent queries, loading, empty, and error feedback.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
+        "input",
+        "label",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -476,6 +517,8 @@
       "description": "Composable filters, removable chips, result counts, and reset actions.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "badge",
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -495,6 +538,8 @@
       "description": "File selection and drag and drop with validation, progress, retry, and removal.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
+        "progress",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -514,6 +559,10 @@
       "description": "Presets, date inputs, and a keyboard-navigable calendar for local date ranges.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
+        "input",
+        "label",
+        "toggle",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -552,6 +601,7 @@
       "description": "Persistent save and discard actions with busy, error, and page-exit warnings.",
       "dependencies": ["class-variance-authority"],
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -590,6 +640,8 @@
       "description": "Nested navigation with collapsed mode, a mobile disclosure, and active states.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
+        "collapsible",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -609,6 +661,8 @@
       "description": "Hierarchy with label truncation, collapsed levels, and a compact mobile fallback.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "breadcrumb",
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -627,6 +681,7 @@
       "title": "Page Tabs",
       "description": "Primary tabs with counts, page actions, and horizontal overflow.",
       "registryDependencies": [
+        "tabs",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -685,6 +740,7 @@
       "description": "Information, success, warning, and error banners with optional actions and dismissal.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -703,6 +759,8 @@
       "title": "Progress Summary",
       "description": "Progress, elapsed time, remaining work, and cancellation in one composable summary.",
       "registryDependencies": [
+        "button",
+        "progress",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -723,6 +781,7 @@
       "description": "Confirm or reject a local action in a polite live region without interrupting the workflow.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -741,6 +800,10 @@
       "title": "Confirmation Dialog",
       "description": "A native modal that explains impact before destructive actions, with optional typed confirmation.",
       "registryDependencies": [
+        "alert-dialog",
+        "button",
+        "input",
+        "label",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -779,6 +842,7 @@
       "title": "Skeleton Group",
       "description": "Composable loading placeholders that match page structure without layout shift.",
       "registryDependencies": [
+        "skeleton",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -799,6 +863,11 @@
       "description": "Search, filters, column visibility, export, and bulk actions for selected rows.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
+        "checkbox",
+        "input",
+        "label",
+        "popover",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -818,6 +887,7 @@
       "description": "A value with comparison, trend, and supporting context.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "badge",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -836,6 +906,7 @@
       "title": "Description List",
       "description": "Labeled facts with responsive alignment and optional actions.",
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -856,6 +927,9 @@
       "description": "Compare plans or products with sticky labels and highlighted differences.",
       "dependencies": ["lucide-react"],
       "registryDependencies": [
+        "checkbox",
+        "label",
+        "table",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -874,6 +948,7 @@
       "title": "Kanban Board",
       "description": "Columns, cards, keyboard movement, and empty states.",
       "registryDependencies": [
+        "badge",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -894,6 +969,8 @@
       "description": "Day, week, and month layouts with event overflow.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
+        "toggle-group",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -913,6 +990,7 @@
       "description": "Actors, actions, resources, timestamps, filters, and event details.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "collapsible",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -932,6 +1010,8 @@
       "description": "Author identity with an initials fallback, biography, profile links, and a follow toggle.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "avatar",
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -951,6 +1031,10 @@
       "description": "Comments with nested replies, reactions, inline editing, moderation states, and timestamps.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "avatar",
+        "button",
+        "collapsible",
+        "textarea",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -970,6 +1054,9 @@
       "description": "Reaction counts and selected states with accessible names and an add-reaction menu.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
+        "dropdown-menu",
+        "toggle",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -989,6 +1076,8 @@
       "description": "A share menu with native sharing, copy-link feedback, and channel links.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
+        "dropdown-menu",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -1008,6 +1097,7 @@
       "description": "A release entry with date, version, categories, and linked changes.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "badge",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -1027,6 +1117,7 @@
       "description": "A campaign message with actions, dismissal, and remembered dismissal.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -1045,6 +1136,7 @@
       "title": "Pricing Toggle",
       "description": "Switch billing periods while keeping prices, billing context, and savings labels in sync.",
       "registryDependencies": [
+        "toggle-group",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -1065,6 +1157,7 @@
       "description": "A quote with the person, role, organization, and an optional proof link.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "avatar",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -1084,6 +1177,9 @@
       "description": "Media selection with thumbnails, zoom, fullscreen viewing, and required alt text.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
+        "dialog",
+        "toggle",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -1103,6 +1199,7 @@
       "description": "Customer logos, ratings, certifications, and security evidence in one section.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "badge",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -1121,6 +1218,10 @@
       "title": "Newsletter Form",
       "description": "Email signup with consent, validation, submission, success, and duplicate-email states.",
       "registryDependencies": [
+        "button",
+        "checkbox",
+        "input",
+        "label",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -1141,6 +1242,7 @@
       "description": "User, assistant, system, and tool messages with avatar, header, content, actions, and streaming state.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -1160,6 +1262,7 @@
       "description": "An inline claim marker with a source preview card and destination link.",
       "dependencies": ["lucide-react"],
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -1179,6 +1282,8 @@
       "description": "A file with type icon or thumbnail, upload progress, failure and retry, and removal.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
+        "progress",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -1198,6 +1303,7 @@
       "description": "Queued, running, successful, and failed tool activity with a disclosure for input and output.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "collapsible",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -1217,6 +1323,7 @@
       "description": "Queued, streaming, stopped, complete, and failed response states with stop and retry actions.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -1236,6 +1343,7 @@
       "description": "A summary of completed agent work with stats, changed artifacts, warnings, and next actions.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -1254,6 +1362,7 @@
       "title": "Hero Section",
       "description": "Positioning, a primary action, supporting proof, and product media.",
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/trust-panel.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
@@ -1295,6 +1404,8 @@
       "description": "Plans, billing periods, limits, and purchase actions.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "badge",
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/pricing-toggle.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
@@ -1336,6 +1447,7 @@
       "description": "Searchable questions with accessible disclosure answers.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "accordion",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/search-field.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
@@ -1356,6 +1468,7 @@
       "description": "A closing section with one goal, supporting copy, and reassurance.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/trust-panel.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
@@ -1375,6 +1488,7 @@
       "title": "Waitlist Section",
       "description": "Collect interest with qualification fields, consent, and confirmation.",
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/newsletter-form.json",
         "https://uaiblocks.vercel.app/r/form-field.json",
@@ -1397,6 +1511,7 @@
       "description": "Contact options, availability, a message form with its states, and expectations.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/status-banner.json",
         "https://uaiblocks.vercel.app/r/form-field.json",
@@ -1418,6 +1533,7 @@
       "description": "Global navigation, page hierarchy, actions, key metrics, and a layout that stacks on narrow screens.",
       "dependencies": ["class-variance-authority"],
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/app-sidebar.json",
         "https://uaiblocks.vercel.app/r/breadcrumb-trail.json",
@@ -1462,6 +1578,7 @@
       "description": "Identity, account actions, contact details, and recent activity in a sidebar or stacked layout.",
       "dependencies": ["class-variance-authority"],
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/activity-timeline.json",
         "https://uaiblocks.vercel.app/r/author-card.json",
@@ -1484,6 +1601,8 @@
       "description": "Members, roles, invitations, access status, search, and confirmed removal.",
       "dependencies": ["class-variance-authority"],
       "registryDependencies": [
+        "button",
+        "select",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/confirmation-dialog.json",
         "https://uaiblocks.vercel.app/r/data-table-toolbar.json",
@@ -1506,6 +1625,7 @@
       "description": "Updates grouped by date with unread state, filters, per-item toggles, and bulk actions.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/empty-state.json",
         "https://uaiblocks.vercel.app/r/page-tabs.json",
@@ -1527,6 +1647,8 @@
       "description": "Plan, usage, payment method, invoice history, billing alerts, and confirmed cancellation.",
       "dependencies": ["class-variance-authority"],
       "registryDependencies": [
+        "button",
+        "table",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/confirmation-dialog.json",
         "https://uaiblocks.vercel.app/r/description-list.json",
@@ -1550,6 +1672,9 @@
       "description": "Query controls, filters, ranked results with highlighted terms, empty states, and pagination.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
+        "label",
+        "select",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/empty-state.json",
         "https://uaiblocks.vercel.app/r/filter-bar.json",
@@ -1572,6 +1697,7 @@
       "title": "Resource Manager",
       "description": "List, create, inspect, edit, archive, and delete domain records.",
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json",
         "https://uaiblocks.vercel.app/r/confirmation-dialog.json",
@@ -1596,6 +1722,10 @@
       "description": "Query surface, results, saved views, and export actions.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
+        "label",
+        "table",
+        "textarea",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json",
         "https://uaiblocks.vercel.app/r/data-table-toolbar.json",
@@ -1618,6 +1748,10 @@
       "description": "File selection, column mapping, validation, preview, and completion.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
+        "label",
+        "select",
+        "table",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json",
         "https://uaiblocks.vercel.app/r/file-upload.json",
@@ -1640,6 +1774,9 @@
       "title": "Approval Queue",
       "description": "Pending decisions grouped by risk, age, owner, and impact.",
       "registryDependencies": [
+        "button",
+        "label",
+        "radio-group",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json",
         "https://uaiblocks.vercel.app/r/approval-card.json",
@@ -1663,6 +1800,7 @@
       "title": "Audit Log Viewer",
       "description": "Filters, events, details, and export controls.",
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json",
         "https://uaiblocks.vercel.app/r/audit-log.json",
@@ -1685,6 +1823,9 @@
       "title": "Incident Dashboard",
       "description": "Status, impact, timeline, responders, and updates.",
       "registryDependencies": [
+        "button",
+        "label",
+        "textarea",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json",
         "https://uaiblocks.vercel.app/r/activity-timeline.json",
@@ -1708,6 +1849,7 @@
       "title": "Report Builder",
       "description": "Select metrics, dimensions, filters, visualization, and export format.",
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json",
         "https://uaiblocks.vercel.app/r/filter-bar.json",
@@ -1730,6 +1872,7 @@
       "description": "Gallery, options, availability, price, delivery, and purchase actions.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/product-gallery.json",
         "https://uaiblocks.vercel.app/r/quantity-picker.json",
@@ -1751,6 +1894,9 @@
       "description": "Categories, filters, sorting, result counts, and pagination.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
+        "label",
+        "select",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/filter-bar.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
@@ -1771,6 +1917,8 @@
       "description": "Review items, quantities, discounts, totals, and checkout actions.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
+        "sheet",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/cart-item.json",
         "https://uaiblocks.vercel.app/r/coupon-field.json",
@@ -1794,6 +1942,7 @@
       "description": "Guide contact, delivery, payment, review, and confirmation.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/price-summary.json",
         "https://uaiblocks.vercel.app/r/status-banner.json",
@@ -1816,6 +1965,8 @@
       "description": "Status, shipment events, delivery estimates, and support.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
+        "collapsible",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/description-list.json",
         "https://uaiblocks.vercel.app/r/order-status.json",
@@ -1836,6 +1987,9 @@
       "title": "Subscription Management",
       "description": "Change plans, usage limits, payment, renewal, and cancellation.",
       "registryDependencies": [
+        "button",
+        "label",
+        "radio-group",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/confirmation-dialog.json",
         "https://uaiblocks.vercel.app/r/description-list.json",
@@ -1858,6 +2012,7 @@
       "title": "Code Verification",
       "description": "One-time code entry with paste, resend timing, errors, and alternate methods.",
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/inline-feedback.json",
         "https://uaiblocks.vercel.app/r/status-banner.json",
@@ -1879,6 +2034,7 @@
       "title": "Onboarding Wizard",
       "description": "Resumable setup steps with validation, progress, optional steps, and completion.",
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/step-indicator.json",
         "https://uaiblocks.vercel.app/r/status-banner.json",
@@ -1901,6 +2057,7 @@
       "description": "Create a workspace, invite teammates, and choose initial settings.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/form-field.json",
         "https://uaiblocks.vercel.app/r/status-banner.json",
@@ -1922,6 +2079,7 @@
       "description": "Long-form reading with metadata, text size controls, sharing, and related articles.",
       "dependencies": ["class-variance-authority"],
       "registryDependencies": [
+        "toggle-group",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/author-card.json",
         "https://uaiblocks.vercel.app/r/share-menu.json",
@@ -1943,6 +2101,7 @@
       "description": "Navigation, an in-page table of contents with the current section, content, and page actions.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/app-sidebar.json",
         "https://uaiblocks.vercel.app/r/breadcrumb-trail.json",
@@ -1964,6 +2123,8 @@
       "description": "Releases grouped by date with version, category, and product area filters.",
       "dependencies": ["class-variance-authority"],
       "registryDependencies": [
+        "label",
+        "select",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/changelog-entry.json",
         "https://uaiblocks.vercel.app/r/empty-state.json",
@@ -1986,6 +2147,9 @@
       "description": "Nested replies, reactions, sorting, moderation states, and a comment composer.",
       "dependencies": ["lucide-react"],
       "registryDependencies": [
+        "button",
+        "textarea",
+        "toggle-group",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/comment.json",
         "https://uaiblocks.vercel.app/r/reaction-bar.json",
@@ -2007,6 +2171,8 @@
       "description": "Posts with authors, tags, reactions, filters, and numbered pagination.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
+        "button",
+        "toggle-group",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/author-card.json",
         "https://uaiblocks.vercel.app/r/empty-state.json",
@@ -2096,6 +2262,7 @@
       "title": "File Analysis",
       "description": "Attached files, extraction status, and findings that cite the page or cell they came from.",
       "registryDependencies": [
+        "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json",
         "https://uaiblocks.vercel.app/r/attachment.json",

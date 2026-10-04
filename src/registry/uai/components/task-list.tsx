@@ -4,6 +4,7 @@ import { cva } from "class-variance-authority";
 import { Check, Circle, LoaderCircle } from "lucide-react";
 import { type ComponentProps, createContext, type ReactNode, useContext } from "react";
 
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/uai-utils";
 
 export const TASK_LIST_VARIANTS = ["card", "timeline", "compact"] as const;
@@ -70,7 +71,7 @@ const taskListMarkerVariants = cva(
 );
 
 const taskListStatusVariants = cva(
-  "inline-flex shrink-0 items-center rounded-full font-medium whitespace-nowrap tabular-nums",
+  "shrink-0 gap-0 rounded-full border-0 py-0 font-medium whitespace-nowrap tabular-nums",
   {
     variants: {
       status: {
@@ -156,14 +157,15 @@ export function TaskListItem({
         />
       </span>
       <span className={timeline ? "min-w-0 pt-0.75" : "min-w-0"}>{children}</span>
-      <span
+      <Badge
+        variant="secondary"
         className={cn(
           taskListStatusVariants({ status }),
           compact ? "min-h-5 px-1.5 text-[11px]/4" : "min-h-5.5 px-2 text-[11.5px]/4",
         )}
       >
         {statusLabel ?? statusCopy[status]}
-      </span>
+      </Badge>
     </li>
   );
 }

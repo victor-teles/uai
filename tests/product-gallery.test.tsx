@@ -76,15 +76,15 @@ test("opens fullscreen in a dialog, steps with arrows, and restores focus", asyn
   render(<Fixture />);
   const trigger = screen.getByRole("button", { name: "View fullscreen" });
   await user.click(trigger);
-  const dialog = document.querySelector("dialog") as HTMLDialogElement;
-  expect(dialog.open).toBe(true);
+  const dialog = screen.getByRole("dialog", { name: "Fullscreen product images" });
+  expect(dialog).toBeTruthy();
   expect(document.activeElement?.getAttribute("aria-label")).toBe("Close fullscreen");
   await user.keyboard("{ArrowRight}");
   expect(dialog.querySelector("img")?.getAttribute("alt")).toBe("Side view");
   await user.click(screen.getByRole("button", { name: "Previous image" }));
   expect(dialog.querySelector("img")?.getAttribute("alt")).toBe("Front view");
   await user.keyboard("{Escape}");
-  expect(dialog.open).toBe(false);
+  expect(screen.queryByRole("dialog")).toBeNull();
   expect(document.activeElement).toBe(trigger);
 });
 

@@ -12,6 +12,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/uai-utils";
 
 export const MESSAGE_VARIANTS = ["bubble", "plain", "compact"] as const;
@@ -242,7 +243,7 @@ export function MessageActions({ className, ...props }: ComponentProps<"div">) {
 }
 
 const messageActionVariants = cva(
-  "grid cursor-pointer place-items-center rounded-lg border-0 bg-transparent p-0 text-subtle-foreground [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring active:scale-[0.94] motion-reduce:transition-none motion-reduce:active:scale-100",
+  "cursor-pointer rounded-lg p-0 text-subtle-foreground [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-accent hover:text-accent-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-1 focus-visible:outline-ring active:scale-[0.94] motion-reduce:transition-none motion-reduce:active:scale-100 dark:hover:bg-accent [&_svg:not([class*='size-'])]:size-3.5",
   {
     variants: {
       variant: { bubble: "size-7", plain: "size-7", compact: "size-6" },
@@ -258,9 +259,11 @@ export type MessageActionProps = ComponentProps<"button"> & {
 export function MessageAction({ label, className, ...props }: MessageActionProps) {
   const context = useMessage("MessageAction");
   return (
-    <button
+    <Button
       data-slot="message-action"
       type="button"
+      variant="ghost"
+      size="icon"
       aria-label={label}
       title={label}
       className={cn(messageActionVariants({ variant: context.variant }), className)}
@@ -293,9 +296,11 @@ export function MessageCopy({
   }, [copied]);
   return (
     <>
-      <button
+      <Button
         data-slot="message-copy"
         type="button"
+        variant="ghost"
+        size="icon"
         aria-label="Copy message"
         title="Copy message"
         className={cn(messageActionVariants({ variant: context.variant }), className)}
@@ -314,11 +319,11 @@ export function MessageCopy({
         }}
       >
         {copied ? (
-          <Check size={14} aria-hidden="true" className="text-success" />
+          <Check size={14} aria-hidden="true" className="text-success size-3.5" />
         ) : (
-          (children ?? <Copy size={14} aria-hidden="true" />)
+          (children ?? <Copy size={14} className="size-3.5" aria-hidden="true" />)
         )}
-      </button>
+      </Button>
       <span role="status" className="sr-only">
         {copied ? "Copied to clipboard" : ""}
       </span>

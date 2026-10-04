@@ -11,6 +11,7 @@ import {
   useId,
   useState,
 } from "react";
+import { Button } from "@/components/ui/button";
 import {
   ProductGallery,
   type ProductGalleryProps,
@@ -71,7 +72,7 @@ const toneDot: Record<ProductDetailAvailabilityTone, string> = {
   unavailable: "bg-destructive ring-destructive/18",
 };
 const buttonClass =
-  "inline-flex items-center justify-center rounded-full border-0 text-[13px] font-medium transition-[filter,background-color,transform] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.97] motion-reduce:transition-none motion-reduce:enabled:active:scale-100";
+  "rounded-full border-0 py-0 text-[13px] transition-[filter,background-color,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.97] motion-reduce:transition-none motion-reduce:enabled:active:scale-100";
 
 const productDetailVariants = cva(
   "@container box-border min-w-0 text-[13px]/[18px] text-foreground",
@@ -419,15 +420,16 @@ export function ProductDetailAddToCart({
   const context = useDetail("ProductDetailAddToCart");
   const blocked = disabled || context.pending;
   return (
-    <button
+    <Button
       data-slot="product-detail-add-to-cart"
+      variant="default"
       className={cn(
         buttonClass,
-        "flex-[1_1_160px] gap-2 px-4.5 text-primary-foreground",
+        "flex-[1_1_160px] gap-2 px-4.5 text-primary-foreground has-[>svg]:px-4.5 disabled:opacity-100",
         context.variant === "compact" ? "h-8" : "h-10",
         blocked
-          ? "cursor-not-allowed bg-[color-mix(in_oklab,var(--primary)_55%,var(--card))]"
-          : "cursor-pointer bg-primary enabled:hover:brightness-108",
+          ? "cursor-not-allowed bg-[color-mix(in_oklab,var(--primary)_55%,var(--card))] hover:bg-[color-mix(in_oklab,var(--primary)_55%,var(--card))]"
+          : "cursor-pointer bg-primary hover:bg-primary enabled:hover:brightness-108",
         className,
       )}
       {...props}
@@ -441,14 +443,14 @@ export function ProductDetailAddToCart({
           <LoaderCircle
             size={14}
             aria-hidden="true"
-            className="animate-[spin_900ms_linear_infinite] motion-reduce:animate-none"
+            className="size-3.5 animate-[spin_900ms_linear_infinite] motion-reduce:animate-none"
           />
           {pendingLabel}
         </>
       ) : (
         children
       )}
-    </button>
+    </Button>
   );
 }
 
@@ -456,12 +458,13 @@ export function ProductDetailAddToCart({
 export function ProductDetailSecondaryAction({ className, ...props }: ComponentProps<"button">) {
   const { variant } = useDetail("ProductDetailSecondaryAction");
   return (
-    <button
+    <Button
       type="button"
+      variant="secondary"
       data-slot="product-detail-secondary-action"
       className={cn(
         buttonClass,
-        "cursor-pointer gap-1.5 bg-secondary px-4 text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+        "cursor-pointer gap-1.5 bg-secondary px-4 text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] has-[>svg]:px-4",
         variant === "compact" ? "h-8" : "h-10",
         className,
       )}

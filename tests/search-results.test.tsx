@@ -26,6 +26,7 @@ import {
   SearchResultsPagination,
   SearchResultsQuery,
   SearchResultsSort,
+  SearchResultsSortOption,
   SearchResultsSummary,
   type SearchResultsVariant,
 } from "@/registry/uai/blocks/search-results";
@@ -62,8 +63,8 @@ function Fixture({
         <SearchResultsBar>
           <SearchResultsSummary>{results.length} results</SearchResultsSummary>
           <SearchResultsSort defaultValue="relevance">
-            <option value="relevance">Best match</option>
-            <option value="newest">Newest</option>
+            <SearchResultsSortOption value="relevance">Best match</SearchResultsSortOption>
+            <SearchResultsSortOption value="newest">Newest</SearchResultsSortOption>
           </SearchResultsSort>
         </SearchResultsBar>
         {loading ? (
@@ -105,6 +106,16 @@ test("wraps the query in a search landmark and labels results", () => {
   );
   expect(screen.getAllByText("refund", { selector: "mark" })).toHaveLength(2);
   expect(screen.getByRole("combobox", { name: "Sort by" })).toBeTruthy();
+});
+
+test("chooses a ranking from the labelled sort select", async () => {
+  const user = userEvent.setup();
+  render(<Fixture />);
+  const sort = screen.getByRole("combobox", { name: "Sort by" });
+  expect(sort.textContent).toBe("Best match");
+  await user.click(sort);
+  await user.click(screen.getByRole("option", { name: "Newest" }));
+  expect(sort.textContent).toBe("Newest");
 });
 
 test("updates results from the query and shows an empty state", async () => {

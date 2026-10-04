@@ -3,6 +3,9 @@
 import { cva } from "class-variance-authority";
 import { LoaderCircle, Search, X } from "lucide-react";
 import { type ComponentProps, createContext, useContext, useId, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/uai-utils";
 
 export const SEARCH_FIELD_VARIANTS = ["rounded", "pill", "compact"] as const;
@@ -79,14 +82,17 @@ export function SearchField({
 export function SearchFieldLabel({ children, className, ...props }: ComponentProps<"label">) {
   const context = useSearch();
   return (
-    <label
+    <Label
       data-slot="search-field-label"
-      className={cn("font-medium", className)}
+      className={cn(
+        "block text-[length:inherit] leading-[inherit] font-medium select-auto",
+        className,
+      )}
       {...props}
       htmlFor={context.id}
     >
       {children}
-    </label>
+    </Label>
   );
 }
 export function SearchFieldControl({ className, children, ...props }: ComponentProps<"div">) {
@@ -127,12 +133,14 @@ export function SearchFieldInput({
 }: Omit<ComponentProps<"input">, "value" | "defaultValue" | "id" | "disabled">) {
   const context = useSearch();
   return (
-    <input
+    <Input
       type="search"
       data-slot="search-field-input"
       className={cn(
-        "w-full min-w-0 flex-1 border-0 bg-transparent p-0 text-foreground outline-none placeholder:text-subtle-foreground [&::-webkit-search-cancel-button]:appearance-none",
-        context.variant === "compact" ? "text-[12.5px]/6" : "text-[13px]/7",
+        "h-auto w-full min-w-0 flex-1 rounded-none border-0 bg-transparent p-0 text-foreground shadow-none outline-none placeholder:text-subtle-foreground focus-visible:ring-0 disabled:cursor-default disabled:opacity-100 dark:bg-transparent [&::-webkit-search-cancel-button]:appearance-none",
+        context.variant === "compact"
+          ? "text-[12.5px]/6 md:text-[12.5px]/6"
+          : "text-[13px]/7 md:text-[13px]/7",
         className,
       )}
       {...props}
@@ -158,7 +166,7 @@ export function SearchFieldInput({
   );
 }
 export function SearchFieldClear({
-  children = <X size={14} strokeWidth={1.75} aria-hidden="true" />,
+  children = <X size={14} className="size-3.5" strokeWidth={1.75} aria-hidden="true" />,
   onClick,
   className,
   ...props
@@ -166,11 +174,13 @@ export function SearchFieldClear({
   const context = useSearch();
   if (!context.value) return null;
   return (
-    <button
+    <Button
       aria-label="Clear search"
       data-slot="search-field-clear"
+      variant="ghost"
+      size="icon"
       className={cn(
-        "grid shrink-0 cursor-pointer animate-in place-items-center border-0 bg-transparent p-0 text-subtle-foreground duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_var(--ease-out-quint)] fade-in-0 zoom-in-80 hover:bg-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.92] motion-reduce:animate-none motion-reduce:transition-none",
+        "grid shrink-0 cursor-pointer animate-in place-items-center border-0 bg-transparent p-0 text-subtle-foreground duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_var(--ease-out-quint)] fade-in-0 zoom-in-80 hover:bg-accent hover:text-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.92] disabled:opacity-100 motion-reduce:animate-none motion-reduce:transition-none dark:hover:bg-accent [&_svg:not([class*='size-'])]:size-3.5",
         context.variant === "compact" ? "size-6" : "size-7",
         context.variant === "pill" ? "rounded-full" : "rounded-lg",
         className,
@@ -187,7 +197,7 @@ export function SearchFieldClear({
       }}
     >
       {children}
-    </button>
+    </Button>
   );
 }
 export function SearchFieldMessage({ children, className, ...props }: ComponentProps<"p">) {
@@ -237,10 +247,12 @@ export function SearchFieldRecentItem({
 }: Omit<ComponentProps<"button">, "value"> & { value: string }) {
   const context = useSearch();
   return (
-    <button
+    <Button
       data-slot="search-field-recent-item"
+      variant="secondary"
+      size="sm"
       className={cn(
-        "cursor-pointer rounded-full border-0 bg-secondary px-3 text-[12.5px] font-medium text-muted-foreground [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_var(--ease-out-quint)] hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none",
+        "cursor-pointer gap-1.5 rounded-full border-0 bg-secondary px-3 py-0 text-[12.5px] font-medium text-muted-foreground [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_var(--ease-out-quint)] hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] hover:text-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.97] has-[>svg]:px-3 motion-reduce:transition-none",
         context.variant === "compact" ? "h-6" : "h-7",
         className,
       )}
@@ -256,6 +268,6 @@ export function SearchFieldRecentItem({
       }}
     >
       {children ?? value}
-    </button>
+    </Button>
   );
 }

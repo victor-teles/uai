@@ -40,6 +40,9 @@ with the shadcn CLI or by copying the distributable source manually. Installed c
 ## Capabilities and constraints
 
 - The registry uses the shadcn registry schema and installation flow.
+- Registry items compose standard shadcn primitives and declare them in
+  `registryDependencies`, so installed code reuses the primitives a shadcn app
+  already owns.
 - Fumadocs UI provides the application shell and highlighted code blocks.
 - Bun manages dependencies and project scripts.
 - The first release targets React and Tailwind CSS.

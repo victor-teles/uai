@@ -12,6 +12,10 @@ import {
   useRef,
   useState,
 } from "react";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/uai-utils";
 
 export const NEWSLETTER_FORM_VARIANTS = ["inline", "stacked", "card"] as const;
@@ -45,7 +49,7 @@ type NewsletterContext = {
   requireConsent: (required: boolean) => void;
   status: NewsletterFormStatus;
   inputRef: React.RefObject<HTMLInputElement | null>;
-  consentRef: React.RefObject<HTMLInputElement | null>;
+  consentRef: React.RefObject<HTMLButtonElement | null>;
 };
 const Context = createContext<NewsletterContext | null>(null);
 function useNewsletter(part: string) {
@@ -94,7 +98,7 @@ export function NewsletterForm({
 }: NewsletterFormProps) {
   const id = useId();
   const inputRef = useRef<HTMLInputElement>(null);
-  const consentRef = useRef<HTMLInputElement>(null);
+  const consentRef = useRef<HTMLButtonElement>(null);
   const [email, setEmailState] = useState(defaultEmail);
   const [consent, setConsentState] = useState(false);
   const [consentRequired, requireConsent] = useState(false);
@@ -161,10 +165,9 @@ export function NewsletterForm({
 export function NewsletterFormLabel({ className, ...props }: ComponentProps<"label">) {
   const context = useNewsletter("NewsletterFormLabel");
   return (
-    // biome-ignore lint/a11y/noLabelWithoutControl: htmlFor targets NewsletterFormInput; consumers supply the text.
-    <label
+    <Label
       data-slot="newsletter-form-label"
-      className={cn("text-[13px] font-medium", className)}
+      className={cn("text-[13px] leading-[inherit] font-medium select-auto", className)}
       {...props}
       htmlFor={`${context.id}-email`}
     />
@@ -196,14 +199,14 @@ export function NewsletterFormInput({
   const stacked = context.variant === "stacked";
   const invalid = context.status === "invalid" || context.status === "duplicate";
   return (
-    <input
+    <Input
       name="email"
       autoComplete="email"
       inputMode="email"
       data-slot="newsletter-form-input"
       className={cn(
-        "box-border w-full min-w-0 flex-1 border-0 bg-transparent text-[13px]/[18px] text-inherit outline-none transition-shadow duration-120 ease-out placeholder:text-subtle-foreground placeholder:opacity-100 motion-reduce:transition-none",
-        stacked ? "h-9 rounded-[10px] px-3" : "h-7 rounded-none p-0",
+        "box-border w-full min-w-0 flex-1 border-0 bg-transparent text-[13px]/[18px] text-inherit shadow-none outline-none transition-shadow duration-120 ease-out placeholder:text-subtle-foreground placeholder:opacity-100 focus-visible:ring-0 motion-reduce:transition-none md:text-[13px]/[18px] dark:bg-transparent",
+        stacked ? "h-9 rounded-[10px] px-3 py-0" : "h-7 rounded-none p-0",
         stacked && (invalid ? invalidRing : inputRing),
         className,
       )}
@@ -234,10 +237,11 @@ export function NewsletterFormSubmit({
   const pending = context.status === "submitting";
   const stacked = context.variant === "stacked";
   return (
-    <button
+    <Button
       data-slot="newsletter-form-submit"
+      variant="default"
       className={cn(
-        "flex-none rounded-full border-0 bg-primary px-3.5 text-[13px] font-medium whitespace-nowrap text-primary-foreground [transition:filter_120ms_ease-out,opacity_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none",
+        "flex-none rounded-full border-0 bg-primary px-3.5 py-0 text-[13px] font-medium whitespace-nowrap text-primary-foreground [transition:filter_120ms_ease-out,opacity_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-primary focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid has-[>svg]:px-3.5 motion-reduce:transition-none",
         stacked ? "h-8.5" : "h-7.5",
         pending
           ? "cursor-progress opacity-70"
@@ -253,7 +257,7 @@ export function NewsletterFormSubmit({
       }}
     >
       {pending ? pendingLabel : children}
-    </button>
+    </Button>
   );
 }
 
@@ -271,29 +275,28 @@ export function NewsletterFormConsent({
   }, [required, requireConsent]);
   const checkboxId = `${context.id}-consent`;
   return (
-    <label
+    <Label
       data-slot="newsletter-form-consent"
       className={cn(
-        "flex cursor-pointer items-start gap-2 text-xs/4 text-muted-foreground",
+        "flex cursor-pointer items-start gap-2 text-xs/4 font-normal text-muted-foreground select-auto",
         className,
       )}
       {...props}
       htmlFor={checkboxId}
     >
-      <input
+      <Checkbox
         ref={context.consentRef}
         id={checkboxId}
         name="consent"
-        type="checkbox"
         required={required}
         checked={context.consent}
         aria-invalid={context.status === "consent" || undefined}
         aria-describedby={`${context.id}-message`}
-        onChange={(event) => context.setConsent(event.target.checked)}
-        className="m-0 mt-px size-3.5 flex-none cursor-pointer accent-primary"
+        onCheckedChange={(checked) => context.setConsent(checked === true)}
+        className="m-0 mt-px size-3.5 flex-none cursor-pointer shadow-none focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid [&_svg]:size-3"
       />
       <span>{children}</span>
-    </label>
+    </Label>
   );
 }
 

@@ -2,6 +2,15 @@
 
 import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, useContext, useId } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   ConfirmationDialog,
   type ConfirmationDialogProps,
@@ -133,17 +142,17 @@ export function BillingPortalActions({ className, ...props }: ComponentProps<"di
 }
 
 const billingPortalButtonVariants = cva(
-  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap [transition:background-color_120ms_ease-out,filter_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:[transform:scale(0.97)] motion-reduce:transition-none motion-reduce:enabled:active:[transform:none]",
+  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap [transition:background-color_120ms_ease-out,filter_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] py-0 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid enabled:active:[transform:scale(0.97)] motion-reduce:transition-none motion-reduce:enabled:active:[transform:none] [&_svg:not([class*='size-'])]:size-3.5",
   {
     variants: {
       emphasis: {
-        primary: "bg-primary text-primary-foreground enabled:hover:brightness-108",
+        primary: "bg-primary text-primary-foreground hover:bg-primary enabled:hover:brightness-108",
         secondary:
           "bg-secondary text-secondary-foreground enabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
       },
       compact: {
-        true: "h-[26px] px-2.5 text-[12px]",
-        false: "h-[30px] px-[13px] text-[12.5px]",
+        true: "h-[26px] px-2.5 has-[>svg]:px-2.5 text-[12px]",
+        false: "h-[30px] px-[13px] has-[>svg]:px-[13px] text-[12.5px]",
       },
     },
   },
@@ -157,8 +166,9 @@ export function BillingPortalButton({
 }: ComponentProps<"button"> & { emphasis?: "primary" | "secondary" }) {
   const context = usePortal("BillingPortalButton");
   return (
-    <button
+    <Button
       data-slot="billing-portal-button"
+      variant={emphasis === "primary" ? "default" : "secondary"}
       className={cn(
         billingPortalButtonVariants({ emphasis, compact: context.variant === "compact" }),
         className,
@@ -303,15 +313,18 @@ export function BillingPortalInvoices({ children, className, ...props }: Compone
   return (
     <div
       data-slot="billing-portal-invoices-scroller"
-      className="-mx-2 min-w-0 overflow-x-auto overscroll-x-contain"
+      className="-mx-2 min-w-0 *:data-[slot=table-container]:overscroll-x-contain"
     >
-      <table
+      <Table
         data-slot="billing-portal-invoices"
-        className={cn("w-full min-w-[440px] border-collapse tabular-nums", className)}
+        className={cn(
+          "w-full min-w-[440px] border-collapse text-[length:inherit] tabular-nums",
+          className,
+        )}
         {...props}
       >
         {children}
-      </table>
+      </Table>
     </div>
   );
 }
@@ -322,9 +335,13 @@ export function BillingPortalInvoicesHeader({
   ...props
 }: ComponentProps<"thead">) {
   return (
-    <thead data-slot="billing-portal-invoices-header" className={cn(className)} {...props}>
-      <tr>{children}</tr>
-    </thead>
+    <TableHeader
+      data-slot="billing-portal-invoices-header"
+      className={cn("[&_tr]:border-b-0", className)}
+      {...props}
+    >
+      <TableRow className="hover:bg-transparent">{children}</TableRow>
+    </TableHeader>
   );
 }
 
@@ -334,11 +351,11 @@ export function BillingPortalInvoicesColumn({
   ...props
 }: Omit<ComponentProps<"th">, "align"> & { align?: "start" | "end" }) {
   return (
-    <th
+    <TableHead
       scope="col"
       data-slot="billing-portal-invoices-column"
       className={cn(
-        "border-b px-2.5 pt-0 pb-2 text-[12px] font-medium whitespace-nowrap text-subtle-foreground",
+        "h-auto border-b px-2.5 pt-0 pb-2 text-[12px] font-medium whitespace-nowrap text-subtle-foreground",
         align === "end" ? "text-end" : "text-start",
         className,
       )}
@@ -348,15 +365,17 @@ export function BillingPortalInvoicesColumn({
 }
 
 export function BillingPortalInvoicesBody({ className, ...props }: ComponentProps<"tbody">) {
-  return <tbody data-slot="billing-portal-invoices-body" className={cn(className)} {...props} />;
+  return (
+    <TableBody data-slot="billing-portal-invoices-body" className={cn(className)} {...props} />
+  );
 }
 
 export function BillingPortalInvoice({ className, ...props }: ComponentProps<"tr">) {
   return (
-    <tr
+    <TableRow
       data-slot="billing-portal-invoice"
       className={cn(
-        "transition-[background-color] duration-120 ease-[ease-out] hover:bg-accent/55 motion-reduce:transition-none [&:last-child>td]:border-b-transparent [&>td]:border-b [&>td:first-child]:rounded-l-lg [&>td:last-child]:rounded-r-lg",
+        "border-b-0 transition-[background-color] duration-120 ease-[ease-out] hover:bg-accent/55 motion-reduce:transition-none [&:last-child>td]:border-b-transparent [&>td]:border-b [&>td:first-child]:rounded-l-lg [&>td:last-child]:rounded-r-lg",
         className,
       )}
       {...props}
@@ -371,7 +390,7 @@ export function BillingPortalInvoiceCell({
 }: Omit<ComponentProps<"td">, "align"> & { align?: "start" | "end" }) {
   const { variant } = usePortal("BillingPortalInvoiceCell");
   return (
-    <td
+    <TableCell
       data-slot="billing-portal-invoice-cell"
       className={cn(
         "px-2.5 whitespace-nowrap",

@@ -2,6 +2,7 @@
 
 import { cva } from "class-variance-authority";
 import { type ComponentProps, createContext, useContext, useId } from "react";
+import { Button } from "@/components/ui/button";
 import {
   ActivityTimeline,
   type ActivityTimelineVariant,
@@ -118,22 +119,22 @@ export function ProfilePageActions({
 
 const profilePageActionVariants = cva(
   [
-    "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap",
-    "[transition:background-color_120ms_ease-out,filter_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)]",
-    "enabled:active:scale-97 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+    "cursor-pointer gap-1.5 rounded-full border-0 py-0",
+    "transition-[background-color,filter,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)]",
+    "enabled:active:scale-97 focus-visible:ring-0 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
     "motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
   ],
   {
     variants: {
       intent: {
-        primary: "bg-primary text-primary-foreground enabled:hover:brightness-108",
+        primary: "bg-primary text-primary-foreground hover:bg-primary enabled:hover:brightness-108",
         secondary:
-          "bg-secondary text-secondary-foreground enabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
-        danger: "bg-destructive/12 text-destructive enabled:hover:bg-destructive/20",
+          "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+        danger: "bg-destructive/12 text-destructive hover:bg-destructive/20",
       },
       compact: {
-        true: "h-[26px] px-2.5 text-[12px]",
-        false: "h-[30px] px-[13px] text-[12.5px]",
+        true: "h-[26px] px-2.5 text-[12px] has-[>svg]:px-2.5",
+        false: "h-[30px] px-[13px] text-[12.5px] has-[>svg]:px-[13px]",
       },
     },
   },
@@ -152,8 +153,9 @@ export function ProfilePageAction({
   const variant = useVariant("ProfilePageAction");
   const intent = emphasis === "primary" ? "primary" : tone === "danger" ? "danger" : "secondary";
   return (
-    <button
+    <Button
       data-slot="profile-page-action"
+      variant={intent === "primary" ? "default" : "secondary"}
       className={cn(
         profilePageActionVariants({ intent, compact: variant === "compact" }),
         className,

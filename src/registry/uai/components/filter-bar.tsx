@@ -3,6 +3,8 @@
 import { cva } from "class-variance-authority";
 import { X } from "lucide-react";
 import { type ComponentProps, createContext, useContext } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/uai-utils";
 
 export const FILTER_BAR_VARIANTS = ["toolbar", "panel", "compact"] as const;
@@ -38,8 +40,10 @@ const filterBarVariants = cva("flex min-w-0 flex-wrap border text-foreground", {
   },
 });
 
+// Ghost Button overrides: the neutral hover and pointer-event resets keep hover feedback on
+// enabled controls only and preserve the not-allowed cursor when disabled.
 const actionButton =
-  "cursor-pointer border-0 bg-transparent transition-[background-color,color,transform] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none";
+  "cursor-pointer border-0 bg-transparent transition-[background-color,color,transform] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] hover:bg-transparent focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid enabled:active:scale-[0.97] disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none dark:hover:bg-transparent";
 
 export function FilterBar({
   variant = "toolbar",
@@ -90,29 +94,32 @@ export function FilterBarChip({
 }: ComponentProps<"span"> & { onRemove: () => void; disabled?: boolean }) {
   const context = useFilter();
   return (
-    <span
+    <Badge
+      variant="secondary"
       data-slot="filter-bar-chip"
       className={cn(
-        "box-border inline-flex min-h-6.5 max-w-full items-center gap-0.5 rounded-full bg-muted py-0 pr-0.75 pl-2.5 text-[12px] font-medium text-foreground",
+        "box-border inline-flex min-h-6.5 w-auto max-w-full shrink justify-start items-center gap-0.5 overflow-visible rounded-full border-0 bg-muted py-0 pr-0.75 pl-2.5 text-[12px] font-medium whitespace-normal text-foreground",
         "animate-in fade-in-0 zoom-in-96 duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:animate-none",
         className,
       )}
       {...props}
     >
       <span className="wrap-anywhere">{children}</span>
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="icon"
         disabled={context.disabled || disabled}
         onClick={onRemove}
         className={cn(
           actionButton,
-          "grid size-5 shrink-0 place-items-center rounded-full p-0 text-subtle-foreground enabled:hover:bg-foreground/10 enabled:hover:text-foreground",
+          "grid size-5 shrink-0 place-items-center rounded-full p-0 text-subtle-foreground hover:text-subtle-foreground enabled:hover:bg-foreground/10 enabled:hover:text-foreground [&_svg:not([class*='size-'])]:size-3",
         )}
       >
-        <X size={12} strokeWidth={2} aria-hidden="true" />
+        <X size={12} className="size-3" strokeWidth={2} aria-hidden="true" />
         <span className="sr-only">Remove {children} filter</span>
-      </button>
-    </span>
+      </Button>
+    </Badge>
   );
 }
 export function FilterBarCount({ children, className, ...props }: ComponentProps<"span">) {
@@ -135,11 +142,12 @@ export function FilterBarReset({
 }: ComponentProps<"button">) {
   const context = useFilter();
   return (
-    <button
+    <Button
       data-slot="filter-bar-reset"
+      variant="ghost"
       className={cn(
         actionButton,
-        "h-7 rounded-full px-3 text-[12.5px] font-medium text-muted-foreground enabled:hover:bg-accent enabled:hover:text-foreground",
+        "h-7 rounded-full px-3 py-0 text-[12.5px] font-medium text-muted-foreground hover:text-muted-foreground enabled:hover:bg-accent enabled:hover:text-foreground has-[>svg]:px-3",
         context.variant === "panel" ? "ml-0 self-start" : "ml-auto",
         className,
       )}
@@ -152,6 +160,6 @@ export function FilterBarReset({
       }}
     >
       {children}
-    </button>
+    </Button>
   );
 }

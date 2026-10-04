@@ -9,6 +9,9 @@ import {
   useId,
   useState,
 } from "react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Comment, type CommentProps, type CommentVariant } from "@/components/ui/uai/comment";
 import {
   ReactionBar,
@@ -135,16 +138,25 @@ export function CommentThreadCount({ className, ...props }: ComponentProps<"span
   );
 }
 
+export type CommentThreadSortProps = Omit<ComponentProps<"div">, "defaultValue" | "dir">;
+
 /** A radio group for the sort order. Arrow keys move the selection. */
 export function CommentThreadSort({
   "aria-label": label = "Sort comments",
   onKeyDown,
   className,
   ...props
-}: ComponentProps<"div">) {
-  const { variant } = useThread("CommentThreadSort");
+}: CommentThreadSortProps) {
+  const { variant, sort, setSort } = useThread("CommentThreadSort");
   return (
-    <div
+    <ToggleGroup
+      type="single"
+      rovingFocus={false}
+      spacing={0.5}
+      value={sort}
+      onValueChange={(next) => {
+        if (next) setSort(next);
+      }}
       role="radiogroup"
       aria-label={label}
       data-slot="comment-thread-sort"
@@ -162,36 +174,32 @@ export function CommentThreadSort({
   );
 }
 
+export type CommentThreadSortOptionProps = Omit<ComponentProps<typeof ToggleGroupItem>, "value"> & {
+  value: string;
+};
+
 export function CommentThreadSortOption({
   value,
-  onClick,
   className,
   ...props
-}: Omit<ComponentProps<"button">, "value"> & { value: string }) {
+}: CommentThreadSortOptionProps) {
   const context = useThread("CommentThreadSortOption");
   const checked = context.sort === value;
   const compact = context.variant === "compact";
   return (
-    // biome-ignore lint/a11y/useSemanticElements: APG radio group built from buttons for custom segmented styling.
-    <button
+    <ToggleGroupItem
       data-slot="comment-thread-sort-option"
       className={cn(
-        "cursor-pointer rounded-full border-0 px-2.5 text-[12px] font-medium [transition:background-color_180ms_cubic-bezier(0.23,1,0.32,1),color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.96] motion-reduce:transition-none motion-reduce:active:scale-100",
+        "min-w-0 cursor-pointer rounded-full border-0 px-2.5 text-[12px] font-medium [transition:background-color_180ms_cubic-bezier(0.23,1,0.32,1),color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.96] motion-reduce:transition-none motion-reduce:active:scale-100",
         compact ? "h-5.5" : "h-6",
         checked
-          ? "bg-accent text-foreground"
-          : "bg-transparent text-subtle-foreground hover:text-foreground",
+          ? "bg-accent text-foreground hover:bg-accent hover:text-foreground data-[state=on]:text-foreground"
+          : "bg-transparent text-subtle-foreground hover:bg-transparent hover:text-foreground",
         className,
       )}
       {...props}
-      type="button"
-      role="radio"
-      aria-checked={checked}
+      value={value}
       tabIndex={checked ? 0 : -1}
-      onClick={(event) => {
-        onClick?.(event);
-        if (!event.defaultPrevented) context.setSort(value);
-      }}
     />
   );
 }
@@ -267,7 +275,7 @@ export function CommentThreadComposer({
         submit();
       }}
     >
-      <textarea
+      <Textarea
         aria-label={label}
         placeholder={placeholder}
         value={value}
@@ -280,22 +288,23 @@ export function CommentThreadComposer({
             submit();
           }
         }}
-        className="min-w-0 flex-1 resize-none border-0 bg-transparent px-1.5 py-1.25 text-[13px]/[18px] text-inherit outline-none placeholder:text-subtle-foreground"
+        className="field-sizing-fixed block min-h-0 w-auto min-w-0 flex-1 resize-none rounded-none border-0 bg-transparent px-1.5 py-1.25 text-[13px]/[18px] text-inherit shadow-none outline-none placeholder:text-subtle-foreground focus-visible:ring-0 md:text-[13px]/[18px] dark:bg-transparent"
       />
-      <button
+      <Button
         type="submit"
+        size="icon"
         aria-label="Post comment"
         disabled={!ready}
         className={cn(
-          "grid flex-[0_0_auto] place-items-center rounded-full border-0 [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring not-disabled:active:scale-[0.92] motion-reduce:transition-none motion-reduce:not-disabled:active:scale-100",
+          "grid flex-[0_0_auto] place-items-center rounded-full border-0 [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid not-disabled:active:scale-[0.92] disabled:pointer-events-auto disabled:opacity-100 motion-reduce:transition-none motion-reduce:not-disabled:active:scale-100",
           compact ? "size-6" : "size-7",
           ready
-            ? "cursor-pointer bg-foreground text-card"
-            : "cursor-not-allowed bg-border-strong text-card/70",
+            ? "cursor-pointer bg-foreground text-card hover:bg-foreground"
+            : "cursor-not-allowed bg-border-strong text-card/70 hover:bg-border-strong",
         )}
       >
-        <ArrowUp size={compact ? 14 : 16} strokeWidth={2} aria-hidden="true" />
-      </button>
+        <ArrowUp strokeWidth={2} aria-hidden="true" className={compact ? "size-3.5" : "size-4"} />
+      </Button>
     </form>
   );
 }

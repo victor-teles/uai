@@ -2,14 +2,16 @@
 
 import { cva } from "class-variance-authority";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { type ComponentProps, createContext, type ReactNode, useContext, useId } from "react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import {
-  type ComponentProps,
-  createContext,
-  type ReactNode,
-  useContext,
-  useId,
-  useState,
-} from "react";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   FilterBar,
   type FilterBarProps,
@@ -41,8 +43,8 @@ function useListingVariant() {
 }
 
 const pillInteraction =
-  "[transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none";
-const pillHover = "hover:bg-accent hover:text-foreground";
+  "py-0 text-[13px]/[18px] transition-[background-color,color,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none";
+const pillHover = "hover:bg-accent hover:text-foreground dark:hover:bg-accent";
 const pillPress = "active:scale-[0.97] motion-reduce:active:scale-100";
 
 const productListingVariants = cva(
@@ -138,20 +140,25 @@ export function ProductListingCategory({
 }: ProductListingCategoryProps) {
   return (
     <li className="flex-none">
-      <a
-        aria-current={current ? "page" : undefined}
-        data-slot="product-listing-category"
+      <Button
+        asChild
+        variant="ghost"
         className={cn(
-          "inline-flex h-7 items-center rounded-full px-3 font-medium whitespace-nowrap no-underline",
+          "h-7 rounded-full px-3 no-underline has-[>svg]:px-3",
           pillInteraction,
           pillPress,
           current
-            ? "bg-accent text-foreground"
+            ? cn("bg-accent text-foreground", pillHover)
             : cn("bg-transparent text-muted-foreground", pillHover),
           className,
         )}
-        {...props}
-      />
+      >
+        <a
+          aria-current={current ? "page" : undefined}
+          data-slot="product-listing-category"
+          {...props}
+        />
+      </Button>
     </li>
   );
 }
@@ -233,49 +240,78 @@ export function ProductListingCount({ className, ...props }: ComponentProps<"p">
 }
 
 export type ProductListingSortProps = Omit<
-  ComponentProps<"select">,
-  "value" | "defaultValue" | "onChange"
+  ComponentProps<typeof SelectTrigger>,
+  "id" | "size" | "value" | "defaultValue" | "onChange" | "name"
 > & {
   label?: ReactNode;
   value?: string;
   defaultValue?: string;
   onValueChange?: (value: string) => void;
+  name?: string;
 };
 
-/** A labelled native select for sort order. Compose option elements inside. */
+/** A labelled select for sort order. Compose ProductListingSortOption items inside. */
 export function ProductListingSort({
   label = "Sort by",
   value,
-  defaultValue = "",
+  defaultValue,
   onValueChange,
+  name,
   className,
+  children,
   ...props
 }: ProductListingSortProps) {
   useListing("ProductListingSort");
   const id = useId();
-  const [internal, setInternal] = useState(defaultValue);
   return (
     <div data-slot="product-listing-sort" className="inline-flex items-center gap-2">
-      <label htmlFor={id} className="text-[12.5px] text-subtle-foreground">
+      <Label
+        htmlFor={id}
+        className="text-[12.5px] leading-[inherit] font-normal text-subtle-foreground select-auto"
+      >
         {label}
-      </label>
-      <select
-        data-slot="product-listing-sort-select"
-        className={cn(
-          "h-7 cursor-pointer rounded-full border-0 bg-secondary px-2.5 text-[12.5px] font-medium text-foreground",
-          "transition-[background-color] duration-120 ease-[ease-out] hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] motion-reduce:transition-none",
-          "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
-          className,
-        )}
-        {...props}
-        id={id}
-        value={value ?? internal}
-        onChange={(event) => {
-          if (value === undefined) setInternal(event.target.value);
-          onValueChange?.(event.target.value);
-        }}
-      />
+      </Label>
+      <Select name={name} value={value} defaultValue={defaultValue} onValueChange={onValueChange}>
+        <SelectTrigger
+          data-slot="product-listing-sort-select"
+          className={cn(
+            "w-auto cursor-pointer gap-1 rounded-full border-0 bg-secondary py-0 pr-2 pl-2.5 text-[12.5px]/[18px] font-medium text-foreground shadow-none data-[size=default]:h-7 dark:bg-secondary [&_svg]:size-3.5",
+            "transition-[background-color] duration-120 ease-[ease-out] hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] motion-reduce:transition-none dark:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
+            "focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid",
+            className,
+          )}
+          {...props}
+          id={id}
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent
+          position="popper"
+          align="end"
+          className="min-w-40 rounded-[14px] border-0 bg-popover text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_12px_28px_-10px_oklch(0_0_0/0.32),0_2px_6px_-2px_oklch(0_0_0/0.12)] duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-[state=open]:zoom-in-96 data-[state=open]:[--tw-enter-translate-x:0]! data-[state=open]:[--tw-enter-translate-y:0]! motion-reduce:data-[state=closed]:animate-none motion-reduce:data-[state=open]:animate-none"
+        >
+          {children}
+        </SelectContent>
+      </Select>
     </div>
+  );
+}
+
+/** One sort order inside ProductListingSort. */
+export function ProductListingSortOption({
+  className,
+  ...props
+}: ComponentProps<typeof SelectItem>) {
+  useListing("ProductListingSortOption");
+  return (
+    <SelectItem
+      data-slot="product-listing-sort-option"
+      className={cn(
+        "min-h-8 cursor-pointer rounded-[10px] py-1.5 pr-8 pl-2.5 text-[13px]/[18px] text-foreground focus:bg-accent focus:text-foreground",
+        className,
+      )}
+      {...props}
+    />
   );
 }
 
@@ -441,8 +477,7 @@ export function ProductListingPagination({
   );
 }
 
-const pageLinkClass =
-  "inline-flex h-7 min-w-7 items-center justify-center gap-1 rounded-full font-medium no-underline tabular-nums";
+const pageLinkClass = "h-7 min-w-7 gap-1 rounded-full no-underline tabular-nums";
 
 export function ProductListingPage({
   current = false,
@@ -451,21 +486,26 @@ export function ProductListingPage({
 }: ComponentProps<"a"> & { current?: boolean }) {
   return (
     <li>
-      <a
-        aria-current={current ? "page" : undefined}
-        data-slot="product-listing-page"
+      <Button
+        asChild
+        variant="ghost"
         className={cn(
           pageLinkClass,
-          "px-2",
+          "px-2 has-[>svg]:px-2",
           pillInteraction,
           pillPress,
           current
-            ? "bg-accent text-foreground"
+            ? cn("bg-accent text-foreground", pillHover)
             : cn("bg-transparent text-muted-foreground", pillHover),
           className,
         )}
-        {...props}
-      />
+      >
+        <a
+          aria-current={current ? "page" : undefined}
+          data-slot="product-listing-page"
+          {...props}
+        />
+      </Button>
     </li>
   );
 }
@@ -483,27 +523,34 @@ function PageStep({
   const Icon = direction === "previous" ? ChevronLeft : ChevronRight;
   return (
     <li>
-      <a
-        data-slot={
-          direction === "previous" ? "product-listing-page-previous" : "product-listing-page-next"
-        }
+      <Button
+        asChild
+        variant="ghost"
         className={cn(
           pageLinkClass,
-          "px-2.5",
+          "px-2.5 has-[>svg]:px-2.5",
           pillInteraction,
           disabled
-            ? "text-subtle-foreground opacity-50"
+            ? "text-subtle-foreground opacity-50 hover:bg-transparent hover:text-subtle-foreground dark:hover:bg-transparent"
             : cn("text-muted-foreground", pillHover, pillPress),
           className,
         )}
-        {...props}
-        href={disabled ? undefined : href}
-        aria-disabled={disabled || undefined}
       >
-        {direction === "previous" ? <Icon size={14} aria-hidden="true" /> : null}
-        {children}
-        {direction === "next" ? <Icon size={14} aria-hidden="true" /> : null}
-      </a>
+        <a
+          data-slot={
+            direction === "previous" ? "product-listing-page-previous" : "product-listing-page-next"
+          }
+          {...props}
+          href={disabled ? undefined : href}
+          aria-disabled={disabled || undefined}
+        >
+          {direction === "previous" ? (
+            <Icon size={14} aria-hidden="true" className="size-3.5" />
+          ) : null}
+          {children}
+          {direction === "next" ? <Icon size={14} aria-hidden="true" className="size-3.5" /> : null}
+        </a>
+      </Button>
     </li>
   );
 }
