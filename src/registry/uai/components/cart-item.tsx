@@ -17,17 +17,21 @@ export type CartItemProps = ComponentProps<"article"> & {
   variant?: CartItemVariant;
 };
 
-const cartItemVariants = cva("grid w-full items-start border-border/60 text-foreground", {
-  variants: {
-    variant: {
-      card: "grid-cols-[96px_minmax(0,1fr)] gap-4 rounded-[14px] border bg-card p-4 max-[420px]:grid-cols-[76px_minmax(0,1fr)]",
-      plain:
-        "grid-cols-[88px_minmax(0,1fr)] gap-4 rounded-none border-b bg-transparent pb-4.5 max-[420px]:grid-cols-[76px_minmax(0,1fr)]",
-      compact:
-        "grid-cols-[72px_minmax(0,1fr)] gap-3 rounded-xl border bg-card p-3 max-[420px]:grid-cols-[68px_minmax(0,1fr)]",
+// The line dims and stops taking input while its remove action is in flight.
+const cartItemVariants = cva(
+  "grid w-full items-start border-border/60 text-foreground transition-opacity duration-200 ease-out has-[[data-slot=cart-item-remove][aria-busy=true]]:pointer-events-none has-[[data-slot=cart-item-remove][aria-busy=true]]:opacity-55 motion-reduce:transition-none",
+  {
+    variants: {
+      variant: {
+        card: "grid-cols-[96px_minmax(0,1fr)] gap-4 rounded-[14px] border bg-card p-4 max-[420px]:grid-cols-[76px_minmax(0,1fr)]",
+        plain:
+          "grid-cols-[88px_minmax(0,1fr)] gap-4 rounded-none border-b bg-transparent pb-4.5 max-[420px]:grid-cols-[76px_minmax(0,1fr)]",
+        compact:
+          "grid-cols-[72px_minmax(0,1fr)] gap-3 rounded-xl border bg-card p-3 max-[420px]:grid-cols-[68px_minmax(0,1fr)]",
+      },
     },
   },
-});
+);
 
 function cartItemChrome(variant: CartItemVariant) {
   const compact = variant === "compact";

@@ -77,7 +77,7 @@ export function TrustPanelLogos({ className, ...props }: ComponentProps<"ul">) {
 }
 
 const trustPanelLogoVariants = cva(
-  "relative flex items-center gap-1.5 font-medium tracking-[-0.01em] whitespace-nowrap transition-[color,background-color] duration-120 ease-[ease-out] hover:text-foreground motion-reduce:transition-none",
+  "relative flex items-center gap-1.5 font-medium tracking-[-0.01em] whitespace-nowrap",
   {
     variants: {
       variant: {

@@ -1,7 +1,17 @@
 "use client";
 
 import { cva } from "class-variance-authority";
-import { type ComponentProps, createContext, useContext, useId } from "react";
+import {
+  type ComponentProps,
+  createContext,
+  type RefObject,
+  useContext,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -141,8 +151,39 @@ export function BillingPortalActions({ className, ...props }: ComponentProps<"di
   );
 }
 
+const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
+
+type ScrollEdges = { start: boolean; end: boolean };
+
+/** Tracks which ends of the table scroller inside `ref` hide content, so the edges can fade. */
+function useScrollEdges(ref: RefObject<HTMLElement | null>) {
+  const [edges, setEdges] = useState<ScrollEdges>({ start: false, end: false });
+  useIsomorphicLayoutEffect(() => {
+    const element = ref.current?.querySelector<HTMLElement>("[data-slot=table-container]");
+    if (!element) return;
+    const measure = () => {
+      const offset = Math.abs(element.scrollLeft);
+      const room = element.scrollWidth - element.clientWidth;
+      const start = offset > 1;
+      const end = room - offset > 1;
+      setEdges((previous) =>
+        previous.start === start && previous.end === end ? previous : { start, end },
+      );
+    };
+    measure();
+    element.addEventListener("scroll", measure, { passive: true });
+    const observer = typeof ResizeObserver === "function" ? new ResizeObserver(measure) : null;
+    observer?.observe(element);
+    return () => {
+      element.removeEventListener("scroll", measure);
+      observer?.disconnect();
+    };
+  }, []);
+  return edges;
+}
+
 const billingPortalButtonVariants = cva(
-  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap [transition:background-color_120ms_ease-out,filter_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] py-0 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid enabled:active:[transform:scale(0.97)] motion-reduce:transition-none motion-reduce:enabled:active:[transform:none] [&_svg:not([class*='size-'])]:size-3.5",
+  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap transition-[background-color,filter,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] py-0 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid enabled:active:scale-[0.97] motion-reduce:transition-none motion-reduce:enabled:active:scale-100 [&_svg:not([class*='size-'])]:size-3.5",
   {
     variants: {
       emphasis: {
@@ -310,10 +351,15 @@ export function BillingPortalDetails(props: Omit<DescriptionListProps, "variant"
 /** Invoice history. Scrolls horizontally on narrow screens instead of squeezing columns. */
 export function BillingPortalInvoices({ children, className, ...props }: ComponentProps<"table">) {
   usePortal("BillingPortalInvoices");
+  const ref = useRef<HTMLDivElement>(null);
+  const edges = useScrollEdges(ref);
   return (
     <div
+      ref={ref}
       data-slot="billing-portal-invoices-scroller"
-      className="-mx-2 min-w-0 *:data-[slot=table-container]:overscroll-x-contain"
+      data-overflow-start={edges.start ? "" : undefined}
+      data-overflow-end={edges.end ? "" : undefined}
+      className="-mx-2 min-w-0 *:data-[slot=table-container]:overscroll-x-contain data-overflow-start:mask-l-from-[calc(100%-24px)] data-overflow-end:mask-r-from-[calc(100%-24px)]"
     >
       <Table
         data-slot="billing-portal-invoices"

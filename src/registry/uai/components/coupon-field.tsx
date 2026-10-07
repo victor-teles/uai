@@ -1,7 +1,7 @@
 "use client";
 
 import { cva } from "class-variance-authority";
-import { CheckCircle2, CircleAlert, LoaderCircle, X } from "lucide-react";
+import { Check, CheckCircle2, CircleAlert, LoaderCircle, X } from "lucide-react";
 import {
   type ComponentProps,
   createContext,
@@ -68,6 +68,7 @@ type CouponFieldContextValue = {
   clear: () => void;
   canApply: boolean;
   isReplacing: boolean;
+  isApplied: boolean;
   disabled: boolean;
   inputId: string;
   labelId: string;
@@ -117,6 +118,9 @@ export function CouponField({
       !disabled &&
       normalizedDraft !== normalizedAppliedCode,
   );
+  const isApplied = Boolean(
+    status === "applied" && normalizedAppliedCode && normalizedDraft === normalizedAppliedCode,
+  );
 
   useEffect(() => {
     if (value === undefined && status === "applied" && appliedCode !== undefined) {
@@ -140,6 +144,7 @@ export function CouponField({
     clear: () => setDraft(""),
     canApply,
     isReplacing,
+    isApplied,
     disabled,
     inputId,
     labelId,
@@ -281,23 +286,32 @@ export function CouponFieldApply({
 }: CouponFieldApplyProps) {
   const context = useCouponField("CouponFieldApply");
   const isApplying = context.status === "applying";
+  const isApplied = context.isApplied;
   const isDisabled = context.disabled || disabled || !context.canApply;
-  const label = isApplying ? "Applying…" : context.isReplacing ? "Replace" : "Apply";
+  const label = isApplying
+    ? "Applying…"
+    : isApplied
+      ? "Applied"
+      : context.isReplacing
+        ? "Replace"
+        : "Apply";
 
   return (
     <Button
       type="button"
       data-slot="coupon-field-apply"
-      variant={isDisabled && !isApplying ? "secondary" : "default"}
+      variant={isDisabled && !isApplying && !isApplied ? "secondary" : "default"}
       className={cn(
         "inline-flex shrink-0 items-center justify-center gap-1.5 py-0 font-medium transition-[scale,background-color,color,filter] duration-[140ms] ease-out-quint focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid disabled:pointer-events-auto motion-reduce:transition-none",
         context.chrome.applyClass,
         context.chrome.applyRadius,
         isApplying
           ? "cursor-progress bg-primary text-primary-foreground opacity-80 hover:bg-primary disabled:opacity-80"
-          : isDisabled
-            ? "cursor-not-allowed bg-secondary text-subtle-foreground hover:bg-secondary disabled:opacity-100"
-            : "bg-primary text-primary-foreground hover:bg-primary hover:brightness-[1.08] active:scale-[0.97] motion-reduce:active:scale-100",
+          : isApplied
+            ? "cursor-default bg-success/14 text-success hover:bg-success/14 disabled:opacity-100"
+            : isDisabled
+              ? "cursor-not-allowed bg-secondary text-subtle-foreground hover:bg-secondary disabled:opacity-100"
+              : "bg-primary text-primary-foreground hover:bg-primary hover:brightness-[1.08] active:scale-[0.97] motion-reduce:active:scale-100",
         className,
       )}
       {...props}
@@ -310,6 +324,15 @@ export function CouponFieldApply({
       {isApplying ? (
         <LoaderCircle
           className={cn(context.chrome.iconClass, "animate-spin motion-reduce:animate-none")}
+          aria-hidden="true"
+        />
+      ) : isApplied ? (
+        <Check
+          className={cn(
+            context.chrome.iconClass,
+            "animate-in fade-in-0 zoom-in-50 duration-200 ease-out-quint motion-reduce:animate-none",
+          )}
+          strokeWidth={2.2}
           aria-hidden="true"
         />
       ) : null}
@@ -330,6 +353,7 @@ export function CouponFieldFeedback({ children, className, ...props }: CouponFie
 
   return (
     <div
+      key={context.status}
       data-slot="coupon-field-feedback"
       className={cn(
         "flex animate-in items-start duration-240 ease-out-quint fade-in-0 slide-in-from-bottom-1 motion-reduce:animate-none",

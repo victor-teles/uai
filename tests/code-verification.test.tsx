@@ -63,7 +63,15 @@ test("labels each box, autofills from the first, and auto-submits a typed code",
   expect(document.activeElement).toBe(box(2));
   await user.keyboard("34");
   await waitFor(() => expect(onVerify).toHaveBeenCalledWith("1234"));
-  await waitFor(() => expect(screen.getByText("Verified")).toBeTruthy());
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "Verified" }).getAttribute("data-state")).toBe(
+      "verified",
+    ),
+  );
+  expect(screen.getAllByText("Verified")).toHaveLength(2);
+  expect(screen.getByRole("button", { name: "Verified" }).getAttribute("aria-disabled")).toBe(
+    "true",
+  );
 });
 
 test("pastes a whole code and supports arrows, Home, End, and Backspace", async () => {

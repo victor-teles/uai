@@ -249,7 +249,7 @@ function OrderStatusMarker({
     complete:
       "border-transparent bg-[color-mix(in_oklab,var(--success)_16%,var(--card))] text-success",
     current:
-      "border-transparent bg-[color-mix(in_oklab,var(--primary)_18%,var(--card))] text-primary ring-3 ring-primary/10",
+      "border-transparent bg-[color-mix(in_oklab,var(--primary)_18%,var(--card))] text-primary ring-3 ring-primary/10 motion-safe:animate-ring-pulse",
     upcoming: "border-border bg-card text-subtle-foreground",
     issue:
       "border-transparent bg-[color-mix(in_oklab,var(--destructive)_16%,var(--card))] text-destructive",
@@ -266,11 +266,7 @@ function OrderStatusMarker({
       aria-hidden="true"
     >
       <Icon
-        className={cn(
-          iconClassName,
-          status === "current" &&
-            "size-2 fill-current motion-safe:animate-pulse motion-reduce:animate-none",
-        )}
+        className={cn(iconClassName, status === "current" && "size-2 fill-current")}
         strokeWidth={status === "current" ? 0 : 2.25}
       />
     </span>

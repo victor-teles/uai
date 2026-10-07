@@ -40,6 +40,7 @@
   --animate-ring-pulse: ring-pulse 1.8s ease-out infinite;
   --animate-grow-x: grow-x 480ms cubic-bezier(0.23, 1, 0.32, 1) backwards;
   --animate-grow-y: grow-y 480ms cubic-bezier(0.23, 1, 0.32, 1) backwards;
+  --animate-shake: shake 260ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
 @keyframes shimmer {
@@ -88,6 +89,17 @@
 @keyframes grow-y {
   from {
     transform: scaleY(0);
+  }
+}
+
+@keyframes shake {
+  20%,
+  60% {
+    translate: -4px 0;
+  }
+  40%,
+  80% {
+    translate: 4px 0;
   }
 }
 
@@ -1002,6 +1014,26 @@ a {
   font-size: 0.9rem;
   line-height: 1.6;
   text-wrap: pretty;
+}
+
+.uai-overview__intro .uai-overview__pronounce {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: 0;
+  color: var(--uai-subtle);
+  font-family: var(--uai-mono);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.uai-overview__pronounce span:first-child {
+  color: var(--uai-text);
+  font-weight: 500;
+}
+
+.uai-overview__pronounce span:nth-child(2) {
+  color: var(--uai-signal-ink);
 }
 
 .uai-overview__grid {

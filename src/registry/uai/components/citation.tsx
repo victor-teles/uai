@@ -144,7 +144,7 @@ export function CitationTrigger({
       data-slot="citation-trigger"
       aria-label={children === undefined ? `Source ${context.index ?? ""}`.trim() : undefined}
       className={cn(
-        "mx-0.5 inline-flex shrink cursor-pointer items-center justify-center gap-1 border-0 bg-muted py-0 font-medium text-muted-foreground tabular-nums",
+        "relative mx-0.5 inline-flex shrink cursor-pointer items-center justify-center gap-1 border-0 bg-muted py-0 font-medium text-muted-foreground tabular-nums after:absolute after:-inset-1 after:content-['']",
         "transition-[background-color,color,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)]",
         "hover:bg-[color-mix(in_oklab,var(--muted)_80%,var(--foreground))] hover:text-foreground aria-expanded:bg-[color-mix(in_oklab,var(--muted)_80%,var(--foreground))] aria-expanded:text-foreground dark:hover:bg-[color-mix(in_oklab,var(--muted)_80%,var(--foreground))]",
         "focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-1 focus-visible:outline-ring active:scale-94",

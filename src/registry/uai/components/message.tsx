@@ -233,7 +233,7 @@ export function MessageActions({ className, ...props }: ComponentProps<"div">) {
       role="group"
       aria-label="Message actions"
       className={cn(
-        "-mt-0.5 flex flex-wrap items-center gap-0",
+        "-mt-0.5 flex animate-in flex-wrap items-center gap-0 duration-200 ease-out fade-in-0 motion-reduce:animate-none",
         context.variant === "bubble" && context.role === "user" ? "ml-0" : "-ml-1.5",
         className,
       )}
@@ -318,11 +318,24 @@ export function MessageCopy({
           }
         }}
       >
-        {copied ? (
-          <Check size={14} aria-hidden="true" className="text-success size-3.5" />
-        ) : (
-          (children ?? <Copy size={14} className="size-3.5" aria-hidden="true" />)
-        )}
+        <span className="grid place-items-center [&>*]:[grid-area:1/1]">
+          <span
+            className={cn(
+              "grid place-items-center transition-[opacity,scale,filter] duration-200 ease-out-quint motion-reduce:transition-none",
+              copied ? "scale-100 opacity-100 blur-none" : "scale-50 opacity-0 blur-[2px]",
+            )}
+          >
+            <Check size={14} aria-hidden="true" className="text-success size-3.5" />
+          </span>
+          <span
+            className={cn(
+              "grid place-items-center transition-[opacity,scale,filter] duration-200 ease-out-quint motion-reduce:transition-none",
+              copied ? "scale-50 opacity-0 blur-[2px]" : "scale-100 opacity-100 blur-none",
+            )}
+          >
+            {children ?? <Copy size={14} className="size-3.5" aria-hidden="true" />}
+          </span>
+        </span>
       </Button>
       <span role="status" className="sr-only">
         {copied ? "Copied to clipboard" : ""}

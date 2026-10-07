@@ -157,12 +157,25 @@ export function WaitlistSectionHighlight({ children, className, ...props }: Comp
  * A Newsletter Form that also carries qualification fields. Resolving `onSubscribe` with success
  * (or nothing) swaps the form for WaitlistSectionConfirmation.
  */
-export function WaitlistSectionForm({ variant, onSubscribe, ...props }: NewsletterFormProps) {
+export function WaitlistSectionForm({
+  variant,
+  onSubscribe,
+  className,
+  ...props
+}: NewsletterFormProps) {
   const waitlist = useWaitlist("WaitlistSectionForm");
+  // Only a form that comes back after a restart animates in; the first render stays still.
+  const [returning, setReturning] = useState(false);
+  if (waitlist.joinedEmail !== null && !returning) setReturning(true);
   if (waitlist.joinedEmail !== null) return null;
   return (
     <NewsletterForm
       {...props}
+      className={cn(
+        returning &&
+          "animate-in fade-in-0 slide-in-from-bottom-1 duration-240 ease-out-quint motion-reduce:animate-none",
+        className,
+      )}
       variant={variant ?? formVariants[waitlist.variant]}
       onSubscribe={async (submission) => {
         const result = await onSubscribe(submission);

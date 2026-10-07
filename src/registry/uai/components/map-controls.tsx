@@ -189,16 +189,14 @@ export function MapControlsLocate({
       aria-pressed={status === "active"}
       aria-busy={status === "locating" || undefined}
       data-status={status}
-      className={cn("data-[status=error]:text-destructive", className)}
+      className={cn(
+        // The radar ping sits around the icon so grouped controls never clip it.
+        "relative after:pointer-events-none after:absolute after:top-1/2 after:left-1/2 after:size-2 after:-translate-1/2 after:rounded-full data-[status=error]:text-destructive motion-safe:data-[status=locating]:after:animate-ring-pulse",
+        className,
+      )}
       {...props}
     >
-      {children ?? (
-        <Icon
-          strokeWidth={1.75}
-          aria-hidden="true"
-          className="in-data-[status=locating]:animate-pulse motion-reduce:animate-none"
-        />
-      )}
+      {children ?? <Icon strokeWidth={1.75} aria-hidden="true" />}
     </MapControlsButton>
   );
 }

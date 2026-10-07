@@ -56,6 +56,7 @@ type PixPaymentContextValue = {
   code: string;
   secondsLeft: number | null;
   copied: boolean;
+  copyFailed: boolean;
   copy: () => Promise<void>;
 };
 
@@ -88,6 +89,7 @@ export function PixPayment({
   const [offset] = useState(() => (now === undefined ? 0 : toTime(now) - Date.now()));
   const [clock, setClock] = useState(() => Date.now() + offset);
   const [copied, setCopied] = useState(false);
+  const [copyFailed, setCopyFailed] = useState(false);
   const expiredNotified = useRef(false);
   const onExpireRef = useRef(onExpire);
   onExpireRef.current = onExpire;
@@ -115,15 +117,20 @@ export function PixPayment({
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(code);
+      setCopyFailed(false);
       setCopied(true);
       onCodeCopy?.(code);
     } catch {
+      // Without clipboard access the code stays selectable, and the hint says so.
       setCopied(false);
+      setCopyFailed(true);
     }
   };
 
   return (
-    <PixPaymentContext.Provider value={{ variant, status, code, secondsLeft, copied, copy }}>
+    <PixPaymentContext.Provider
+      value={{ variant, status, code, secondsLeft, copied, copyFailed, copy }}
+    >
       <section
         data-slot="pix-payment"
         data-variant={variant}
@@ -283,7 +290,11 @@ export function PixPaymentQrCode({ children, className, ...props }: PixPaymentQr
           )}
         >
           {context.status === "paid" ? (
-            <CheckCircle2 className="size-7 text-success" strokeWidth={1.75} aria-hidden="true" />
+            <CheckCircle2
+              className="size-7 animate-in text-success delay-60 duration-240 ease-out-quint fill-mode-both fade-in-0 zoom-in-50 motion-reduce:animate-none"
+              strokeWidth={1.75}
+              aria-hidden="true"
+            />
           ) : (
             <TimerOff className="size-7 opacity-70" strokeWidth={1.75} aria-hidden="true" />
           )}
@@ -340,7 +351,7 @@ export function PixPaymentCode({
       >
         <code
           className={cn(
-            "min-w-0 flex-1 truncate font-mono text-[12px] leading-4 text-muted-foreground",
+            "min-w-0 flex-1 truncate font-mono text-[12px] leading-4 text-muted-foreground select-all",
             disabled && "line-through decoration-subtle-foreground/60",
           )}
           title={context.code}
@@ -351,25 +362,49 @@ export function PixPaymentCode({
           type="button"
           data-slot="pix-payment-copy"
           className={cn(
-            "shrink-0 gap-1.5 rounded-full py-0 font-medium transition-[scale,background-color,filter] duration-[140ms] ease-out-quint focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.97] disabled:pointer-events-auto disabled:cursor-not-allowed disabled:bg-secondary disabled:text-subtle-foreground disabled:opacity-100 motion-reduce:transition-none motion-reduce:active:scale-100",
+            "shrink-0 gap-1.5 rounded-full py-0 font-medium transition-[scale,background-color,color,filter] duration-[140ms] ease-out-quint focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.97] disabled:pointer-events-auto disabled:cursor-not-allowed disabled:bg-secondary disabled:text-subtle-foreground disabled:opacity-100 motion-reduce:transition-none motion-reduce:active:scale-100",
             compact
               ? "h-7 px-3 text-[12px] has-[>svg]:px-3"
               : "h-8 px-3.5 text-[12.5px] has-[>svg]:px-3.5",
-            "bg-primary text-primary-foreground hover:bg-primary hover:brightness-[1.08]",
+            context.copied
+              ? "bg-success/14 text-success hover:bg-success/14"
+              : "bg-primary text-primary-foreground hover:bg-primary hover:brightness-[1.08]",
           )}
           disabled={disabled}
           onClick={() => void context.copy()}
         >
           {context.copied ? (
-            <Check className="size-3.5" strokeWidth={2.2} aria-hidden="true" />
+            <Check
+              key="copied"
+              className="size-3.5 animate-in duration-200 ease-out-quint fade-in-0 zoom-in-50 motion-reduce:animate-none"
+              strokeWidth={2.2}
+              aria-hidden="true"
+            />
           ) : (
-            <Copy className="size-3.5" strokeWidth={2} aria-hidden="true" />
+            <Copy key="copy" className="size-3.5" strokeWidth={2} aria-hidden="true" />
           )}
-          {context.copied ? "Copiado" : "Copiar código"}
+          {/* Both labels share one cell, so the button keeps its width when the label swaps. */}
+          <span className="grid [&>*]:[grid-area:1/1]">
+            <span className={cn(context.copied && "invisible")} aria-hidden={context.copied}>
+              Copiar código
+            </span>
+            <span className={cn(!context.copied && "invisible")} aria-hidden={!context.copied}>
+              Copiado
+            </span>
+          </span>
         </Button>
       </div>
+      {context.copyFailed ? (
+        <p className="m-0 text-[11.5px] leading-4 text-subtle-foreground">
+          Selecione e copie o código
+        </p>
+      ) : null}
       <span role="status" className="sr-only">
-        {context.copied ? "Código Pix copiado" : ""}
+        {context.copied
+          ? "Código Pix copiado"
+          : context.copyFailed
+            ? "Não foi possível copiar o código Pix"
+            : ""}
       </span>
     </div>
   );
@@ -392,7 +427,7 @@ export function PixPaymentCountdown({ className, ...props }: PixPaymentCountdown
     <p
       data-slot="pix-payment-countdown"
       className={cn(
-        "text-[12px] leading-4 text-subtle-foreground",
+        "text-[12px] leading-4 text-subtle-foreground transition-colors duration-240 motion-reduce:transition-none",
         urgent && "text-warning",
         className,
       )}

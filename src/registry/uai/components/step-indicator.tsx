@@ -29,15 +29,16 @@ const dotTone: Record<StepIndicatorStatus, string> = {
   blocked: "bg-border-strong",
   upcoming: "bg-border",
 };
+// Complete steps keep the neutral track; the `before:` fill grows over it.
 const verticalTone: Record<StepIndicatorStatus, string> = {
-  complete: "shadow-[inset_2px_0_0_var(--foreground)]",
+  complete: "shadow-[inset_2px_0_0_var(--border)]",
   current: "shadow-[inset_2px_0_0_var(--primary)]",
   error: "shadow-[inset_2px_0_0_var(--destructive)]",
   blocked: "shadow-[inset_2px_0_0_var(--border-strong)]",
   upcoming: "shadow-[inset_2px_0_0_var(--border)]",
 };
 const horizontalTone: Record<StepIndicatorStatus, string> = {
-  complete: "shadow-[inset_0_3px_0_var(--foreground)]",
+  complete: "shadow-[inset_0_3px_0_var(--border)]",
   current: "shadow-[inset_0_3px_0_var(--primary)]",
   error: "shadow-[inset_0_3px_0_var(--destructive)]",
   blocked: "shadow-[inset_0_3px_0_var(--border-strong)]",
@@ -104,7 +105,10 @@ export function StepIndicatorStep({
       >
         <span
           aria-hidden="true"
-          className={cn("size-1.5 shrink-0 rounded-full", dotTone[status])}
+          className={cn(
+            "size-1.5 shrink-0 rounded-full transition-colors duration-200 ease-out motion-reduce:transition-none",
+            dotTone[status],
+          )}
         />
         {children}
         {label}
@@ -114,11 +118,17 @@ export function StepIndicatorStep({
     <li
       data-slot="step-indicator-step"
       className={cn(
-        "grid min-w-0 content-start gap-1 [transition:box-shadow_240ms_var(--ease-out-quint),color_120ms_ease-out] motion-reduce:transition-none",
+        "relative grid min-w-0 content-start gap-1 [transition:box-shadow_240ms_var(--ease-out-quint),color_120ms_ease-out] before:pointer-events-none before:absolute before:bg-foreground before:transition-[scale] before:duration-300 before:ease-out-quint before:content-[''] motion-reduce:transition-none motion-reduce:before:transition-none",
         muted ? "text-muted-foreground" : "text-foreground",
         variant === "vertical"
-          ? cn("rounded-none pt-2 pr-0 pb-2.5 pl-3.5", verticalTone[status])
-          : cn("flex-[1_1_110px] rounded-t-[2px] pt-3", horizontalTone[status]),
+          ? cn(
+              "rounded-none pt-2 pr-0 pb-2.5 pl-3.5 before:inset-y-0 before:left-0 before:w-0.5 before:origin-top before:scale-y-0 data-[status=complete]:before:scale-y-100",
+              verticalTone[status],
+            )
+          : cn(
+              "flex-[1_1_110px] rounded-t-[2px] pt-3 before:inset-x-0 before:top-0 before:h-[3px] before:origin-left before:scale-x-0 before:rounded-t-[2px] data-[status=complete]:before:scale-x-100",
+              horizontalTone[status],
+            ),
         className,
       )}
       {...props}

@@ -36,6 +36,29 @@ function useTabs(part: string) {
 }
 const TabContext = createContext<boolean | null>(null);
 const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
+// Fades whichever edge of a scroller still hides content.
+const scrollEdgeFade =
+  "data-overflow-start:[mask-image:linear-gradient(to_right,transparent,black_24px)] data-overflow-end:[mask-image:linear-gradient(to_left,transparent,black_24px)] data-overflow-start:data-overflow-end:[mask-image:linear-gradient(to_right,transparent,black_24px,black_calc(100%-24px),transparent)]";
+function useScrollEdges(ref: React.RefObject<HTMLElement | null>) {
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    const update = () => {
+      const max = element.scrollWidth - element.clientWidth;
+      element.toggleAttribute("data-overflow-start", element.scrollLeft > 1);
+      element.toggleAttribute("data-overflow-end", element.scrollLeft < max - 1);
+    };
+    update();
+    element.addEventListener("scroll", update, { passive: true });
+    const observer = typeof ResizeObserver === "function" ? new ResizeObserver(update) : null;
+    observer?.observe(element);
+    for (const child of element.children) observer?.observe(child);
+    return () => {
+      element.removeEventListener("scroll", update);
+      observer?.disconnect();
+    };
+  }, [ref]);
+}
 function slug(value: string) {
   return value.replace(/[^\w-]/g, "_");
 }
@@ -91,7 +114,7 @@ const ListContext = createContext(false);
 const easeOut = "cubic-bezier(0.23, 1, 0.32, 1)";
 
 const pageTabsThumbVariants = cva(
-  "pointer-events-none absolute left-0 -z-1 transition-[transform,width] duration-240 ease-out-quint",
+  "pointer-events-none absolute left-0 -z-1 transition-[transform,width] duration-240 ease-out-quint motion-reduce:transition-none",
   {
     variants: {
       variant: {
@@ -125,6 +148,7 @@ export function PageTabsList({ className, children, ...props }: ComponentProps<"
   const ref = useRef<HTMLDivElement>(null);
   const [thumb, setThumb] = useState<Thumb | null>(null);
   const [settled, setSettled] = useState(false);
+  useScrollEdges(ref);
   // Measure the selected tab so a single thumb can slide between tabs.
   useIsomorphicLayoutEffect(() => {
     const list = ref.current;
@@ -170,6 +194,7 @@ export function PageTabsList({ className, children, ...props }: ComponentProps<"
       className={cn(
         "relative isolate flex h-auto w-auto min-w-0 flex-[1_1_auto] items-center justify-start overflow-x-auto overscroll-x-contain [scrollbar-width:none] group-data-[orientation=horizontal]/tabs:h-auto",
         context.variant === "underline" ? "gap-1" : "gap-0.5",
+        scrollEdgeFade,
         context.variant === "segmented"
           ? "rounded-xl bg-muted p-0.75"
           : "rounded-none bg-transparent p-0",
@@ -196,7 +221,7 @@ export function PageTabsList({ className, children, ...props }: ComponentProps<"
 }
 
 const pageTabsTabVariants = cva(
-  "relative inline-flex flex-none cursor-pointer items-center justify-start gap-1.5 border-0 bg-transparent py-0 font-medium whitespace-nowrap [transition:color_120ms_ease-out,background-color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring enabled:active:scale-[0.97] disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none motion-reduce:active:scale-100",
+  "relative inline-flex flex-none cursor-pointer items-center justify-start gap-1.5 border-0 bg-transparent py-0 font-medium whitespace-nowrap transition-[color,background-color,scale] duration-140 ease-[cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring enabled:active:scale-[0.97] disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none motion-reduce:active:scale-100",
   {
     variants: {
       variant: {

@@ -2,7 +2,16 @@
 
 import { cva } from "class-variance-authority";
 import { ArrowRight, X } from "lucide-react";
-import { type ComponentProps, createContext, useContext, useEffect, useId, useState } from "react";
+import {
+  type ComponentProps,
+  createContext,
+  type Ref,
+  useContext,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/uai-utils";
 
@@ -42,12 +51,17 @@ function writeDismissed(key: string) {
     // Storage can be unavailable in private modes; dismissal still applies in memory.
   }
 }
+function assignRef<T>(ref: Ref<T> | undefined, value: T) {
+  if (typeof ref === "function") ref(value);
+  else if (ref) ref.current = value;
+}
 const announcementBarVariants = cva(
-  "box-border flex min-w-0 animate-in items-center text-[13px]/[18px] text-foreground duration-240 ease-out-quint fade-in-0 slide-in-from-top-1 fill-mode-both motion-reduce:animate-none [&_:is(a,button)]:focus-visible:outline-2 [&_:is(a,button)]:focus-visible:outline-offset-2 [&_:is(a,button)]:focus-visible:outline-ring",
+  "box-border flex min-w-0 animate-in items-center text-[13px]/[18px] text-foreground duration-240 ease-out-quint fade-in-0 slide-in-from-top-1 fill-mode-both data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:duration-150 data-[state=closed]:ease-out data-[state=closed]:fill-mode-forwards motion-reduce:animate-none [&_:is(a,button)]:focus-visible:outline-2 [&_:is(a,button)]:focus-visible:outline-offset-2 [&_:is(a,button)]:focus-visible:outline-ring",
   {
     variants: {
       variant: {
-        bar: "w-full flex-wrap gap-3 bg-[color-mix(in_oklab,var(--primary)_9%,var(--card))] py-2 pr-2.5 pl-4 shadow-[inset_0_-1px_0_color-mix(in_oklab,var(--primary)_16%,var(--border))]",
+        // The bar sits in flow, so it fades for as long as its row collapses.
+        bar: "w-full flex-wrap gap-3 data-[state=closed]:duration-300 bg-[color-mix(in_oklab,var(--primary)_9%,var(--card))] py-2 pr-2.5 pl-4 shadow-[inset_0_-1px_0_color-mix(in_oklab,var(--primary)_16%,var(--border))]",
         card: "w-full flex-wrap gap-3 rounded-[14px] border bg-card py-2.5 pr-2.5 pl-3.5",
         pill: "mx-auto my-0 w-fit max-w-full flex-nowrap gap-2.5 rounded-full bg-card py-1 pr-1 pl-1.25 shadow-[0_0_0_1px_var(--border)]",
       },
@@ -63,6 +77,7 @@ export function AnnouncementBar({
   storageKey,
   children,
   className,
+  ref,
   ...props
 }: AnnouncementBarProps) {
   const id = useId();
@@ -74,23 +89,61 @@ export function AnnouncementBar({
     if (open === undefined) setInternal(false);
     else if (open) onOpenChange?.(false);
   }, [storageKey]);
+  const bar = useRef<HTMLElement | null>(null);
+  const collapse = useRef<HTMLDivElement | null>(null);
+  // Stay mounted while the exit plays; reduced motion has no animation, so unmount at once.
+  const [rendered, setRendered] = useState(current);
+  if (current && !rendered) setRendered(true);
+  useEffect(() => {
+    if (current) return;
+    const node = bar.current;
+    const animation = node ? window.getComputedStyle(node).animationName : "";
+    if (!animation || animation === "none") return setRendered(false);
+    // The in-flow bar also gives its row back instead of letting content jump up.
+    collapse.current?.animate?.([{ gridTemplateRows: "1fr" }, { gridTemplateRows: "0fr" }], {
+      duration: 300,
+      easing: "cubic-bezier(0.23, 1, 0.32, 1)",
+      fill: "forwards",
+    });
+  }, [current]);
   const dismiss = () => {
     if (storageKey) writeDismissed(storageKey);
     if (open === undefined) setInternal(false);
     onOpenChange?.(false);
   };
-  if (!current) return null;
+  if (!current && !rendered) return null;
+  // Only a closing bar is wrapped, so an open bar stays a direct child (and can be sticky).
+  const closingBar = !current && variant === "bar";
+  const element = (
+    <section
+      aria-labelledby={`${id}-message`}
+      data-slot="announcement-bar"
+      className={cn(announcementBarVariants({ variant }), className)}
+      {...props}
+      ref={(node) => {
+        bar.current = node;
+        assignRef(ref, node);
+      }}
+      data-variant={variant}
+      data-state={current ? "open" : "closed"}
+      inert={!current}
+      onAnimationEnd={(event) => {
+        props.onAnimationEnd?.(event);
+        if (event.target === event.currentTarget && !current) setRendered(false);
+      }}
+    >
+      {children}
+    </section>
+  );
   return (
     <Context.Provider value={{ id, variant, dismiss }}>
-      <section
-        aria-labelledby={`${id}-message`}
-        data-slot="announcement-bar"
-        className={cn(announcementBarVariants({ variant }), className)}
-        {...props}
-        data-variant={variant}
-      >
-        {children}
-      </section>
+      {closingBar ? (
+        <div ref={collapse} className="grid">
+          <div className="min-h-0 overflow-hidden">{element}</div>
+        </div>
+      ) : (
+        element
+      )}
     </Context.Provider>
   );
 }
@@ -108,8 +161,24 @@ export function AnnouncementBarLabel({ className, ...props }: ComponentProps<"sp
   );
 }
 
-export function AnnouncementBarMessage({ className, ...props }: ComponentProps<"p">) {
+export function AnnouncementBarMessage({ className, ref, ...props }: ComponentProps<"p">) {
   const context = useAnnouncement("AnnouncementBarMessage");
+  const message = useRef<HTMLParagraphElement | null>(null);
+  const truncates = context.variant === "pill" && props.title === undefined;
+  // The pill truncates its message, so expose the full text as a tooltip when it is cut off.
+  useEffect(() => {
+    const element = message.current;
+    if (!truncates || !element) return;
+    const update = () => {
+      if (element.scrollWidth > element.clientWidth) element.title = element.textContent ?? "";
+      else element.removeAttribute("title");
+    };
+    update();
+    if (typeof ResizeObserver !== "function") return;
+    const observer = new ResizeObserver(update);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [truncates]);
   return (
     <p
       data-slot="announcement-bar-message"
@@ -121,6 +190,10 @@ export function AnnouncementBarMessage({ className, ...props }: ComponentProps<"
         className,
       )}
       {...props}
+      ref={(node) => {
+        message.current = node;
+        assignRef(ref, node);
+      }}
       id={`${context.id}-message`}
     />
   );
@@ -137,7 +210,7 @@ export function AnnouncementBarActions({ className, ...props }: ComponentProps<"
 }
 
 const actionVariants = cva(
-  "inline-flex items-center gap-1 rounded-full font-medium whitespace-nowrap no-underline [transition:background-color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-solid active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 [&_svg]:[transition:translate_140ms_cubic-bezier(0.23,1,0.32,1)] hover:[&_svg]:translate-x-0.5 motion-reduce:[&_svg]:transition-none motion-reduce:hover:[&_svg]:translate-x-0",
+  "inline-flex items-center gap-1 rounded-full font-medium whitespace-nowrap no-underline transition-[background-color,scale] duration-[120ms,140ms] ease-[ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-solid active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 [&_svg]:[transition:translate_140ms_cubic-bezier(0.23,1,0.32,1)] hover:[&_svg]:translate-x-0.5 motion-reduce:[&_svg]:transition-none motion-reduce:hover:[&_svg]:translate-x-0",
   {
     variants: {
       variant: {
@@ -181,7 +254,7 @@ export function AnnouncementBarDismiss({
       variant="ghost"
       size="icon-sm"
       className={cn(
-        "grid cursor-pointer place-items-center border-0 bg-transparent p-0 text-muted-foreground [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:text-foreground focus-visible:ring-0 focus-visible:outline-solid active:scale-[0.94] motion-reduce:transition-none motion-reduce:active:scale-100",
+        "grid cursor-pointer place-items-center border-0 bg-transparent p-0 text-muted-foreground transition-[background-color,color,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] hover:text-foreground focus-visible:ring-0 focus-visible:outline-solid active:scale-[0.94] motion-reduce:transition-none motion-reduce:active:scale-100",
         pill ? "size-6.5 rounded-full" : "size-7 rounded-lg",
         context.variant === "bar"
           ? "hover:bg-foreground/8 dark:hover:bg-foreground/8"

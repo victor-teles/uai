@@ -185,7 +185,7 @@ export function InstallmentPickerOption({
         disabled={context.disabled || disabled}
         aria-labelledby={contentId}
         className={cn(
-          "size-4 border-0 bg-transparent shadow-[inset_0_0_0_1.5px_var(--border-strong)] transition-[background-color,box-shadow] duration-[140ms] ease-out-quint focus-visible:ring-0 data-[state=checked]:bg-primary data-[state=checked]:shadow-none disabled:opacity-100 motion-reduce:transition-none dark:bg-transparent dark:data-[state=checked]:bg-primary [&_svg]:size-1.5 [&_svg]:fill-primary-foreground [&_svg]:stroke-0",
+          "size-4 border-0 bg-transparent shadow-[inset_0_0_0_1.5px_var(--border-strong)] transition-[background-color,box-shadow] duration-[140ms] ease-out-quint focus-visible:ring-0 data-[state=checked]:bg-primary data-[state=checked]:shadow-none disabled:opacity-100 motion-reduce:transition-none dark:bg-transparent dark:data-[state=checked]:bg-primary [&_svg]:size-1.5 [&_svg]:fill-primary-foreground [&_svg]:stroke-0 [&_svg]:animate-in [&_svg]:zoom-in-0 [&_svg]:duration-150 [&_svg]:ease-out-quint motion-reduce:[&_svg]:animate-none",
           context.variant === "tiles" && "absolute top-3 right-3",
           context.variant === "compact" && "size-3.5",
         )}

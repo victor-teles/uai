@@ -40,7 +40,7 @@ const featureShowcaseListVariants = cva("m-0 grid min-w-0 list-none p-0", {
 });
 
 const featureShowcaseItemVariants = cva(
-  "grid min-w-0 animate-[enter_400ms_var(--ease-out-quint)_both] fade-in-0 slide-in-from-bottom-[6px] nth-2:[animation-delay:40ms] nth-3:[animation-delay:80ms] nth-[n+4]:[animation-delay:120ms] motion-reduce:animate-none motion-reduce:transition-none",
+  "grid min-w-0 animate-[enter_400ms_var(--ease-out-quint)_both] fade-in-0 slide-in-from-bottom-[6px] nth-2:[animation-delay:40ms] nth-3:[animation-delay:80ms] nth-[n+4]:[animation-delay:120ms] supports-[animation-timeline:view()]:[animation-timeline:view()] supports-[animation-timeline:view()]:[animation-range:entry_0%_entry_35%] supports-[animation-timeline:view()]:[animation-duration:auto] motion-reduce:animate-none",
   {
     variants: {
       variant: {
@@ -48,7 +48,7 @@ const featureShowcaseItemVariants = cva(
           "items-center gap-5 @min-[720px]:grid-cols-2 @min-[720px]:gap-12 @min-[720px]:even:*:data-[slot=feature-showcase-media]:-order-1",
         stacked: "items-center gap-5",
         cards:
-          "content-start items-center gap-4 rounded-[14px] border bg-card px-2 pt-2 pb-4.5 shadow-[0_1px_2px_oklch(0_0_0/0.04)] [transition:border-color_120ms_ease-out,transform_240ms_cubic-bezier(0.23,1,0.32,1)] hover:border-border-strong [&>:not([data-slot=feature-showcase-media])]:px-2",
+          "content-start items-center gap-4 rounded-[14px] border bg-card px-2 pt-2 pb-4.5 shadow-[0_1px_2px_oklch(0_0_0/0.04)] [&>:not([data-slot=feature-showcase-media])]:px-2",
       },
     },
   },

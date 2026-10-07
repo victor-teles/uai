@@ -1,7 +1,8 @@
 "use client";
 
 import { cva } from "class-variance-authority";
-import { type ComponentProps, createContext, useContext, useEffect } from "react";
+import { Check } from "lucide-react";
+import { type ComponentProps, createContext, useContext, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/uai-utils";
 
@@ -15,14 +16,19 @@ export type UnsavedChangesBarProps = ComponentProps<"section"> & {
   onSave?: () => void;
   onDiscard?: () => void;
 };
+/** How long the bar confirms a successful save before it leaves. */
+const SAVED_MS = 1200;
+const EXIT_MS = 150;
+type Phase = "open" | "saved" | "closing" | "closed";
 type ChangesContext = {
-  status: "idle" | "saving" | "error";
+  /** `saved` is internal: the bar confirms a save after `dirty` turns false. */
+  status: "idle" | "saving" | "error" | "saved";
   onSave?: () => void;
   onDiscard?: () => void;
 };
 const Context = createContext<ChangesContext | null>(null);
 const unsavedChangesBarVariants = cva(
-  "sticky z-10 flex flex-wrap items-center border-solid border-border bg-card text-card-foreground animate-in fade-in-0 slide-in-from-bottom-1 zoom-in-98 duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:animate-none",
+  "sticky z-10 flex flex-wrap items-center border-solid border-border bg-card text-card-foreground",
   {
     variants: {
       variant: {
@@ -35,7 +41,7 @@ const unsavedChangesBarVariants = cva(
   },
 );
 const actionClass =
-  "h-7.5 cursor-pointer whitespace-nowrap rounded-full border-0 px-3.5 py-0 text-[12.5px] font-medium transition-[background-color,filter,transform] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid enabled:active:scale-[0.97] disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-60 has-[>svg]:px-3.5 motion-reduce:transition-none";
+  "h-7.5 cursor-pointer whitespace-nowrap rounded-full border-0 px-3.5 py-0 text-[12.5px] font-medium transition-[background-color,filter,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid enabled:active:scale-[0.97] disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-60 has-[>svg]:px-3.5 motion-reduce:transition-none motion-reduce:enabled:active:scale-100";
 function useChanges() {
   const context = useContext(Context);
   if (!context) throw new Error("UnsavedChangesBar children must be used within UnsavedChangesBar");
@@ -61,14 +67,44 @@ export function UnsavedChangesBar({
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty, warnBeforeUnload]);
-  if (!dirty) return null;
+
+  // When `dirty` turns false after a `saving` status, confirm the save, then play the exit.
+  // Any other clean transition (discard, synchronous save) unmounts at once, as before.
+  const [phase, setPhase] = useState<Phase>(dirty ? "open" : "closed");
+  const [saved, setSaved] = useState(false);
+  const [wasDirty, setWasDirty] = useState(dirty);
+  const [lastStatus, setLastStatus] = useState(status);
+  if (dirty && status !== lastStatus) setLastStatus(status);
+  if (dirty !== wasDirty) {
+    setWasDirty(dirty);
+    const confirmed = !dirty && (lastStatus === "saving" || status === "saving");
+    setSaved(confirmed);
+    setPhase(dirty ? "open" : confirmed ? "saved" : "closed");
+  }
+  useEffect(() => {
+    if (phase !== "saved" && phase !== "closing") return;
+    const timer = window.setTimeout(
+      () => setPhase(phase === "saved" ? "closing" : "closed"),
+      phase === "saved" ? SAVED_MS : EXIT_MS,
+    );
+    return () => window.clearTimeout(timer);
+  }, [phase]);
+
+  if (phase === "closed") return null;
   return (
-    <Context.Provider value={{ status, onSave, onDiscard }}>
+    <Context.Provider value={{ status: saved ? "saved" : status, onSave, onDiscard }}>
       <section
         aria-label="Unsaved changes"
         data-slot="unsaved-changes-bar"
         data-variant={variant}
-        className={cn(unsavedChangesBarVariants({ variant }), className)}
+        data-state={phase}
+        className={cn(
+          unsavedChangesBarVariants({ variant }),
+          phase === "closing"
+            ? "animate-out fade-out-0 slide-out-to-bottom-1 fill-mode-forwards duration-150 ease-out motion-reduce:hidden"
+            : "animate-in fade-in-0 slide-in-from-bottom-1 zoom-in-98 duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:animate-none",
+          className,
+        )}
         {...props}
         aria-busy={status === "saving"}
       >
@@ -80,6 +116,7 @@ export function UnsavedChangesBar({
 export function UnsavedChangesBarMessage({ children, className, ...props }: ComponentProps<"p">) {
   const context = useChanges();
   const error = context.status === "error";
+  const saved = context.status === "saved";
   return (
     <p
       data-slot="unsaved-changes-bar-message"
@@ -97,7 +134,12 @@ export function UnsavedChangesBarMessage({ children, className, ...props }: Comp
         aria-hidden="true"
         className={cn(
           "size-1.5 shrink-0 rounded-full ring-3",
-          error ? "bg-destructive ring-destructive/22" : "bg-warning ring-warning/22",
+          "transition-colors duration-200 ease-out motion-reduce:transition-none",
+          error
+            ? "bg-destructive ring-destructive/22"
+            : saved
+              ? "bg-success ring-success/22"
+              : "bg-warning ring-warning/22",
         )}
       />
       <span
@@ -110,9 +152,11 @@ export function UnsavedChangesBarMessage({ children, className, ...props }: Comp
         {children ??
           (context.status === "saving"
             ? "Saving changes…"
-            : error
-              ? "Changes could not be saved. Try again."
-              : "You have unsaved changes.")}
+            : saved
+              ? "Changes saved."
+              : error
+                ? "Changes could not be saved. Try again."
+                : "You have unsaved changes.")}
       </span>
     </p>
   );
@@ -128,29 +172,46 @@ export function UnsavedChangesBarActions({ className, ...props }: ComponentProps
 }
 export function UnsavedChangesBarSave({
   children = "Save changes",
+  savedLabel = "Saved",
   onClick,
   className,
   ...props
-}: ComponentProps<"button">) {
+}: ComponentProps<"button"> & { savedLabel?: string }) {
   const context = useChanges();
+  const saved = context.status === "saved";
   return (
     <Button
       data-slot="unsaved-changes-bar-save"
       variant="default"
       className={cn(
         actionClass,
-        "bg-primary text-primary-foreground hover:bg-primary enabled:hover:brightness-108",
+        saved
+          ? "gap-1.5 bg-success/14 text-success hover:bg-success/14 disabled:cursor-default disabled:opacity-100"
+          : "bg-primary text-primary-foreground hover:bg-primary enabled:hover:brightness-108",
         className,
       )}
       {...props}
       type="button"
-      disabled={context.status === "saving" || props.disabled}
+      disabled={context.status === "saving" || saved || props.disabled}
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) context.onSave?.();
       }}
     >
-      {context.status === "saving" ? "Saving…" : children}
+      {saved ? (
+        <>
+          <Check
+            className="size-3.5 animate-in fade-in-0 zoom-in-50 duration-200 ease-out-quint motion-reduce:animate-none"
+            strokeWidth={2.2}
+            aria-hidden="true"
+          />
+          {savedLabel}
+        </>
+      ) : context.status === "saving" ? (
+        "Saving…"
+      ) : (
+        children
+      )}
     </Button>
   );
 }
@@ -172,7 +233,7 @@ export function UnsavedChangesBarDiscard({
       )}
       {...props}
       type="button"
-      disabled={context.status === "saving" || props.disabled}
+      disabled={context.status === "saving" || context.status === "saved" || props.disabled}
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) context.onDiscard?.();

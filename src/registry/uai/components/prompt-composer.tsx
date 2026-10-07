@@ -297,12 +297,14 @@ export function PromptComposer({
                 <span
                   key={item.id}
                   className={cn(
-                    "flex items-center gap-1.5 bg-muted py-1 pr-1 pl-1.5 text-muted-foreground",
+                    "flex animate-in items-center gap-1.5 bg-muted py-1 pr-1 pl-1.5 text-muted-foreground duration-200 ease-out-quint fade-in-0 zoom-in-95 motion-reduce:animate-none",
                     chrome.chipClass,
                   )}
                 >
                   <FileText className="size-3" aria-hidden="true" />
-                  <span className="max-w-36 truncate text-card-foreground">{item.file.name}</span>
+                  <span title={item.file.name} className="max-w-36 truncate text-card-foreground">
+                    {item.file.name}
+                  </span>
                   <Button
                     type="button"
                     variant="ghost"
@@ -311,7 +313,7 @@ export function PromptComposer({
                     disabled={locked}
                     onClick={() => context.removeAttachment(item.id)}
                     className={cn(
-                      "grid size-4 place-items-center text-muted-foreground transition-colors duration-100 hover:bg-transparent hover:text-card-foreground disabled:opacity-100 dark:hover:bg-transparent",
+                      "relative grid size-4 place-items-center text-muted-foreground transition-colors after:absolute after:-inset-1 after:content-[''] duration-100 hover:bg-transparent hover:text-card-foreground disabled:opacity-100 dark:hover:bg-transparent",
                       chrome.pill ? "rounded-full" : "rounded",
                     )}
                   >
@@ -371,7 +373,7 @@ export function PromptComposerAdd({
             aria-label={label}
             disabled={context.locked}
             className={cn(
-              "text-muted-foreground transition-[background-color,color,transform] duration-150 focus-visible:bg-accent active:scale-[0.94] disabled:opacity-100 dark:hover:bg-accent data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
+              "text-muted-foreground transition-[background-color,color,scale] duration-150 focus-visible:bg-accent active:scale-[0.94] disabled:opacity-100 dark:hover:bg-accent data-[state=open]:bg-accent data-[state=open]:text-accent-foreground motion-reduce:transition-none motion-reduce:active:scale-100",
               context.chrome.controlClass,
               context.chrome.controlRadiusClass,
             )}
@@ -713,7 +715,7 @@ export function PromptComposerSubmit({
       aria-label={ariaLabel ?? (context.busy ? "Sending prompt" : "Send")}
       disabled={!context.canSend || disabled}
       className={cn(
-        "transition-[background-color,color,opacity,transform] duration-140 ease-out-quint enabled:hover:opacity-90 enabled:active:scale-[0.94] disabled:cursor-not-allowed disabled:opacity-100 motion-reduce:transition-none",
+        "transition-[background-color,color,opacity,scale] duration-140 ease-out-quint enabled:hover:opacity-90 enabled:active:scale-[0.94] disabled:cursor-not-allowed disabled:opacity-100 motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
         context.chrome.controlClass,
         context.chrome.controlRadiusClass,
         context.canSend || context.busy
@@ -722,15 +724,29 @@ export function PromptComposerSubmit({
         className,
       )}
     >
-      {children ??
-        (context.busy ? (
-          <LoaderCircle
-            className={cn(context.chrome.iconClass, "motion-safe:animate-spin")}
-            aria-hidden="true"
-          />
-        ) : (
-          <ArrowUp className={context.chrome.iconClass} strokeWidth={2.4} aria-hidden="true" />
-        ))}
+      {children ?? (
+        <span className="grid [&>*]:[grid-area:1/1]">
+          <span
+            className={cn(
+              "grid place-items-center transition-[opacity,scale,filter] duration-200 ease-out-quint motion-reduce:transition-none",
+              context.busy ? "scale-100 blur-none opacity-100" : "scale-50 opacity-0 blur-[2px]",
+            )}
+          >
+            <LoaderCircle
+              className={cn(context.chrome.iconClass, "motion-safe:animate-spin")}
+              aria-hidden="true"
+            />
+          </span>
+          <span
+            className={cn(
+              "grid place-items-center transition-[opacity,scale,filter] duration-200 ease-out-quint motion-reduce:transition-none",
+              context.busy ? "scale-50 opacity-0 blur-[2px]" : "scale-100 blur-none opacity-100",
+            )}
+          >
+            <ArrowUp className={context.chrome.iconClass} strokeWidth={2.4} aria-hidden="true" />
+          </span>
+        </span>
+      )}
     </Button>
   );
 }

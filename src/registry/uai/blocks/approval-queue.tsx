@@ -5,7 +5,10 @@ import {
   createContext,
   type ReactNode,
   useContext,
+  useEffect,
   useId,
+  useLayoutEffect,
+  useRef,
   useState,
 } from "react";
 import { Button } from "@/components/ui/button";
@@ -46,6 +49,7 @@ function useQueue(part: string) {
 }
 type GroupByContext = { value: string };
 const GroupByCtx = createContext<GroupByContext | null>(null);
+const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 const GroupContext = createContext<string | null>(null);
 function useGroup(part: string) {
   const id = useContext(GroupContext);
@@ -172,7 +176,7 @@ export function ApprovalQueueAction({
       data-slot="approval-queue-action"
       variant={emphasis === "primary" ? "default" : "secondary"}
       className={cn(
-        "gap-1.5 rounded-full border-0 py-0 [transition:filter_120ms_ease-out,box-shadow_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid not-disabled:active:scale-[0.97] disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:not-disabled:active:scale-100 [&_svg:not([class*='size-'])]:size-3.5",
+        "gap-1.5 rounded-full border-0 py-0 transition-[filter,box-shadow,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid not-disabled:active:scale-[0.97] disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:not-disabled:active:scale-100 [&_svg:not([class*='size-'])]:size-3.5",
         compact
           ? "h-6.5 px-2.75 text-[12px]/4 has-[>svg]:px-2.75"
           : "h-7.5 px-3.25 text-[12.5px]/4 has-[>svg]:px-3.25",
@@ -233,12 +237,37 @@ export function ApprovalQueueGroupBy({
   onValueChange,
   className,
   children,
+  ref: forwardedRef,
   ...props
 }: ApprovalQueueGroupByProps) {
   useQueue("ApprovalQueueGroupBy");
   const name = useId();
   const [internal, setInternal] = useState(defaultValue);
   const current = value ?? internal;
+  const ref = useRef<HTMLFieldSetElement | null>(null);
+  const [thumb, setThumb] = useState<{ x: number; y: number; width: number; height: number }>();
+  // Measure the checked option so one thumb can slide between options.
+  useIsomorphicLayoutEffect(() => {
+    const group = ref.current;
+    if (!group) return;
+    const measure = () => {
+      const checked = group.querySelector<HTMLElement>(
+        "[data-slot=approval-queue-group-by-option][data-checked]",
+      );
+      if (!checked || checked.offsetWidth === 0) return setThumb(undefined);
+      setThumb({
+        x: checked.offsetLeft,
+        y: checked.offsetTop,
+        width: checked.offsetWidth,
+        height: checked.offsetHeight,
+      });
+    };
+    measure();
+    if (typeof ResizeObserver !== "function") return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(group);
+    return () => observer.disconnect();
+  }, [current]);
   return (
     <GroupByCtx.Provider value={{ value: current }}>
       <RadioGroup
@@ -250,14 +279,35 @@ export function ApprovalQueueGroupBy({
           onValueChange?.(next);
         }}
         className={cn(
-          "m-0 flex flex-wrap items-center gap-0.5 rounded-full border-0 bg-card p-0.75 shadow-[inset_0_0_0_1px_var(--border)]",
+          "group/group-by relative isolate m-0 flex flex-wrap items-center gap-0.5 rounded-full border-0 bg-card p-0.75 shadow-[inset_0_0_0_1px_var(--border)]",
           className,
         )}
       >
-        <fieldset data-slot="approval-queue-group-by" {...props}>
+        <fieldset
+          data-slot="approval-queue-group-by"
+          {...props}
+          ref={(node) => {
+            ref.current = node;
+            if (typeof forwardedRef === "function") forwardedRef(node);
+            else if (forwardedRef) forwardedRef.current = node;
+          }}
+          data-ready={thumb ? "" : undefined}
+        >
           <legend className="float-left pr-1.5 pl-2.5 text-[12px] text-subtle-foreground">
             {label}
           </legend>
+          {thumb ? (
+            <span
+              aria-hidden="true"
+              data-slot="approval-queue-group-by-thumb"
+              className="pointer-events-none absolute top-0 left-0 -z-1 rounded-full bg-accent shadow-[0_1px_2px_oklch(0_0_0/0.08)] transition-[translate,width] duration-240 ease-out-quint motion-reduce:transition-none"
+              style={{
+                translate: `${thumb.x}px ${thumb.y}px`,
+                width: thumb.width,
+                height: thumb.height,
+              }}
+            />
+          ) : null}
           {children}
         </fieldset>
       </RadioGroup>
@@ -286,8 +336,9 @@ export function ApprovalQueueGroupByOption({
       data-checked={checked || undefined}
       className={cn(
         "relative inline-flex h-6 cursor-pointer items-center rounded-full px-2.5 text-[12px] leading-[inherit] font-medium select-auto [transition:background-color_160ms_cubic-bezier(0.23,1,0.32,1),color_120ms_ease-out,box-shadow_160ms_cubic-bezier(0.23,1,0.32,1)] has-focus-visible:outline-2 has-focus-visible:outline-offset-1 has-focus-visible:outline-ring motion-reduce:transition-none",
+        // The shared thumb paints the checked option once measured; until then it paints itself.
         checked
-          ? "bg-accent text-foreground shadow-[0_1px_2px_oklch(0_0_0/0.08)]"
+          ? "bg-accent text-foreground shadow-[0_1px_2px_oklch(0_0_0/0.08)] group-data-ready/group-by:bg-transparent group-data-ready/group-by:shadow-none"
           : "bg-transparent text-subtle-foreground hover:text-foreground",
         className,
       )}

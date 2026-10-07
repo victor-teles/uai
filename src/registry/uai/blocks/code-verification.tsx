@@ -1,9 +1,11 @@
 "use client";
 
 import { cva } from "class-variance-authority";
+import { Check } from "lucide-react";
 import {
   type ClipboardEvent,
   type ComponentProps,
+  type CSSProperties,
   createContext,
   type KeyboardEvent,
   type ReactNode,
@@ -344,6 +346,8 @@ export function CodeVerificationInput({
         "m-0 grid min-w-0 border-0 p-0",
         variant === "split" ? "justify-start" : "justify-center",
         variant === "compact" ? "gap-1.5" : "gap-2",
+        // Replays on each failed attempt: the status passes through "verifying" in between.
+        status === "invalid" && "animate-shake motion-reduce:animate-none",
         className,
       )}
       {...props}
@@ -362,12 +366,13 @@ export function CodeVerificationInput({
             aria-invalid={invalid || undefined}
             data-slot="code-verification-cell"
             className={cn(
-              "box-border h-12 w-full min-w-0 rounded-[10px] border p-0 text-center text-[20px] font-medium tabular-nums caret-foreground outline-none [transition:border-color_120ms_ease-out,background-color_120ms_ease-out,box-shadow_120ms_ease-out] focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--primary)_22%,transparent)] motion-reduce:transition-none",
+              "box-border h-12 w-full min-w-0 rounded-[10px] border p-0 text-center text-[20px] font-medium tabular-nums caret-foreground outline-none focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--primary)_22%,transparent)] data-filled:animate-in data-filled:zoom-in-95 data-filled:duration-150 data-filled:ease-out-quint motion-reduce:transition-none motion-reduce:animate-none",
               variant === "compact" && "h-10 rounded-lg text-[18px]",
               status === "verified"
-                ? "border-transparent bg-[color-mix(in_oklab,var(--success)_8%,var(--card))] text-success"
+                ? // The success wave staggers per cell through `--i`; only this state carries a delay.
+                  "border-transparent bg-[color-mix(in_oklab,var(--success)_8%,var(--card))] text-success [transition:border-color_200ms_ease-out,background-color_200ms_ease-out,color_200ms_ease-out] [transition-delay:calc(var(--i)*35ms)]"
                 : cn(
-                    "text-foreground hover:not-focus:border-border",
+                    "text-foreground [transition:border-color_120ms_ease-out,background-color_120ms_ease-out,box-shadow_120ms_ease-out,color_120ms_ease-out] hover:not-focus:border-border",
                     locked
                       ? "border-transparent bg-muted"
                       : invalid
@@ -381,6 +386,7 @@ export function CodeVerificationInput({
                   ),
             )}
             data-filled={char ? "" : undefined}
+            style={{ "--i": index } as CSSProperties}
             autoComplete={index === 0 ? "one-time-code" : "off"}
             inputMode={mode === "numeric" ? "numeric" : "text"}
             pattern={mode === "numeric" ? "[0-9]*" : undefined}
@@ -444,12 +450,14 @@ export function CodeVerificationMessage({
 
 export function CodeVerificationSubmit({
   pendingLabel = "Verifying…",
+  verifiedLabel = "Verified",
   children,
   className,
   ...props
-}: ComponentProps<"button"> & { pendingLabel?: ReactNode }) {
+}: ComponentProps<"button"> & { pendingLabel?: ReactNode; verifiedLabel?: ReactNode }) {
   const context = useCodeVerification("CodeVerificationSubmit");
   const pending = context.status === "verifying";
+  const verified = context.status === "verified";
   const ready = context.code.length === context.length && context.status !== "verified";
   return (
     <Button
@@ -459,18 +467,30 @@ export function CodeVerificationSubmit({
         "rounded-full border-0 px-4 py-0 text-[13px] has-[>svg]:px-4",
         codeVerificationActionMotion,
         context.variant === "compact" ? "h-7.5" : "h-8.5",
-        ready || pending
-          ? "bg-primary text-primary-foreground hover:bg-primary hover:brightness-108 active:scale-[0.97] motion-reduce:active:scale-100"
-          : "bg-muted text-subtle-foreground hover:bg-muted",
-        pending ? "cursor-progress" : ready ? "cursor-pointer" : "cursor-not-allowed",
+        verified
+          ? "cursor-default gap-1.5 bg-success/14 text-success hover:bg-success/14"
+          : ready || pending
+            ? "bg-primary text-primary-foreground hover:bg-primary hover:brightness-108 active:scale-[0.97] motion-reduce:active:scale-100"
+            : "bg-muted text-subtle-foreground hover:bg-muted",
+        !verified &&
+          (pending ? "cursor-progress" : ready ? "cursor-pointer" : "cursor-not-allowed"),
         className,
       )}
       {...props}
       aria-disabled={!ready || pending || undefined}
       aria-busy={pending || undefined}
-      data-state={ready || pending ? "ready" : "idle"}
+      data-state={verified ? "verified" : ready || pending ? "ready" : "idle"}
     >
-      {pending ? (
+      {verified ? (
+        <>
+          <Check
+            className="size-3.5 animate-in fade-in-0 zoom-in-50 duration-200 ease-out-quint motion-reduce:animate-none"
+            strokeWidth={2.2}
+            aria-hidden="true"
+          />
+          {verifiedLabel}
+        </>
+      ) : pending ? (
         <span className="animate-shimmer bg-[linear-gradient(90deg,color-mix(in_oklab,currentColor_55%,transparent)_0%,color-mix(in_oklab,currentColor_55%,transparent)_35%,currentColor_50%,color-mix(in_oklab,currentColor_55%,transparent)_65%,color-mix(in_oklab,currentColor_55%,transparent)_100%)] bg-[length:200%_100%] bg-clip-text [-webkit-text-fill-color:transparent] motion-reduce:animate-none motion-reduce:bg-none motion-reduce:[-webkit-text-fill-color:currentColor]">
           {pendingLabel}
         </span>

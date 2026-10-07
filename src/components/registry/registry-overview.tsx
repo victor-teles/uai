@@ -9,6 +9,11 @@ export function RegistryOverview() {
   return (
     <article className="uai-doc uai-overview" aria-labelledby="uai-overview-title">
       <header className="uai-overview__intro">
+        <p className="uai-overview__pronounce">
+          <span lang="pt-BR">Uai</span>
+          <span>/waj/</span>
+          <span>sounds like “why”, or “UI” said fast. The Minas Gerais word for surprise</span>
+        </p>
         <h1 id="uai-overview-title">Open-code components for websites and web apps.</h1>
         <p>
           Uai is a shadcn registry of compound React components and page blocks. The CLI copies

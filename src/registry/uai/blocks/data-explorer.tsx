@@ -1,8 +1,8 @@
 "use client";
 
 import { cva } from "class-variance-authority";
-import { Play } from "lucide-react";
-import { type ComponentProps, createContext, useContext, useId } from "react";
+import { LoaderCircle, Play } from "lucide-react";
+import { type ComponentProps, createContext, useContext, useEffect, useId, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -29,9 +29,13 @@ import { cn } from "@/lib/uai-utils";
 
 export const DATA_EXPLORER_VARIANTS = ["workbench", "stacked", "compact"] as const;
 export type DataExplorerVariant = (typeof DATA_EXPLORER_VARIANTS)[number];
-export type DataExplorerProps = ComponentProps<"section"> & { variant?: DataExplorerVariant };
+export type DataExplorerProps = ComponentProps<"section"> & {
+  variant?: DataExplorerVariant;
+  /** A query is running: the Run button reports busy and the status line shimmers. */
+  pending?: boolean;
+};
 
-type ExplorerContext = { id: string; variant: DataExplorerVariant };
+type ExplorerContext = { id: string; variant: DataExplorerVariant; pending: boolean };
 const Context = createContext<ExplorerContext | null>(null);
 function useExplorer(part: string) {
   const context = useContext(Context);
@@ -55,6 +59,30 @@ const emptyVariants: Record<DataExplorerVariant, EmptyStateVariant> = {
   compact: "compact",
 };
 
+// Fades whichever edge of the results still hides columns.
+const scrollEdgeFade =
+  "data-overflow-start:[mask-image:linear-gradient(to_right,transparent,black_24px)] data-overflow-end:[mask-image:linear-gradient(to_left,transparent,black_24px)] data-overflow-start:data-overflow-end:[mask-image:linear-gradient(to_right,transparent,black_24px,black_calc(100%-24px),transparent)]";
+function useScrollEdges(ref: React.RefObject<HTMLElement | null>) {
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    const update = () => {
+      const max = element.scrollWidth - element.clientWidth;
+      element.toggleAttribute("data-overflow-start", element.scrollLeft > 1);
+      element.toggleAttribute("data-overflow-end", element.scrollLeft < max - 1);
+    };
+    update();
+    element.addEventListener("scroll", update, { passive: true });
+    const observer = typeof ResizeObserver === "function" ? new ResizeObserver(update) : null;
+    observer?.observe(element);
+    for (const child of element.children) observer?.observe(child);
+    return () => {
+      element.removeEventListener("scroll", update);
+      observer?.disconnect();
+    };
+  }, [ref]);
+}
+
 const dataExplorerVariants = cva("grid min-w-0 content-start text-[13px]/[18px] text-foreground", {
   variants: {
     variant: { workbench: "gap-4", stacked: "gap-4", compact: "gap-2.5" },
@@ -62,7 +90,7 @@ const dataExplorerVariants = cva("grid min-w-0 content-start text-[13px]/[18px] 
 });
 
 const dataExplorerActionVariants = cva(
-  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap [transition:filter_120ms_ease-out,box-shadow_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] py-0 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid enabled:active:scale-[0.97] disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:enabled:active:scale-100 [&_svg:not([class*='size-'])]:size-3.5",
+  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 font-medium whitespace-nowrap transition-[filter,box-shadow,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] py-0 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid enabled:active:scale-[0.97] disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:enabled:active:scale-100 [&_svg:not([class*='size-'])]:size-3.5",
   {
     variants: {
       emphasis: {
@@ -82,13 +110,14 @@ const dataExplorerActionVariants = cva(
 /** Query workspace: saved views, a query editor, and a results table. */
 export function DataExplorer({
   variant = "workbench",
+  pending = false,
   className,
   children,
   ...props
 }: DataExplorerProps) {
   const id = useId();
   return (
-    <Context.Provider value={{ id, variant }}>
+    <Context.Provider value={{ id, variant, pending }}>
       <section
         aria-labelledby={`${id}-title`}
         data-slot="data-explorer"
@@ -288,8 +317,18 @@ export function DataExplorerRun({
       )}
       {...props}
       type="submit"
+      aria-busy={context.pending || undefined}
+      data-pending={context.pending || undefined}
     >
-      <Play strokeWidth={2} fill="currentColor" aria-hidden="true" className="size-3" />
+      {context.pending ? (
+        <LoaderCircle
+          strokeWidth={2.25}
+          aria-hidden="true"
+          className="size-3 motion-safe:animate-spin"
+        />
+      ) : (
+        <Play strokeWidth={2} fill="currentColor" aria-hidden="true" className="size-3" />
+      )}
       {children}
     </Button>
   );
@@ -329,8 +368,11 @@ export function DataExplorerTable({
 }: ComponentProps<"table">) {
   const context = useExplorer("DataExplorerTable");
   const compact = context.variant === "compact";
+  const scroller = useRef<HTMLElement>(null);
+  useScrollEdges(scroller);
   return (
     <section
+      ref={scroller}
       aria-label={label}
       // biome-ignore lint/a11y/noNoninteractiveTabindex: a scrollable region must be reachable by keyboard.
       tabIndex={0}
@@ -338,6 +380,7 @@ export function DataExplorerTable({
       className={cn(
         "min-w-0 overflow-x-auto border bg-card shadow-[0_1px_2px_oklch(0_0_0/0.04)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring *:data-[slot=table-container]:overflow-visible",
         compact ? "rounded-xl px-1 py-0.5" : "rounded-[14px] px-1.5 py-1",
+        scrollEdgeFade,
       )}
     >
       <Table
@@ -431,11 +474,17 @@ export function DataExplorerCell({
 
 /** Row count, timing, or errors, announced politely. */
 export function DataExplorerStatus({ className, ...props }: ComponentProps<"p">) {
+  const context = useExplorer("DataExplorerStatus");
   return (
     <p
       role="status"
       data-slot="data-explorer-status"
-      className={cn("m-0 px-0.5 text-[12px] text-subtle-foreground tabular-nums", className)}
+      data-pending={context.pending || undefined}
+      className={cn(
+        "m-0 px-0.5 text-[12px] text-subtle-foreground tabular-nums",
+        context.pending && "shimmer-text",
+        className,
+      )}
       {...props}
     />
   );

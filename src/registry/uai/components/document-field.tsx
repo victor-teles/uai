@@ -372,6 +372,7 @@ export function DocumentFieldKind({ className, ...props }: DocumentFieldKindProp
   if (!context.value) return null;
   return (
     <Badge
+      key={context.kind}
       variant="secondary"
       data-slot="document-field-kind"
       data-kind={context.kind}
@@ -394,11 +395,12 @@ export function DocumentFieldStatusIcon({ className, ...props }: DocumentFieldSt
   if (context.status !== "valid" && !context.showInvalid) return null;
   return (
     <span
+      key={context.showInvalid ? "invalid" : "valid"}
       data-slot="document-field-status-icon"
       aria-hidden="true"
       className={cn(
-        "inline-flex shrink-0 animate-in items-center duration-180 ease-out-quint fade-in-0 zoom-in-96 motion-reduce:animate-none",
-        context.showInvalid ? "text-destructive" : "text-success",
+        "inline-flex shrink-0 animate-in items-center duration-180 ease-out-quint fade-in-0 motion-reduce:animate-none",
+        context.showInvalid ? "zoom-in-96 text-destructive" : "zoom-in-75 text-success",
         className,
       )}
       {...props}

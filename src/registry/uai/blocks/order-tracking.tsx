@@ -11,7 +11,7 @@ import {
   useState,
 } from "react";
 import { Button } from "@/components/ui/button";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   DescriptionList,
   type DescriptionListProps,
@@ -325,22 +325,32 @@ export function OrderTrackingEarlierEvents({
   const [open, setOpen] = useState(defaultOpen);
   return (
     <Collapsible open={open} onOpenChange={setOpen} asChild>
-      <div
-        data-slot="order-tracking-earlier-events"
-        className={cn("grid gap-2", className)}
-        {...props}
-      >
-        <CollapsibleContent id={id}>
-          <ol
-            className={cn(
-              "m-0 grid list-none p-0",
-              "[&>li]:animate-in [&>li]:fade-in-0 [&>li]:slide-in-from-bottom-1 [&>li]:duration-240 [&>li]:ease-out-quint [&>li]:fill-mode-both motion-reduce:[&>li]:animate-none",
-              "[&>li:nth-child(2)]:[animation-delay:40ms] [&>li:nth-child(3)]:[animation-delay:80ms] [&>li:nth-child(4)]:[animation-delay:120ms] [&>li:nth-child(n+5)]:[animation-delay:160ms]",
-            )}
-          >
-            {children}
-          </ol>
-        </CollapsibleContent>
+      <div data-slot="order-tracking-earlier-events" className={cn("grid", className)} {...props}>
+        {/* Stays mounted so the row height can ease open and shut; closed events are inert. */}
+        <div
+          id={id}
+          data-state={open ? "open" : "closed"}
+          inert={!open}
+          className={cn(
+            "grid transition-[grid-template-rows,opacity] duration-300 ease-out-quint motion-reduce:transition-none",
+            open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+          )}
+        >
+          <div className="min-h-0 overflow-hidden">
+            <ol
+              className={cn(
+                // The bottom padding replaces the row gap so it collapses with the list.
+                "m-0 grid list-none px-0 pt-0 pb-2",
+                // Events stagger in each time the list opens.
+                open &&
+                  "[&>li]:animate-in [&>li]:fade-in-0 [&>li]:slide-in-from-bottom-1 [&>li]:duration-240 [&>li]:ease-out-quint [&>li]:fill-mode-both motion-reduce:[&>li]:animate-none",
+                "[&>li:nth-child(2)]:[animation-delay:40ms] [&>li:nth-child(3)]:[animation-delay:80ms] [&>li:nth-child(4)]:[animation-delay:120ms] [&>li:nth-child(n+5)]:[animation-delay:160ms]",
+              )}
+            >
+              {children}
+            </ol>
+          </div>
+        </div>
         <CollapsibleTrigger asChild>
           <Button
             type="button"

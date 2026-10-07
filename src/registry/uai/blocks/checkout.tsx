@@ -338,7 +338,7 @@ export function CheckoutSectionTitle({ children, className, ...props }: Componen
       {complete ? (
         <span
           aria-hidden="true"
-          className="grid size-[18px] place-items-center rounded-full bg-success/16 text-success"
+          className="grid size-[18px] place-items-center rounded-full bg-success/16 text-success animate-in fade-in-0 zoom-in-50 duration-200 ease-out-quint motion-reduce:animate-none"
         >
           <Check size={11} className="size-[11px]" strokeWidth={2.5} />
         </span>
@@ -412,7 +412,11 @@ export function CheckoutSectionSummary({ className, ...props }: ComponentProps<"
   return (
     <div
       data-slot="checkout-section-summary"
-      className={cn("-mt-1.5 min-w-0 pl-[26px] text-[12.5px] text-muted-foreground", className)}
+      className={cn(
+        "-mt-1.5 min-w-0 pl-[26px] text-[12.5px] text-muted-foreground",
+        enter,
+        className,
+      )}
       {...props}
     />
   );

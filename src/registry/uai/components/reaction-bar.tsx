@@ -66,7 +66,8 @@ const reactionBarItemVariants = cva(
         pill: "h-7 gap-1.5 px-2.5 text-[12.5px]",
         outlined:
           "h-7 gap-1.5 bg-transparent px-2.5 text-[12.5px] shadow-[inset_0_0_0_1px_var(--border)] enabled:hover:bg-accent enabled:hover:shadow-[inset_0_0_0_1px_var(--border-strong)]",
-        compact: "h-5.5 gap-1 px-[7px] text-[11.5px]",
+        compact:
+          "relative h-5.5 gap-1 px-[7px] text-[11.5px] after:absolute after:-inset-x-0.5 after:-inset-y-1 after:content-['']",
       },
     },
   },
@@ -131,6 +132,8 @@ export function ReactionBarItem({
   const context = useReactions("ReactionBarItem");
   const pressed = context.selected.includes(value);
   const compact = context.variant === "compact";
+  // Pop only after the person toggles, not for reactions that load preselected.
+  const [toggled, setToggled] = useState(false);
   return (
     <Toggle
       data-slot="reaction-bar-item"
@@ -138,7 +141,10 @@ export function ReactionBarItem({
       className={cn(reactionBarItemVariants({ variant: context.variant }), className)}
       {...props}
       pressed={pressed}
-      onPressedChange={() => context.toggle(value)}
+      onPressedChange={() => {
+        setToggled(true);
+        context.toggle(value);
+      }}
       aria-label={`${label}, ${count} ${count === 1 ? "reaction" : "reactions"}`}
       disabled={context.disabled || props.disabled}
       onClick={onClick}
@@ -146,13 +152,22 @@ export function ReactionBarItem({
       <span
         aria-hidden="true"
         className={cn(
-          "inline-block group-aria-pressed/reaction-item:animate-in group-aria-pressed/reaction-item:zoom-in-70 group-aria-pressed/reaction-item:duration-260 group-aria-pressed/reaction-item:ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:animate-none!",
+          "inline-block",
+          toggled &&
+            pressed &&
+            "animate-in duration-260 ease-[cubic-bezier(0.16,1,0.3,1)] zoom-in-70 motion-reduce:animate-none",
           compact ? "text-[12px]/none" : "text-[14px]/none",
         )}
       >
         {emoji}
       </span>
-      <span aria-hidden="true">{count}</span>
+      <span
+        key={count}
+        aria-hidden="true"
+        className="inline-block animate-in duration-200 ease-out-quint fade-in-0 slide-in-from-bottom-1 motion-reduce:animate-none"
+      >
+        {count}
+      </span>
     </Toggle>
   );
 }
@@ -219,7 +234,7 @@ export function ReactionBarPicker({
               className={cn(
                 "rounded-full border-0 bg-transparent p-0 text-muted-foreground transition-[background-color,color,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring enabled:hover:bg-accent enabled:hover:text-accent-foreground enabled:active:scale-[0.94] aria-expanded:bg-accent aria-expanded:text-accent-foreground motion-reduce:transition-none motion-reduce:enabled:active:scale-100 dark:hover:bg-accent",
                 compact
-                  ? "size-5.5 [&_svg:not([class*='size-'])]:size-[13px]"
+                  ? "relative size-5.5 after:absolute after:-inset-x-0.5 after:-inset-y-1 after:content-[''] [&_svg:not([class*='size-'])]:size-[13px]"
                   : "size-7 [&_svg:not([class*='size-'])]:size-[15px]",
               )}
             >

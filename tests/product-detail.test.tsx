@@ -86,7 +86,10 @@ test("submits the selected option and quantity and reports pending state", async
   expect(pending.disabled).toBe(true);
   expect(pending.getAttribute("aria-busy")).toBe("true");
   resolve();
-  await waitFor(() => expect(screen.getByRole("button", { name: "Add to cart" })).toBeTruthy());
+  await waitFor(() => expect(screen.getByRole("button", { name: "Added" })).toBeTruthy());
+  await waitFor(() => expect(screen.getByRole("button", { name: "Add to cart" })).toBeTruthy(), {
+    timeout: 2000,
+  });
 });
 
 test("supports arrow-key option selection and announces availability", async () => {

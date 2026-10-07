@@ -344,10 +344,11 @@ export function SubscriptionManagementMeter({
       >
         <div
           className={cn(
-            "h-full rounded-full transition-[width] duration-300 ease-out-quint motion-reduce:transition-none",
+            "h-full w-full rounded-full transition-[translate] duration-300 ease-out-quint motion-reduce:transition-none",
             near ? "bg-warning" : "bg-primary",
           )}
-          style={{ width: `${ratio * 100}%` }}
+          // A full-width fill slides in from the left; the track clips the hidden part.
+          style={{ translate: `${ratio * 100 - 100}% 0` }}
         />
       </div>
     </div>

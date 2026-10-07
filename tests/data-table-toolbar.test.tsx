@@ -90,6 +90,9 @@ test("shows bulk actions only with a selection and announces the count", async (
   expect(screen.getByRole("status").textContent).toBe("3 selected");
   await user.click(screen.getByRole("button", { name: "Clear selection" }));
   expect(clear).toHaveBeenCalledTimes(1);
+  // Without a running exit animation the bar unmounts as soon as the selection clears.
+  view.rerender(<Fixture selectedCount={0} onClearSelection={clear} />);
+  expect(screen.queryByRole("group", { name: "Bulk actions" })).toBeNull();
 });
 
 test("renders every variant and guards compound children", () => {

@@ -60,6 +60,23 @@ test("masks the CEP and looks it up once when complete", async () => {
   expect(formatCep("2004000")).toBe("20040-00");
 });
 
+test("keeps the caret in place when editing mid-string", async () => {
+  const user = userEvent.setup();
+  render(<Fixture />);
+
+  const input = screen.getByRole("textbox", { name: "CEP" }) as HTMLInputElement;
+  await user.type(input, "01310100");
+  expect(input.value).toBe("01310-100");
+
+  await user.type(input, "{Backspace}", { initialSelectionStart: 3, initialSelectionEnd: 3 });
+  expect(input.value).toBe("01101-00");
+  expect(input.selectionStart).toBe(2);
+
+  await user.type(input, "9", { initialSelectionStart: 2, initialSelectionEnd: 2 });
+  expect(input.value).toBe("01910-100");
+  expect(input.selectionStart).toBe(3);
+});
+
 test("speaks lookup states and shows the address only when found", () => {
   const view = render(<Fixture status="loading" />);
   expect(screen.getByRole("status").textContent).toBe("Buscando endereço…");

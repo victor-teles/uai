@@ -1,7 +1,17 @@
 "use client";
 
 import { cva } from "class-variance-authority";
-import { type ComponentProps, createContext, useContext, useId } from "react";
+import {
+  type ComponentProps,
+  type CSSProperties,
+  createContext,
+  type RefObject,
+  useContext,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
 import { Button } from "@/components/ui/button";
 import {
   FilterBar,
@@ -253,17 +263,16 @@ export function ReportBuilderOption({
   ...props
 }: Omit<ComponentProps<"input">, "type"> & { type?: "checkbox" | "radio" }) {
   const context = useBuilder("ReportBuilderOption");
-  const checked = Boolean(props.checked ?? props.defaultChecked);
+  // Styling reads the live input through has-checked, so uncontrolled options update on click.
   return (
     <label
       data-slot="report-builder-option"
-      data-checked={checked || undefined}
+      data-checked={props.checked || undefined}
       className={cn(
-        "relative inline-flex items-center rounded-full border-0 text-[12px] font-medium whitespace-nowrap [transition:background-color_120ms_ease-out,color_120ms_ease-out,box-shadow_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] active:[transform:scale(0.97)] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-1 has-[:focus-visible]:outline-ring motion-reduce:transition-none motion-reduce:active:[transform:none]",
+        "relative inline-flex items-center rounded-full border-0 text-[12px] font-medium whitespace-nowrap transition-[background-color,color,box-shadow,scale] duration-[120ms,120ms,120ms,140ms] ease-[ease-out,ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-1 has-[:focus-visible]:outline-ring motion-reduce:transition-none motion-reduce:active:scale-100",
         context.variant === "compact" ? "h-6 px-2.5" : "h-7 px-3",
-        checked
-          ? "bg-[color-mix(in_oklab,var(--primary)_16%,var(--card))] text-[color-mix(in_oklab,var(--primary)_55%,var(--foreground))] shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_40%,transparent)]"
-          : "bg-card text-muted-foreground shadow-[inset_0_0_0_1px_var(--border)] hover:text-foreground hover:shadow-[inset_0_0_0_1px_var(--border-strong)]",
+        "bg-card text-muted-foreground shadow-[inset_0_0_0_1px_var(--border)] not-has-checked:hover:text-foreground not-has-checked:hover:shadow-[inset_0_0_0_1px_var(--border-strong)]",
+        "has-checked:bg-[color-mix(in_oklab,var(--primary)_16%,var(--card))] has-checked:text-[color-mix(in_oklab,var(--primary)_55%,var(--foreground))] has-checked:shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_40%,transparent)]",
         props.disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
         className,
       )}
@@ -317,6 +326,36 @@ export function ReportBuilderMetric(props: Omit<MetricCardProps, "variant">) {
 }
 
 /** A bar chart rendered as a list, so every value is available as text. */
+type ScrollEdges = { start: boolean; end: boolean };
+
+/** Tracks which ends of a horizontal scroller hide content, so those edges can fade. */
+function useScrollEdges(ref: RefObject<HTMLElement | null>) {
+  const [edges, setEdges] = useState<ScrollEdges>({ start: false, end: false });
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    const measure = () => {
+      const offset = Math.abs(element.scrollLeft);
+      const room = element.scrollWidth - element.clientWidth;
+      const start = offset > 1;
+      const end = room - offset > 1;
+      setEdges((previous) =>
+        previous.start === start && previous.end === end ? previous : { start, end },
+      );
+    };
+    measure();
+    element.addEventListener("scroll", measure, { passive: true });
+    const observer = typeof ResizeObserver === "function" ? new ResizeObserver(measure) : null;
+    observer?.observe(element);
+    for (const child of element.children) observer?.observe(child);
+    return () => {
+      element.removeEventListener("scroll", measure);
+      observer?.disconnect();
+    };
+  }, [ref]);
+  return edges;
+}
+
 export function ReportBuilderChart({
   max,
   orientation = "horizontal",
@@ -325,14 +364,19 @@ export function ReportBuilderChart({
 }: ComponentProps<"ul"> & { max: number; orientation?: ReportBuilderChartOrientation }) {
   const context = useBuilder("ReportBuilderChart");
   const vertical = orientation === "vertical";
+  const ref = useRef<HTMLUListElement>(null);
+  const edges = useScrollEdges(ref);
   return (
     <ChartCtx.Provider value={{ max: Math.max(max, 1), orientation }}>
       <ul
+        ref={ref}
         data-slot="report-builder-chart"
+        data-overflow-start={edges.start ? "" : undefined}
+        data-overflow-end={edges.end ? "" : undefined}
         className={cn(
           "m-0 min-w-0 list-none p-0",
           vertical
-            ? "flex items-stretch gap-2 overflow-x-auto"
+            ? "flex items-stretch gap-2 overflow-x-auto data-overflow-start:mask-l-from-[calc(100%-24px)] data-overflow-end:mask-r-from-[calc(100%-24px)]"
             : cn("grid", context.variant === "compact" ? "gap-1.5" : "gap-2.5"),
           className,
         )}
@@ -379,16 +423,17 @@ export function ReportBuilderBar({
         >
           <span
             data-slot="report-builder-bar-fill"
+            // A full-size fill slides by `translate`, so value changes animate without touching
+            // width or height. The mount entrance slides in from the track start via `transform`.
             className={cn(
-              "bg-[color-mix(in_oklab,var(--primary)_85%,var(--foreground))] motion-reduce:animate-none",
+              "size-full bg-[color-mix(in_oklab,var(--primary)_85%,var(--foreground))] transition-[translate] duration-300 ease-out-quint animate-in animation-duration-400 motion-reduce:animate-none motion-reduce:transition-none",
               vertical
-                ? "origin-bottom animate-[grow-y_400ms_cubic-bezier(0.23,1,0.32,1)_both] rounded-md"
-                : "origin-left animate-[grow-x_400ms_cubic-bezier(0.23,1,0.32,1)_both] rounded-full",
+                ? "translate-y-(--fill-offset) slide-in-from-bottom rounded-md"
+                : "translate-x-(--fill-offset) slide-in-from-left rounded-full",
             )}
-            style={{
-              width: vertical ? "100%" : `${percent}%`,
-              height: vertical ? `${percent}%` : "100%",
-            }}
+            style={
+              { "--fill-offset": `${vertical ? 100 - percent : percent - 100}%` } as CSSProperties
+            }
           />
         </span>
         {children}

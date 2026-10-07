@@ -274,7 +274,11 @@ export function CommentBody({ className, children, ...props }: ComponentProps<"d
         <CollapsibleContent asChild>
           <div
             id={bodyId}
-            className="min-w-0 text-pretty whitespace-pre-line text-foreground wrap-anywhere"
+            className={cn(
+              "min-w-0 text-pretty whitespace-pre-line text-foreground wrap-anywhere",
+              hidden &&
+                "animate-in duration-200 ease-out-quint fade-in-0 motion-reduce:animate-none",
+            )}
           >
             {children}
           </div>
@@ -322,7 +326,10 @@ export function CommentEditor({
   return (
     <form
       data-slot="comment-editor"
-      className={cn("grid min-w-0 gap-2", className)}
+      className={cn(
+        "grid min-w-0 animate-in gap-2 duration-200 ease-out-quint fade-in-0 motion-reduce:animate-none",
+        className,
+      )}
       {...props}
       onSubmit={(event) => {
         event.preventDefault();

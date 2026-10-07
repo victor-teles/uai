@@ -201,7 +201,7 @@ function controlClass(variant: CalendarViewVariant) {
   );
 }
 const press =
-  "[transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_var(--ease-out-quint)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100";
+  "transition-[background-color,color,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100";
 // Primitive controls swap their ring for the Uai outline; `outline-solid` undoes their `outline-none`.
 const primitiveFocus = "focus-visible:ring-0 focus-visible:outline-solid";
 // Ghost icon button and secondary pill, per the shared button rules.
@@ -295,7 +295,7 @@ export function CalendarViewModes({
       <span
         aria-hidden="true"
         className={cn(
-          "absolute inset-y-0.5 left-0.5 -z-1 w-[calc((100%-4px)/3)] rounded-full bg-card shadow-[0_0_0_1px_var(--border),0_1px_2px_oklch(0_0_0/0.08)] transition-[translate] duration-240 ease-out-quint",
+          "absolute inset-y-0.5 left-0.5 -z-1 w-[calc((100%-4px)/3)] rounded-full bg-card shadow-[0_0_0_1px_var(--border),0_1px_2px_oklch(0_0_0/0.08)] transition-[translate] duration-240 ease-out-quint motion-reduce:transition-none",
           modeThumbOffset[context.view],
         )}
       />
@@ -428,7 +428,8 @@ export function CalendarViewGrid({
               context.setView("day");
             }}
             className={cn(
-              "mt-0.5 cursor-pointer rounded-md border-0 bg-transparent px-1.5 text-[11px]/4 font-medium text-subtle-foreground hover:bg-accent hover:text-foreground",
+              // The hit area grows vertically so the short row is easy to tap.
+              "relative mt-0.5 cursor-pointer rounded-md border-0 bg-transparent px-1.5 text-[11px]/4 after:absolute after:inset-x-0 after:-inset-y-1 after:content-[''] font-medium text-subtle-foreground hover:bg-accent hover:text-foreground",
               press,
             )}
           >
@@ -547,7 +548,11 @@ export function CalendarViewGrid({
             ))}
           </tr>
         </thead>
-        <tbody>
+        {/* Keyed by the first visible date so each period change fades the grid in. */}
+        <tbody
+          key={`${view}-${weeks[0]?.[0] ? dateKey(weeks[0][0]) : ""}`}
+          className="animate-in fade-in-0 duration-150 ease-out motion-reduce:animate-none"
+        >
           {weeks.map((week) => (
             <tr key={week.map(dateKey).join()}>
               {week.map((day) =>

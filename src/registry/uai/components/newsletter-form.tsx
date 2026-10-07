@@ -1,6 +1,7 @@
 "use client";
 
 import { cva } from "class-variance-authority";
+import { Check } from "lucide-react";
 import {
   type ComponentProps,
   createContext,
@@ -229,13 +230,17 @@ export function NewsletterFormInput({
 export function NewsletterFormSubmit({
   children = "Subscribe",
   pendingLabel = "Subscribing…",
+  successLabel = "Subscribed",
   onClick,
   className,
   ...props
-}: Omit<ComponentProps<"button">, "type"> & { pendingLabel?: string }) {
+}: Omit<ComponentProps<"button">, "type"> & { pendingLabel?: string; successLabel?: string }) {
   const context = useNewsletter("NewsletterFormSubmit");
   const pending = context.status === "submitting";
+  const subscribed = context.status === "success";
+  const inert = pending || subscribed;
   const stacked = context.variant === "stacked";
+  const label = subscribed ? "success" : pending ? "pending" : "idle";
   return (
     <Button
       data-slot="newsletter-form-submit"
@@ -243,20 +248,49 @@ export function NewsletterFormSubmit({
       className={cn(
         "flex-none rounded-full border-0 bg-primary px-3.5 py-0 text-[13px] font-medium whitespace-nowrap text-primary-foreground [transition:filter_120ms_ease-out,opacity_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-primary focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid has-[>svg]:px-3.5 motion-reduce:transition-none",
         stacked ? "h-8.5" : "h-7.5",
-        pending
-          ? "cursor-progress opacity-70"
-          : "cursor-pointer hover:brightness-108 active:scale-[0.97] motion-reduce:active:scale-100",
+        subscribed
+          ? "cursor-default gap-1.5 bg-success/14 text-success hover:bg-success/14"
+          : pending
+            ? "cursor-progress opacity-70"
+            : "cursor-pointer hover:brightness-108 active:scale-[0.97] motion-reduce:active:scale-100",
         className,
       )}
       {...props}
       type="submit"
-      aria-disabled={pending || undefined}
+      data-status={label}
+      aria-disabled={inert || undefined}
       onClick={(event) => {
-        if (pending) event.preventDefault();
+        if (inert) event.preventDefault();
         onClick?.(event);
       }}
     >
-      {pending ? pendingLabel : children}
+      {subscribed ? (
+        <Check
+          className="size-3.5 animate-in fade-in-0 zoom-in-50 duration-200 ease-out-quint motion-reduce:animate-none"
+          strokeWidth={2.2}
+          aria-hidden="true"
+        />
+      ) : null}
+      <span className="grid [&>*]:[grid-area:1/1]">
+        <span
+          className={cn(label !== "idle" && "invisible")}
+          aria-hidden={label !== "idle" || undefined}
+        >
+          {children}
+        </span>
+        <span
+          className={cn(label !== "pending" && "invisible")}
+          aria-hidden={label !== "pending" || undefined}
+        >
+          {pendingLabel}
+        </span>
+        <span
+          className={cn(label !== "success" && "invisible")}
+          aria-hidden={label !== "success" || undefined}
+        >
+          {successLabel}
+        </span>
+      </span>
     </Button>
   );
 }
@@ -340,7 +374,12 @@ export function NewsletterFormMessage({
       {...props}
       id={`${context.id}-message`}
     >
-      {context.status === "idle" ? children : copy}
+      <span
+        key={context.status}
+        className="block animate-in fade-in-0 slide-in-from-top-1 duration-200 ease-out-quint motion-reduce:animate-none"
+      >
+        {context.status === "idle" ? children : copy}
+      </span>
     </p>
   );
 }

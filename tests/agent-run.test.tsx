@@ -112,11 +112,11 @@ test("expands a tool call and approves with the keyboard", async () => {
   const approve = mock(() => {});
   render(<Fixture onApprove={approve} />);
   const tool = screen.getByRole("button", { name: /run_tests/ });
-  expect(screen.getByText("312 passed").closest("[hidden]")).not.toBeNull();
+  expect(screen.getByText("312 passed").closest("[inert]")).not.toBeNull();
   tool.focus();
   await user.keyboard("{Enter}");
   expect(tool.getAttribute("aria-expanded")).toBe("true");
-  expect(screen.getByText("312 passed").closest("[hidden]")).toBeNull();
+  expect(screen.getByText("312 passed").closest("[inert]")).toBeNull();
   screen.getByRole("button", { name: "Deploy" }).focus();
   await user.keyboard(" ");
   expect(approve).toHaveBeenCalledTimes(1);

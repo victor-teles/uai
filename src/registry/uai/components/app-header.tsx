@@ -132,6 +132,8 @@ export function AppHeaderOverflow({ children, className, ...props }: AppHeaderOv
       className={cn(
         "order-4 min-w-0 basis-full flex-col border-t pt-2 md:order-none md:flex md:basis-auto md:flex-row md:items-center md:border-0 md:pt-0",
         context.open ? "flex" : "hidden",
+        // The mobile panel eases in each time it opens; desktop keeps it static.
+        "max-md:animate-in max-md:fade-in-0 max-md:slide-in-from-top-1 max-md:duration-200 max-md:ease-out-quint motion-reduce:animate-none",
         context.chrome.overflowClass,
         className,
       )}
@@ -329,7 +331,12 @@ export function AppHeaderMenuButton({
         onClick?.(event);
       }}
     >
-      <Icon className="size-4" strokeWidth={1.8} aria-hidden="true" />
+      <Icon
+        key={context.open ? "close" : "open"}
+        className="size-4 animate-in fade-in-0 zoom-in-75 duration-150 ease-out-quint motion-reduce:animate-none"
+        strokeWidth={1.8}
+        aria-hidden="true"
+      />
     </Button>
   );
 }

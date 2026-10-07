@@ -252,7 +252,11 @@ export function PricingTogglePrice({
   return (
     <span
       data-slot="pricing-toggle-price"
-      className={cn(className)}
+      // Each period mounts its own price, so the swap fades up on change.
+      className={cn(
+        "inline-block animate-in duration-200 ease-out-quint tabular-nums fade-in-0 slide-in-from-bottom-1 motion-reduce:animate-none",
+        className,
+      )}
       {...props}
       data-period={period}
     >

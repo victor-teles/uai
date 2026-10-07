@@ -544,13 +544,24 @@ function Advance({
         if (!event.defaultPrevented) void context.next();
       }}
     >
-      {context.pending ? (
-        <span className="animate-shimmer bg-[linear-gradient(90deg,color-mix(in_oklab,currentColor_55%,transparent)_0%,color-mix(in_oklab,currentColor_55%,transparent)_35%,currentColor_50%,color-mix(in_oklab,currentColor_55%,transparent)_65%,color-mix(in_oklab,currentColor_55%,transparent)_100%)] bg-[length:200%_100%] bg-clip-text [-webkit-text-fill-color:transparent] motion-reduce:animate-none motion-reduce:bg-none motion-reduce:[-webkit-text-fill-color:currentColor]">
+      {/* Both labels share one grid cell so the button keeps its width while pending. */}
+      <span className="grid [&>*]:[grid-area:1/1]">
+        <span
+          className={cn(context.pending && "invisible")}
+          aria-hidden={context.pending || undefined}
+        >
+          {children}
+        </span>
+        <span
+          className={cn(
+            "animate-shimmer bg-[linear-gradient(90deg,color-mix(in_oklab,currentColor_55%,transparent)_0%,color-mix(in_oklab,currentColor_55%,transparent)_35%,currentColor_50%,color-mix(in_oklab,currentColor_55%,transparent)_65%,color-mix(in_oklab,currentColor_55%,transparent)_100%)] bg-[length:200%_100%] bg-clip-text [-webkit-text-fill-color:transparent] motion-reduce:animate-none motion-reduce:bg-none motion-reduce:[-webkit-text-fill-color:currentColor]",
+            !context.pending && "invisible animate-none",
+          )}
+          aria-hidden={!context.pending || undefined}
+        >
           {pendingLabel}
         </span>
-      ) : (
-        children
-      )}
+      </span>
     </Button>
   );
 }

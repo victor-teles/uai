@@ -1,5 +1,16 @@
+"use client";
+
 import { cva } from "class-variance-authority";
-import { type ComponentProps, createContext, type ReactNode, useContext, useId } from "react";
+import {
+  type ComponentProps,
+  createContext,
+  type ReactNode,
+  useContext,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+} from "react";
 
 import { cn } from "@/lib/uai-utils";
 
@@ -187,6 +198,31 @@ export function PriceSummaryItem({
   );
 }
 
+const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
+
+// Ticks the total in place when its text changes, so a new amount reads as an update.
+function useValueTick<T extends HTMLElement>() {
+  const ref = useRef<T>(null);
+  const previous = useRef<string | null>(null);
+  useIsomorphicLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    const text = element.textContent;
+    const changed = previous.current !== null && previous.current !== text;
+    previous.current = text;
+    if (!changed || typeof element.animate !== "function") return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    element.animate(
+      [
+        { opacity: 0.4, transform: "translateY(3px)" },
+        { opacity: 1, transform: "none" },
+      ],
+      { duration: 200, easing: "cubic-bezier(0.23, 1, 0.32, 1)" },
+    );
+  });
+  return ref;
+}
+
 export type PriceSummaryTotalProps = ComponentProps<"div"> & {
   label?: ReactNode;
   hint?: ReactNode;
@@ -200,6 +236,7 @@ export function PriceSummaryTotal({
   ...props
 }: PriceSummaryTotalProps) {
   const context = usePriceSummary("PriceSummaryTotal");
+  const valueRef = useValueTick<HTMLElement>();
 
   return (
     <div
@@ -220,6 +257,7 @@ export function PriceSummaryTotal({
         ) : null}
       </dt>
       <dd
+        ref={valueRef}
         className={cn(
           "ml-auto min-w-0 max-w-[58%] text-right font-semibold tracking-[-0.025em] tabular-nums wrap-anywhere",
           context.chrome.totalValueClass,

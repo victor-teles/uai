@@ -42,11 +42,11 @@ test("toggles the input and output disclosure with the keyboard", async () => {
   const trigger = screen.getByRole("button", { name: /create_refund/ });
   const panel = document.getElementById(trigger.getAttribute("aria-controls") ?? "");
   expect(trigger.getAttribute("aria-expanded")).toBe("false");
-  expect(panel?.hidden).toBe(true);
+  expect(panel?.closest("[inert]")).not.toBeNull();
   await user.tab();
   await user.keyboard("{Enter}");
   expect(trigger.getAttribute("aria-expanded")).toBe("true");
-  expect(panel?.hidden).toBe(false);
+  expect(panel?.closest("[inert]")).toBeNull();
   expect(screen.getByRole("group", { name: "Input" })).toBeTruthy();
   expect(screen.getByRole("group", { name: "Output" }).textContent).toContain("re_3PqL");
   await user.keyboard(" ");

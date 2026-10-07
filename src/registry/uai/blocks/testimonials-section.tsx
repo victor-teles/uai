@@ -124,7 +124,7 @@ export function TestimonialsSectionItem({
       data-slot="testimonials-section-item"
       data-featured={featured || undefined}
       className={cn(
-        "min-w-0 animate-in fade-in-0 slide-in-from-bottom-[6px] duration-400 ease-out-quint fill-mode-both motion-reduce:animate-none nth-2:[animation-delay:40ms] nth-3:[animation-delay:80ms] nth-4:[animation-delay:120ms] nth-5:[animation-delay:160ms] nth-[n+6]:[animation-delay:200ms]",
+        "min-w-0 animate-in fade-in-0 slide-in-from-bottom-[6px] duration-400 ease-out-quint fill-mode-both motion-reduce:animate-none nth-2:[animation-delay:40ms] nth-3:[animation-delay:80ms] nth-4:[animation-delay:120ms] nth-5:[animation-delay:160ms] nth-[n+6]:[animation-delay:200ms] supports-[animation-timeline:view()]:[animation-timeline:view()] supports-[animation-timeline:view()]:[animation-range:entry_0%_entry_35%] supports-[animation-timeline:view()]:[animation-duration:auto]",
         variant === "wall" && "mb-2.5 break-inside-avoid",
         variant === "featured" && featured && "@min-[720px]:row-span-3 @min-[720px]:self-center",
       )}

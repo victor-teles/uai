@@ -57,7 +57,7 @@ function usePost(part: string) {
 }
 
 const pill =
-  "[transition:background-color_120ms_ease-out,color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.96] motion-reduce:transition-none motion-reduce:enabled:active:scale-100";
+  "transition-[background-color,color,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.97] motion-reduce:transition-none motion-reduce:enabled:active:scale-100";
 const pillIdle =
   "bg-transparent text-muted-foreground enabled:hover:bg-accent enabled:hover:text-foreground";
 const pillSelected = "bg-accent text-foreground";

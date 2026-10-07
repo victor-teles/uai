@@ -7,6 +7,7 @@ import {
   createContext,
   type ReactNode,
   useContext,
+  useEffect,
   useId,
   useLayoutEffect,
   useRef,
@@ -51,7 +52,7 @@ const ColumnsCtx = createContext<ColumnsContext | null>(null);
 const easeOut = "cubic-bezier(0.23, 1, 0.32, 1)";
 // Secondary pill on the shadcn Button: raised fill, lighter on hover, a small press.
 const controlVariants = cva(
-  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 bg-secondary py-0 font-medium whitespace-nowrap text-foreground [transition:background-color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 aria-expanded:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] motion-reduce:transition-none motion-reduce:active:scale-100 [&_svg:not([class*='size-'])]:size-3.5 [&>svg]:text-muted-foreground",
+  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 bg-secondary py-0 font-medium whitespace-nowrap text-foreground transition-[background-color,scale] duration-[120ms,140ms] ease-[ease-out,cubic-bezier(0.23,1,0.32,1)] hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 aria-expanded:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] motion-reduce:transition-none motion-reduce:active:scale-100 [&_svg:not([class*='size-'])]:size-3.5 [&>svg]:text-muted-foreground",
   {
     variants: {
       variant: {
@@ -195,6 +196,7 @@ export function DataTableToolbarSearch({
           className={cn(
             controlVariants({ variant: context.variant }),
             "size-5 p-0 has-[>svg]:p-0 [&_svg:not([class*='size-'])]:size-3",
+            "animate-in fade-in-0 zoom-in-75 duration-150 ease-out-quint motion-reduce:animate-none",
           )}
         >
           <X size={12} className="size-3" strokeWidth={2} aria-hidden="true" />
@@ -348,21 +350,38 @@ export function DataTableToolbarBulkActions({
       { duration: 220, easing: easeOut },
     );
   }, [visible]);
-  if (!visible) return null;
+  // Stay mounted while the exit animation plays; reduced motion has none, so unmount at once.
+  const [rendered, setRendered] = useState(visible);
+  if (visible && !rendered) setRendered(true);
+  useEffect(() => {
+    if (visible) return;
+    const bar = ref.current;
+    const animation = bar ? window.getComputedStyle(bar).animationName : "";
+    if (!animation || animation === "none") setRendered(false);
+  }, [visible]);
+  if (!visible && !rendered) return null;
   return (
     // biome-ignore lint/a11y/useSemanticElements: bulk actions are buttons, not a form fieldset.
     <div
       role="group"
       aria-label="Bulk actions"
       data-slot="data-table-toolbar-bulk-actions"
+      data-state={visible ? "open" : "closed"}
+      aria-hidden={visible ? undefined : true}
+      inert={!visible}
       className={cn(
         "flex min-w-0 flex-wrap items-center gap-1.5 rounded-full bg-primary/12 inset-ring-1 inset-ring-primary/22",
+        "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-1 data-[state=closed]:duration-150 data-[state=closed]:ease-out data-[state=closed]:fill-mode-forwards motion-reduce:animate-none",
         context.variant === "stacked" ? "basis-auto" : "basis-full",
         context.variant === "compact" ? "py-0.75 pr-0.75 pl-2.5" : "py-1 pr-1 pl-3",
         className,
       )}
       {...props}
       ref={ref}
+      onAnimationEnd={(event) => {
+        props.onAnimationEnd?.(event);
+        if (event.target === event.currentTarget && !visible) setRendered(false);
+      }}
     >
       {children}
     </div>

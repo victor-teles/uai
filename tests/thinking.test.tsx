@@ -25,11 +25,12 @@ test("composes a user-controlled activity disclosure", async () => {
 
   const trigger = screen.getByRole("button", { name: /Work complete/ });
   expect(trigger.getAttribute("aria-expanded")).toBe("false");
-  expect(screen.queryByText("Read the public interface")).toBeNull();
+  expect(screen.getByText("Read the public interface").closest("[inert]")).not.toBeNull();
 
   await user.click(trigger);
 
   expect(trigger.getAttribute("aria-expanded")).toBe("true");
+  expect(screen.getByText("Read the public interface").closest("[inert]")).toBeNull();
   expect(screen.getByRole("log").textContent).toContain("Read the public interface");
   expect(screen.getByText("src/prompt.tsx")).toBeTruthy();
 });

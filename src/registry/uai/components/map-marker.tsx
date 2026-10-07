@@ -35,13 +35,13 @@ const toneClasses =
   "data-[tone=default]:[--marker:var(--foreground)] data-[tone=primary]:[--marker:var(--primary)] data-[tone=success]:[--marker:var(--success)] data-[tone=warning]:[--marker:var(--warning)] data-[tone=destructive]:[--marker:var(--destructive)]";
 
 const mapMarkerVariants = cva(
-  `group/map-marker relative inline-flex cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-[12px]/4 font-medium text-foreground transition-[scale,translate] duration-180 ease-out-quint outline-none hover:z-10 focus-visible:z-10 aria-pressed:z-20 motion-reduce:transition-none ${toneClasses}`,
+  `group/map-marker relative inline-flex cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-[12px]/4 font-medium text-foreground transition-[scale,translate] duration-180 ease-out-quint outline-none hover:z-10 focus-visible:z-10 active:scale-[0.94] aria-pressed:z-20 motion-reduce:transition-none motion-reduce:active:scale-100 ${toneClasses}`,
   {
     variants: {
       variant: {
         pin: "flex-col pb-0.5 hover:-translate-y-0.5 aria-pressed:-translate-y-1 motion-reduce:translate-y-0!",
         dot: "size-6",
-        label: "hover:-translate-y-0.5 motion-reduce:translate-y-0!",
+        label: "hover:-translate-y-0.5 aria-pressed:-translate-y-0.5 motion-reduce:translate-y-0!",
       },
     },
   },
@@ -82,7 +82,7 @@ export function MapMarker({
           <>
             <span
               aria-hidden="true"
-              className="absolute inset-0 rounded-full bg-(--marker)/24 opacity-0 transition-opacity duration-180 group-hover/map-marker:opacity-100 group-aria-pressed/map-marker:animate-ring-pulse group-aria-pressed/map-marker:opacity-100 motion-reduce:animate-none!"
+              className="absolute inset-0 rounded-full bg-(--marker)/24 text-(--marker) opacity-0 transition-opacity duration-180 group-hover/map-marker:opacity-100 group-aria-pressed/map-marker:animate-ring-pulse group-aria-pressed/map-marker:opacity-100 motion-reduce:animate-none!"
             />
             <span className="relative size-3 rounded-full bg-(--marker) shadow-[0_0_0_2px_var(--card),0_2px_6px_oklch(0_0_0/0.3)] transition-[scale] duration-180 ease-out-quint group-focus-visible/map-marker:shadow-[0_0_0_2px_var(--card),0_0_0_4px_var(--ring)] group-aria-pressed/map-marker:scale-125 motion-reduce:transition-none" />
             {children}

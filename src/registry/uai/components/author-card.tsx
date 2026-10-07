@@ -18,7 +18,7 @@ function useAuthor(part: string) {
   return context;
 }
 const actionClass =
-  "transition-[background-color,color,filter,transform] duration-[120ms,120ms,120ms,140ms] ease-[ease-out,ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100";
+  "transition-[background-color,color,filter,scale] duration-[120ms,120ms,120ms,140ms] ease-[ease-out,ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100";
 const mixHover = "hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]";
 function initials(name: string) {
   return name
