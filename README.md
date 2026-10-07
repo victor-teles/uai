@@ -20,6 +20,11 @@ Open `http://localhost:3000` for the overview. Every registry item has its own p
 at `/components/<name>`. Press ⌘K or `/` to search. Generated registry documents are
 available under `/r`.
 
+For AI tools, `/llms.txt` indexes every item, `/llms-full.txt` holds the full text,
+and `/components/<name>.md` serves one item as Markdown with its install command,
+usage example, part tree, and accessibility notes. They are generated from the
+catalog in `src/lib/llms.ts` with Fumadocs' `llms()` helper.
+
 ## Install a registry item locally
 
 Keep the Uai development server running. In a shadcn project, run:
