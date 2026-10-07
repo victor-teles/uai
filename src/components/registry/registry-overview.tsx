@@ -12,7 +12,7 @@ export function RegistryOverview() {
         <p className="uai-overview__pronounce">
           <span lang="pt-BR">Uai</span>
           <span>/waj/</span>
-          <span>sounds like “why”, the Minas Gerais word for surprise</span>
+          <span>sounds like “why”, or “UI” said fast. The Minas Gerais word for surprise</span>
         </p>
         <h1 id="uai-overview-title">Open-code components for websites and web apps.</h1>
         <p>
