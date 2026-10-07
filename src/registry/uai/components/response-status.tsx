@@ -73,7 +73,7 @@ const responseStatusVariants = cva(
 );
 
 const responseStatusActionVariants = cva(
-  "h-7 cursor-pointer gap-1.5 rounded-full px-3 text-[12.5px] text-foreground has-[>svg]:px-3 [transition:background-color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100",
+  "h-7 cursor-pointer gap-1.5 rounded-full px-3 text-[12.5px] text-foreground has-[>svg]:px-3 [transition:background-color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] animate-in duration-200 ease-out-quint fade-in-0 zoom-in-95 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:animate-none motion-reduce:transition-none motion-reduce:active:scale-100",
   {
     variants: {
       variant: {
@@ -202,7 +202,12 @@ export function ResponseStatusIndicator({ children, className, ...props }: Compo
       )}
       {...props}
     >
-      {children ?? icon}
+      <span
+        key={context.status}
+        className="grid place-items-center animate-in duration-200 ease-out-quint fade-in-0 zoom-in-50 motion-reduce:animate-none"
+      >
+        {children ?? icon}
+      </span>
     </span>
   );
 }

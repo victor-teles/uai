@@ -6,6 +6,7 @@ import {
   type ComponentProps,
   createContext,
   type KeyboardEvent,
+  type RefObject,
   useContext,
   useEffect,
   useId,
@@ -51,6 +52,41 @@ function useGallery(part: string) {
   return context;
 }
 const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
+
+type ScrollEdges = { start: boolean; end: boolean; vertical: boolean };
+
+/** Tracks which ends of a scroller hide content, so the edges can fade. */
+function useScrollEdges(ref: RefObject<HTMLElement | null>) {
+  const [edges, setEdges] = useState<ScrollEdges>({ start: false, end: false, vertical: false });
+  useIsomorphicLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    const measure = () => {
+      const vertical = element.scrollHeight - element.clientHeight > 1;
+      const offset = vertical ? element.scrollTop : Math.abs(element.scrollLeft);
+      const room = vertical
+        ? element.scrollHeight - element.clientHeight
+        : element.scrollWidth - element.clientWidth;
+      const next = { start: offset > 1, end: room - offset > 1, vertical };
+      setEdges((previous) =>
+        previous.start === next.start &&
+        previous.end === next.end &&
+        previous.vertical === next.vertical
+          ? previous
+          : next,
+      );
+    };
+    measure();
+    element.addEventListener("scroll", measure, { passive: true });
+    const observer = typeof ResizeObserver === "function" ? new ResizeObserver(measure) : null;
+    observer?.observe(element);
+    return () => {
+      element.removeEventListener("scroll", measure);
+      observer?.disconnect();
+    };
+  }, []);
+  return edges;
+}
 const controlClass =
   "grid size-7 min-w-0 cursor-pointer place-items-center rounded-full border-0 bg-card/84 p-0 text-muted-foreground shadow-[0_0_0_1px_var(--border),0_1px_2px_oklch(0_0_0/0.08)] backdrop-blur-sm transition-[background-color,color,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] hover:bg-accent hover:text-accent-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.94] aria-pressed:bg-accent aria-pressed:text-accent-foreground data-[state=on]:bg-accent data-[state=on]:text-accent-foreground motion-reduce:transition-none motion-reduce:active:scale-100 dark:hover:bg-accent [&_svg:not([class*='size-'])]:size-3.5";
 
@@ -139,10 +175,11 @@ export function ProductGalleryViewport({ children, className, ...props }: Compon
         // biome-ignore lint/a11y/useKeyWithClickEvents: ProductGalleryZoom is the keyboard control.
         // biome-ignore lint/performance/noImgElement: registry source is framework-agnostic.
         <img
+          key={media.value}
           src={media.src}
           alt={media.alt}
           className={cn(
-            "block size-full object-contain transition-[scale] duration-240 ease-out-quint motion-reduce:transition-none",
+            "block size-full animate-in object-contain duration-200 ease-out fade-in-0 motion-reduce:animate-none transition-[scale] duration-240 ease-out-quint motion-reduce:transition-none",
             context.zoomed ? "scale-200 cursor-zoom-out" : "scale-none cursor-zoom-in",
           )}
           draggable={false}
@@ -235,9 +272,10 @@ export function ProductGalleryFullscreen({
           <div className="grid gap-1">
             {/* biome-ignore lint/performance/noImgElement: registry source is framework-agnostic. */}
             <img
+              key={media.value}
               src={media.src}
               alt={media.alt}
-              className="block max-h-[calc(100dvh_-_120px)] w-full rounded-[10px] bg-muted object-contain"
+              className="block max-h-[calc(100dvh_-_120px)] w-full animate-in rounded-[10px] bg-muted object-contain duration-200 ease-out fade-in-0 motion-reduce:animate-none"
             />
             <div className="flex items-center gap-1 py-1 pr-1 pl-2.5">
               <p
@@ -309,6 +347,7 @@ export function ProductGalleryThumbnails({
 }: ComponentProps<"div">) {
   const context = useGallery("ProductGalleryThumbnails");
   const ref = useRef<HTMLDivElement>(null);
+  const edges = useScrollEdges(ref);
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     onKeyDown?.(event);
     const move = MOVES[event.key];
@@ -330,10 +369,15 @@ export function ProductGalleryThumbnails({
       aria-label={label}
       aria-describedby={`${context.id}-position`}
       data-slot="product-gallery-thumbnails"
+      data-overflow-start={edges.start ? "" : undefined}
+      data-overflow-end={edges.end ? "" : undefined}
       className={cn(
         "-m-1 flex min-w-0 overflow-auto p-1 [grid-area:thumbs]",
         context.variant === "compact" ? "gap-1.5" : "gap-2",
         context.variant === "side" && "flex-col max-[560px]:flex-row",
+        edges.vertical
+          ? "data-overflow-start:mask-t-from-[calc(100%-24px)] data-overflow-end:mask-b-from-[calc(100%-24px)]"
+          : "data-overflow-start:mask-l-from-[calc(100%-24px)] data-overflow-end:mask-r-from-[calc(100%-24px)]",
         className,
       )}
       {...props}

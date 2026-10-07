@@ -288,6 +288,8 @@ export function FaqSectionAnswer({ className, children, ...props }: ComponentPro
       data-slot="faq-section-answer"
       className={cn(
         "grid max-w-[64ch] gap-2 pb-4 text-[13px]/5 text-pretty text-muted-foreground",
+        // The text fades with the height keyframe on its parent; onAnimationEnd ignores it by target.
+        "[[data-state=open]>&]:animate-in [[data-state=open]>&]:fade-in-0 [[data-state=open]>&]:duration-200 [[data-state=closed]>&]:animate-out [[data-state=closed]>&]:fade-out-0 [[data-state=closed]>&]:duration-150 motion-reduce:animate-none",
         className,
       )}
       {...props}

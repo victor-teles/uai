@@ -220,7 +220,12 @@ export function PasswordRecoveryProgressItem({
         )}
       >
         <Icon
-          className="size-2.5"
+          key={state === "complete" ? "complete" : "pending"}
+          className={cn(
+            "size-2.5",
+            state === "complete" &&
+              "animate-in fade-in-0 zoom-in-50 duration-200 ease-out-quint motion-reduce:animate-none",
+          )}
           strokeWidth={state === "complete" ? 2.4 : 2}
           aria-hidden="true"
         />
@@ -479,9 +484,17 @@ export function PasswordRecoveryInput({
         onPressedChange={setRevealed}
       >
         {revealed ? (
-          <EyeOff className="size-4" aria-hidden="true" />
+          <EyeOff
+            key="hide"
+            className="size-4 animate-in fade-in-0 zoom-in-75 duration-150 ease-out-quint motion-reduce:animate-none"
+            aria-hidden="true"
+          />
         ) : (
-          <Eye className="size-4" aria-hidden="true" />
+          <Eye
+            key="show"
+            className="size-4 animate-in fade-in-0 zoom-in-75 duration-150 ease-out-quint motion-reduce:animate-none"
+            aria-hidden="true"
+          />
         )}
       </Toggle>
     </div>
@@ -561,7 +574,16 @@ export function PasswordRecoveryPasswordRequirement({
       )}
       {...props}
     >
-      <Icon className="mt-0.5 size-3.5 shrink-0" strokeWidth={met ? 2.2 : 1.6} aria-hidden="true" />
+      <Icon
+        key={met ? "met" : "unmet"}
+        className={cn(
+          "mt-0.5 size-3.5 shrink-0",
+          met &&
+            "animate-in fade-in-0 zoom-in-50 duration-200 ease-out-quint motion-reduce:animate-none",
+        )}
+        strokeWidth={met ? 2.2 : 1.6}
+        aria-hidden="true"
+      />
       <span className="sr-only">{met ? "Met: " : "Not met: "}</span>
       <span>{children}</span>
     </li>
@@ -584,7 +606,7 @@ export function PasswordRecoveryError({
       data-slot="password-recovery-error"
       id={id ?? errorId}
       className={cn(
-        "rounded-[10px] bg-destructive/10 px-3 py-2.5 text-[12px] leading-4 text-[color-mix(in_oklab,var(--destructive)_80%,var(--foreground))] shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--destructive)_24%,transparent)] wrap-anywhere",
+        "rounded-[10px] bg-destructive/10 px-3 py-2.5 text-[12px] leading-4 text-[color-mix(in_oklab,var(--destructive)_80%,var(--foreground))] shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--destructive)_24%,transparent)] wrap-anywhere animate-in fade-in-0 slide-in-from-top-1 duration-200 ease-out-quint motion-reduce:animate-none",
         className,
       )}
       role="alert"

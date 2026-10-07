@@ -36,14 +36,13 @@ const taskListVariants = cva("m-0 w-full list-none p-0 text-foreground", {
   compoundVariants: [
     {
       variant: ["card", "compact"],
-      className:
-        "divide-y divide-border overflow-hidden border bg-card [&>li]:transition-[background-color,opacity,translate] [&>li:hover]:bg-muted/45",
+      className: "divide-y divide-border overflow-hidden border bg-card",
     },
   ],
 });
 
 const taskListItemVariants = cva(
-  "transition-[opacity,translate,background-color] duration-240 ease-out-quint starting:translate-y-1 starting:opacity-0 nth-2:delay-40 nth-3:delay-80 nth-4:delay-120 nth-5:delay-160 nth-6:delay-200 motion-reduce:transition-none [&:last-child>span:first-child]:hidden",
+  "animate-in duration-240 ease-out-quint fill-mode-backwards fade-in-0 slide-in-from-bottom-1 nth-2:[animation-delay:40ms] nth-3:[animation-delay:80ms] nth-4:[animation-delay:120ms] nth-5:[animation-delay:160ms] nth-6:[animation-delay:200ms] motion-reduce:animate-none [&:last-child>span:first-child]:hidden",
   {
     variants: {
       variant: {
@@ -149,10 +148,13 @@ export function TaskListItem({
         aria-hidden="true"
       >
         <StatusIcon
+          key={status}
           strokeWidth={status === "complete" ? 2.5 : 2}
           className={cn(
             compact ? "size-3" : "size-3.5",
             status === "active" && "motion-safe:animate-spin",
+            status === "complete" &&
+              "animate-in duration-200 ease-out-quint fade-in-0 zoom-in-50 motion-reduce:animate-none",
           )}
         />
       </span>
@@ -164,7 +166,11 @@ export function TaskListItem({
           compact ? "min-h-5 px-1.5 text-[11px]/4" : "min-h-5.5 px-2 text-[11.5px]/4",
         )}
       >
-        {statusLabel ?? statusCopy[status]}
+        {status === "active" ? (
+          <span className="shimmer-text">{statusLabel ?? statusCopy[status]}</span>
+        ) : (
+          (statusLabel ?? statusCopy[status])
+        )}
       </Badge>
     </li>
   );

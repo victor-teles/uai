@@ -2,7 +2,16 @@
 
 import { cva } from "class-variance-authority";
 import { ArrowRight } from "lucide-react";
-import { type ComponentProps, createContext, useContext, useId, useState } from "react";
+import {
+  type ComponentProps,
+  createContext,
+  type RefObject,
+  useContext,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -472,6 +481,36 @@ export function ImportWorkflowIssues(props: Omit<StatusBannerProps, "variant">) 
   return <StatusBanner {...props} variant={bannerVariants[context.variant]} />;
 }
 
+type ScrollEdges = { start: boolean; end: boolean };
+
+/** Tracks which ends of a horizontal scroller hide content, so those edges can fade. */
+function useScrollEdges(ref: RefObject<HTMLElement | null>) {
+  const [edges, setEdges] = useState<ScrollEdges>({ start: false, end: false });
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    const measure = () => {
+      const offset = Math.abs(element.scrollLeft);
+      const room = element.scrollWidth - element.clientWidth;
+      const start = offset > 1;
+      const end = room - offset > 1;
+      setEdges((previous) =>
+        previous.start === start && previous.end === end ? previous : { start, end },
+      );
+    };
+    measure();
+    element.addEventListener("scroll", measure, { passive: true });
+    const observer = typeof ResizeObserver === "function" ? new ResizeObserver(measure) : null;
+    observer?.observe(element);
+    for (const child of element.children) observer?.observe(child);
+    return () => {
+      element.removeEventListener("scroll", measure);
+      observer?.disconnect();
+    };
+  }, [ref]);
+  return edges;
+}
+
 /** Scrollable preview of parsed rows. The wrapper is focusable so keyboard users can scroll it. */
 export function ImportWorkflowTable({
   "aria-label": label = "Import preview",
@@ -479,27 +518,36 @@ export function ImportWorkflowTable({
   ...props
 }: ComponentProps<"table">) {
   const context = useWorkflow("ImportWorkflowTable");
+  const ref = useRef<HTMLElement>(null);
+  const edges = useScrollEdges(ref);
   return (
-    <section
-      aria-label={label}
-      // biome-ignore lint/a11y/noNoninteractiveTabindex: a scrollable region must be reachable by keyboard.
-      tabIndex={0}
+    // The frame carries the border and focus ring so the edge fade masks only the rows.
+    <div
       className={cn(
-        "min-w-0 overflow-x-auto border px-1.5 py-0.5 [&>[data-slot=table-container]]:overflow-visible",
+        "min-w-0 overflow-hidden border has-[>section:focus-visible]:outline-solid has-[>section:focus-visible]:outline-2 has-[>section:focus-visible]:outline-offset-2 has-[>section:focus-visible]:outline-ring",
         context.variant === "compact" ? "rounded-xl" : "rounded-[14px]",
-        focusRing,
       )}
     >
-      <Table
-        data-slot="import-workflow-table"
-        className={cn(
-          "w-full border-collapse",
-          context.variant === "compact" ? "text-[12px]/[18px]" : "text-[12.5px]/[18px]",
-          className,
-        )}
-        {...props}
-      />
-    </section>
+      <section
+        ref={ref}
+        aria-label={label}
+        // biome-ignore lint/a11y/noNoninteractiveTabindex: a scrollable region must be reachable by keyboard.
+        tabIndex={0}
+        data-overflow-start={edges.start ? "" : undefined}
+        data-overflow-end={edges.end ? "" : undefined}
+        className="min-w-0 overflow-x-auto px-1.5 py-0.5 outline-none data-overflow-start:mask-l-from-[calc(100%-24px)] data-overflow-end:mask-r-from-[calc(100%-24px)] [&>[data-slot=table-container]]:overflow-visible"
+      >
+        <Table
+          data-slot="import-workflow-table"
+          className={cn(
+            "w-full border-collapse",
+            context.variant === "compact" ? "text-[12px]/[18px]" : "text-[12.5px]/[18px]",
+            className,
+          )}
+          {...props}
+        />
+      </section>
+    </div>
   );
 }
 

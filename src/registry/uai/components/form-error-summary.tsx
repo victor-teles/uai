@@ -46,7 +46,11 @@ export function FormErrorSummary({
         role="alert"
         data-slot="form-error-summary"
         data-variant={variant}
-        className={cn(formErrorSummaryVariants({ variant }), className)}
+        className={cn(
+          formErrorSummaryVariants({ variant }),
+          "animate-in fade-in-0 slide-in-from-top-1 duration-240 ease-out-quint motion-reduce:animate-none",
+          className,
+        )}
         {...props}
         ref={ref}
         tabIndex={-1}

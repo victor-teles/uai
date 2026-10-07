@@ -32,7 +32,10 @@ test("composes ordered tasks with visible status text", () => {
   expect(screen.getAllByRole("listitem")).toHaveLength(2);
   expect(screen.getByText("Complete")).toBeTruthy();
   expect(screen.getByText("Complete").className).toContain("bg-success/14");
-  expect(screen.getByText("In progress").className).toContain("text-foreground");
+  expect(screen.getByText("In progress").className).toContain("shimmer-text");
+  expect(screen.getByText("In progress").closest('[data-slot="badge"]')?.className).toContain(
+    "text-foreground",
+  );
   expect(screen.getByText("In progress")).toBeTruthy();
 });
 

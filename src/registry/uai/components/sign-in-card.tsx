@@ -404,9 +404,17 @@ export function SignInCardInput({
         onPressedChange={setRevealed}
       >
         {revealed ? (
-          <EyeOff className="size-4" aria-hidden="true" />
+          <EyeOff
+            key="hide"
+            className="size-4 animate-in fade-in-0 zoom-in-75 duration-150 ease-out-quint motion-reduce:animate-none"
+            aria-hidden="true"
+          />
         ) : (
-          <Eye className="size-4" aria-hidden="true" />
+          <Eye
+            key="show"
+            className="size-4 animate-in fade-in-0 zoom-in-75 duration-150 ease-out-quint motion-reduce:animate-none"
+            aria-hidden="true"
+          />
         )}
       </Toggle>
     </div>
@@ -474,7 +482,7 @@ export function SignInCardError({ children, className, id, ...props }: SignInCar
       data-slot="sign-in-card-error"
       id={id ?? errorId}
       className={cn(
-        "rounded-[10px] bg-destructive/10 px-3 py-2.5 text-[12px] leading-4 text-[color-mix(in_oklab,var(--destructive)_80%,var(--foreground))] shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--destructive)_24%,transparent)] wrap-anywhere",
+        "rounded-[10px] bg-destructive/10 px-3 py-2.5 text-[12px] leading-4 text-[color-mix(in_oklab,var(--destructive)_80%,var(--foreground))] shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--destructive)_24%,transparent)] wrap-anywhere animate-in fade-in-0 slide-in-from-top-1 duration-200 ease-out-quint motion-reduce:animate-none",
         className,
       )}
       role="alert"

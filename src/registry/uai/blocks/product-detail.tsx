@@ -1,13 +1,14 @@
 "use client";
 
 import { cva } from "class-variance-authority";
-import { LoaderCircle } from "lucide-react";
+import { Check, LoaderCircle } from "lucide-react";
 import {
   type ComponentProps,
   createContext,
   type FormEvent,
   type ReactNode,
   useContext,
+  useEffect,
   useId,
   useState,
 } from "react";
@@ -40,6 +41,7 @@ type DetailContext = {
   id: string;
   variant: ProductDetailVariant;
   pending: boolean;
+  added: boolean;
   submit: (event: FormEvent<HTMLFormElement>) => void;
 };
 const Context = createContext<DetailContext | null>(null);
@@ -106,19 +108,29 @@ export function ProductDetail({
 }: ProductDetailProps) {
   const id = useId();
   const [pending, setPending] = useState(false);
+  const [added, setAdded] = useState(false);
+  useEffect(() => {
+    if (!added) return;
+    const timer = window.setTimeout(() => setAdded(false), 1400);
+    return () => window.clearTimeout(timer);
+  }, [added]);
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (pending) return;
     const result = onAddToCart?.(new FormData(event.currentTarget));
     if (!result) return;
     setPending(true);
+    setAdded(false);
     result.then(
-      () => setPending(false),
+      () => {
+        setPending(false);
+        setAdded(true);
+      },
       () => setPending(false),
     );
   };
   return (
-    <Context.Provider value={{ id, variant, pending, submit }}>
+    <Context.Provider value={{ id, variant, pending, added, submit }}>
       <section
         aria-labelledby={`${id}-title`}
         data-slot="product-detail"
@@ -326,7 +338,7 @@ export function ProductDetailOptionValue({
       data-slot="product-detail-option-value"
       className={cn(
         "relative inline-flex min-h-8 cursor-pointer items-center gap-2 rounded-full bg-secondary text-[13px] font-medium text-muted-foreground",
-        "transition-[background-color,box-shadow,color] duration-120 ease-out hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] motion-reduce:transition-none",
+        "transition-[background-color,box-shadow,color,scale] duration-[120ms,120ms,120ms,140ms] ease-[ease-out,ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] active:scale-[0.97] has-[input:disabled]:active:scale-100 motion-reduce:transition-none motion-reduce:active:scale-100",
         "has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-ring",
         "has-[input:checked]:bg-card has-[input:checked]:text-foreground has-[input:checked]:shadow-[inset_0_0_0_1.5px_var(--foreground)]",
         "has-[input:disabled]:cursor-not-allowed has-[input:disabled]:bg-secondary has-[input:disabled]:line-through has-[input:disabled]:opacity-45",
@@ -407,11 +419,14 @@ export function ProductDetailActions({ className, ...props }: ComponentProps<"di
 export type ProductDetailAddToCartProps = ComponentProps<"button"> & {
   /** Label while onAddToCart is pending. */
   pendingLabel?: ReactNode;
+  /** Label shown briefly after onAddToCart resolves. */
+  addedLabel?: ReactNode;
 };
 
 /** Submits the purchase form as the block's single accent-filled action. */
 export function ProductDetailAddToCart({
   pendingLabel = "Adding…",
+  addedLabel = "Added",
   children = "Add to cart",
   disabled,
   className,
@@ -419,6 +434,7 @@ export function ProductDetailAddToCart({
 }: ProductDetailAddToCartProps) {
   const context = useDetail("ProductDetailAddToCart");
   const blocked = disabled || context.pending;
+  const state = context.pending ? "pending" : context.added ? "added" : "idle";
   return (
     <Button
       data-slot="product-detail-add-to-cart"
@@ -439,17 +455,30 @@ export function ProductDetailAddToCart({
       data-kind="primary"
     >
       {context.pending ? (
-        <>
-          <LoaderCircle
-            size={14}
-            aria-hidden="true"
-            className="size-3.5 animate-[spin_900ms_linear_infinite] motion-reduce:animate-none"
-          />
+        <LoaderCircle
+          size={14}
+          aria-hidden="true"
+          className="size-3.5 animate-[spin_900ms_linear_infinite] motion-reduce:animate-none"
+        />
+      ) : context.added ? (
+        <Check
+          size={14}
+          aria-hidden="true"
+          className="size-3.5 animate-in duration-200 ease-out-quint fade-in-0 zoom-in-50 motion-reduce:animate-none"
+        />
+      ) : null}
+      {/* Labels share one cell, so the button keeps its width as the state changes. */}
+      <span className="grid [&>*]:[grid-area:1/1]">
+        <span className={cn(state !== "idle" && "invisible")} aria-hidden={state !== "idle"}>
+          {children}
+        </span>
+        <span className={cn(state !== "pending" && "invisible")} aria-hidden={state !== "pending"}>
           {pendingLabel}
-        </>
-      ) : (
-        children
-      )}
+        </span>
+        <span className={cn(state !== "added" && "invisible")} aria-hidden={state !== "added"}>
+          {addedLabel}
+        </span>
+      </span>
     </Button>
   );
 }

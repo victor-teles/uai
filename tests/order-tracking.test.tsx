@@ -90,14 +90,14 @@ test("discloses earlier events with the keyboard", async () => {
   const toggle = screen.getByRole("button", { name: "Show 1 earlier event" });
   expect(toggle.getAttribute("aria-expanded")).toBe("false");
   const list = document.getElementById(toggle.getAttribute("aria-controls") ?? "");
-  expect(list?.hidden).toBe(true);
+  expect(list?.hasAttribute("inert")).toBe(true);
   toggle.focus();
   await user.keyboard("{Enter}");
   expect(toggle.getAttribute("aria-expanded")).toBe("true");
-  expect(list?.hidden).toBe(false);
+  expect(list?.hasAttribute("inert")).toBe(false);
   expect(toggle.textContent).toBe("Hide earlier events");
   await user.keyboard(" ");
-  expect(list?.hidden).toBe(true);
+  expect(list?.hasAttribute("inert")).toBe(true);
 });
 
 test("renders every variant and guards regions", () => {

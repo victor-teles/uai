@@ -1,5 +1,5 @@
 import { expect, mock, test } from "bun:test";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
   UNSAVED_CHANGES_BAR_VARIANTS,
@@ -49,6 +49,22 @@ test("guards duplicate actions while saving and keeps failed changes available",
   expect(save).toHaveBeenCalledTimes(1);
   view.rerender(<Fixture dirty={false} />);
   expect(screen.queryByRole("region")).toBeNull();
+  view.unmount();
+});
+test("confirms a successful save before leaving", async () => {
+  const view = render(<Fixture dirty status="saving" />);
+  view.rerender(<Fixture dirty={false} status="idle" />);
+  expect(screen.getByRole("status").textContent).toContain("Changes saved.");
+  const saved = screen.getByRole("button", { name: "Saved" }) as HTMLButtonElement;
+  expect(saved.disabled).toBe(true);
+  expect(saved.className).toContain("bg-success/14");
+  expect((screen.getByRole("button", { name: "Discard" }) as HTMLButtonElement).disabled).toBe(
+    true,
+  );
+  const section = () => view.container.querySelector("section")?.dataset.state;
+  expect(section()).toBe("saved");
+  await waitFor(() => expect(section()).toBe("closing"), { timeout: 2000 });
+  await waitFor(() => expect(section()).toBeUndefined());
   view.unmount();
 });
 test("warns on native navigation only while dirty and cleans up after unmount", () => {

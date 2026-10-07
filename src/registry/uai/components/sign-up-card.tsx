@@ -215,7 +215,7 @@ export function SignUpCardProvider({
       data-slot="sign-up-card-provider"
       variant="secondary"
       className={cn(
-        "w-full gap-2 rounded-full border-0 px-3.5 text-foreground transition-[background-color,transform] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 motion-reduce:transform-none motion-reduce:transition-none has-[>svg]:px-3.5",
+        "w-full gap-2 rounded-full border-0 px-3.5 text-foreground transition-[background-color,scale] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 motion-reduce:transition-none motion-reduce:active:scale-100 has-[>svg]:px-3.5",
         chrome.controlClass,
         className,
       )}
@@ -385,7 +385,19 @@ export function SignUpCardInput({
         pressed={revealed}
         onPressedChange={setRevealed}
       >
-        {revealed ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+        {revealed ? (
+          <EyeOff
+            key="hide"
+            className="animate-in fade-in-0 zoom-in-75 duration-150 ease-out-quint motion-reduce:animate-none"
+            aria-hidden="true"
+          />
+        ) : (
+          <Eye
+            key="show"
+            className="animate-in fade-in-0 zoom-in-75 duration-150 ease-out-quint motion-reduce:animate-none"
+            aria-hidden="true"
+          />
+        )}
       </Toggle>
     </div>
   );
@@ -462,7 +474,16 @@ export function SignUpCardPasswordRequirement({
       )}
       {...props}
     >
-      <Icon className="mt-0.5 size-3.5 shrink-0" strokeWidth={met ? 2.2 : 1.6} aria-hidden="true" />
+      <Icon
+        key={met ? "met" : "unmet"}
+        className={cn(
+          "mt-0.5 size-3.5 shrink-0",
+          met &&
+            "animate-in fade-in-0 zoom-in-50 duration-200 ease-out-quint motion-reduce:animate-none",
+        )}
+        strokeWidth={met ? 2.2 : 1.6}
+        aria-hidden="true"
+      />
       <span className="sr-only">{met ? "Met: " : "Not met: "}</span>
       <span>{children}</span>
     </li>
@@ -535,7 +556,7 @@ export function SignUpCardError({ children, className, id, ...props }: SignUpCar
       id={id ?? errorId}
       data-slot="sign-up-card-error"
       className={cn(
-        "rounded-[10px] bg-destructive/10 px-3 py-2.5 text-[12px] leading-4 text-[color-mix(in_oklab,var(--destructive)_80%,var(--foreground))] inset-ring inset-ring-destructive/24 wrap-anywhere",
+        "rounded-[10px] bg-destructive/10 px-3 py-2.5 text-[12px] leading-4 text-[color-mix(in_oklab,var(--destructive)_80%,var(--foreground))] inset-ring inset-ring-destructive/24 wrap-anywhere animate-in fade-in-0 slide-in-from-top-1 duration-200 ease-out-quint motion-reduce:animate-none",
         className,
       )}
       role="alert"
@@ -560,7 +581,7 @@ export function SignUpCardSubmit({
     <Button
       data-slot="sign-up-card-submit"
       className={cn(
-        "w-full gap-2 rounded-full border-0 px-4 transition-[filter,transform] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-primary hover:brightness-108 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100 motion-reduce:transform-none motion-reduce:transition-none has-[>svg]:px-4",
+        "w-full gap-2 rounded-full border-0 px-4 transition-[filter,scale] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-primary hover:brightness-108 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100 motion-reduce:transition-none motion-reduce:active:scale-100 has-[>svg]:px-4",
         chrome.controlClass,
         className,
       )}

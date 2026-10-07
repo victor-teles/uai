@@ -98,7 +98,10 @@ export function FileUpload({
           {errors.map((error) => (
             <p
               key={`${error.file.name}-${error.file.size}-${error.file.lastModified}`}
-              className={cn("m-0 text-xs/4 wrap-anywhere", dangerText)}
+              className={cn(
+                "m-0 animate-in text-xs/4 wrap-anywhere duration-200 ease-out-quint fade-in-0 slide-in-from-top-1 motion-reduce:animate-none",
+                dangerText,
+              )}
             >
               {error.file.name}: {error.reason}
             </p>

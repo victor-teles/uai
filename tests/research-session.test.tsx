@@ -95,11 +95,11 @@ test("toggles search activity with the keyboard", async () => {
   render(<Fixture />);
   const trigger = screen.getByRole("button", { name: /Searching/ });
   expect(trigger.getAttribute("aria-expanded")).toBe("true");
-  expect(screen.getByRole("log")).toBeTruthy();
+  expect(screen.getByRole("log").closest("[inert]")).toBeNull();
   trigger.focus();
   await user.keyboard("{Enter}");
   expect(trigger.getAttribute("aria-expanded")).toBe("false");
-  expect(screen.queryByRole("log")).toBeNull();
+  expect(screen.getByRole("log").closest("[inert]")).not.toBeNull();
 });
 
 test("maps each layout onto its parts and guards them", () => {

@@ -4,10 +4,12 @@ import { cva } from "class-variance-authority";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import {
   type ComponentProps,
+  type CSSProperties,
   createContext,
   useContext,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -221,7 +223,7 @@ export function DocumentationPageActions({
 
 type ActionStyleProps = { emphasis?: "primary" | "secondary" };
 const documentationPageActionVariants = cva(
-  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 px-3 has-[>svg]:px-3 text-[12.5px] font-medium whitespace-nowrap no-underline [transition:background-color_120ms_ease-out,filter_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] py-0 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:[transform:scale(0.97)] motion-reduce:transition-none motion-reduce:active:[transform:none] [&_svg:not([class*='size-'])]:size-3.5",
+  "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 px-3 has-[>svg]:px-3 text-[12.5px] font-medium whitespace-nowrap no-underline transition-[background-color,filter,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] py-0 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 [&_svg:not([class*='size-'])]:size-3.5",
   {
     variants: {
       emphasis: {
@@ -325,7 +327,7 @@ export function DocumentationPageSectionTitle({ className, ...props }: Component
   return (
     <h2
       data-slot="documentation-page-section-title"
-      className={cn("m-0 text-[17px]/6 font-semibold tracking-[-0.01em]", className)}
+      className={cn("m-0 text-[17px]/6 font-medium tracking-[-0.01em]", className)}
       {...props}
       id={id}
     />
@@ -403,13 +405,51 @@ export function DocumentationPageTocTitle({ className, ...props }: ComponentProp
   );
 }
 
-export function DocumentationPageTocList({ className, ...props }: ComponentProps<"ul">) {
+const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
+
+export function DocumentationPageTocList({ className, children, ...props }: ComponentProps<"ul">) {
+  const { activeSection } = useDocs("DocumentationPageTocList");
+  const ref = useRef<HTMLUListElement>(null);
+  const [marker, setMarker] = useState<{ y: number; height: number }>();
+  useIsomorphicLayoutEffect(() => {
+    const list = ref.current;
+    if (!list) return;
+    const measure = () => {
+      const active = list.querySelector<HTMLElement>(
+        "[data-slot=documentation-page-toc-item][data-active]",
+      );
+      if (!active || active.offsetHeight === 0) return setMarker(undefined);
+      setMarker({ y: active.offsetTop, height: active.offsetHeight });
+    };
+    measure();
+    if (typeof ResizeObserver !== "function") return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(list);
+    return () => observer.disconnect();
+  }, [activeSection]);
+  // One measured marker (a pseudo-element, so the list keeps only <li> children) slides to the
+  // current link; until it is measured the link paints its own border.
+  const style = marker
+    ? ({
+        "--toc-marker-y": `${marker.y}px`,
+        "--toc-marker-height": `${marker.height}px`,
+      } as CSSProperties)
+    : undefined;
   return (
     <ul
+      ref={ref}
       data-slot="documentation-page-toc-list"
-      className={cn("m-0 grid list-none gap-0 border-s p-0", className)}
+      className={cn(
+        "group/toc relative m-0 grid list-none gap-0 border-s p-0",
+        "before:pointer-events-none before:absolute before:top-0 before:-start-px before:h-(--toc-marker-height) before:w-px before:translate-y-(--toc-marker-y) before:bg-foreground before:opacity-0 before:transition-[translate,height] before:duration-200 before:ease-out-quint data-ready:before:opacity-100 motion-reduce:before:transition-none",
+        className,
+      )}
       {...props}
-    />
+      style={{ ...props.style, ...style }}
+      data-ready={marker ? "" : undefined}
+    >
+      {children}
+    </ul>
   );
 }
 
@@ -434,10 +474,10 @@ export function DocumentationPageTocItem({
       <a
         data-slot="documentation-page-toc-item"
         className={cn(
-          "-ms-px block min-w-0 border-s py-1 pr-2 text-[12.5px]/4 no-underline wrap-anywhere [transition:color_120ms_ease-out,border-color_180ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none",
+          "-ms-px block min-w-0 border-s py-1 pr-2 text-[12.5px]/4 no-underline wrap-anywhere transition-[color] duration-120 ease-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none",
           level === 3 ? "pl-[22px]" : "pl-3",
           active
-            ? "border-s-foreground font-medium text-foreground"
+            ? "border-s-foreground font-medium text-foreground group-data-ready/toc:border-s-transparent"
             : "border-s-transparent font-normal text-subtle-foreground hover:text-foreground",
           className,
         )}

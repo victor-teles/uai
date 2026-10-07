@@ -2,17 +2,8 @@
 
 import { cva } from "class-variance-authority";
 import { ChevronRight } from "lucide-react";
-import {
-  type ComponentProps,
-  createContext,
-  useContext,
-  useEffect,
-  useId,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { type ComponentProps, createContext, useContext, useId, useState } from "react";
+import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/uai-utils";
 
 export const AUDIT_LOG_VARIANTS = ["card", "timeline", "compact"] as const;
@@ -26,8 +17,6 @@ function useLog(part: string) {
   if (!context) throw new Error(`${part} must be used within AuditLog`);
   return context;
 }
-const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
-const easeOut = "cubic-bezier(0.23, 1, 0.32, 1)";
 const auditLogVariants = cva("grid min-w-0 rounded-[14px] text-[13px]/[18px] text-foreground", {
   variants: {
     variant: {
@@ -190,7 +179,7 @@ export function AuditLogEventSummary({ className, children, ...props }: Componen
         aria-hidden="true"
         className={cn(
           "size-3.5",
-          "shrink-0 self-center text-subtle-foreground transition-[rotate] duration-180 ease-out-quint",
+          "shrink-0 self-center text-subtle-foreground transition-[rotate] duration-180 ease-out-quint motion-reduce:transition-none",
           event.open && "rotate-90",
         )}
       />
@@ -242,43 +231,33 @@ export function AuditLogTimestamp({ className, ...props }: ComponentProps<"time"
 export function AuditLogEventDetails({ className, ...props }: ComponentProps<"dl">) {
   const log = useLog("AuditLogEventDetails");
   const event = useEvent("AuditLogEventDetails");
-  const ref = useRef<HTMLDListElement>(null);
-  const wasOpen = useRef(event.open);
-  // Fade the details in under the summary when the event expands.
-  useIsomorphicLayoutEffect(() => {
-    const opened = event.open && !wasOpen.current;
-    wasOpen.current = event.open;
-    const details = ref.current;
-    if (!opened || !details || typeof details.animate !== "function") return;
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
-    details.animate(
-      [
-        { opacity: 0, transform: "translateY(-4px)" },
-        { opacity: 1, transform: "none" },
-      ],
-      { duration: 220, easing: easeOut },
-    );
-  }, [event.open]);
   const compact = log.variant === "compact";
   return (
-    // Details stay mounted while closed so `aria-controls` always points at an element.
-    <CollapsibleContent asChild forceMount>
-      <dl
-        data-slot="audit-log-event-details"
-        className={cn(
-          "grid-cols-[minmax(88px,max-content)_minmax(0,1fr)] gap-x-4 gap-y-1.5 bg-background text-xs/4 shadow-[inset_0_0_0_1px_var(--border)]",
-          event.open ? "grid" : "hidden",
-          compact
-            ? "mt-0 mr-0 mb-1 ml-6.5 rounded-lg px-2.5 py-2"
-            : "mt-0 mr-0 mb-2 ml-7 rounded-[10px] px-3 py-2.5",
-          className,
-        )}
-        {...props}
-        ref={ref}
-        id={`${event.id}-details`}
-        hidden={!event.open}
-      />
-    </CollapsibleContent>
+    // Details stay mounted while closed so `aria-controls` always points at an element, and
+    // the row height eases open through `grid-template-rows`. Closed details are inert.
+    <div
+      className={cn(
+        "grid transition-[grid-template-rows,opacity] duration-300 ease-out-quint motion-reduce:transition-none",
+        event.open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+      )}
+    >
+      <div className="min-h-0 overflow-hidden">
+        <dl
+          data-slot="audit-log-event-details"
+          data-state={event.open ? "open" : "closed"}
+          className={cn(
+            "grid grid-cols-[minmax(88px,max-content)_minmax(0,1fr)] gap-x-4 gap-y-1.5 bg-background text-xs/4 shadow-[inset_0_0_0_1px_var(--border)]",
+            compact
+              ? "mt-0 mr-0 mb-1 ml-6.5 rounded-lg px-2.5 py-2"
+              : "mt-0 mr-0 mb-2 ml-7 rounded-[10px] px-3 py-2.5",
+            className,
+          )}
+          {...props}
+          id={`${event.id}-details`}
+          inert={!event.open}
+        />
+      </div>
+    </div>
   );
 }
 

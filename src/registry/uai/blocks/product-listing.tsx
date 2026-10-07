@@ -2,7 +2,18 @@
 
 import { cva } from "class-variance-authority";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { type ComponentProps, createContext, type ReactNode, useContext, useId } from "react";
+import {
+  type ComponentProps,
+  createContext,
+  type ReactNode,
+  type RefObject,
+  useContext,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -22,6 +33,37 @@ import { cn } from "@/lib/uai-utils";
 export const PRODUCT_LISTING_VARIANTS = ["grid", "sidebar", "list"] as const;
 export type ProductListingVariant = (typeof PRODUCT_LISTING_VARIANTS)[number];
 export type ProductListingProps = ComponentProps<"section"> & { variant?: ProductListingVariant };
+
+const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
+
+type ScrollEdges = { start: boolean; end: boolean };
+
+/** Tracks which ends of a horizontal scroller hide content, so the edges can fade. */
+function useScrollEdges(ref: RefObject<HTMLElement | null>) {
+  const [edges, setEdges] = useState<ScrollEdges>({ start: false, end: false });
+  useIsomorphicLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    const measure = () => {
+      const offset = Math.abs(element.scrollLeft);
+      const room = element.scrollWidth - element.clientWidth;
+      const start = offset > 1;
+      const end = room - offset > 1;
+      setEdges((previous) =>
+        previous.start === start && previous.end === end ? previous : { start, end },
+      );
+    };
+    measure();
+    element.addEventListener("scroll", measure, { passive: true });
+    const observer = typeof ResizeObserver === "function" ? new ResizeObserver(measure) : null;
+    observer?.observe(element);
+    return () => {
+      element.removeEventListener("scroll", measure);
+      observer?.disconnect();
+    };
+  }, []);
+  return edges;
+}
 
 type ListingContext = { id: string; variant: ProductListingVariant };
 const Context = createContext<ListingContext | null>(null);
@@ -118,6 +160,8 @@ export function ProductListingCategories({
   ...props
 }: ComponentProps<"nav">) {
   useListing("ProductListingCategories");
+  const ref = useRef<HTMLUListElement>(null);
+  const edges = useScrollEdges(ref);
   return (
     <nav
       aria-label={ariaLabel}
@@ -125,7 +169,14 @@ export function ProductListingCategories({
       className={cn("min-w-0", className)}
       {...props}
     >
-      <ul className="m-0 flex list-none gap-0.5 overflow-x-auto p-0.5">{children}</ul>
+      <ul
+        ref={ref}
+        data-overflow-start={edges.start ? "" : undefined}
+        data-overflow-end={edges.end ? "" : undefined}
+        className="m-0 flex list-none gap-0.5 overflow-x-auto p-0.5 data-overflow-start:mask-l-from-[calc(100%-24px)] data-overflow-end:mask-r-from-[calc(100%-24px)]"
+      >
+        {children}
+      </ul>
     </nav>
   );
 }

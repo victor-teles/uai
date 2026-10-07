@@ -271,11 +271,22 @@ export function DateRangePickerCalendar({
   const [focused, setFocused] = useState(() =>
     clampDate(context.value.start || dateKey(new Date()), context.min, context.max),
   );
-  const [month, setMonth] = useState(focused.slice(0, 7));
+  // `direction` drives the month slide: 1 forward, -1 backward, 0 on first render.
+  const [view, setView] = useState({ month: focused.slice(0, 7), direction: 0 });
+  const month = view.month;
+  const setMonth = (next: string) =>
+    setView((current) =>
+      next === current.month ? current : { month: next, direction: next > current.month ? 1 : -1 },
+    );
   useEffect(() => {
     if (context.value.start && inBounds(context.value.start, context.min, context.max)) {
-      setFocused(context.value.start);
-      setMonth(context.value.start.slice(0, 7));
+      const start = context.value.start;
+      setFocused(start);
+      setView((current) =>
+        start.slice(0, 7) === current.month
+          ? current
+          : { month: start.slice(0, 7), direction: start.slice(0, 7) > current.month ? 1 : -1 },
+      );
     }
   }, [context.value.start, context.min, context.max]);
   const first = parseDate(`${month}-01`);
@@ -348,7 +359,15 @@ export function DateRangePickerCalendar({
             ))}
           </tr>
         </thead>
-        <tbody>
+        <tbody
+          key={month}
+          className={cn(
+            view.direction !== 0 &&
+              "animate-in fade-in-0 duration-200 ease-out-quint motion-reduce:animate-none",
+            view.direction > 0 && "slide-in-from-right-2",
+            view.direction < 0 && "slide-in-from-left-2",
+          )}
+        >
           {Array.from({ length: 6 }, (_, week) => (
             <tr key={moveDate(gridStart, week * 7)}>
               {Array.from({ length: 7 }, (_, day) => {
@@ -383,7 +402,7 @@ export function DateRangePickerCalendar({
                         endpoint
                           ? "bg-primary font-medium text-primary-foreground"
                           : cn(
-                              "font-normal aria-[current=date]:font-semibold aria-[current=date]:text-primary",
+                              "font-normal aria-[current=date]:font-medium aria-[current=date]:text-primary",
                               selected
                                 ? "bg-primary/16 enabled:hover:bg-primary/26"
                                 : "bg-transparent enabled:hover:bg-accent",
@@ -432,8 +451,14 @@ export function DateRangePickerCalendar({
   );
 }
 const monthButton = cn(ghostButton, "grid size-7 place-items-center rounded-lg p-0");
-export function DateRangePickerSummary({ className, ...props }: ComponentProps<"p">) {
+export function DateRangePickerSummary({
+  locale = "en-US",
+  className,
+  ...props
+}: ComponentProps<"p"> & { locale?: string }) {
   const context = useRange();
+  const formatter = new Intl.DateTimeFormat(locale, { dateStyle: "medium" });
+  const format = (value: string) => formatter.format(parseDate(value));
   return (
     <p
       role="status"
@@ -444,8 +469,8 @@ export function DateRangePickerSummary({ className, ...props }: ComponentProps<"
       {!context.value.start
         ? "Choose a start date."
         : !context.value.end
-          ? `${context.value.start} selected. Choose an end date.`
-          : `${context.value.start} to ${context.value.end}`}
+          ? `${format(context.value.start)} selected. Choose an end date.`
+          : `${format(context.value.start)} to ${format(context.value.end)}`}
     </p>
   );
 }

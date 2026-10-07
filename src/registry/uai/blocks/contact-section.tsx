@@ -48,7 +48,7 @@ const contactSectionVariants = cva("@container min-w-0 text-[13px]/[18px] text-f
 });
 
 const actionClass =
-  "justify-self-start rounded-full border-0 py-0 [transition:filter_120ms_ease-out,box-shadow_120ms_ease-out,background-color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:not-aria-disabled:scale-[0.97] motion-reduce:transition-none motion-reduce:active:not-aria-disabled:scale-100";
+  "justify-self-start rounded-full border-0 py-0 transition-[filter,box-shadow,background-color,scale] duration-[120ms,120ms,120ms,140ms] ease-[ease-out,ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:not-aria-disabled:scale-[0.97] motion-reduce:transition-none motion-reduce:active:not-aria-disabled:scale-100";
 
 /** Contact options, availability, a message form with its states, and response expectations. */
 export function ContactSection({
@@ -353,11 +353,24 @@ export function ContactSectionSubmit({
         onClick?.(event);
       }}
     >
-      {pending ? (
-        <span className="shimmer-text motion-reduce:text-muted-foreground">{pendingLabel}</span>
-      ) : (
-        children
-      )}
+      {/* Both labels share one grid cell so the button keeps its width while sending. */}
+      <span className="grid *:[grid-area:1/1]">
+        <span
+          aria-hidden={pending || undefined}
+          className={cn("inline-flex items-center justify-center gap-1.5", pending && "invisible")}
+        >
+          {children}
+        </span>
+        <span
+          aria-hidden={!pending || undefined}
+          className={cn(
+            "shimmer-text text-center motion-reduce:text-muted-foreground",
+            !pending && "invisible",
+          )}
+        >
+          {pendingLabel}
+        </span>
+      </span>
     </Button>
   );
 }

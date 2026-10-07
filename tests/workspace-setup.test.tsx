@@ -123,6 +123,9 @@ test("validates on submit, focuses the first invalid field, and sends values", a
   await waitFor(() =>
     expect(screen.getByRole("status").textContent).toContain("Workspace created"),
   );
+  const created = screen.getByRole("button", { name: "Created" }) as HTMLButtonElement;
+  expect(created.disabled).toBe(true);
+  expect(created.className).toContain("disabled:bg-success/14");
 });
 
 test("shows creation failures, renders every variant, and guards its regions", async () => {

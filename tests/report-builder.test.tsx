@@ -102,7 +102,25 @@ test("renders the chart as a labelled list with text values", () => {
   expect(bars[0]?.textContent).toBe("North America$400k");
   expect(bars[1]?.textContent).toBe("Europe100");
   const fill = bars[1]?.querySelector("[aria-hidden] > span") as HTMLElement;
-  expect(fill.style.width).toBe("25%");
+  expect(fill.style.getPropertyValue("--fill-offset")).toBe("-75%");
+});
+
+test("styles uncontrolled options from the live input state", async () => {
+  const user = userEvent.setup();
+  render(
+    <ReportBuilder>
+      <ReportBuilderOptions>
+        <ReportBuilderOption name="metric">Revenue</ReportBuilderOption>
+      </ReportBuilderOptions>
+    </ReportBuilder>,
+  );
+  const revenue = screen.getByRole("checkbox", { name: "Revenue" }) as HTMLInputElement;
+  const label = revenue.closest("label");
+  expect(label?.className).toContain("has-checked:bg-");
+  expect(label?.className).not.toContain(" bg-[color-mix");
+  await user.click(revenue);
+  expect(revenue.checked).toBe(true);
+  expect(label?.matches(":has(:checked)")).toBe(true);
 });
 
 test("renders every layout variant and guards its parts", () => {

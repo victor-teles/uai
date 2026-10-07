@@ -409,6 +409,8 @@ export function ResourceManagerInspector({ className, ...props }: ComponentProps
   const context = useManager("ResourceManagerInspector");
   return (
     <section
+      // Remount per record so the enter fade replays when the selection changes.
+      key={context.value}
       aria-labelledby={`${context.id}-inspector-title`}
       data-slot="resource-manager-inspector"
       className={cn(inspectorVariants({ variant: context.variant }), className)}

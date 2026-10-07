@@ -320,7 +320,7 @@ export function CommandMenuItem({
       role="option"
       data-slot="command-menu-item"
       className={cn(
-        "flex items-center font-medium transition-[background-color] duration-120 ease-out select-none motion-reduce:transition-none [&>svg]:shrink-0 [&>svg]:text-muted-foreground data-[active]:[&>svg]:text-foreground",
+        "flex items-center font-medium select-none [&>svg]:shrink-0 [&>svg]:text-muted-foreground data-[active]:[&>svg]:text-foreground",
         compact
           ? "min-h-7 gap-2 rounded-[7px] px-2 text-[12.5px]"
           : "min-h-8 gap-2.5 rounded-lg px-2.5 text-[13px]",

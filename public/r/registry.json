@@ -38,7 +38,8 @@
           "animate-indeterminate": "indeterminate 1.4s cubic-bezier(0.65, 0, 0.35, 1) infinite",
           "animate-ring-pulse": "ring-pulse 1.8s ease-out infinite",
           "animate-grow-x": "grow-x 480ms cubic-bezier(0.23, 1, 0.32, 1) backwards",
-          "animate-grow-y": "grow-y 480ms cubic-bezier(0.23, 1, 0.32, 1) backwards"
+          "animate-grow-y": "grow-y 480ms cubic-bezier(0.23, 1, 0.32, 1) backwards",
+          "animate-shake": "shake 260ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both"
         },
         "light": {
           "radius": "0.875rem",
@@ -132,6 +133,14 @@
         "@keyframes grow-y": {
           "from": {
             "transform": "scaleY(0)"
+          }
+        },
+        "@keyframes shake": {
+          "20%, 60%": {
+            "translate": "-4px 0"
+          },
+          "40%, 80%": {
+            "translate": "4px 0"
           }
         },
         "@utility shimmer-text": {
@@ -580,7 +589,7 @@
       "type": "registry:ui",
       "title": "Form Error Summary",
       "description": "A submission error summary with links that focus the matching fields.",
-      "dependencies": ["class-variance-authority"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
@@ -599,7 +608,7 @@
       "type": "registry:ui",
       "title": "Unsaved Changes Bar",
       "description": "Persistent save and discard actions with busy, error, and page-exit warnings.",
-      "dependencies": ["class-variance-authority"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
@@ -1233,7 +1242,7 @@
         }
       ],
       "categories": ["marketing", "forms"],
-      "dependencies": ["class-variance-authority"]
+      "dependencies": ["class-variance-authority", "lucide-react"]
     },
     {
       "name": "message",
@@ -2145,7 +2154,7 @@
         }
       ],
       "categories": ["authentication", "onboarding", "forms"],
-      "dependencies": ["class-variance-authority"]
+      "dependencies": ["class-variance-authority", "lucide-react"]
     },
     {
       "name": "onboarding-wizard",

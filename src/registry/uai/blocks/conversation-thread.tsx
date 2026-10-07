@@ -152,10 +152,36 @@ export function ConversationThreadLog({ onScroll, className, ...props }: Compone
   const { id, variant } = useThread("ConversationThreadLog");
   const ref = useRef<HTMLDivElement>(null);
   const pinned = useRef(true);
+  const messageCount = useRef<number | null>(null);
+  const smoothing = useRef(false);
+  // A new message glides into view; streaming text and reduced motion stay instant.
   useEffect(() => {
     const node = ref.current;
-    if (node && pinned.current) node.scrollTop = node.scrollHeight;
+    if (!node) return;
+    const previous = messageCount.current;
+    messageCount.current = node.childElementCount;
+    if (!pinned.current) return;
+    const appended = previous !== null && node.childElementCount > previous;
+    const reduce =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if ((appended || smoothing.current) && !reduce && typeof node.scrollTo === "function") {
+      smoothing.current = true;
+      node.scrollTo({ top: node.scrollHeight, behavior: "smooth" });
+    } else {
+      node.scrollTop = node.scrollHeight;
+    }
   });
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const settle = () => {
+      smoothing.current = false;
+      pinned.current = node.scrollHeight - node.scrollTop - node.clientHeight < 32;
+    };
+    node.addEventListener("scrollend", settle);
+    return () => node.removeEventListener("scrollend", settle);
+  }, []);
   return (
     <div
       role="log"
@@ -177,7 +203,13 @@ export function ConversationThreadLog({ onScroll, className, ...props }: Compone
       onScroll={(event: UIEvent<HTMLDivElement>) => {
         onScroll?.(event);
         const node = event.currentTarget;
-        pinned.current = node.scrollHeight - node.scrollTop - node.clientHeight < 32;
+        const distance = node.scrollHeight - node.scrollTop - node.clientHeight;
+        // Mid-glide positions are not the reader scrolling away.
+        if (smoothing.current) {
+          if (distance < 32) smoothing.current = false;
+          return;
+        }
+        pinned.current = distance < 32;
       }}
     />
   );

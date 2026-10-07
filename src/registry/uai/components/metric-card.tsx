@@ -2,7 +2,16 @@
 
 import { cva } from "class-variance-authority";
 import { ArrowDownRight, ArrowRight, ArrowUpRight } from "lucide-react";
-import { type ComponentProps, createContext, useContext, useId } from "react";
+import {
+  type ComponentProps,
+  createContext,
+  type Ref,
+  useContext,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+} from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/uai-utils";
 
@@ -68,8 +77,36 @@ export function MetricCardLabel({ className, ...props }: ComponentProps<"span">)
   );
 }
 
-export function MetricCardValue({ className, ...props }: ComponentProps<"p">) {
+const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
+/** Ticks the value in when its text changes. Skips the first render and reduced motion. */
+function useValueTick(ref: React.RefObject<HTMLElement | null>) {
+  const previous = useRef<string | null>(null);
+  useIsomorphicLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    const text = element.textContent;
+    const changed = previous.current !== null && previous.current !== text;
+    previous.current = text;
+    if (!changed || typeof element.animate !== "function") return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    element.animate(
+      [
+        { opacity: 0.4, transform: "translateY(3px)" },
+        { opacity: 1, transform: "none" },
+      ],
+      { duration: 200, easing: "cubic-bezier(0.23, 1, 0.32, 1)" },
+    );
+  });
+}
+function assignRef<T>(ref: Ref<T> | undefined, value: T) {
+  if (typeof ref === "function") ref(value);
+  else if (ref) ref.current = value;
+}
+
+export function MetricCardValue({ className, ref, ...props }: ComponentProps<"p">) {
   const context = useMetric("MetricCardValue");
+  const element = useRef<HTMLParagraphElement | null>(null);
+  useValueTick(element);
   return (
     <p
       data-slot="metric-card-value"
@@ -81,6 +118,10 @@ export function MetricCardValue({ className, ...props }: ComponentProps<"p">) {
         className,
       )}
       {...props}
+      ref={(node) => {
+        element.current = node;
+        assignRef(ref, node);
+      }}
     />
   );
 }

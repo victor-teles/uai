@@ -43,7 +43,7 @@ const filterBarVariants = cva("flex min-w-0 flex-wrap border text-foreground", {
 // Ghost Button overrides: the neutral hover and pointer-event resets keep hover feedback on
 // enabled controls only and preserve the not-allowed cursor when disabled.
 const actionButton =
-  "cursor-pointer border-0 bg-transparent transition-[background-color,color,transform] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] hover:bg-transparent focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid enabled:active:scale-[0.97] disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none dark:hover:bg-transparent";
+  "cursor-pointer border-0 bg-transparent transition-[background-color,color,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] hover:bg-transparent focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid enabled:active:scale-[0.97] disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none motion-reduce:enabled:active:scale-100 dark:hover:bg-transparent";
 
 export function FilterBar({
   variant = "toolbar",

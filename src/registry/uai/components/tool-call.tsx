@@ -14,9 +14,7 @@ import {
   createContext,
   type ReactNode,
   useContext,
-  useEffect,
   useId,
-  useRef,
   useState,
 } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -148,27 +146,20 @@ export function ToolCallHeader({ className, ...props }: ComponentProps<"div">) {
 }
 
 function StatusIcon({ status, size }: { status: ToolCallStatus; size: number }) {
-  const ref = useRef<SVGSVGElement>(null);
-  useEffect(() => {
-    if (status !== "running") return;
-    const reduce =
-      typeof window.matchMedia === "function" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) return;
-    const animation = ref.current?.animate?.(
-      [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }],
-      { duration: 900, iterations: Number.POSITIVE_INFINITY },
-    );
-    return () => animation?.cancel();
-  }, [status]);
   const { icon: Icon, color } = statusDetails[status];
   return (
     <Icon
-      ref={ref}
+      key={status}
       size={size}
       strokeWidth={2}
       aria-hidden="true"
-      className={cn("flex-none", color)}
+      className={cn(
+        "flex-none",
+        color,
+        status === "running" && "motion-safe:animate-spin",
+        (status === "success" || status === "error") &&
+          "animate-in duration-200 ease-out-quint fade-in-0 zoom-in-50 motion-reduce:animate-none",
+      )}
     />
   );
 }
@@ -205,7 +196,7 @@ export function ToolCallTrigger({ children, className, ...props }: ComponentProp
         aria-hidden="true"
         className={cn(
           "size-3.5",
-          "flex-none text-subtle-foreground [transition:rotate_180ms_cubic-bezier(0.23,1,0.32,1),color_120ms_ease-out] group-hover/tool-call-trigger:text-foreground group-data-[state=open]/tool-call-trigger:rotate-180",
+          "flex-none text-subtle-foreground [transition:rotate_180ms_cubic-bezier(0.23,1,0.32,1),color_120ms_ease-out] group-hover/tool-call-trigger:text-foreground group-data-[state=open]/tool-call-trigger:rotate-180 motion-reduce:transition-none",
         )}
       />
     </CollapsibleTrigger>
@@ -260,21 +251,29 @@ export function ToolCallContent({ className, ...props }: ComponentProps<"div">) 
   const context = useToolCall("ToolCallContent");
   const inline = context.variant === "inline";
   return (
-    <CollapsibleContent
-      data-slot="tool-call-content"
+    <div
+      inert={!context.open}
       className={cn(
-        "animate-in gap-2.5 fade-in-0 slide-in-from-top-1 duration-240 ease-out-quint motion-reduce:animate-none",
-        context.open ? "grid" : "hidden",
-        inline
-          ? "border-t-0 pt-1.5 pr-0 pb-1 pl-[38px]"
-          : cn("border-t", context.variant === "compact" ? "p-2" : "p-3"),
-        className,
+        "grid transition-[grid-template-rows,opacity] duration-300 ease-out-quint motion-reduce:transition-none",
+        context.open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
       )}
-      {...props}
-      id={`${context.id}-content`}
-      forceMount
-      hidden={!context.open}
-    />
+    >
+      <div className="min-h-0 overflow-hidden">
+        <CollapsibleContent
+          data-slot="tool-call-content"
+          className={cn(
+            "grid gap-2.5",
+            inline
+              ? "border-t-0 pt-1.5 pr-0 pb-1 pl-[38px]"
+              : cn("border-t", context.variant === "compact" ? "p-2" : "p-3"),
+            className,
+          )}
+          {...props}
+          id={`${context.id}-content`}
+          forceMount
+        />
+      </div>
+    </div>
   );
 }
 

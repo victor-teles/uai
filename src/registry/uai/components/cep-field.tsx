@@ -3,11 +3,13 @@
 import { cva } from "class-variance-authority";
 import { CircleAlert, LoaderCircle, MapPin, Search } from "lucide-react";
 import {
+  type ChangeEvent,
   type ComponentProps,
   createContext,
   type KeyboardEvent,
   useContext,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -180,6 +182,7 @@ export type CepFieldControlProps = ComponentProps<"div">;
 export function CepFieldControl({ children, className, ...props }: CepFieldControlProps) {
   const context = useCepField("CepFieldControl");
   const failed = context.status === "not-found" || context.status === "error";
+  const found = context.status === "found";
   return (
     <div
       data-slot="cep-field-control"
@@ -188,13 +191,19 @@ export function CepFieldControl({ children, className, ...props }: CepFieldContr
         context.chrome.controlClass,
         failed
           ? "border-destructive/70 hover:border-destructive focus-within:border-destructive"
-          : "border-border",
+          : found
+            ? "border-[color-mix(in_oklab,var(--success)_45%,var(--border))]"
+            : "border-border",
         className,
       )}
       {...props}
     >
       <MapPin
-        className={cn("shrink-0 text-subtle-foreground", context.chrome.iconClass)}
+        className={cn(
+          "shrink-0 transition-colors duration-200 ease-out motion-reduce:transition-none",
+          found ? "text-success" : "text-subtle-foreground",
+          context.chrome.iconClass,
+        )}
         strokeWidth={1.9}
         aria-hidden="true"
       />
@@ -208,8 +217,35 @@ export type CepFieldInputProps = Omit<
   "value" | "defaultValue" | "onChange"
 >;
 
+/** Maps a caret after `count` digits to its index in the formatted CEP. */
+function caretAfter(formatted: string, count: number) {
+  if (count === 0) return 0;
+  let seen = 0;
+  for (let index = 0; index < formatted.length; index += 1) {
+    if (/\d/.test(formatted[index] ?? "")) seen += 1;
+    if (seen === count) return index + 1;
+  }
+  return formatted.length;
+}
+
 export function CepFieldInput({ className, disabled, onKeyDown, ...props }: CepFieldInputProps) {
   const context = useCepField("CepFieldInput");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const pendingCaret = useRef<number | null>(null);
+
+  useLayoutEffect(() => {
+    const input = inputRef.current;
+    if (pendingCaret.current === null || !input || document.activeElement !== input) return;
+    const caret = caretAfter(input.value, pendingCaret.current);
+    input.setSelectionRange(caret, caret);
+    pendingCaret.current = null;
+  });
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { value, selectionStart } = event.target;
+    pendingCaret.current = normalizeCep(value.slice(0, selectionStart ?? value.length)).length;
+    context.setValue(value);
+  };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     onKeyDown?.(event);
@@ -231,9 +267,10 @@ export function CepFieldInput({ className, disabled, onKeyDown, ...props }: CepF
         className,
       )}
       {...props}
+      ref={inputRef}
       id={context.inputId}
       value={formatCep(context.value)}
-      onChange={(event) => context.setValue(event.target.value)}
+      onChange={handleChange}
       onKeyDown={handleKeyDown}
       disabled={context.disabled || disabled}
       aria-invalid={context.status === "not-found" || context.status === "error" || undefined}

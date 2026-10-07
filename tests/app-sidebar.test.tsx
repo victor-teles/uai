@@ -97,7 +97,9 @@ test("collapses to icons while keeping accessible names", async () => {
   expect(toggle.getAttribute("aria-expanded")).toBe("false");
   const overview = screen.getByRole("link", { name: "Overview" });
   expect(overview.getAttribute("title")).toBe("Overview");
-  expect(screen.queryByText("12")).toBeNull();
+  // Labels and badges fade out in place; badges leave the accessibility tree.
+  expect(screen.getByText("12").getAttribute("aria-hidden")).toBe("true");
+  expect(screen.getByText("Overview").className).toContain("opacity-0");
   await user.click(screen.getByRole("button", { name: "Documents" }));
   expect(container.firstElementChild?.hasAttribute("data-collapsed")).toBe(false);
   expect(screen.getByRole("link", { name: "Project briefs" })).toBeTruthy();

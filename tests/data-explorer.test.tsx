@@ -80,6 +80,15 @@ test("runs the labelled query through the consumer submit handler", async () => 
   expect(screen.getByRole("status").textContent).toBe("1 row · 38 ms");
 });
 
+test("reports a running query on the Run button and the status line", () => {
+  const view = render(<Fixture />);
+  const run = screen.getByRole("button", { name: "Run query" });
+  expect(run.hasAttribute("aria-busy")).toBe(false);
+  view.rerender(<Fixture pending />);
+  expect(run.getAttribute("aria-busy")).toBe("true");
+  expect(screen.getByRole("status").className).toContain("shimmer-text");
+});
+
 test("exposes a focusable results region with real table headers", () => {
   render(<Fixture />);
   const region = screen.getByRole("region", { name: "Expansion results" });

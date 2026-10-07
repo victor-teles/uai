@@ -5,7 +5,9 @@ import {
   type ComponentProps,
   createContext,
   type KeyboardEvent,
+  type Ref,
   useContext,
+  useEffect,
   useId,
   useLayoutEffect,
   useRef,
@@ -30,6 +32,11 @@ type BoardContext = {
   variant: KanbanBoardVariant;
   value: KanbanBoardValue;
   grabbed: string | null;
+  /** Card being dragged with the mouse, and the column under the pointer. */
+  dragging: string | null;
+  dropTarget: string | null;
+  setDragging: (card: string | null) => void;
+  setDropTarget: (column: string | null) => void;
   labels: Map<string, string>;
   register: (id: string, element: HTMLElement | null) => void;
   move: (card: string, column: string, index: number) => void;
@@ -48,6 +55,34 @@ function useColumn(part: string) {
   const context = useContext(ColumnCtx);
   if (!context) throw new Error(`${part} must be used within KanbanBoardColumn`);
   return context;
+}
+
+// Fades whichever edge of the board still hides columns.
+const scrollEdgeFade =
+  "data-overflow-start:[mask-image:linear-gradient(to_right,transparent,black_24px)] data-overflow-end:[mask-image:linear-gradient(to_left,transparent,black_24px)] data-overflow-start:data-overflow-end:[mask-image:linear-gradient(to_right,transparent,black_24px,black_calc(100%-24px),transparent)]";
+function useScrollEdges(ref: React.RefObject<HTMLElement | null>) {
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    const update = () => {
+      const max = element.scrollWidth - element.clientWidth;
+      element.toggleAttribute("data-overflow-start", element.scrollLeft > 1);
+      element.toggleAttribute("data-overflow-end", element.scrollLeft < max - 1);
+    };
+    update();
+    element.addEventListener("scroll", update, { passive: true });
+    const observer = typeof ResizeObserver === "function" ? new ResizeObserver(update) : null;
+    observer?.observe(element);
+    for (const child of element.children) observer?.observe(child);
+    return () => {
+      element.removeEventListener("scroll", update);
+      observer?.disconnect();
+    };
+  }, [ref]);
+}
+function assignRef<T>(ref: Ref<T> | undefined, value: T) {
+  if (typeof ref === "function") ref(value);
+  else if (ref) ref.current = value;
 }
 
 const kanbanBoardVariants = cva(
@@ -103,11 +138,31 @@ export function KanbanBoard({
   onValueChange,
   className,
   children,
+  ref,
   ...props
 }: KanbanBoardProps) {
   const id = useId();
   const [internal, setInternal] = useState(defaultValue);
   const [grabbed, setGrabbed] = useState<string | null>(null);
+  const [dragging, setDragging] = useState<string | null>(null);
+  const [dropTarget, setDropTarget] = useState<string | null>(null);
+  const root = useRef<HTMLDivElement | null>(null);
+  useScrollEdges(root);
+  // A moved card remounts in its new column, so its own dragend may never reach React.
+  const active = dragging !== null || dropTarget !== null;
+  useEffect(() => {
+    if (!active) return;
+    const end = () => {
+      setDragging(null);
+      setDropTarget(null);
+    };
+    window.addEventListener("dragend", end);
+    window.addEventListener("drop", end);
+    return () => {
+      window.removeEventListener("dragend", end);
+      window.removeEventListener("drop", end);
+    };
+  }, [active]);
   const [announcement, setAnnouncement] = useState("");
   const snapshot = useRef<KanbanBoardValue | null>(null);
   const elements = useRef(new Map<string, HTMLElement>());
@@ -191,6 +246,10 @@ export function KanbanBoard({
     variant,
     value: current,
     grabbed,
+    dragging,
+    dropTarget,
+    setDragging,
+    setDropTarget,
     labels,
     register: (card, element) => {
       if (element) elements.current.set(card, element);
@@ -208,8 +267,12 @@ export function KanbanBoard({
       <div
         data-slot="kanban-board"
         data-variant={variant}
-        className={cn(kanbanBoardVariants({ variant }), className)}
+        className={cn(kanbanBoardVariants({ variant }), scrollEdgeFade, className)}
         {...props}
+        ref={(node) => {
+          root.current = node;
+          assignRef(ref, node);
+        }}
       >
         {children}
         <p id={`${id}-instructions`} className="sr-only">
@@ -235,6 +298,8 @@ export function KanbanBoardColumn({
   label,
   className,
   children,
+  onDragEnter,
+  onDragLeave,
   onDragOver,
   onDrop,
   ...props
@@ -247,15 +312,33 @@ export function KanbanBoardColumn({
       <section
         aria-labelledby={titleId}
         data-slot="kanban-board-column"
-        className={cn(kanbanBoardColumnVariants({ variant: board.variant }), className)}
+        className={cn(
+          kanbanBoardColumnVariants({ variant: board.variant }),
+          "transition-[background-color,box-shadow] duration-150 ease-out data-drop-target:bg-accent/60 data-drop-target:inset-ring-1 data-drop-target:inset-ring-border-strong motion-reduce:transition-none",
+          className,
+        )}
         {...props}
         data-column={value}
+        data-drop-target={board.dropTarget === value || undefined}
+        onDragEnter={(event) => {
+          onDragEnter?.(event);
+          if (event.dataTransfer.types.includes("application/x-uai-kanban"))
+            board.setDropTarget(value);
+        }}
+        onDragLeave={(event) => {
+          onDragLeave?.(event);
+          // Moving between the column's own children is not a leave.
+          const next = event.relatedTarget;
+          if (next instanceof Node && event.currentTarget.contains(next)) return;
+          if (board.dropTarget === value) board.setDropTarget(null);
+        }}
         onDragOver={(event) => {
           onDragOver?.(event);
           if (event.dataTransfer.types.includes("application/x-uai-kanban")) event.preventDefault();
         }}
         onDrop={(event) => {
           onDrop?.(event);
+          board.setDropTarget(null);
           const card = event.dataTransfer.getData("application/x-uai-kanban");
           if (!card || event.defaultPrevented) return;
           event.preventDefault();
@@ -340,6 +423,7 @@ export function KanbanBoardCard({
   onKeyDown,
   onFocus,
   onDragStart,
+  onDragEnd,
   onDragOver,
   onDrop,
   className,
@@ -349,11 +433,12 @@ export function KanbanBoardCard({
   const column = useColumn("KanbanBoardCard");
   board.labels.set(value, label);
   const grabbed = board.grabbed === value;
+  const dimFrame = useRef(0);
   return (
     <li
       data-slot="kanban-board-card"
       className={cn(
-        "grid min-w-0 cursor-grab bg-card [transition:box-shadow_120ms_ease-out,transform_160ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:cursor-grabbing motion-reduce:transition-none",
+        "grid min-w-0 cursor-grab bg-card [transition:box-shadow_120ms_ease-out,transform_160ms_cubic-bezier(0.23,1,0.32,1),opacity_120ms_ease-out] data-dragging:opacity-40 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:cursor-grabbing motion-reduce:transition-none",
         board.variant === "compact"
           ? "gap-1 rounded-lg px-2.5 py-2"
           : "gap-1.5 rounded-[10px] px-3 py-2.5",
@@ -370,6 +455,7 @@ export function KanbanBoardCard({
       aria-describedby={`${board.id}-instructions`}
       aria-roledescription="movable card"
       data-grabbed={grabbed || undefined}
+      data-dragging={board.dragging === value || undefined}
       onKeyDown={(event) => {
         onKeyDown?.(event);
         if (!event.defaultPrevented) board.onCardKeyDown(event, value);
@@ -382,6 +468,14 @@ export function KanbanBoardCard({
         onDragStart?.(event);
         event.dataTransfer.setData("application/x-uai-kanban", value);
         event.dataTransfer.effectAllowed = "move";
+        // Dim after the browser captures the drag image, which would otherwise be dimmed too.
+        dimFrame.current = requestAnimationFrame(() => board.setDragging(value));
+      }}
+      onDragEnd={(event) => {
+        onDragEnd?.(event);
+        cancelAnimationFrame(dimFrame.current);
+        board.setDragging(null);
+        board.setDropTarget(null);
       }}
       onDragOver={(event) => {
         onDragOver?.(event);

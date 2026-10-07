@@ -79,6 +79,8 @@ function useControllable<T>(value: T | undefined, initial: T, onChange?: (value:
   return [current, set] as const;
 }
 const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
+const mobileReveal =
+  "animate-in fade-in-0 slide-in-from-top-1 duration-200 ease-out-quint motion-reduce:animate-none";
 const easeOut = "cubic-bezier(0.23, 1, 0.32, 1)";
 /** Fades a disclosure in when it opens. Skips the first render and reduced motion. */
 function useReveal(ref: React.RefObject<HTMLElement | null>, open: boolean) {
@@ -103,12 +105,14 @@ function useReveal(ref: React.RefObject<HTMLElement | null>, open: boolean) {
 // Press feedback and focus for rows and icon buttons. Idle rows add their own hover tint.
 const rowInteraction =
   "[transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] active:scale-[0.985] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring motion-reduce:transition-none motion-reduce:active:scale-100";
+// Labels fade while the width animates instead of vanishing on the first frame.
+const labelFade = "transition-opacity duration-150 ease-out motion-reduce:transition-none";
 const rowIdle = "bg-transparent text-muted-foreground hover:bg-accent/70 hover:text-foreground";
 
 function iconButtonClass(variant: AppSidebarVariant) {
   return cn(
     "grid flex-none cursor-pointer place-items-center border-0 bg-transparent p-0 text-muted-foreground",
-    "[transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-accent hover:text-foreground active:scale-[0.97] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid motion-reduce:transition-none motion-reduce:active:scale-100 dark:hover:bg-accent",
+    "transition-[background-color,color,scale] duration-140 ease-out-quint hover:bg-accent hover:text-foreground active:scale-[0.97] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid motion-reduce:transition-none motion-reduce:active:scale-100 dark:hover:bg-accent",
     variant === "compact" ? "size-6 rounded-[7px]" : "size-7 rounded-lg",
   );
 }
@@ -119,9 +123,13 @@ function rowClass(context: SidebarContext, active: boolean, nested: boolean) {
     "flex w-full min-w-0 cursor-pointer items-center border-0 text-left font-medium no-underline",
     rowInteraction,
     compact ? "h-6.5 gap-2 rounded-md text-[12px]" : "h-7.5 gap-2.5 rounded-[7px] text-[12.5px]",
+    // Rows stay start-aligned while the width animates; collapsed padding centres the icon.
+    "justify-start",
     context.collapsed
-      ? "justify-center p-0"
-      : cn("justify-start", nested ? cn("pr-2", compact ? "pl-7.5" : "pl-9") : "px-2"),
+      ? cn("pr-0", compact ? "pl-2" : "pl-[11px]")
+      : nested
+        ? cn("pr-2", compact ? "pl-7.5" : "pl-9")
+        : "px-2",
     active
       ? cn(
           "text-foreground",
@@ -134,7 +142,7 @@ function rowClass(context: SidebarContext, active: boolean, nested: boolean) {
 }
 
 const appSidebarVariants = cva(
-  "flex min-w-0 flex-col overflow-hidden text-[13px]/[18px] text-foreground transition-[width] duration-240 ease-out-quint motion-reduce:transition-none",
+  "flex min-w-0 flex-col overflow-hidden text-[13px]/[18px] text-foreground transition-[width] duration-200 ease-out-quint motion-reduce:transition-none",
   {
     variants: {
       variant: {
@@ -229,7 +237,7 @@ export function AppSidebarHeader({ className, ...props }: ComponentProps<"div">)
     <div
       data-slot="app-sidebar-header"
       className={cn(
-        "flex min-w-0 items-center gap-1.5",
+        "relative flex min-w-0 items-center gap-1.5",
         context.collapsed ? "flex-col" : "flex-row",
         className,
       )}
@@ -247,7 +255,9 @@ export function AppSidebarTitle({ className, ...props }: ComponentProps<"span">)
       className={cn(
         "min-w-0 flex-1 truncate font-medium tracking-[-0.005em]",
         context.variant === "compact" ? "pl-1 text-[12.5px]" : "pl-1.5 text-[13px]",
-        context.collapsed && "sr-only",
+        labelFade,
+        // Leaves the column layout at once, then fades out behind the narrowing edge.
+        context.collapsed && "pointer-events-none absolute opacity-0",
         className,
       )}
       {...props}
@@ -309,7 +319,13 @@ export function AppSidebarMobileTrigger({
         if (!event.defaultPrevented) context.setOpen(!context.open);
       }}
     >
-      <Icon size={16} strokeWidth={1.75} aria-hidden="true" />
+      <Icon
+        key={context.open ? "close" : "open"}
+        size={16}
+        strokeWidth={1.75}
+        aria-hidden="true"
+        className="animate-in fade-in-0 zoom-in-75 duration-150 ease-out-quint motion-reduce:animate-none"
+      />
     </Button>
   );
 }
@@ -324,6 +340,7 @@ export function AppSidebarNav({ className, ...props }: ComponentProps<"nav">) {
       className={cn(
         "min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto",
         hiddenOnMobile ? "hidden" : "flex",
+        context.mobile && mobileReveal,
         context.variant === "compact" ? "gap-2.5" : "gap-4",
         className,
       )}
@@ -446,7 +463,12 @@ export function AppSidebarItemLabel({ className, ...props }: ComponentProps<"spa
   return (
     <span
       data-slot="app-sidebar-item-label"
-      className={cn("min-w-0 flex-1 truncate", context.collapsed && "sr-only", className)}
+      className={cn(
+        "min-w-0 flex-1 truncate",
+        labelFade,
+        context.collapsed && "opacity-0",
+        className,
+      )}
       {...props}
     />
   );
@@ -455,12 +477,14 @@ export function AppSidebarItemLabel({ className, ...props }: ComponentProps<"spa
 /** A trailing count or status beside a row label. Hidden when collapsed. */
 export function AppSidebarItemBadge({ className, ...props }: ComponentProps<"span">) {
   const context = useSidebar("AppSidebarItemBadge");
-  if (context.collapsed) return null;
   return (
     <span
       data-slot="app-sidebar-item-badge"
+      aria-hidden={context.collapsed || undefined}
       className={cn(
         "ml-auto min-w-4.5 rounded-full bg-foreground/7 px-1.5 text-center text-[11px]/[17px] font-medium text-muted-foreground tabular-nums",
+        labelFade,
+        context.collapsed && "opacity-0",
         className,
       )}
       {...props}
@@ -574,7 +598,7 @@ export function AppSidebarFooter({ className, ...props }: ComponentProps<"div">)
   return (
     <div
       data-slot="app-sidebar-footer"
-      className={cn("grid gap-px border-t pt-2", className)}
+      className={cn("grid gap-px border-t pt-2", context.mobile && mobileReveal, className)}
       {...props}
     />
   );

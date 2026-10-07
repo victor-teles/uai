@@ -72,7 +72,9 @@ test("labels replacement and clears the draft when removing an applied code", as
   );
 
   const input = screen.getByRole("textbox", { name: "Discount code" });
-  expect((screen.getByRole("button", { name: "Apply" }) as HTMLButtonElement).disabled).toBe(true);
+  const applied = screen.getByRole("button", { name: "Applied" }) as HTMLButtonElement;
+  expect(applied.disabled).toBe(true);
+  expect(applied.className).toContain("bg-success/14");
 
   await user.clear(input);
   await user.type(input, "SAVE20");

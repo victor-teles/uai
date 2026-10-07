@@ -57,6 +57,9 @@ const headerHover = "bg-card [tr:hover>&]:bg-[color-mix(in_oklab,var(--muted)_55
 // Hairlines between rows only; the last row sits on the container edge.
 const cellRule = "border-b [tr:last-child>&]:border-b-0";
 const badge = "bg-primary/16 text-[11px]/4 font-medium text-primary";
+// Sticky headers cast a soft edge once the table scrolls under them.
+const stickyShadow =
+  "group-data-scrolled/comparison-table:shadow-[4px_0_8px_-4px_oklch(0_0_0/0.16)]";
 // Uai cells size from padding and wrap; the shadcn cells are fixed-height and nowrap.
 const cellReset = "h-auto whitespace-normal";
 
@@ -152,6 +155,7 @@ export function ComparisonTableDifferencesToggle({
 export function ComparisonTableContent({
   className,
   children,
+  onScroll,
   ...props
 }: Omit<ComponentProps<"section">, "children"> & { children: ReactNode }) {
   const context = useTable("ComparisonTableContent");
@@ -164,12 +168,16 @@ export function ComparisonTableContent({
       data-slot="comparison-table-content"
       className={cn(
         // The focusable section scrolls, so the shadcn table container must not become a second scroller.
-        "max-w-full overflow-x-auto bg-card outline-offset-2 *:data-[slot=table-container]:overflow-visible",
+        "group/comparison-table max-w-full overflow-x-auto bg-card outline-offset-2 *:data-[slot=table-container]:overflow-visible",
         context.variant === "plain" ? "border-0" : "border",
         compact ? "rounded-xl" : "rounded-[14px]",
         className,
       )}
       {...props}
+      onScroll={(event) => {
+        onScroll?.(event);
+        event.currentTarget.toggleAttribute("data-scrolled", event.currentTarget.scrollLeft > 0);
+      }}
     >
       <Table
         aria-labelledby={`${context.id}-title`}
@@ -200,7 +208,8 @@ export function ComparisonTableCorner({ className, ...props }: ComponentProps<"t
       scope="col"
       data-slot="comparison-table-corner"
       className={cn(
-        "sticky top-0 left-0 z-2 border-b bg-card text-left align-bottom text-[12px] font-medium text-subtle-foreground",
+        "sticky top-0 left-0 z-2 border-b bg-card text-left align-bottom text-[12px] font-medium text-subtle-foreground transition-shadow duration-150 ease-out motion-reduce:transition-none",
+        stickyShadow,
         cellReset,
         cellPadding(context.variant),
         className,
@@ -283,11 +292,17 @@ export function ComparisonTableRowHeader({ children, className, ...props }: Comp
       scope="row"
       data-slot="comparison-table-row-header"
       className={cn(
-        "sticky left-0 z-1 min-w-[140px] text-left font-medium [transition:background-color_120ms_ease-out] motion-reduce:transition-none",
+        "sticky left-0 z-1 min-w-[140px] text-left font-medium [transition:background-color_120ms_ease-out,box-shadow_150ms_ease-out] motion-reduce:transition-none",
         cellReset,
         cellPadding(context.variant),
         cellRule,
-        isMarked ? cn(marked, "shadow-[inset_2px_0_0_var(--primary)]") : headerHover,
+        isMarked
+          ? cn(
+              marked,
+              "shadow-[inset_2px_0_0_var(--primary)]",
+              "group-data-scrolled/comparison-table:shadow-[inset_2px_0_0_var(--primary),4px_0_8px_-4px_oklch(0_0_0/0.16)]",
+            )
+          : cn(headerHover, stickyShadow),
         // Unchanged rows dim as a whole, so the row header inherits the row color.
         context.highlight && !row.different ? "text-inherit" : "text-muted-foreground",
         className,

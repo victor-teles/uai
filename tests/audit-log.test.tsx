@@ -51,14 +51,14 @@ test("expands event details with the keyboard", async () => {
   const summary = screen.getByRole("button", { name: /Ana Souza deleted api-key-prod/ });
   const details = document.getElementById(summary.getAttribute("aria-controls") ?? "");
   expect(summary.getAttribute("aria-expanded")).toBe("false");
-  expect(details?.hidden).toBe(true);
+  expect(details?.hasAttribute("inert")).toBe(true);
   await user.tab();
   await user.keyboard("{Enter}");
   expect(summary.getAttribute("aria-expanded")).toBe("true");
-  expect(details?.hidden).toBe(false);
+  expect(details?.hasAttribute("inert")).toBe(false);
   expect(screen.getByRole("definition").textContent).toBe("189.40.12.7");
   await user.keyboard(" ");
-  expect(details?.hidden).toBe(true);
+  expect(details?.hasAttribute("inert")).toBe(true);
 });
 
 test("exposes machine-readable timestamps and controlled expansion", async () => {

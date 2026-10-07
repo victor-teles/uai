@@ -111,16 +111,21 @@ export function SearchFieldControl({ className, children, ...props }: ComponentP
       {...props}
       data-status={context.status}
     >
-      {context.status === "loading" ? (
-        <LoaderCircle
-          className="animate-[spin_0.8s_linear_infinite] motion-reduce:animate-none"
-          size={compact ? 14 : 16}
-          strokeWidth={1.75}
-          aria-hidden="true"
-        />
-      ) : (
-        <Search size={compact ? 14 : 16} strokeWidth={1.75} aria-hidden="true" />
-      )}
+      <span
+        key={context.status === "loading" ? "loading" : "idle"}
+        className="inline-flex shrink-0 animate-in fade-in-0 zoom-in-75 duration-150 ease-out-quint motion-reduce:animate-none"
+      >
+        {context.status === "loading" ? (
+          <LoaderCircle
+            className="animate-[spin_0.8s_linear_infinite] motion-reduce:animate-none"
+            size={compact ? 14 : 16}
+            strokeWidth={1.75}
+            aria-hidden="true"
+          />
+        ) : (
+          <Search size={compact ? 14 : 16} strokeWidth={1.75} aria-hidden="true" />
+        )}
+      </span>
       {children}
     </div>
   );

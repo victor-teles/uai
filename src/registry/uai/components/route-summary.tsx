@@ -1,7 +1,16 @@
 "use client";
 
 import { cva } from "class-variance-authority";
-import { type ComponentProps, createContext, useContext, useId, useState } from "react";
+import {
+  type ComponentProps,
+  createContext,
+  useContext,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/uai-utils";
@@ -65,6 +74,8 @@ export type RouteSummaryModesProps = Omit<
   onValueChange?: (value: string) => void;
 };
 
+const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
+
 /** Travel modes. One is always selected; arrow keys move between them. */
 export function RouteSummaryModes({
   value,
@@ -72,11 +83,35 @@ export function RouteSummaryModes({
   onValueChange,
   "aria-label": label = "Travel mode",
   className,
+  children,
   ...props
 }: RouteSummaryModesProps) {
   useSummary("RouteSummaryModes");
   const [internal, setInternal] = useState(defaultValue);
   const selected = value ?? internal;
+  const ref = useRef<HTMLDivElement>(null);
+  const [thumb, setThumb] = useState<{ x: number; y: number; width: number; height: number }>();
+  useIsomorphicLayoutEffect(() => {
+    const list = ref.current;
+    if (!list) return;
+    const measure = () => {
+      const active = list.querySelector<HTMLElement>(
+        "[data-slot=route-summary-mode][data-state=on]",
+      );
+      if (!active || active.offsetWidth === 0) return setThumb(undefined);
+      setThumb({
+        x: active.offsetLeft,
+        y: active.offsetTop,
+        width: active.offsetWidth,
+        height: active.offsetHeight,
+      });
+    };
+    measure();
+    if (typeof ResizeObserver !== "function") return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(list);
+    return () => observer.disconnect();
+  }, [selected]);
   return (
     <ToggleGroup
       data-slot="route-summary-modes"
@@ -88,9 +123,27 @@ export function RouteSummaryModes({
         if (value === undefined) setInternal(next);
         onValueChange?.(next);
       }}
-      className={cn("flex w-full gap-1 rounded-full bg-muted p-1", className)}
+      className={cn(
+        "group/modes relative isolate flex w-full gap-1 rounded-full bg-muted p-1",
+        className,
+      )}
       {...props}
-    />
+      ref={ref}
+      data-ready={thumb ? "" : undefined}
+    >
+      {/* One measured thumb slides between modes; until it is measured the active mode paints itself. */}
+      <span
+        aria-hidden="true"
+        data-slot="route-summary-modes-thumb"
+        className="pointer-events-none absolute top-0 left-0 -z-1 rounded-full bg-card opacity-0 shadow-[0_1px_2px_oklch(0_0_0/0.12),0_0_0_1px_var(--border)] transition-[translate,width] duration-240 ease-out-quint group-data-ready/modes:opacity-100 motion-reduce:transition-none"
+        style={{
+          width: thumb?.width ?? 0,
+          height: thumb?.height ?? 0,
+          translate: thumb ? `${thumb.x}px ${thumb.y}px` : undefined,
+        }}
+      />
+      {children}
+    </ToggleGroup>
   );
 }
 
@@ -108,7 +161,7 @@ export function RouteSummaryMode({ label, className, ...props }: RouteSummaryMod
       aria-label={label}
       title={label}
       className={cn(
-        "h-auto min-w-0 flex-1 gap-1.5 rounded-full! border-0 bg-transparent font-medium text-subtle-foreground tabular-nums shadow-none transition-[background-color,color,box-shadow] duration-120 ease-out hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring focus-visible:outline-solid data-[state=on]:bg-card data-[state=on]:text-foreground data-[state=on]:shadow-[0_1px_2px_oklch(0_0_0/0.12),0_0_0_1px_var(--border)] motion-reduce:transition-none [&_svg]:stroke-[1.75]",
+        "h-auto min-w-0 flex-1 gap-1.5 rounded-full! border-0 bg-transparent font-medium text-subtle-foreground tabular-nums shadow-none transition-[color,scale] duration-[120ms,140ms] ease-[ease-out,cubic-bezier(0.23,1,0.32,1)] hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.97] data-[state=on]:bg-card data-[state=on]:text-foreground data-[state=on]:shadow-[0_1px_2px_oklch(0_0_0/0.12),0_0_0_1px_var(--border)] group-data-ready/modes:data-[state=on]:bg-transparent group-data-ready/modes:data-[state=on]:shadow-none motion-reduce:transition-none motion-reduce:active:scale-100 [&_svg]:stroke-[1.75]",
         context.variant === "compact"
           ? "min-h-6 px-2 text-[11.5px]/4 [&_svg:not([class*='size-'])]:size-3.5"
           : "min-h-7 px-2.5 text-[12px]/4 [&_svg:not([class*='size-'])]:size-4",

@@ -134,7 +134,7 @@ export function ChangelogEntryTitle({
       data-slot="changelog-entry-title"
       className={cn(
         "m-0 tracking-[-0.01em] text-balance",
-        variant === "compact" ? "text-sm/5 font-medium" : "text-[15px]/[22px] font-semibold",
+        variant === "compact" ? "text-sm/5 font-medium" : "text-[15px]/[22px] font-medium",
         className,
       )}
       {...props}

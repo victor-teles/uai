@@ -51,7 +51,7 @@ function useConfirmation(part: string) {
   return context;
 }
 const buttonTones = cva(
-  "cursor-pointer whitespace-nowrap rounded-full border-0 py-0 font-medium transition-[background-color,filter,color,transform] duration-[120ms,120ms,120ms,140ms] ease-[ease-out,ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.97] motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
+  "cursor-pointer whitespace-nowrap rounded-full border-0 py-0 font-medium transition-[background-color,filter,color,scale] duration-[120ms,120ms,120ms,140ms] ease-[ease-out,ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.97] motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
   {
     variants: {
       tone: {
@@ -78,7 +78,7 @@ const dialogVariants = cva(
         centered:
           "w-[min(100%_-_32px,440px)] gap-4 rounded-[14px] p-5 duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-[state=open]:zoom-in-96",
         sheet:
-          "top-auto bottom-0 w-[min(100%,560px)] max-w-full translate-y-0 gap-4 rounded-t-3xl rounded-b-none px-5 pt-5 pb-6 duration-300 ease-out-quint data-[size=default]:sm:max-w-[560px] data-[state=closed]:slide-out-to-bottom-[24px] data-[state=open]:slide-in-from-bottom-[24px] data-[state=closed]:[--tw-exit-scale:1]! data-[state=open]:[--tw-enter-scale:1]!",
+          "top-auto bottom-0 w-[min(100%,560px)] max-w-full translate-y-0 gap-4 rounded-t-3xl rounded-b-none px-5 pt-5 pb-6 duration-300 ease-out-quint data-[state=closed]:duration-200 data-[size=default]:sm:max-w-[560px] data-[state=closed]:slide-out-to-bottom-[24px] data-[state=open]:slide-in-from-bottom-[24px] data-[state=closed]:[--tw-exit-scale:1]! data-[state=open]:[--tw-enter-scale:1]!",
         compact:
           "w-[min(100%_-_32px,360px)] gap-3 rounded-xl p-4 duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-[state=open]:zoom-in-96",
       },

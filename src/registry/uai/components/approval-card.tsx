@@ -260,11 +260,23 @@ export function ApprovalCardHeader({
                 aria-hidden="true"
               />
             ) : context.status === "approved" ? (
-              <Check className="size-3 text-success" aria-hidden="true" />
+              <Check
+                key="approved"
+                className="size-3 animate-in duration-200 ease-out-quint fade-in-0 zoom-in-50 motion-reduce:animate-none text-success"
+                aria-hidden="true"
+              />
             ) : context.status === "rejected" ? (
-              <X className="size-3 text-destructive" aria-hidden="true" />
+              <X
+                key="rejected"
+                className="size-3 animate-in duration-200 ease-out-quint fade-in-0 zoom-in-50 motion-reduce:animate-none text-destructive"
+                aria-hidden="true"
+              />
             ) : context.status === "error" ? (
-              <CircleAlert className="size-3 text-destructive" aria-hidden="true" />
+              <CircleAlert
+                key="error"
+                className="size-3 animate-in duration-200 ease-out-quint fade-in-0 zoom-in-50 motion-reduce:animate-none text-destructive"
+                aria-hidden="true"
+              />
             ) : null}
             <span
               className={cn(
@@ -422,12 +434,12 @@ export function ApprovalCardReject({
       {...props}
       type="button"
       className={cn(
-        "h-8 rounded-full px-3.5 py-0 text-[13px] has-[>svg]:px-3.5 transition-[background-color,transform] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] focus-visible:ring-2 focus-visible:ring-ring enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100",
+        "h-8 rounded-full px-3.5 py-0 text-[13px] has-[>svg]:px-3.5 transition-[background-color,scale] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] focus-visible:ring-2 focus-visible:ring-ring enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:enabled:active:scale-100",
         className,
       )}
       disabled={context.disabled || !context.isActionable || disabled}
     >
-      {children}
+      {context.isSubmitting && context.pendingDecision === "rejected" ? "Rejecting…" : children}
     </Button>
   );
 }
@@ -451,7 +463,7 @@ export function ApprovalCardApprove({
       {...props}
       type="button"
       className={cn(
-        "h-8 rounded-full px-3.5 py-0 text-[13px] has-[>svg]:px-3.5 transition-[filter,opacity,transform] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] enabled:hover:brightness-[1.08] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none motion-reduce:active:scale-100 dark:focus-visible:ring-ring",
+        "h-8 rounded-full px-3.5 py-0 text-[13px] has-[>svg]:px-3.5 transition-[filter,opacity,scale] duration-[140ms] ease-[cubic-bezier(0.23,1,0.32,1)] enabled:hover:brightness-[1.08] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card enabled:active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transition-none motion-reduce:enabled:active:scale-100 dark:focus-visible:ring-ring",
         context.risk === "critical"
           ? "bg-destructive text-primary-foreground hover:bg-destructive dark:bg-destructive"
           : "bg-primary text-primary-foreground hover:bg-primary",

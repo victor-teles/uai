@@ -405,7 +405,7 @@ Distributed components read the standard shadcn theme tokens, never `--uai-*` va
 | Accent | `primary`, `ring` | `bg-primary text-primary-foreground` |
 | Success / Warning / Danger | `success`, `warning`, `destructive` | `bg-success/14 text-success` |
 
-The theme also ships `ease-out-quint`, the `shimmer-text` utility for live labels, and the `animate-skeleton-shimmer`, `animate-indeterminate`, `animate-ring-pulse`, `animate-grow-x`, and `animate-grow-y` animations. Entrances and pop-ins use `tw-animate-css`.
+The theme also ships `ease-out-quint`, the `shimmer-text` utility for live labels, and the `animate-skeleton-shimmer`, `animate-indeterminate`, `animate-ring-pulse`, `animate-grow-x`, `animate-grow-y`, and `animate-shake` animations. Entrances and pop-ins use `tw-animate-css`.
 
 ## Typography
 
@@ -462,6 +462,11 @@ Depth comes from tone. Cards are Surface on Canvas, and specimens are a 3% tint 
 - Page enter: 4px fade-up, 280ms, for documents. The workbench fades in over 200ms without movement.
 - File-tree folders rotate their chevron 90° in 160ms.
 - Live labels (thinking, running, uploading) shimmer from Subtle to Text.
+- Press transitions list `scale` (and chevrons `rotate`), never `transform`: Tailwind v4 `scale-*` and `rotate-*` write the standalone properties.
+- State swaps settle instead of snapping: icon swaps crossfade with `scale(0.5)` and a 2px blur in 200ms; a newly finished status icon pops in from `scale(0.5)`; changed numbers tick up 3px with a fade in 200ms.
+- Success ends in a success-tinted state with a check and a past-tense label (Applied, Verified, Saved), not a grey disabled button. Labels that change length share one grid cell so the control keeps its width.
+- Dismissed banners and bars play a 150–160ms exit before they unmount; in-flow bars also collapse their row.
+- A rejected code shakes 4px for 260ms. Segmented controls slide a measured thumb in 240ms. Horizontal scrollers fade 24px at any edge that hides content.
 - Reduced motion removes transforms, pop-ins, and shimmers.
 
 ## Components

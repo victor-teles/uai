@@ -2,7 +2,15 @@
 
 import { cva } from "class-variance-authority";
 import { CircleAlert, CircleCheck, Info, TriangleAlert, X } from "lucide-react";
-import { type ComponentProps, createContext, useContext, useState } from "react";
+import {
+  type ComponentProps,
+  createContext,
+  type Ref,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/uai-utils";
 
@@ -40,15 +48,21 @@ const toneIcon = {
   error: CircleAlert,
 } as const;
 
+function assignRef<T>(ref: Ref<T> | undefined, value: T) {
+  if (typeof ref === "function") ref(value);
+  else if (ref) ref.current = value;
+}
+
 const statusBannerVariants = cva(
-  "flex min-w-0 animate-in flex-wrap border-solid text-[13px]/[18px] text-foreground duration-240 ease-out-quint fade-in-0 slide-in-from-bottom-1 fill-mode-both motion-reduce:animate-none",
+  "flex min-w-0 animate-in flex-wrap border-solid text-[13px]/[18px] text-foreground duration-240 ease-out-quint fade-in-0 slide-in-from-bottom-1 fill-mode-both data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:duration-150 data-[state=closed]:ease-out data-[state=closed]:fill-mode-forwards motion-reduce:animate-none",
   {
     variants: {
       variant: {
         card: "items-start gap-3 rounded-[14px] border bg-card p-3.5",
         tinted:
           "items-start gap-3 rounded-xl border-0 bg-[color-mix(in_oklab,var(--tone)_11%,var(--card))] px-3.5 py-3 shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--tone)_18%,transparent)]",
-        bar: "items-center gap-2.5 rounded-none border-0 border-b border-[color-mix(in_oklab,var(--tone)_22%,var(--border))] bg-[color-mix(in_oklab,var(--tone)_8%,var(--card))] px-4 py-2",
+        // The bar sits in flow, so it fades for as long as its row collapses.
+        bar: "items-center gap-2.5 rounded-none data-[state=closed]:duration-300 border-0 border-b border-[color-mix(in_oklab,var(--tone)_22%,var(--border))] bg-[color-mix(in_oklab,var(--tone)_8%,var(--card))] px-4 py-2",
       },
     },
   },
@@ -62,28 +76,67 @@ export function StatusBanner({
   onOpenChange,
   children,
   className,
+  ref,
   ...props
 }: StatusBannerProps) {
   const [internal, setInternal] = useState(defaultOpen);
   const visible = open ?? internal;
-  if (!visible) return null;
+  const banner = useRef<HTMLDivElement | null>(null);
+  const collapse = useRef<HTMLDivElement | null>(null);
+  // Stay mounted while the exit plays; reduced motion has no animation, so unmount at once.
+  const [rendered, setRendered] = useState(visible);
+  if (visible && !rendered) setRendered(true);
+  useEffect(() => {
+    if (visible) return;
+    const node = banner.current;
+    const animation = node ? window.getComputedStyle(node).animationName : "";
+    if (!animation || animation === "none") return setRendered(false);
+    // The in-flow bar also gives its row back instead of letting content jump up.
+    collapse.current?.animate?.([{ gridTemplateRows: "1fr" }, { gridTemplateRows: "0fr" }], {
+      duration: 300,
+      easing: "cubic-bezier(0.23, 1, 0.32, 1)",
+      fill: "forwards",
+    });
+  }, [visible]);
+  if (!visible && !rendered) return null;
   const dismiss = () => {
     if (open === undefined) setInternal(false);
     onOpenChange?.(false);
   };
   const urgent = tone === "error" || tone === "warning";
+  // Only a closing bar is wrapped, so an open bar stays a direct child (and can be sticky).
+  const closingBar = !visible && variant === "bar";
+  const element = (
+    <div
+      role={urgent ? "alert" : "status"}
+      data-slot="status-banner"
+      className={cn(toneClass[tone], statusBannerVariants({ variant }), className)}
+      {...props}
+      ref={(node) => {
+        banner.current = node;
+        assignRef(ref, node);
+      }}
+      data-variant={variant}
+      data-tone={tone}
+      data-state={visible ? "open" : "closed"}
+      inert={!visible}
+      onAnimationEnd={(event) => {
+        props.onAnimationEnd?.(event);
+        if (event.target === event.currentTarget && !visible) setRendered(false);
+      }}
+    >
+      {children}
+    </div>
+  );
   return (
     <Context.Provider value={{ tone, variant, dismiss }}>
-      <div
-        role={urgent ? "alert" : "status"}
-        data-slot="status-banner"
-        className={cn(toneClass[tone], statusBannerVariants({ variant }), className)}
-        {...props}
-        data-variant={variant}
-        data-tone={tone}
-      >
-        {children}
-      </div>
+      {closingBar ? (
+        <div ref={collapse} className="grid">
+          <div className="min-h-0 overflow-hidden">{element}</div>
+        </div>
+      ) : (
+        element
+      )}
     </Context.Provider>
   );
 }
@@ -149,7 +202,7 @@ export function StatusBannerActions({ className, ...props }: ComponentProps<"div
 }
 
 const actionVariants = cva(
-  "cursor-pointer rounded-full py-0 text-foreground [transition:background-color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100",
+  "cursor-pointer rounded-full py-0 text-foreground transition-[background-color,scale] duration-[120ms,140ms] ease-[ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100",
   {
     variants: {
       variant: {
@@ -188,7 +241,7 @@ export function StatusBannerDismiss({
       aria-label="Dismiss"
       data-slot="status-banner-dismiss"
       className={cn(
-        "flex-none cursor-pointer rounded-lg text-subtle-foreground [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-foreground/8 hover:text-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.94] motion-reduce:transition-none motion-reduce:active:scale-100 dark:hover:bg-foreground/8 [&_svg:not([class*='size-'])]:size-3.5",
+        "flex-none cursor-pointer rounded-lg text-subtle-foreground transition-[background-color,color,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] hover:bg-foreground/8 hover:text-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.94] motion-reduce:transition-none motion-reduce:active:scale-100 dark:hover:bg-foreground/8 [&_svg:not([class*='size-'])]:size-3.5",
         context.variant === "bar"
           ? "-my-0.75 mr-[-4px] ml-0 size-6"
           : "-my-[5px] mr-[-6px] ml-0 size-7",

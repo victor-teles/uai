@@ -6,7 +6,10 @@ import {
   createContext,
   type KeyboardEvent,
   useContext,
+  useEffect,
   useId,
+  useLayoutEffect,
+  useRef,
   useState,
 } from "react";
 import { Button } from "@/components/ui/button";
@@ -140,14 +143,38 @@ export function CommentThreadCount({ className, ...props }: ComponentProps<"span
 
 export type CommentThreadSortProps = Omit<ComponentProps<"div">, "defaultValue" | "dir">;
 
+const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
+
 /** A radio group for the sort order. Arrow keys move the selection. */
 export function CommentThreadSort({
   "aria-label": label = "Sort comments",
   onKeyDown,
   className,
+  children,
   ...props
 }: CommentThreadSortProps) {
   const { variant, sort, setSort } = useThread("CommentThreadSort");
+  const ref = useRef<HTMLDivElement>(null);
+  const [thumb, setThumb] = useState<{ x: number; y: number; width: number; height: number }>();
+  useIsomorphicLayoutEffect(() => {
+    const group = ref.current;
+    if (!group) return;
+    const measure = () => {
+      const checked = group.querySelector<HTMLElement>("[role=radio][aria-checked=true]");
+      if (!checked || checked.offsetWidth === 0) return setThumb(undefined);
+      setThumb({
+        x: checked.offsetLeft,
+        y: checked.offsetTop,
+        width: checked.offsetWidth,
+        height: checked.offsetHeight,
+      });
+    };
+    measure();
+    if (typeof ResizeObserver !== "function") return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(group);
+    return () => observer.disconnect();
+  }, [sort]);
   return (
     <ToggleGroup
       type="single"
@@ -161,16 +188,33 @@ export function CommentThreadSort({
       aria-label={label}
       data-slot="comment-thread-sort"
       className={cn(
-        "inline-flex items-center gap-0.5 rounded-full bg-card",
+        "group/sort relative isolate inline-flex items-center gap-0.5 rounded-full bg-card",
         variant === "compact" ? "p-px" : "p-0.5",
         className,
       )}
       {...props}
+      ref={ref}
+      data-ready={thumb ? "" : undefined}
       onKeyDown={(event) => {
         onKeyDown?.(event);
         if (!event.defaultPrevented) moveRadio(event);
       }}
-    />
+    >
+      {/* Mounted only once measured, so the thumb never slides in from the corner. */}
+      {thumb ? (
+        <span
+          aria-hidden="true"
+          data-slot="comment-thread-sort-thumb"
+          className="pointer-events-none absolute top-0 left-0 -z-1 rounded-full bg-accent transition-[translate,width] duration-240 ease-out-quint motion-reduce:transition-none"
+          style={{
+            width: thumb.width,
+            height: thumb.height,
+            translate: `${thumb.x}px ${thumb.y}px`,
+          }}
+        />
+      ) : null}
+      {children}
+    </ToggleGroup>
   );
 }
 
@@ -193,7 +237,7 @@ export function CommentThreadSortOption({
         "min-w-0 cursor-pointer rounded-full border-0 px-2.5 text-[12px] font-medium [transition:background-color_180ms_cubic-bezier(0.23,1,0.32,1),color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.96] motion-reduce:transition-none motion-reduce:active:scale-100",
         compact ? "h-5.5" : "h-6",
         checked
-          ? "bg-accent text-foreground hover:bg-accent hover:text-foreground data-[state=on]:text-foreground"
+          ? "bg-accent text-foreground hover:bg-accent hover:text-foreground data-[state=on]:text-foreground group-data-ready/sort:bg-transparent group-data-ready/sort:hover:bg-transparent group-data-ready/sort:data-[state=on]:bg-transparent"
           : "bg-transparent text-subtle-foreground hover:bg-transparent hover:text-foreground",
         className,
       )}

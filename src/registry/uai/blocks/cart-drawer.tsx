@@ -8,6 +8,8 @@ import {
   type ReactNode,
   type RefObject,
   useContext,
+  useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -49,6 +51,30 @@ function useDrawer(part: string) {
   const context = useContext(Context);
   if (!context) throw new Error(`${part} must be used within CartDrawer`);
   return context;
+}
+
+const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
+
+// Ticks an element in place when its text changes, so a new count reads as an update.
+function useValueTick<T extends HTMLElement>() {
+  const ref = useRef<T>(null);
+  const previous = useRef<string | null>(null);
+  useIsomorphicLayoutEffect(() => {
+    const element = ref.current;
+    const text = element?.textContent ?? null;
+    const changed = previous.current !== null && text !== null && previous.current !== text;
+    previous.current = text;
+    if (!changed || !element || typeof element.animate !== "function") return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    element.animate(
+      [
+        { opacity: 0.4, transform: "translateY(3px)" },
+        { opacity: 1, transform: "none" },
+      ],
+      { duration: 200, easing: "cubic-bezier(0.23, 1, 0.32, 1)" },
+    );
+  });
+  return ref;
 }
 
 const buttonBase =
@@ -114,6 +140,7 @@ export function CartDrawerTrigger({
   ...props
 }: CartDrawerTriggerProps) {
   const context = useDrawer("CartDrawerTrigger");
+  const countRef = useValueTick<HTMLSpanElement>();
   return (
     <SheetTrigger asChild onClick={onClick}>
       <Button
@@ -137,7 +164,10 @@ export function CartDrawerTrigger({
         />
         {children}
         {count === undefined ? null : (
-          <span className="inline-grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1.5 text-[11.5px] font-medium text-primary-foreground tabular-nums">
+          <span
+            ref={countRef}
+            className="inline-grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1.5 text-[11.5px] font-medium text-primary-foreground tabular-nums"
+          >
             {count}
             <span className="sr-only">{count === 1 ? " item" : " items"}</span>
           </span>
@@ -148,7 +178,7 @@ export function CartDrawerTrigger({
 }
 
 const cartDrawerContentVariants = cva(
-  "box-border max-w-full gap-0 overflow-hidden border-0 bg-popover p-0 text-[13px]/[18px] text-popover-foreground ease-out-quint data-[state=closed]:duration-220 data-[state=open]:duration-220 data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 sm:max-w-full motion-reduce:data-[state=closed]:animate-none motion-reduce:data-[state=open]:animate-none",
+  "box-border max-w-full gap-0 overflow-hidden border-0 bg-popover p-0 text-[13px]/[18px] text-popover-foreground ease-[cubic-bezier(0.23,1,0.32,1)] data-[state=closed]:duration-220 data-[state=open]:duration-220 data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 sm:max-w-full motion-reduce:data-[state=closed]:animate-none motion-reduce:data-[state=open]:animate-none",
   {
     variants: {
       variant: {
@@ -306,8 +336,14 @@ export function CartDrawerItems({
 export function CartDrawerItem(props: Omit<CartItemProps, "variant">) {
   const context = useDrawer("CartDrawerItem");
   return (
-    <li data-slot="cart-drawer-item" className="min-w-0">
-      <CartItem {...props} variant={itemVariants[context.variant]} />
+    <li
+      data-slot="cart-drawer-item"
+      // The line collapses while its remove action is in flight.
+      className="grid min-w-0 grid-rows-[1fr] transition-[grid-template-rows,opacity] duration-240 ease-out-quint has-[[data-slot=cart-item-remove][aria-busy=true]]:grid-rows-[0fr] has-[[data-slot=cart-item-remove][aria-busy=true]]:opacity-0 motion-reduce:transition-none"
+    >
+      <div className="min-h-0 has-[[data-slot=cart-item-remove][aria-busy=true]]:overflow-hidden">
+        <CartItem {...props} variant={itemVariants[context.variant]} />
+      </div>
     </li>
   );
 }

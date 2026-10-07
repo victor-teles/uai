@@ -135,9 +135,12 @@ export function ThinkingTrigger({
         )}
       >
         <StatusIcon
+          key={context.status}
           strokeWidth={2}
           className={cn(
             "size-3.5",
+            context.status !== "thinking" &&
+              "animate-in duration-200 ease-out-quint fade-in-0 zoom-in-50 motion-reduce:animate-none",
             context.status === "thinking" &&
               "text-muted-foreground motion-safe:animate-spin motion-reduce:animate-none",
             context.status === "complete" && "text-success",
@@ -183,7 +186,7 @@ export function ThinkingTrigger({
       ) : null}
       <ChevronDown
         className={cn(
-          "size-4 shrink-0 text-subtle-foreground transition-[transform,color] duration-180 ease-out-quint group-hover/trigger:text-muted-foreground motion-reduce:transition-none",
+          "size-4 shrink-0 text-subtle-foreground transition-[rotate,color] duration-180 ease-out-quint group-hover/trigger:text-muted-foreground motion-reduce:transition-none",
           context.open && "rotate-180",
         )}
         aria-hidden="true"
@@ -212,24 +215,32 @@ export function ThinkingContent({
   const hasActivity = Children.count(children) > 0;
 
   return (
-    <CollapsibleContent
-      data-slot="thinking-content"
+    <div
+      inert={!context.open}
       className={cn(
-        "border-t px-3.5 pt-1 pb-1.5 animate-in fade-in-0 slide-in-from-top-1 duration-240 ease-out-quint motion-reduce:animate-none",
-        className,
+        "grid transition-[grid-template-rows,opacity] duration-300 ease-out-quint motion-reduce:transition-none",
+        context.open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
       )}
-      {...props}
     >
-      {hasActivity ? (
-        <div role="log" aria-live="polite" aria-relevant="additions text">
-          <ol>{children}</ol>
-        </div>
-      ) : (
-        <p className="py-3 text-[13px]/[18px] text-subtle-foreground">
-          {emptyLabel ?? getEmptyLabel(context.status)}
-        </p>
-      )}
-    </CollapsibleContent>
+      <div className="min-h-0 overflow-hidden">
+        <CollapsibleContent
+          data-slot="thinking-content"
+          forceMount
+          className={cn("border-t px-3.5 pt-1 pb-1.5", className)}
+          {...props}
+        >
+          {hasActivity ? (
+            <div role="log" aria-live="polite" aria-relevant="additions text">
+              <ol>{children}</ol>
+            </div>
+          ) : (
+            <p className="py-3 text-[13px]/[18px] text-subtle-foreground">
+              {emptyLabel ?? getEmptyLabel(context.status)}
+            </p>
+          )}
+        </CollapsibleContent>
+      </div>
+    </div>
   );
 }
 

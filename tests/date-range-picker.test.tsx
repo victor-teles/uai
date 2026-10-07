@@ -35,7 +35,7 @@ test("selects custom ranges, restarts a completed range, and clears dates", asyn
   await user.click(day("Tuesday, September 15, 2026"));
   expect(screen.getByRole("status").textContent).toContain("Choose an end date");
   await user.click(day("Friday, September 18, 2026"));
-  expect(screen.getByRole("status").textContent).toBe("2026-09-15 to 2026-09-18");
+  expect(screen.getByRole("status").textContent).toBe("Sep 15, 2026 to Sep 18, 2026");
   expect(day("Wednesday, September 16, 2026").getAttribute("aria-pressed")).toBe("true");
   await user.click(day("Monday, September 21, 2026"));
   await user.click(day("Sunday, September 20, 2026"));
@@ -73,7 +73,7 @@ test("enforces date bounds for presets, calendar, and direct input", async () =>
   fireEvent.change(screen.getByLabelText("End date"), { target: { value: "2026-09-10" } });
   expect((screen.getByLabelText("End date") as HTMLInputElement).value).toBe("");
   await user.click(day("Sunday, September 20, 2026"));
-  expect(screen.getByRole("status").textContent).toBe("2026-09-14 to 2026-09-20");
+  expect(screen.getByRole("status").textContent).toBe("Sep 14, 2026 to Sep 20, 2026");
 });
 test("navigates day, week, month and year by keyboard with one calendar tab stop", async () => {
   const user = userEvent.setup();

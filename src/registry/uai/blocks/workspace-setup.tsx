@@ -1,7 +1,7 @@
 "use client";
 
 import { cva } from "class-variance-authority";
-import { X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import {
   type ComponentProps,
   createContext,
@@ -498,7 +498,7 @@ export function WorkspaceSetupChoice({
       data-slot="workspace-setup-choice"
       className={cn(
         transition,
-        "flex min-w-0 cursor-pointer items-start gap-2.5 bg-card shadow-[inset_0_0_0_1px_var(--border)] hover:bg-[color-mix(in_oklab,var(--muted)_50%,var(--card))] has-checked:bg-[color-mix(in_oklab,var(--primary)_6%,var(--card))] has-checked:shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_55%,transparent)] has-focus-visible:outline-2 focus-visible:outline-solid has-focus-visible:outline-offset-2 has-focus-visible:outline-ring",
+        "flex min-w-0 cursor-pointer items-start gap-2.5 bg-card shadow-[inset_0_0_0_1px_var(--border)] hover:bg-[color-mix(in_oklab,var(--muted)_50%,var(--card))] has-checked:bg-[color-mix(in_oklab,var(--primary)_6%,var(--card))] has-checked:shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_55%,transparent)] has-focus-visible:outline-2 has-focus-visible:outline-solid has-focus-visible:outline-offset-2 has-focus-visible:outline-ring",
         variant === "compact" ? "rounded-lg p-2.5" : "rounded-[10px] p-3",
         className,
       )}
@@ -629,12 +629,14 @@ export function WorkspaceSetupActions({ className, ...props }: ComponentProps<"d
 
 export function WorkspaceSetupSubmit({
   pendingLabel = "Creating…",
+  createdLabel = "Created",
   children,
   className,
   ...props
-}: ComponentProps<"button"> & { pendingLabel?: ReactNode }) {
+}: ComponentProps<"button"> & { pendingLabel?: ReactNode; createdLabel?: ReactNode }) {
   const context = useSetup("WorkspaceSetupSubmit");
   const pending = context.status === "creating";
+  const created = context.status === "created";
   const compact = context.variant === "compact";
   return (
     <Button
@@ -643,6 +645,7 @@ export function WorkspaceSetupSubmit({
       className={cn(
         buttonBase,
         "bg-primary text-primary-foreground hover:bg-primary not-disabled:hover:brightness-108 disabled:cursor-default disabled:bg-secondary disabled:text-subtle-foreground",
+        created && "gap-1.5 disabled:bg-success/14 disabled:text-success",
         compact
           ? "h-7 px-3 text-[12.5px] has-[>svg]:px-3"
           : "h-8 px-3.5 text-[13px] has-[>svg]:px-3.5",
@@ -651,9 +654,18 @@ export function WorkspaceSetupSubmit({
       )}
       {...props}
       aria-busy={pending || undefined}
-      disabled={context.status === "created"}
+      disabled={created}
     >
-      {pending ? (
+      {created ? (
+        <>
+          <Check
+            className="size-3.5 animate-in fade-in-0 zoom-in-50 duration-200 ease-out-quint motion-reduce:animate-none"
+            strokeWidth={2.2}
+            aria-hidden="true"
+          />
+          {createdLabel}
+        </>
+      ) : pending ? (
         <span className="animate-[shimmer_2s_linear_infinite] bg-[linear-gradient(90deg,color-mix(in_oklab,currentColor_55%,transparent)_0%,color-mix(in_oklab,currentColor_55%,transparent)_35%,currentColor_50%,color-mix(in_oklab,currentColor_55%,transparent)_65%,color-mix(in_oklab,currentColor_55%,transparent)_100%)] bg-size-[200%_100%] bg-clip-text [-webkit-text-fill-color:transparent] motion-reduce:animate-none motion-reduce:bg-none motion-reduce:[-webkit-text-fill-color:currentColor]">
           {pendingLabel}
         </span>

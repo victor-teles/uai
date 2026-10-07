@@ -271,13 +271,13 @@ export function SplitPaneHandle({
         aria-hidden="true"
         data-slot="split-pane-handle-grip"
         className={cn(
-          "absolute rounded-full [transition:background-color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)]",
+          "absolute rounded-full [transition:background-color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none",
           horizontal ? "h-7 w-1" : "h-1 w-7",
           active
             ? "bg-foreground"
             : "bg-border-strong group-hover/split-handle:bg-muted-foreground motion-safe:group-hover/split-handle:scale-110",
           context.variant !== "inset" && "shadow-[0_0_0_2px_var(--card)]",
-          dragging && "[transform:scale(1.1)]",
+          dragging && "motion-safe:scale-110",
         )}
       />
     </div>

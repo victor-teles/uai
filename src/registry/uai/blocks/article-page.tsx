@@ -6,7 +6,10 @@ import {
   createContext,
   type KeyboardEvent,
   useContext,
+  useEffect,
   useId,
+  useLayoutEffect,
+  useRef,
   useState,
 } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -230,14 +233,38 @@ export function ArticlePageToolbar({
 
 export type ArticlePageTextSizeControlProps = Omit<ComponentProps<"div">, "defaultValue" | "dir">;
 
+const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
+
 /** A radio group that sets the reading size of ArticlePageContent. Arrow keys move the selection. */
 export function ArticlePageTextSizeControl({
   "aria-label": label = "Text size",
   onKeyDown,
   className,
+  children,
   ...props
 }: ArticlePageTextSizeControlProps) {
   const { variant, textSize, setTextSize } = useArticle("ArticlePageTextSizeControl");
+  const ref = useRef<HTMLDivElement>(null);
+  const [thumb, setThumb] = useState<{ x: number; y: number; width: number; height: number }>();
+  useIsomorphicLayoutEffect(() => {
+    const list = ref.current;
+    if (!list) return;
+    const measure = () => {
+      const checked = list.querySelector<HTMLElement>("[role=radio][aria-checked=true]");
+      if (!checked || checked.offsetWidth === 0) return setThumb(undefined);
+      setThumb({
+        x: checked.offsetLeft,
+        y: checked.offsetTop,
+        width: checked.offsetWidth,
+        height: checked.offsetHeight,
+      });
+    };
+    measure();
+    if (typeof ResizeObserver !== "function") return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(list);
+    return () => observer.disconnect();
+  }, [textSize]);
   return (
     <ToggleGroup
       type="single"
@@ -251,16 +278,31 @@ export function ArticlePageTextSizeControl({
       aria-label={label}
       data-slot="article-page-text-size-control"
       className={cn(
-        "inline-flex items-center gap-0.5 rounded-full bg-card",
+        "group/text-size relative isolate inline-flex items-center gap-0.5 rounded-full bg-card",
         variant === "compact" ? "p-px" : "p-0.5",
         className,
       )}
       {...props}
+      ref={ref}
+      data-ready={thumb ? "" : undefined}
       onKeyDown={(event) => {
         onKeyDown?.(event);
         if (!event.defaultPrevented) moveRadio(event);
       }}
-    />
+    >
+      {/* One measured thumb slides between sizes; until it is measured the checked option paints itself. */}
+      <span
+        aria-hidden="true"
+        data-slot="article-page-text-size-thumb"
+        className="pointer-events-none absolute top-0 left-0 -z-1 rounded-full bg-accent opacity-0 transition-[translate,width] duration-240 ease-out-quint group-data-ready/text-size:opacity-100 motion-reduce:transition-none"
+        style={{
+          width: thumb?.width ?? 0,
+          height: thumb?.height ?? 0,
+          translate: thumb ? `${thumb.x}px ${thumb.y}px` : undefined,
+        }}
+      />
+      {children}
+    </ToggleGroup>
   );
 }
 
@@ -290,12 +332,12 @@ export function ArticlePageTextSizeOption({
       data-slot="article-page-text-size-option"
       className={cn(
         "grid cursor-pointer place-items-center rounded-full border-0 px-1.5 font-medium",
-        "[transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)]",
+        "transition-[color,scale] duration-[120ms,140ms] ease-[ease-out,cubic-bezier(0.23,1,0.32,1)]",
         "focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring focus-visible:outline-solid active:scale-94",
         "motion-reduce:transition-none motion-reduce:active:scale-100",
-        compact ? "h-[22px] min-w-6" : "h-6 min-w-7",
+        compact ? "h-6 min-w-6" : "h-6 min-w-7",
         checked
-          ? "bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground"
+          ? "bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground group-data-ready/text-size:bg-transparent group-data-ready/text-size:hover:bg-transparent"
           : "bg-transparent text-subtle-foreground hover:bg-transparent hover:text-foreground",
         optionTextSize[value],
         className,
@@ -315,7 +357,7 @@ export function ArticlePageShare(props: Omit<ShareMenuProps, "variant">) {
 
 const articleContentProse = [
   "[&>*]:mx-0 [&>*]:mb-0 [&>:where(:first-child)]:mt-0 [&>*+*]:mt-[1em]",
-  "[&_h2]:mt-[1.6em] [&_h2]:text-[1.25em]/[1.3] [&_h2]:font-semibold [&_h2]:tracking-[-0.01em]",
+  "[&_h2]:mt-[1.6em] [&_h2]:text-[1.25em]/[1.3] [&_h2]:font-medium [&_h2]:tracking-[-0.01em]",
   "[&_h3]:mt-[1.4em] [&_h3]:text-[1.08em]/[1.35] [&_h3]:font-medium",
   "[&_a]:text-inherit [&_a]:underline [&_a]:decoration-border-strong [&_a]:underline-offset-3 [&_a]:transition-[text-decoration-color] [&_a]:duration-120 [&_a]:ease-[ease-out] [&_a:hover]:decoration-foreground motion-reduce:[&_a]:transition-none",
   "[&_blockquote]:border-s-2 [&_blockquote]:border-border-strong [&_blockquote]:py-0.5 [&_blockquote]:ps-4 [&_blockquote]:pe-0 [&_blockquote]:text-muted-foreground",
@@ -331,7 +373,6 @@ export function ArticlePageContent({ className, ...props }: ComponentProps<"div"
       data-slot="article-page-content"
       className={cn(
         "min-w-0 text-pretty wrap-anywhere",
-        "[transition:font-size_180ms_cubic-bezier(0.23,1,0.32,1),line-height_180ms_cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none",
         variant !== "compact" && "max-w-[68ch]",
         contentType[textSize],
         articleContentProse,

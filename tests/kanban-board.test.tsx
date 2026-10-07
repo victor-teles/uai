@@ -1,5 +1,5 @@
 import { expect, mock, test } from "bun:test";
-import { render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import {
@@ -133,4 +133,25 @@ test("renders every variant and guards compound children", () => {
       </KanbanBoard>,
     ),
   ).toThrow("KanbanBoardColumnTitle must be used within KanbanBoardColumn");
+});
+
+test("marks the dragged card and the column under the pointer", async () => {
+  render(<Stateful />);
+  const card = screen.getByText("Alpha").closest("li") as HTMLElement;
+  const doing = screen.getByRole("region", { name: "Doing" });
+  const dataTransfer = {
+    types: ["application/x-uai-kanban"],
+    setData: () => {},
+    getData: () => "a",
+    effectAllowed: "all",
+  };
+  fireEvent.dragStart(card, { dataTransfer });
+  await act(() => new Promise((resolve) => requestAnimationFrame(resolve)));
+  expect(card.hasAttribute("data-dragging")).toBe(true);
+  fireEvent.dragEnter(doing, { dataTransfer });
+  expect(doing.hasAttribute("data-drop-target")).toBe(true);
+  fireEvent.dragLeave(doing, { dataTransfer, relatedTarget: null });
+  expect(doing.hasAttribute("data-drop-target")).toBe(false);
+  fireEvent.dragEnd(card, { dataTransfer });
+  expect(card.hasAttribute("data-dragging")).toBe(false);
 });
