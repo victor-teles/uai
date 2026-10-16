@@ -311,7 +311,7 @@ describe("Uai registry", () => {
 
     expect(getRegistryItem("cart-item").usage).toBe(preview);
     expect(preview).toContain("const [quantity, setQuantity] = useState(2)");
-    expect(preview).toContain("<CartItemPrice>${(quantity * 48).toFixed(2)}</CartItemPrice>");
+    expect(preview).toContain("<CartItemPrice>$" + "{(quantity * 48).toFixed(2)}</CartItemPrice>");
     expect(preview).toContain("value={quantity}");
     expect(preview).toContain("onValueChange={setQuantity}");
   });
