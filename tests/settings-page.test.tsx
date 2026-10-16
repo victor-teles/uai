@@ -18,6 +18,7 @@ import {
   SettingsPage,
   SettingsPageConfirm,
   SettingsPageField,
+  SettingsPageFieldEdited,
   SettingsPageHeader,
   SettingsPageSaveBar,
   SettingsPageSection,
@@ -51,8 +52,16 @@ function Fixture({
           <SettingsPageSectionDescription>Shown on invoices.</SettingsPageSectionDescription>
         </SettingsPageSectionHeader>
         <SettingsPageSectionContent>
-          <SettingsPageField required invalid={!name.trim()} value={name} onValueChange={setName}>
-            <FormFieldLabel>Workspace name</FormFieldLabel>
+          <SettingsPageField
+            required
+            edited={name !== saved}
+            invalid={!name.trim()}
+            value={name}
+            onValueChange={setName}
+          >
+            <FormFieldLabel>
+              Workspace name <SettingsPageFieldEdited />
+            </FormFieldLabel>
             <FormFieldInput />
             <FormFieldError>Enter a workspace name.</FormFieldError>
           </SettingsPageField>
@@ -145,4 +154,49 @@ test("maps every variant and guards regions outside the page", () => {
       </SettingsPage>,
     ),
   ).toThrow("SettingsPageSectionTitle must be used within SettingsPageSection");
+});
+
+test("marks edited fields and only labels optional ones", async () => {
+  const user = userEvent.setup();
+  render(<Fixture />);
+  const marker = screen.getByText("Edited").closest("[data-slot=settings-page-field-edited]");
+  expect(marker?.getAttribute("data-state")).toBe("off");
+  expect(marker?.getAttribute("aria-hidden")).toBe("true");
+  expect(screen.queryByText("(required)")?.closest("[data-slot=form-field-label]")).toBeTruthy();
+  await user.type(screen.getByLabelText(/Workspace name/), "!");
+  expect(marker?.getAttribute("data-state")).toBe("on");
+  expect(marker?.hasAttribute("aria-hidden")).toBe(false);
+  expect(() => render(<SettingsPageFieldEdited />)).toThrow(
+    "SettingsPageFieldEdited must be used within SettingsPageField",
+  );
+});
+
+test("keeps Save enabled with an invalid field and sends focus to it instead of saving", async () => {
+  const user = userEvent.setup();
+  const saves: string[] = [];
+  render(<Fixture onSave={(name) => saves.push(name)} />);
+  const input = screen.getByLabelText(/Workspace name/);
+  await user.clear(input);
+  const save = screen.getByRole("button", { name: "Save changes" }) as HTMLButtonElement;
+  expect(save.disabled).toBe(false);
+  await user.click(save);
+  expect(saves).toEqual([]);
+  expect(document.activeElement).toBe(input);
+  expect(input.hasAttribute("data-shake")).toBe(true);
+  expect(screen.getByText("Fix 1 field to save")).toBeTruthy();
+  expect(screen.getByRole("region", { name: "Unsaved changes" }).hasAttribute("data-invalid")).toBe(
+    true,
+  );
+  await user.type(input, "Northwind Co");
+  expect(screen.queryByText("Fix 1 field to save")).toBeNull();
+  await user.click(screen.getByRole("button", { name: "Save changes" }));
+  expect(saves).toEqual(["Northwind Co"]);
+});
+
+test("keeps danger on the button only", () => {
+  render(<Fixture />);
+  const title = screen.getByRole("heading", { name: "Delete workspace" });
+  expect(title.className).not.toContain("destructive");
+  const danger = screen.getByRole("region", { name: "Delete workspace" });
+  expect(danger.className).not.toContain("destructive");
 });
