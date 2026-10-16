@@ -1,0 +1,84 @@
+name: Component factory
+
+# Builds the next `todo` idea from backlog/ideas.yml and proposes it as a draft PR.
+#
+# Manual only for now. Enable the schedule once the AI secrets below are configured
+# and the generation step is wired to an agent:
+#   - secrets.ANTHROPIC_API_KEY or secrets.OPENAI_API_KEY
+#   - vars.AI_MODEL (and optionally vars.AI_PROVIDER)
+#   - Settings › Actions › General › "Allow GitHub Actions to create and approve pull requests"
+on:
+  workflow_dispatch:
+    inputs:
+      idea:
+        description: Backlog id to build (defaults to the first `todo` idea)
+        required: false
+  # schedule:
+  #   - cron: "0 9 * * 1-5" # weekdays 09:00 UTC; enable after the secrets are set
+
+concurrency:
+  group: component-factory
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  factory:
+    name: Build one backlog idea
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+
+      - name: Guardrail - at most 2 open bot PRs
+        id: guard
+        run: bun scripts/automation/bot-pr.ts check
+
+      - name: Pick the idea
+        id: idea
+        if: steps.guard.outputs.allowed == 'true'
+        run: bun scripts/automation/backlog.ts next
+
+      - name: Generate the component
+        id: generate
+        if: steps.guard.outputs.allowed == 'true' && steps.idea.outputs.found == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          AI_PROVIDER: ${{ vars.AI_PROVIDER }}
+          AI_MODEL: ${{ vars.AI_MODEL }}
+          IDEA_ID: ${{ inputs.idea || steps.idea.outputs.id }}
+        run: |
+          # Skeleton: plug the coding agent in here. It must follow CONTRIBUTING.md
+          # › "Add a component" for $IDEA_ID (source, mirror, registry.json, catalog,
+          # <id>-preview.tsx, tests) and leave the changes in the working tree.
+          echo "::notice::Generation is not wired yet; nothing was built for $IDEA_ID."
+          echo "generated=false" >> "$GITHUB_OUTPUT"
+
+      - name: Checks
+        if: steps.generate.outputs.generated == 'true'
+        run: |
+          bun run typecheck
+          bun run lint
+          bun run registry:check
+          bun run test
+
+      - name: Open a draft PR
+        if: steps.generate.outputs.generated == 'true'
+        env:
+          IDEA_ID: ${{ inputs.idea || steps.idea.outputs.id }}
+          IDEA_TITLE: ${{ steps.idea.outputs.title }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          printf 'Built by the component factory from `backlog/ideas.yml` › `%s`.\n\nDraft until a human reviews it against `quality/premium-rubric.md`.\n' "$IDEA_ID" > "$RUNNER_TEMP/body.md"
+          bun scripts/automation/bot-pr.ts open \
+            --branch "bot/component-$IDEA_ID" \
+            --title "Add $IDEA_TITLE" \
+            --body-file "$RUNNER_TEMP/body.md"
