@@ -50,10 +50,10 @@ CI runs all of these on every pull request and on `main`:
 | --- | --- |
 | `bun run typecheck` | Next route types and TypeScript. |
 | `bun run lint` | Biome formatting and lint rules. |
-| `bun run registry:check` | Mirrors, `registry.json` dependencies, catalog usage vs. preview file, variants reaching the preview, reduced-motion handling. |
+| `bun run registry:check` | Mirrors, `registry.json` dependencies, catalog usage vs. preview file, variants reaching the preview, reduced-motion handling, and the static rules from [`quality/premium-rubric.md`](quality/premium-rubric.md) (`scripts/premium-lint.ts`). |
 | `bun run test` | Rebuilds `public/r` and runs the unit tests. |
 | `bun run build` | Rebuilds the registry and the production site. |
-| `bun run test:e2e` | Every `/components/<id>` page in light and dark, desktop and mobile: a screenshot, axe (serious and critical findings fail), and a reduced-motion pass. Needs `bun run build` first. |
+| `bun run test:e2e` | Every `/components/<id>` page in light and dark, desktop and mobile: a screenshot, axe (serious and critical findings fail), a reduced-motion pass, and the premium rubric's live checks (`e2e/premium.e2e.ts`, desktop). Needs `bun run build` first. |
 
 Screenshots and the HTML report land in `e2e-artifacts/` locally and as the
 `browser-desktop` and `browser-mobile` artifacts in CI. Review them for the
@@ -69,6 +69,14 @@ reporting them; new work must not add entries.
 - `e2e/axe-baseline.json`: known serious or critical axe findings, as
   `<rule>:<component>:<theme>`. Delete the line once it is fixed.
 - `e2e/reduced-motion-baseline.json`: components that still move with reduced motion.
+- `e2e/premium-baseline.json`: known premium rubric findings, as
+  `<check>:<component>:<theme>` (P4, P5, C3, S2, L2, X2). Delete the line once it is fixed.
+
+Approved exceptions are different from baselines: they are deliberate deviations
+from the rubric, signed off by Victor, and never shrink on their own. They live in
+`quality/premium-exceptions.json` (one rubric row, one file, named properties,
+approver and date), because `quality/premium-rubric.md` is Designer's text and is
+kept verbatim.
 
 ## Pull requests
 
