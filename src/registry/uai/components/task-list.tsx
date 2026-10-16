@@ -60,8 +60,7 @@ const taskListMarkerVariants = cva(
   {
     variants: {
       status: {
-        complete:
-          "border-transparent bg-success/16 text-[color-mix(in_oklab,var(--success)_85%,var(--foreground))]",
+        complete: "border-transparent bg-success/16 text-success-ink",
         active: "border-transparent bg-muted text-foreground",
         pending: "border-dashed border-subtle-foreground/70 bg-transparent text-transparent",
       },
@@ -74,7 +73,7 @@ const taskListStatusVariants = cva(
   {
     variants: {
       status: {
-        complete: "bg-success/14 text-[color-mix(in_oklab,var(--success)_85%,var(--foreground))]",
+        complete: "bg-success/14 text-success-ink",
         active: "bg-muted text-foreground",
         pending: "bg-transparent text-subtle-foreground",
       },

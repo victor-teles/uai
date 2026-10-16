@@ -227,7 +227,7 @@ export function ContactSectionAvailability({
         className={cn(
           "size-[7px] flex-none rounded-full",
           available
-            ? "bg-success text-success animate-[ring-pulse_2s_cubic-bezier(0.23,1,0.32,1)_infinite] motion-reduce:animate-none"
+            ? "bg-success text-success-ink animate-[ring-pulse_2s_cubic-bezier(0.23,1,0.32,1)_infinite] motion-reduce:animate-none"
             : "bg-border-strong",
         )}
       />

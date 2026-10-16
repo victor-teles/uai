@@ -255,7 +255,7 @@ export function InstallmentPickerTerms({
       className={cn(
         "justify-self-end text-[11.5px] leading-4 tabular-nums group-data-[variant=tiles]/installments:justify-self-start",
         interestFree
-          ? "inline-flex h-5 items-center rounded-full bg-success/14 px-2 font-medium text-success"
+          ? "inline-flex h-5 items-center rounded-full bg-success/14 px-2 font-medium text-success-ink"
           : "text-subtle-foreground",
         className,
       )}

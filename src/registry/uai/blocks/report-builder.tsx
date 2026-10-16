@@ -272,7 +272,7 @@ export function ReportBuilderOption({
         "relative inline-flex items-center rounded-full border-0 text-[12px] font-medium whitespace-nowrap transition-[background-color,color,box-shadow,scale] duration-[120ms,120ms,120ms,140ms] ease-[ease-out,ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-1 has-[:focus-visible]:outline-ring motion-reduce:transition-none motion-reduce:active:scale-100",
         context.variant === "compact" ? "h-6 px-2.5" : "h-7 px-3",
         "bg-card text-muted-foreground shadow-[inset_0_0_0_1px_var(--border)] not-has-checked:hover:text-foreground not-has-checked:hover:shadow-[inset_0_0_0_1px_var(--border-strong)]",
-        "has-checked:bg-[color-mix(in_oklab,var(--primary)_16%,var(--card))] has-checked:text-[color-mix(in_oklab,var(--primary)_55%,var(--foreground))] has-checked:shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_40%,transparent)]",
+        "has-checked:bg-[color-mix(in_oklab,var(--primary)_16%,var(--card))] has-checked:text-primary-ink has-checked:shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_40%,transparent)]",
         props.disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
         className,
       )}

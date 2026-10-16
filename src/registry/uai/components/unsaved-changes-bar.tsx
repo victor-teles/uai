@@ -122,9 +122,7 @@ export function UnsavedChangesBarMessage({ children, className, ...props }: Comp
       data-slot="unsaved-changes-bar-message"
       className={cn(
         "m-0 flex min-w-0 flex-[1_1_140px] items-center gap-2 font-medium",
-        error
-          ? "text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))]"
-          : "text-foreground",
+        error ? "text-destructive-ink" : "text-foreground",
         className,
       )}
       {...props}
@@ -186,7 +184,7 @@ export function UnsavedChangesBarSave({
       className={cn(
         actionClass,
         saved
-          ? "gap-1.5 bg-success/14 text-success hover:bg-success/14 disabled:cursor-default disabled:opacity-100"
+          ? "gap-1.5 bg-success/14 text-success-ink hover:bg-success/14 disabled:cursor-default disabled:opacity-100"
           : "bg-primary text-primary-foreground hover:bg-primary enabled:hover:brightness-108",
         className,
       )}

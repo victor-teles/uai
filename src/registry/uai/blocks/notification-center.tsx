@@ -120,7 +120,7 @@ export function NotificationCenterCount({ className, ...props }: ComponentProps<
     <span
       data-slot="notification-center-count"
       className={cn(
-        "rounded-full bg-primary/14 px-2 text-[11.5px]/5 font-medium tracking-normal text-[color-mix(in_oklab,var(--primary)_70%,var(--foreground))] tabular-nums",
+        "rounded-full bg-primary/14 px-2 text-[11.5px]/5 font-medium tracking-normal text-primary-ink tabular-nums",
         className,
       )}
       {...props}

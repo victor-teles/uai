@@ -338,7 +338,7 @@ export function CheckoutSectionTitle({ children, className, ...props }: Componen
       {complete ? (
         <span
           aria-hidden="true"
-          className="grid size-[18px] place-items-center rounded-full bg-success/16 text-success animate-in fade-in-0 zoom-in-50 duration-200 ease-out-quint motion-reduce:animate-none"
+          className="grid size-[18px] place-items-center rounded-full bg-success/16 text-success-ink animate-in fade-in-0 zoom-in-50 duration-200 ease-out-quint motion-reduce:animate-none"
         >
           <Check size={11} className="size-[11px]" strokeWidth={2.5} />
         </span>
@@ -623,7 +623,7 @@ export function CheckoutConfirmationTitle({ className, ...props }: ComponentProp
       tabIndex={-1}
       data-slot="checkout-confirmation-title"
       className={cn(
-        "m-0 text-base/[22px] font-semibold tracking-[-0.01em] text-[color-mix(in_oklab,var(--success)_70%,var(--foreground))]",
+        "m-0 text-base/[22px] font-semibold tracking-[-0.01em] text-success-ink",
         className,
       )}
       {...props}

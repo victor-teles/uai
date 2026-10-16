@@ -78,9 +78,9 @@ export function StepIndicatorStep({
       className={cn(
         "text-[11.5px]/4",
         status === "error"
-          ? "text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))]"
+          ? "text-destructive-ink"
           : active
-            ? "text-primary"
+            ? "text-primary-ink"
             : "text-subtle-foreground",
         variant === "compact" && "sr-only",
       )}

@@ -218,9 +218,7 @@ export function SearchFieldMessage({ children, className, ...props }: ComponentP
       data-slot="search-field-message"
       className={cn(
         "m-0 text-xs/4",
-        context.status === "error"
-          ? "text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))]"
-          : "text-subtle-foreground",
+        context.status === "error" ? "text-destructive-ink" : "text-subtle-foreground",
         className,
       )}
       {...props}

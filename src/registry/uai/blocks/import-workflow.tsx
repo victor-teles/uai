@@ -593,8 +593,7 @@ export function ImportWorkflowCell({
       data-slot="import-workflow-cell"
       className={cn(
         "h-9 px-2.5 py-0 whitespace-nowrap",
-        tone === "error" &&
-          "bg-destructive/10 text-[color-mix(in_oklab,var(--destructive)_80%,var(--foreground))]",
+        tone === "error" && "bg-destructive/10 text-destructive-ink",
         className,
       )}
       {...props}

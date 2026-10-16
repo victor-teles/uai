@@ -134,7 +134,7 @@ export function ArticlePageCategory({ className, ...props }: ComponentProps<"p">
   return (
     <p
       data-slot="article-page-category"
-      className={cn("m-0 text-xs/4 font-medium text-primary", className)}
+      className={cn("m-0 text-xs/4 font-medium text-primary-ink", className)}
       {...props}
     />
   );

@@ -54,11 +54,10 @@ const citationVariants: Record<FileAnalysisVariant, CitationVariant> = {
 
 const tones: Record<FileAnalysisFindingTone, { label: string; className: string }> = {
   neutral: { label: "Note", className: "bg-muted-foreground/16 text-muted-foreground" },
-  warning: { label: "Review", className: "bg-warning/14 text-warning" },
+  warning: { label: "Review", className: "bg-warning/14 text-warning-ink" },
   critical: {
     label: "Risk",
-    className:
-      "bg-destructive/14 text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))]",
+    className: "bg-destructive/14 text-destructive-ink",
   },
 };
 

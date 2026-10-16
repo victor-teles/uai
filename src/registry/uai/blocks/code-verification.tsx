@@ -370,7 +370,7 @@ export function CodeVerificationInput({
               variant === "compact" && "h-10 rounded-lg text-[18px]",
               status === "verified"
                 ? // The success wave staggers per cell through `--i`; only this state carries a delay.
-                  "border-transparent bg-[color-mix(in_oklab,var(--success)_8%,var(--card))] text-success [transition:border-color_200ms_ease-out,background-color_200ms_ease-out,color_200ms_ease-out] [transition-delay:calc(var(--i)*35ms)]"
+                  "border-transparent bg-[color-mix(in_oklab,var(--success)_8%,var(--card))] text-success-ink [transition:border-color_200ms_ease-out,background-color_200ms_ease-out,color_200ms_ease-out] [transition-delay:calc(var(--i)*35ms)]"
                 : cn(
                     "text-foreground [transition:border-color_120ms_ease-out,background-color_120ms_ease-out,box-shadow_120ms_ease-out,color_120ms_ease-out] hover:not-focus:border-border",
                     locked
@@ -468,7 +468,7 @@ export function CodeVerificationSubmit({
         codeVerificationActionMotion,
         context.variant === "compact" ? "h-7.5" : "h-8.5",
         verified
-          ? "cursor-default gap-1.5 bg-success/14 text-success hover:bg-success/14"
+          ? "cursor-default gap-1.5 bg-success/14 text-success-ink hover:bg-success/14"
           : ready || pending
             ? "bg-primary text-primary-foreground hover:bg-primary hover:brightness-108 active:scale-[0.97] motion-reduce:active:scale-100"
             : "bg-muted text-subtle-foreground hover:bg-muted",

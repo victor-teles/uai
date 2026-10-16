@@ -45,7 +45,7 @@ function useShare(part: string) {
   return context;
 }
 const shareMenuTriggerVariants = cva(
-  "gap-1.5 rounded-full border-0 py-0 font-medium whitespace-nowrap transition-[background-color,box-shadow,color,scale] duration-[120ms,120ms,120ms,140ms] ease-[ease-out,ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] data-copied:[&_svg]:animate-in data-copied:[&_svg]:fade-in-0 data-copied:[&_svg]:zoom-in-60 data-copied:[&_svg]:text-success data-copied:[&_svg]:duration-220 data-copied:[&_svg]:ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none motion-reduce:active:scale-100 motion-reduce:data-copied:[&_svg]:animate-none",
+  "gap-1.5 rounded-full border-0 py-0 font-medium whitespace-nowrap transition-[background-color,box-shadow,color,scale] duration-[120ms,120ms,120ms,140ms] ease-[ease-out,ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.97] data-copied:[&_svg]:animate-in data-copied:[&_svg]:fade-in-0 data-copied:[&_svg]:zoom-in-60 data-copied:[&_svg]:text-success-ink data-copied:[&_svg]:duration-220 data-copied:[&_svg]:ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none motion-reduce:active:scale-100 motion-reduce:data-copied:[&_svg]:animate-none",
   {
     variants: {
       variant: {

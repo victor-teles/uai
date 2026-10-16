@@ -153,7 +153,7 @@ export function AnnouncementBarLabel({ className, ...props }: ComponentProps<"sp
     <span
       data-slot="announcement-bar-label"
       className={cn(
-        "inline-flex h-5 flex-none items-center rounded-full bg-primary/16 px-2 text-[11.5px]/4 font-medium whitespace-nowrap text-[color-mix(in_oklab,var(--primary)_62%,var(--foreground))] shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_28%,transparent)]",
+        "inline-flex h-5 flex-none items-center rounded-full bg-primary/16 px-2 text-[11.5px]/4 font-medium whitespace-nowrap text-primary-ink shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_28%,transparent)]",
         className,
       )}
       {...props}

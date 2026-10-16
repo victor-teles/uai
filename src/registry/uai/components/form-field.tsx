@@ -213,7 +213,7 @@ export function FormFieldError({ className, ...props }: ComponentProps<"p">) {
       role="alert"
       data-slot="form-field-error"
       className={cn(
-        "m-0 text-xs/4 text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))] animate-in fade-in-0 slide-in-from-top-1 duration-200 ease-out-quint motion-reduce:animate-none",
+        "m-0 text-xs/4 text-destructive-ink animate-in fade-in-0 slide-in-from-top-1 duration-200 ease-out-quint motion-reduce:animate-none",
         className,
       )}
       {...props}
@@ -232,8 +232,8 @@ export function FormFieldCount({ className, ...props }: ComponentProps<"span">) 
       data-slot="form-field-count"
       className={cn(
         "text-right text-[11.5px] text-subtle-foreground tabular-nums transition-colors duration-150 ease-out motion-reduce:transition-none",
-        nearLimit && "text-warning",
-        atLimit && "text-destructive",
+        nearLimit && "text-warning-ink",
+        atLimit && "text-destructive-ink",
         className,
       )}
       {...props}

@@ -66,23 +66,23 @@ const riskConfig = {
   low: {
     label: "Low risk",
     icon: ShieldCheck,
-    iconClassName: "bg-success/14 text-success",
+    iconClassName: "bg-success/14 text-success-ink",
   },
   medium: {
     label: "Medium risk",
     icon: CircleAlert,
-    iconClassName: "bg-warning/14 text-warning",
+    iconClassName: "bg-warning/14 text-warning-ink",
   },
   high: {
     label: "High risk",
     icon: TriangleAlert,
-    iconClassName: "bg-destructive/14 text-destructive",
+    iconClassName: "bg-destructive/14 text-destructive-ink",
   },
   critical: {
     label: "Critical risk",
     icon: OctagonAlert,
     iconClassName:
-      "bg-destructive/14 text-destructive shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--destructive)_28%,transparent)]",
+      "bg-destructive/14 text-destructive-ink shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--destructive)_28%,transparent)]",
   },
 } satisfies Record<
   ApprovalRisk,
@@ -247,9 +247,9 @@ export function ApprovalCardHeader({
           <span
             className={cn(
               "inline-flex items-center gap-1.5 text-[11.5px] leading-4 text-subtle-foreground",
-              context.status === "approved" && "text-success",
+              context.status === "approved" && "text-success-ink",
               context.status === "rejected" && "text-muted-foreground",
-              context.status === "error" && "text-destructive",
+              context.status === "error" && "text-destructive-ink",
             )}
             role="status"
             aria-live="polite"
@@ -262,19 +262,19 @@ export function ApprovalCardHeader({
             ) : context.status === "approved" ? (
               <Check
                 key="approved"
-                className="size-3 animate-in duration-200 ease-out-quint fade-in-0 zoom-in-50 motion-reduce:animate-none text-success"
+                className="size-3 animate-in duration-200 ease-out-quint fade-in-0 zoom-in-50 motion-reduce:animate-none text-success-ink"
                 aria-hidden="true"
               />
             ) : context.status === "rejected" ? (
               <X
                 key="rejected"
-                className="size-3 animate-in duration-200 ease-out-quint fade-in-0 zoom-in-50 motion-reduce:animate-none text-destructive"
+                className="size-3 animate-in duration-200 ease-out-quint fade-in-0 zoom-in-50 motion-reduce:animate-none text-destructive-ink"
                 aria-hidden="true"
               />
             ) : context.status === "error" ? (
               <CircleAlert
                 key="error"
-                className="size-3 animate-in duration-200 ease-out-quint fade-in-0 zoom-in-50 motion-reduce:animate-none text-destructive"
+                className="size-3 animate-in duration-200 ease-out-quint fade-in-0 zoom-in-50 motion-reduce:animate-none text-destructive-ink"
                 aria-hidden="true"
               />
             ) : null}
@@ -394,7 +394,7 @@ export function ApprovalCardError({ className, children, ...props }: ApprovalCar
       {...props}
       role="alert"
     >
-      <CircleAlert className="mt-0.5 size-3.5 shrink-0 text-destructive" aria-hidden="true" />
+      <CircleAlert className="mt-0.5 size-3.5 shrink-0 text-destructive-ink" aria-hidden="true" />
       {children}
     </p>
   );

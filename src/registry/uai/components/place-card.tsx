@@ -193,7 +193,7 @@ export function PlaceCardStatus({ status, className, children, ...props }: Place
       data-slot="place-card-status"
       data-status={status}
       className={cn(
-        "inline-flex items-center gap-1.5 font-medium data-[status=closed]:text-destructive data-[status=closing]:text-warning data-[status=open]:text-success",
+        "inline-flex items-center gap-1.5 font-medium data-[status=closed]:text-destructive-ink data-[status=closing]:text-warning-ink data-[status=open]:text-success-ink",
         className,
       )}
       {...props}

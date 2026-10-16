@@ -16,12 +16,12 @@ function useEntry(part: string) {
   return context;
 }
 const toneClasses: Record<ChangelogEntryCategoryTone, string> = {
-  added: "bg-success/14 text-success",
+  added: "bg-success/14 text-success-ink",
   improved:
-    "bg-[color-mix(in_oklab,color-mix(in_oklab,var(--primary)_62%,var(--foreground))_14%,transparent)] text-[color-mix(in_oklab,var(--primary)_62%,var(--foreground))]",
-  fixed: "bg-warning/14 text-warning",
+    "bg-[color-mix(in_oklab,color-mix(in_oklab,var(--primary)_62%,var(--foreground))_14%,transparent)] text-primary-ink",
+  fixed: "bg-warning/14 text-warning-ink",
   removed: "bg-muted-foreground/14 text-muted-foreground",
-  security: "bg-destructive/14 text-destructive",
+  security: "bg-destructive/14 text-destructive-ink",
 };
 
 const changelogEntryVariants = cva(

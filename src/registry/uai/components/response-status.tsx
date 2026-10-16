@@ -42,7 +42,7 @@ function useResponseStatus(part: string) {
 }
 
 const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
-const dangerText = "text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))]";
+const dangerText = "text-destructive-ink";
 const defaultLabels: Record<ResponseStatusValue, string> = {
   queued: "Waiting to start…",
   streaming: "Generating response…",
@@ -188,7 +188,7 @@ export function ResponseStatusIndicator({ children, className, ...props }: Compo
     queued: "text-subtle-foreground",
     streaming: "text-foreground",
     stopped: "text-subtle-foreground",
-    complete: "text-success",
+    complete: "text-success-ink",
     failed: dangerText,
   }[context.status];
   return (

@@ -56,7 +56,7 @@ const rowHover = "hover:bg-[color-mix(in_oklab,var(--muted)_55%,var(--card))]";
 const headerHover = "bg-card [tr:hover>&]:bg-[color-mix(in_oklab,var(--muted)_55%,var(--card))]";
 // Hairlines between rows only; the last row sits on the container edge.
 const cellRule = "border-b [tr:last-child>&]:border-b-0";
-const badge = "bg-primary/16 text-[11px]/4 font-medium text-primary";
+const badge = "bg-primary/16 text-[11px]/4 font-medium text-primary-ink";
 // Sticky headers cast a soft edge once the table scrolls under them.
 const stickyShadow =
   "group-data-scrolled/comparison-table:shadow-[4px_0_8px_-4px_oklch(0_0_0/0.16)]";
@@ -350,7 +350,7 @@ export function ComparisonTableCheck({
       data-value={value}
       className={cn(
         "inline-grid size-5 place-items-center rounded-full",
-        value ? "bg-success/14 text-success" : "text-subtle-foreground",
+        value ? "bg-success/14 text-success-ink" : "text-subtle-foreground",
         className,
       )}
       {...props}

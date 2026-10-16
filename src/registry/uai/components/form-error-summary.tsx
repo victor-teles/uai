@@ -14,7 +14,7 @@ export type FormErrorSummaryProps = ComponentProps<"section"> & {
 const Context = createContext<string | null>(null);
 
 const formErrorSummaryVariants = cva(
-  "border-solid border-destructive/30 border-l-destructive text-foreground outline-none marker:text-destructive/70 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring",
+  "border-solid border-destructive/30 border-l-destructive text-foreground outline-none marker:text-destructive-ink/70 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring",
   {
     variants: {
       variant: {
@@ -79,7 +79,7 @@ export function FormErrorSummaryTitle({
         size={16}
         strokeWidth={1.75}
         aria-hidden="true"
-        className="shrink-0 text-destructive"
+        className="shrink-0 text-destructive-ink"
       />
       {children}
     </h2>

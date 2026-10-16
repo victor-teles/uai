@@ -220,8 +220,8 @@ export function PixPaymentStatusBadge({
       data-status={context.status}
       className={cn(
         "h-6 shrink-0 gap-1.5 rounded-full border-0 px-2.5 py-0 text-[11.5px] font-medium",
-        context.status === "pending" && "bg-warning/14 text-warning",
-        context.status === "paid" && "bg-success/14 text-success",
+        context.status === "pending" && "bg-warning/14 text-warning-ink",
+        context.status === "paid" && "bg-success/14 text-success-ink",
         context.status === "expired" && "bg-muted text-muted-foreground",
         className,
       )}
@@ -291,7 +291,7 @@ export function PixPaymentQrCode({ children, className, ...props }: PixPaymentQr
         >
           {context.status === "paid" ? (
             <CheckCircle2
-              className="size-7 animate-in text-success delay-60 duration-240 ease-out-quint fill-mode-both fade-in-0 zoom-in-50 motion-reduce:animate-none"
+              className="size-7 animate-in text-success-ink delay-60 duration-240 ease-out-quint fill-mode-both fade-in-0 zoom-in-50 motion-reduce:animate-none"
               strokeWidth={1.75}
               aria-hidden="true"
             />
@@ -367,7 +367,7 @@ export function PixPaymentCode({
               ? "h-7 px-3 text-[12px] has-[>svg]:px-3"
               : "h-8 px-3.5 text-[12.5px] has-[>svg]:px-3.5",
             context.copied
-              ? "bg-success/14 text-success hover:bg-success/14"
+              ? "bg-success/14 text-success-ink hover:bg-success/14"
               : "bg-primary text-primary-foreground hover:bg-primary hover:brightness-[1.08]",
           )}
           disabled={disabled}
@@ -428,7 +428,7 @@ export function PixPaymentCountdown({ className, ...props }: PixPaymentCountdown
       data-slot="pix-payment-countdown"
       className={cn(
         "text-[12px] leading-4 text-subtle-foreground transition-colors duration-240 motion-reduce:transition-none",
-        urgent && "text-warning",
+        urgent && "text-warning-ink",
         className,
       )}
       {...props}

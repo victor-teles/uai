@@ -201,7 +201,7 @@ export function CepFieldControl({ children, className, ...props }: CepFieldContr
       <MapPin
         className={cn(
           "shrink-0 transition-colors duration-200 ease-out motion-reduce:transition-none",
-          found ? "text-success" : "text-subtle-foreground",
+          found ? "text-success-ink" : "text-subtle-foreground",
           context.chrome.iconClass,
         )}
         strokeWidth={1.9}
@@ -339,7 +339,7 @@ export function CepFieldMessage({ children, className, ...props }: CepFieldMessa
       data-slot="cep-field-message"
       className={cn(
         "flex items-start empty:hidden",
-        failed ? "text-destructive" : "text-muted-foreground",
+        failed ? "text-destructive-ink" : "text-muted-foreground",
         context.chrome.messageClass,
         className,
       )}

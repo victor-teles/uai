@@ -183,7 +183,7 @@ export function PricingSectionPlanBadge({ className, ...props }: ComponentProps<
     <Badge
       data-slot="pricing-section-plan-badge"
       className={cn(
-        "h-5 rounded-full border-0 bg-primary/16 px-2 py-0 text-[11.5px]/4 text-[color-mix(in_oklab,var(--primary)_70%,var(--foreground))]",
+        "h-5 rounded-full border-0 bg-primary/16 px-2 py-0 text-[11.5px]/4 text-primary-ink",
         className,
       )}
       {...props}

@@ -56,7 +56,7 @@ const buttonTones = cva(
     variants: {
       tone: {
         trigger:
-          "bg-destructive/12 text-destructive hover:bg-destructive/18 hover:text-destructive dark:hover:bg-destructive/18",
+          "bg-destructive/12 text-destructive-ink hover:bg-destructive/18 hover:text-destructive-ink dark:hover:bg-destructive/18",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
         danger:

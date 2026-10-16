@@ -77,7 +77,7 @@ export function MapControlsGroup({ className, ...props }: ComponentProps<"div">)
 }
 
 const buttonVariants = cva(
-  "rounded-none border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-[background-color,color,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] hover:bg-secondary hover:text-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.94] disabled:opacity-40 aria-pressed:text-primary motion-reduce:transition-none motion-reduce:active:scale-100 dark:hover:bg-secondary",
+  "rounded-none border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-[background-color,color,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] hover:bg-secondary hover:text-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.94] disabled:opacity-40 aria-pressed:text-primary-ink motion-reduce:transition-none motion-reduce:active:scale-100 dark:hover:bg-secondary",
   {
     variants: {
       variant: {
@@ -191,7 +191,7 @@ export function MapControlsLocate({
       data-status={status}
       className={cn(
         // The radar ping sits around the icon so grouped controls never clip it.
-        "relative after:pointer-events-none after:absolute after:top-1/2 after:left-1/2 after:size-2 after:-translate-1/2 after:rounded-full data-[status=error]:text-destructive motion-safe:data-[status=locating]:after:animate-ring-pulse",
+        "relative after:pointer-events-none after:absolute after:top-1/2 after:left-1/2 after:size-2 after:-translate-1/2 after:rounded-full data-[status=error]:text-destructive-ink motion-safe:data-[status=locating]:after:animate-ring-pulse",
         className,
       )}
       {...props}

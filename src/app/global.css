@@ -29,6 +29,10 @@
   --color-destructive: var(--destructive);
   --color-success: var(--success);
   --color-warning: var(--warning);
+  --color-success-ink: var(--success-ink);
+  --color-warning-ink: var(--warning-ink);
+  --color-destructive-ink: var(--destructive-ink);
+  --color-primary-ink: var(--primary-ink);
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
   --color-input: var(--input);
@@ -138,6 +142,12 @@
   --uai-success: oklch(0.6 0.15 153);
   --uai-warning: oklch(0.66 0.16 55);
   --uai-danger: oklch(0.58 0.2 23);
+  /* Text-only status inks: text, badges, and links on the card or a 14% tint.
+     Fills keep the status colours above. */
+  --uai-success-ink: oklch(0.5 0.15 153);
+  --uai-warning-ink: oklch(0.54 0.16 55);
+  --uai-danger-ink: oklch(0.54 0.2 23);
+  --uai-accent-ink: oklch(0.485 0.185 257);
   --uai-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --uai-ease-pop: cubic-bezier(0.16, 1, 0.3, 1);
   --uai-pill-active-bg: var(--uai-surface);
@@ -181,6 +191,10 @@
   --destructive: var(--uai-danger);
   --success: var(--uai-success);
   --warning: var(--uai-warning);
+  --destructive-ink: var(--uai-danger-ink);
+  --success-ink: var(--uai-success-ink);
+  --warning-ink: var(--uai-warning-ink);
+  --primary-ink: var(--uai-accent-ink);
   --border: var(--uai-border);
   --border-strong: var(--uai-border-strong);
   --input: var(--uai-border);
@@ -203,6 +217,10 @@
   --uai-success: oklch(0.705 0.154 154);
   --uai-warning: oklch(0.746 0.156 56);
   --uai-danger: oklch(0.666 0.18 21);
+  --uai-success-ink: oklch(0.705 0.154 154);
+  --uai-warning-ink: oklch(0.746 0.156 56);
+  --uai-danger-ink: oklch(0.71 0.18 21);
+  --uai-accent-ink: oklch(0.72 0.185 257);
   --uai-pill-active-bg: oklch(0.31 0.006 271);
   --uai-pill-active-fg: oklch(0.964 0.002 248);
   --uai-signal-ink: oklch(0.91 0.2 122);
