@@ -308,7 +308,7 @@ export function RegistryCompositionFixture() {
           <AppHeaderSearch />
         </AppHeaderOverflow>
         <AppHeaderActions>
-          <AppHeaderAction aria-label="Open account menu">AC</AppHeaderAction>
+          <AppHeaderAction aria-label="AC, open account menu">AC</AppHeaderAction>
         </AppHeaderActions>
         <AppHeaderMenuButton />
       </AppHeader>
