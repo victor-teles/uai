@@ -55,9 +55,6 @@ function useSection(part: string) {
   return context;
 }
 
-// `text-[color-mix(…destructive 75%, foreground)]` and `primaryInk` stand in for
-// `--destructive-ink` and `--primary-ink` until the ink tokens land (phase 2, item 2).
-const primaryInk = "text-[color-mix(in_oklab,var(--primary)_80%,var(--foreground))]";
 const fieldVariants: Record<SettingsPageVariant, FormFieldVariant> = {
   stacked: "outlined",
   split: "outlined",
@@ -238,7 +235,7 @@ export function SettingsPageSectionContent({ className, ...props }: ComponentPro
               "[&>div:first-child]:min-w-0 [&>div:first-child]:flex-[1_1_240px] [&_strong]:font-medium",
               "[&_p]:m-0 [&_p]:mt-0.5 [&_p]:text-[12.5px]/[18px] [&_p]:text-pretty [&_p]:text-muted-foreground",
               // Only the button carries danger: a 12% tint with ink text, 18% on hover.
-              "[&_[data-slot=confirmation-dialog-trigger]]:h-7.5 [&_[data-slot=confirmation-dialog-trigger]]:px-3.5 [&_[data-slot=confirmation-dialog-trigger]]:text-[12.5px]/[18px] [&_[data-slot=confirmation-dialog-trigger]]:text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))] [&_[data-slot=confirmation-dialog-trigger]]:hover:text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))]",
+              "[&_[data-slot=confirmation-dialog-trigger]]:h-7.5 [&_[data-slot=confirmation-dialog-trigger]]:px-3.5 [&_[data-slot=confirmation-dialog-trigger]]:text-[12.5px]/[18px] [&_[data-slot=confirmation-dialog-trigger]]:text-destructive-ink [&_[data-slot=confirmation-dialog-trigger]]:hover:text-destructive-ink",
             )
           : "grid divide-y divide-solid divide-border",
         className,
@@ -324,8 +321,7 @@ export function SettingsPageFieldEdited({
       data-state={field.edited ? "on" : "off"}
       aria-hidden={!field.edited || undefined}
       className={cn(
-        "inline-flex items-center gap-1.25 text-[11.5px]/4 font-normal",
-        primaryInk,
+        "inline-flex items-center gap-1.25 text-[11.5px]/4 font-normal text-primary-ink",
         "opacity-0 transition-opacity duration-160 ease-out data-[state=on]:opacity-100 motion-reduce:transition-none",
         className,
       )}
@@ -396,7 +392,7 @@ export function SettingsPageSaveBar({
         barClass[context.variant],
         "[&_[data-slot=unsaved-changes-bar-message]]:font-normal",
         "[&:not([data-invalid])_[data-slot=unsaved-changes-bar-message][role=status]]:text-muted-foreground",
-        "[&[data-invalid]_[data-slot=unsaved-changes-bar-message]]:text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))]",
+        "[&[data-invalid]_[data-slot=unsaved-changes-bar-message]]:text-destructive-ink",
         className,
       )}
       variant={barVariants[context.variant]}
