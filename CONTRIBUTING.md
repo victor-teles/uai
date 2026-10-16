@@ -85,3 +85,35 @@ kept verbatim.
 - Never edit the stock shadcn primitives in `src/components/ui/*.tsx` or the
   generated files in `public/r`.
 - By contributing, you agree that your work is released under the MIT License.
+
+## Automation
+
+Three workflows run on `workflow_dispatch` only until their secrets are set; each
+file has its `schedule` commented out with a note.
+
+| Workflow | What it does |
+| --- | --- |
+| `component-factory.yml` | Builds the next `todo` idea from `backlog/ideas.yml` (generation step is a stub for now). |
+| `polish-loop.yml` | Screenshots every item and scores it 1–10 against `quality/premium-rubric.md` with `scripts/design-review.ts`. |
+| `idea-scout.yml` | Proposes new `status: proposed` ideas for `backlog/ideas.yml`. |
+
+To enable them:
+
+1. Add `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` as a repository secret, and set the
+   `AI_MODEL` repository variable (optionally `AI_PROVIDER`). Keys are read from the
+   environment only; never put them in code.
+2. Allow GitHub Actions to create pull requests (Settings › Actions › General).
+3. Uncomment the `schedule` block.
+
+Guardrails live in `scripts/automation/bot-pr.ts`: bot PRs are always drafts from a
+`bot/*` branch, carry the `bot` label, and no new one opens while two are open.
+Pull requests opened with the workflow's `GITHUB_TOKEN` don't start CI on their own;
+push an empty commit or close and reopen the PR to run it.
+
+Run the pieces locally:
+
+```sh
+bun scripts/automation/backlog.ts check
+bun run build && bunx playwright test e2e/components.e2e.ts --project=desktop
+AI_MODEL=<model> ANTHROPIC_API_KEY=<key> bun scripts/design-review.ts --limit 3
+```

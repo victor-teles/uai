@@ -30,8 +30,6 @@ type Violation = { rule: string; item: string; detail: string };
 const ROOT = path.resolve(import.meta.dir, "..");
 const BASELINE_PATH = path.join(ROOT, "scripts/registry-check.baseline.json");
 const PREVIEW_ROOT = path.join(ROOT, "src/components/registry");
-/** Older items keep their live preview inline in this file instead of `<id>-preview.tsx`. */
-const LEGACY_PREVIEW = path.join(PREVIEW_ROOT, "registry-preview.tsx");
 
 const registry = (await Bun.file(path.join(ROOT, "registry.json")).json()) as {
   homepage: string;
@@ -161,9 +159,7 @@ for (const item of registry.items) {
         report("missing-variants", item.name, "exports no *_VARIANTS constant");
       }
       const itemPreview = previewByItem.get(item.name);
-      const previewText = itemPreview
-        ? (previewSources.get(itemPreview) ?? "")
-        : (previewSources.get(LEGACY_PREVIEW) ?? "");
+      const previewText = itemPreview ? (previewSources.get(itemPreview) ?? "") : "";
       for (const [, constant, list] of variantConstants) {
         if (!constant) continue;
         const values = [...(list ?? "").matchAll(/"([^"]+)"/g)].map((match) => match[1]);
