@@ -74,3 +74,37 @@ test("guards regions outside the root", () => {
     "HeroSectionMedia must be used within HeroSection",
   );
 });
+
+test("an eyebrow with href is one descriptive link with a decorative arrow", () => {
+  render(
+    <HeroSection>
+      <HeroSectionContent>
+        <HeroSectionEyebrow href="#inbox">
+          <span data-tag>
+            New<span className="sr-only">:</span>
+          </span>
+          Shared inbox for field teams
+        </HeroSectionEyebrow>
+        <HeroSectionTitle>
+          Route every request <em>before coffee.</em>
+        </HeroSectionTitle>
+      </HeroSectionContent>
+    </HeroSection>,
+  );
+  const link = screen.getByRole("link", { name: /^New ?: Shared inbox for field teams$/ });
+  expect(link.getAttribute("href")).toBe("#inbox");
+  expect(link.querySelector("svg")?.getAttribute("aria-hidden")).toBe("true");
+  expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(
+    "Route every request before coffee.",
+  );
+});
+
+test("an eyebrow without href stays plain text", () => {
+  render(
+    <HeroSection>
+      <HeroSectionEyebrow>New · Shared inbox</HeroSectionEyebrow>
+    </HeroSection>,
+  );
+  expect(screen.queryByRole("link")).toBeNull();
+  expect(screen.getByText("New · Shared inbox").dataset.slot).toBe("hero-section-eyebrow");
+});

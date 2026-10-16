@@ -186,6 +186,21 @@
       "categories": ["utility"]
     },
     {
+      "name": "uai-number-tick",
+      "type": "registry:lib",
+      "title": "Uai Number Tick",
+      "description": "Moves only the characters of a formatted number that changed, in one grid cell per character so widths never jump. Shared by Metric Card and Price Summary.",
+      "registryDependencies": ["https://uaiblocks.vercel.app/r/uai-theme.json"],
+      "files": [
+        {
+          "path": "src/registry/uai/lib/uai-number-tick.tsx",
+          "type": "registry:lib",
+          "target": "@lib/uai-number-tick.tsx"
+        }
+      ],
+      "categories": ["utility"]
+    },
+    {
       "name": "thinking",
       "type": "registry:ui",
       "title": "Thinking",
@@ -433,6 +448,7 @@
       "description": "A compound order total with card, plain, and compact variants.",
       "registryDependencies": [
         "https://uaiblocks.vercel.app/r/uai-theme.json",
+        "https://uaiblocks.vercel.app/r/uai-number-tick.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
       "files": [
@@ -443,7 +459,7 @@
         }
       ],
       "categories": ["commerce", "data-display"],
-      "dependencies": ["class-variance-authority"]
+      "dependencies": ["class-variance-authority", "lucide-react"]
     },
     {
       "name": "order-status",
@@ -910,6 +926,7 @@
       "registryDependencies": [
         "badge",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
+        "https://uaiblocks.vercel.app/r/uai-number-tick.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
       "files": [
@@ -1502,8 +1519,10 @@
       "title": "Hero Section",
       "description": "Positioning, a primary action, supporting proof, and product media.",
       "registryDependencies": [
+        "badge",
         "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
+        "https://uaiblocks.vercel.app/r/task-list.json",
         "https://uaiblocks.vercel.app/r/trust-panel.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -1515,7 +1534,7 @@
         }
       ],
       "categories": ["marketing", "hero"],
-      "dependencies": ["class-variance-authority"]
+      "dependencies": ["class-variance-authority", "lucide-react"]
     },
     {
       "name": "feature-showcase",

@@ -126,7 +126,7 @@ for (const item of registry.items) {
       if (!specifier) continue;
       const local =
         specifier.match(/^@\/components\/(?:ui\/)?uai\/([\w-]+)$/) ??
-        specifier.match(/^@\/lib\/(uai-utils)$/);
+        specifier.match(/^@\/lib\/(uai-utils|uai-number-tick)$/);
       const primitive = specifier.match(/^@\/components\/ui\/([\w-]+)$/);
       if (local?.[1]) requiredRegistryDeps.add(registryUrl(local[1]));
       else if (primitive?.[1]) requiredRegistryDeps.add(primitive[1]);

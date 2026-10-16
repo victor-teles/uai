@@ -28,9 +28,11 @@ for (const id of componentIds) {
           })
           .filter((animation) => animation.playState === "running")
           // Colour and opacity fades are not motion; only movement, scaling, and loops count.
+          // Browsers report a `border-color` transition per side (`border-top-color`, ...),
+          // so the longhands are allowed too.
           .filter((animation) => {
             if (!(animation instanceof CSSTransition)) return true;
-            return !/^(?:color|background-color|border-color|outline-color|fill|stroke|opacity|box-shadow|text-decoration-color)$/.test(
+            return !/^(?:color|background-color|border-color|border-(?:top|right|bottom|left|block-start|block-end|inline-start|inline-end)-color|outline-color|fill|stroke|opacity|box-shadow|text-decoration-color)$/.test(
               animation.transitionProperty,
             );
           })
