@@ -1,0 +1,65 @@
+name: Idea scout
+
+# Weekly: asks the model for new component ideas and proposes them as
+# `status: proposed` entries in backlog/ideas.yml, in a draft PR for a human to curate.
+#
+# Manual only for now. Enable the schedule once these are configured:
+#   - secrets.ANTHROPIC_API_KEY or secrets.OPENAI_API_KEY
+#   - vars.AI_MODEL (and optionally vars.AI_PROVIDER)
+#   - Settings › Actions › General › "Allow GitHub Actions to create and approve pull requests"
+on:
+  workflow_dispatch:
+    inputs:
+      count:
+        description: How many ideas to propose (1-10)
+        required: false
+        default: "3"
+  # schedule:
+  #   - cron: "0 7 * * 1" # Mondays 07:00 UTC; enable after the secrets are set
+
+concurrency:
+  group: idea-scout
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  scout:
+    name: Propose backlog ideas
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+
+      - name: Guardrail - at most 2 open bot PRs
+        id: guard
+        run: bun scripts/automation/bot-pr.ts check
+
+      - name: Propose ideas
+        if: steps.guard.outputs.allowed == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          AI_PROVIDER: ${{ vars.AI_PROVIDER }}
+          AI_MODEL: ${{ vars.AI_MODEL }}
+          IDEA_COUNT: ${{ inputs.count || '3' }}
+        run: |
+          bun scripts/automation/idea-scout.ts --count "$IDEA_COUNT"
+          bun scripts/automation/backlog.ts check
+
+      - name: Open a draft PR
+        if: steps.guard.outputs.allowed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          printf 'New `status: proposed` ideas from the idea scout.\n\nMove the ones worth building to `todo`, delete the rest, then mark this ready.\n' > "$RUNNER_TEMP/body.md"
+          bun scripts/automation/bot-pr.ts open \
+            --branch "bot/ideas-$(date -u +%Y-%m-%d)" \
+            --title "Propose new backlog ideas" \
+            --body-file "$RUNNER_TEMP/body.md"
