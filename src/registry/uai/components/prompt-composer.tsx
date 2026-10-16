@@ -627,7 +627,7 @@ export function PromptComposerModelSelect({
               type="button"
               variant="ghost"
               size="sm"
-              aria-label={label}
+              aria-label={`${label}: ${selected.label}`}
               disabled={context.locked}
               className={cn(
                 "gap-1 px-2 text-muted-foreground transition-colors duration-120 ease-out focus-visible:bg-accent disabled:opacity-100 has-[>svg]:px-2 motion-reduce:transition-none dark:hover:bg-accent data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",

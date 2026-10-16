@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import {
+  THINKING_VARIANTS,
   Thinking,
   ThinkingActivity,
   ThinkingContent,
@@ -50,4 +51,22 @@ test("announces status and renders the status-specific empty state", () => {
   expect(screen.getByRole("status").textContent).toBe("Something interrupted this run.");
   expect(screen.getByText("No activity details are available.")).toBeTruthy();
   expect(document.querySelector("section")?.getAttribute("aria-busy")).toBe("false");
+});
+
+test("ships card, inline, and compact variants with the same disclosure contract", () => {
+  expect(THINKING_VARIANTS).toEqual(["card", "inline", "compact"]);
+
+  for (const variant of THINKING_VARIANTS) {
+    const { container, unmount } = render(
+      <Thinking variant={variant} status="error">
+        <ThinkingTrigger summary="The registry build stopped." />
+        <ThinkingContent />
+      </Thinking>,
+    );
+    const root = container.querySelector('[data-slot="thinking"]');
+    expect(root?.getAttribute("data-variant")).toBe(variant);
+    expect(screen.getByRole("button", { name: /Work stopped/ })).not.toBeNull();
+    expect(root?.className.includes("border-[color-mix(")).toBe(variant !== "inline");
+    unmount();
+  }
 });

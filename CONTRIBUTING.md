@@ -50,10 +50,10 @@ CI runs all of these on every pull request and on `main`:
 | --- | --- |
 | `bun run typecheck` | Next route types and TypeScript. |
 | `bun run lint` | Biome formatting and lint rules. |
-| `bun run registry:check` | Mirrors, `registry.json` dependencies, catalog usage vs. preview file, variants reaching the preview, reduced-motion handling. |
+| `bun run registry:check` | Mirrors, `registry.json` dependencies, catalog usage vs. preview file, variants reaching the preview, reduced-motion handling, and the static rules from [`quality/premium-rubric.md`](quality/premium-rubric.md) (`scripts/premium-lint.ts`). |
 | `bun run test` | Rebuilds `public/r` and runs the unit tests. |
 | `bun run build` | Rebuilds the registry and the production site. |
-| `bun run test:e2e` | Every `/components/<id>` page in light and dark, desktop and mobile: a screenshot, axe (serious and critical findings fail), and a reduced-motion pass. Needs `bun run build` first. |
+| `bun run test:e2e` | Every `/components/<id>` page in light and dark, desktop and mobile: a screenshot, axe (serious and critical findings fail), a reduced-motion pass, and the premium rubric's live checks (`e2e/premium.e2e.ts`, desktop). Needs `bun run build` first. |
 
 Screenshots and the HTML report land in `e2e-artifacts/` locally and as the
 `browser-desktop` and `browser-mobile` artifacts in CI. Review them for the
@@ -69,6 +69,14 @@ reporting them; new work must not add entries.
 - `e2e/axe-baseline.json`: known serious or critical axe findings, as
   `<rule>:<component>:<theme>`. Delete the line once it is fixed.
 - `e2e/reduced-motion-baseline.json`: components that still move with reduced motion.
+- `e2e/premium-baseline.json`: known premium rubric findings, as
+  `<check>:<component>:<theme>` (P4, P5, C3, S2, L2, X2). Delete the line once it is fixed.
+
+Approved exceptions are different from baselines: they are deliberate deviations
+from the rubric, signed off by Victor, and never shrink on their own. They live in
+`quality/premium-exceptions.json` (one rubric row, one file, named properties,
+approver and date), because `quality/premium-rubric.md` is Designer's text and is
+kept verbatim.
 
 ## Pull requests
 
@@ -77,3 +85,35 @@ reporting them; new work must not add entries.
 - Never edit the stock shadcn primitives in `src/components/ui/*.tsx` or the
   generated files in `public/r`.
 - By contributing, you agree that your work is released under the MIT License.
+
+## Automation
+
+Three workflows run on `workflow_dispatch` only until their secrets are set; each
+file has its `schedule` commented out with a note.
+
+| Workflow | What it does |
+| --- | --- |
+| `component-factory.yml` | Builds the next `todo` idea from `backlog/ideas.yml` (generation step is a stub for now). |
+| `polish-loop.yml` | Screenshots every item and scores it 1–10 against `quality/premium-rubric.md` with `scripts/design-review.ts`. |
+| `idea-scout.yml` | Proposes new `status: proposed` ideas for `backlog/ideas.yml`. |
+
+To enable them:
+
+1. Add `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` as a repository secret, and set the
+   `AI_MODEL` repository variable (optionally `AI_PROVIDER`). Keys are read from the
+   environment only; never put them in code.
+2. Allow GitHub Actions to create pull requests (Settings › Actions › General).
+3. Uncomment the `schedule` block.
+
+Guardrails live in `scripts/automation/bot-pr.ts`: bot PRs are always drafts from a
+`bot/*` branch, carry the `bot` label, and no new one opens while two are open.
+Pull requests opened with the workflow's `GITHUB_TOKEN` don't start CI on their own;
+push an empty commit or close and reopen the PR to run it.
+
+Run the pieces locally:
+
+```sh
+bun scripts/automation/backlog.ts check
+bun run build && bunx playwright test e2e/components.e2e.ts --project=desktop
+AI_MODEL=<model> ANTHROPIC_API_KEY=<key> bun scripts/design-review.ts --limit 3
+```

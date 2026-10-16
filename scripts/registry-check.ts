@@ -2,7 +2,8 @@
  * Registry contract check.
  *
  * Verifies that every distributed item keeps its source, mirror, catalog entry,
- * preview, variants, dependencies, and reduced-motion handling in sync.
+ * preview, variants, dependencies, and reduced-motion handling in sync, and runs
+ * the static checks from `quality/premium-rubric.md` (see `premium-lint.ts`).
  *
  *   bun run registry:check            # fail on violations not in the baseline
  *   bun run registry:check --update   # rewrite the baseline with current violations
@@ -14,6 +15,7 @@
 import { readdirSync } from "node:fs";
 import path from "node:path";
 import { registryCatalog } from "../src/components/registry/catalog";
+import { lintPreview, lintSource } from "./premium-lint";
 
 type RegistryFile = { path: string; type: string; target?: string };
 type RegistryItem = {
@@ -28,8 +30,6 @@ type Violation = { rule: string; item: string; detail: string };
 const ROOT = path.resolve(import.meta.dir, "..");
 const BASELINE_PATH = path.join(ROOT, "scripts/registry-check.baseline.json");
 const PREVIEW_ROOT = path.join(ROOT, "src/components/registry");
-/** Older items keep their live preview inline in this file instead of `<id>-preview.tsx`. */
-const LEGACY_PREVIEW = path.join(PREVIEW_ROOT, "registry-preview.tsx");
 
 const registry = (await Bun.file(path.join(ROOT, "registry.json")).json()) as {
   homepage: string;
@@ -143,6 +143,13 @@ for (const item of registry.items) {
       report("reduced-motion", item.name, `${file.path} animates without reduced-motion handling`);
     }
 
+    // 6. Premium rubric lint (quality/premium-rubric.md › §10).
+    if (distributable) {
+      for (const finding of lintSource(file.path, source)) {
+        report(finding.rule, item.name, finding.detail);
+      }
+    }
+
     // 4. Every declared variant must reach the live preview.
     if (distributable) {
       const variantConstants = [
@@ -152,9 +159,7 @@ for (const item of registry.items) {
         report("missing-variants", item.name, "exports no *_VARIANTS constant");
       }
       const itemPreview = previewByItem.get(item.name);
-      const previewText = itemPreview
-        ? (previewSources.get(itemPreview) ?? "")
-        : (previewSources.get(LEGACY_PREVIEW) ?? "");
+      const previewText = itemPreview ? (previewSources.get(itemPreview) ?? "") : "";
       for (const [, constant, list] of variantConstants) {
         if (!constant) continue;
         const values = [...(list ?? "").matchAll(/"([^"]+)"/g)].map((match) => match[1]);
@@ -213,6 +218,12 @@ for (const item of registry.items) {
       continue;
     }
     const preview = previewByItem.get(item.name);
+    if (preview) {
+      const relative = path.relative(ROOT, preview);
+      for (const finding of lintPreview(relative, previewSources.get(preview) ?? "")) {
+        report(finding.rule, item.name, finding.detail);
+      }
+    }
     if (!preview) {
       report("catalog-preview", item.name, "has no <id>-preview.tsx file to compare usage with");
     } else if (entry.usage !== previewSources.get(preview)) {

@@ -543,6 +543,10 @@ observable actions without presenting private chain-of-thought.
 
 - **Surface:** Flat 14px Graphite Surface with one Hairline Border. Error changes the
   border to Danger; other states keep the neutral border.
+- **Variants:** `card` is the surface above. `inline` drops the card chrome so the
+  disclosure sits in a chat transcript; its activity hangs from a left hairline. `compact`
+  uses a 12px card, tighter header padding, and a 24px status glyph for sidebars. All
+  three keep the same disclosure, states, and live regions.
 - **Header:** A compact status glyph, title, explicit state label, user-safe summary,
   total elapsed time, and disclosure chevron. The live title shimmers; the status reads as a tinted pill.
 - **States:** Thinking uses restrained motion, Complete uses Success, and Error uses

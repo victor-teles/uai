@@ -1,0 +1,104 @@
+# Component backlog for the automation workflows.
+#
+# component-factory.yml picks the first idea with `status: todo`; idea-scout.yml
+# proposes new ones with `status: proposed` (a human moves them to `todo`).
+#
+# Fields
+#   id           kebab-case registry name; must not exist in registry.json
+#   title        display name
+#   category     catalog category (see RegistryCategory in src/components/registry/catalog.ts)
+#   kind         component | block
+#   status       proposed | todo | in-progress | done | rejected
+#   description  what it does and why it belongs in Uai, in plain words
+#   builds-on    existing registry items it should compose (optional)
+
+ideas:
+  # Brazil
+  - id: boleto-payment
+    title: Boleto Payment
+    category: Brazil
+    kind: component
+    status: todo
+    description: >-
+      Shows a boleto bancário for checkout or billing: the amount, the due date, the
+      linha digitável with a copy button, a slot for the barcode image, and a clear
+      status (pending, paid, overdue). The consumer supplies every value; the component
+      formats and lays them out.
+    builds-on: [pix-payment]
+
+  - id: nota-fiscal-summary
+    title: Nota Fiscal Summary
+    category: Brazil
+    kind: component
+    status: todo
+    description: >-
+      Summarizes an issued nota fiscal (NF-e or NFS-e) after a purchase: number and
+      series, issuer, issue date, total, the chave de acesso with a copy button, and
+      links to the DANFE PDF and XML that the consumer provides. Status covers issued,
+      processing, and cancelled.
+
+  - id: address-form
+    title: Address Form (ViaCEP)
+    category: Brazil
+    kind: block
+    status: todo
+    description: >-
+      A Brazilian address form that starts from the CEP and fills logradouro, bairro,
+      cidade, and UF from ViaCEP (https://viacep.com.br/ws/<cep>/json/). Número and
+      complemento stay manual, every filled field stays editable, and a failed or
+      unknown lookup falls back to manual entry with a clear message.
+    builds-on: [cep-field, form-field]
+
+  - id: phone-field-br
+    title: Brazilian Phone Field
+    category: Brazil
+    kind: component
+    status: todo
+    description: >-
+      Phone input that masks Brazilian numbers as you type, telling mobile numbers
+      (nine digits after the DDD) from landlines (eight digits), with an optional +55
+      prefix. Validates the length and that the DDD is a valid area code, and exposes
+      the value in E.164 for the consumer to submit.
+
+  - id: holiday-calendar
+    title: Holiday Calendar
+    category: Brazil
+    kind: component
+    status: todo
+    description: >-
+      Month calendar that marks feriados and counts business days. Holiday data is a
+      prop the consumer supplies (national, state, or municipal), for example from
+      BrasilAPI's /api/feriados/v1/<ano>; the component ships no hardcoded dates.
+      Useful for delivery estimates, boleto due dates, and scheduling.
+    builds-on: [calendar-view]
+
+  # General
+  - id: time-picker
+    title: Time Picker
+    category: Forms
+    kind: component
+    status: todo
+    description: >-
+      Keyboard-first time entry with hour and minute segments, 24-hour by default with
+      an optional 12-hour mode, step intervals, and min/max bounds. Pairs with
+      date-range-picker for scheduling forms.
+
+  - id: rating-input
+    title: Rating Input
+    category: Forms
+    kind: component
+    status: todo
+    description: >-
+      Star or score rating as a radio group, with hover preview, optional half steps,
+      a read-only display mode, and a visible text value for screen readers and
+      reviews.
+
+  - id: tag-input
+    title: Tag Input
+    category: Forms
+    kind: component
+    status: todo
+    description: >-
+      Free-form tags inside a field: Enter or comma adds a tag, Backspace removes the
+      last one, duplicates are rejected with a message, and each tag has a named
+      remove button.

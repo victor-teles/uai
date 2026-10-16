@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { findRegistryItem, registryCatalog } from "@/components/registry/catalog";
 import { RegistryItem } from "@/components/registry/registry-item";
+import { pageMetadata } from "@/lib/metadata";
 
 type PageProps = { params: Promise<{ id: string }> };
 
@@ -15,7 +16,14 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const item = findRegistryItem((await params).id);
   if (!item) return {};
-  return { title: item.name, description: item.description };
+  const path = `/components/${item.id}`;
+  return pageMetadata({
+    title: item.name,
+    description: item.description,
+    path,
+    alternateTypes: { "text/markdown": `${path}.md` },
+    shareImage: "route",
+  });
 }
 
 export default async function ComponentPage({ params }: PageProps) {

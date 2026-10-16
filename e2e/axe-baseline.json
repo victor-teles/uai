@@ -39,12 +39,6 @@
     "color-contrast:task-list:light",
     "color-contrast:team-management:dark",
     "color-contrast:team-management:light",
-    "color-contrast:tool-call:light",
-    "label-content-name-mismatch:app-header:dark",
-    "label-content-name-mismatch:app-header:light",
-    "label-content-name-mismatch:file-upload:dark",
-    "label-content-name-mismatch:file-upload:light",
-    "label-content-name-mismatch:prompt-composer:dark",
-    "label-content-name-mismatch:prompt-composer:light"
+    "color-contrast:tool-call:light"
   ]
 }

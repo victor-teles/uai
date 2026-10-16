@@ -178,7 +178,7 @@
       "type": "registry:ui",
       "title": "Thinking",
       "description": "A composable activity disclosure with explicit states and structured evidence.",
-      "dependencies": ["lucide-react"],
+      "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "collapsible",
         "https://uaiblocks.vercel.app/r/uai-theme.json",

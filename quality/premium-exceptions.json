@@ -1,0 +1,15 @@
+{
+  "$comment": "Approved exceptions to quality/premium-rubric.md. The rubric is Designer's text and has no exceptions section, so approvals live here. Unlike the baselines, these are not debt: each entry is a deliberate, approved deviation, scoped to one rubric row, one file, and the named properties. scripts/premium-lint.ts reads this file. Add an entry only with the approver and date.",
+  "exceptions": [
+    {
+      "id": "E5",
+      "rule": "cheap-properties",
+      "item": "command-menu",
+      "file": "src/registry/uai/components/command-menu.tsx",
+      "properties": ["height"],
+      "scope": "Height animation on the command-menu result list as it filters, per Designer's redesign spec (uai-design/redesign/command-menu/spec.md).",
+      "approvedBy": "Victor Mesquita",
+      "approved": "2026-10-15"
+    }
+  ]
+}
