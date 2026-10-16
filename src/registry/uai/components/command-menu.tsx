@@ -31,6 +31,10 @@ export type CommandMenuProps = Omit<ComponentProps<"div">, "defaultValue"> & {
 type MenuContext = {
   id: string;
   query: string;
+  /** Option rects by id, captured just before the query changes, for the filter FLIP. */
+  flip: React.RefObject<Map<string, number> | null>;
+  /** True once the first paint is done; rows that appear later fade in. */
+  ready: boolean;
   setQuery: (value: string) => void;
   activeId: string | null;
   setActiveId: (id: string | null) => void;
@@ -57,6 +61,44 @@ function matches(query: string, text: string) {
     .filter(Boolean)
     .every((term) => haystack.includes(term));
 }
+const EASE_POP = "cubic-bezier(0.16, 1, 0.3, 1)";
+const EASE_QUINT = "cubic-bezier(0.23, 1, 0.32, 1)";
+const HIGHLIGHT_NAME = "uai-command-match";
+const prefersReducedMotion = () =>
+  typeof window !== "undefined" &&
+  typeof window.matchMedia === "function" &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/** Set after the page's first paint: a menu mounted later was opened by something. */
+let pageSettled = false;
+
+/** Ranges of every query term inside the list's option text, for the CSS Custom Highlight API. */
+function matchRanges(list: HTMLElement, query: string) {
+  const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const ranges: Range[] = [];
+  if (!terms.length) return ranges;
+  for (const option of list.querySelectorAll<HTMLElement>('[role="option"]')) {
+    const walker = document.createTreeWalker(option, NodeFilter.SHOW_TEXT, {
+      acceptNode: (node) =>
+        node.parentElement?.closest('kbd, [aria-hidden="true"]')
+          ? NodeFilter.FILTER_REJECT
+          : NodeFilter.FILTER_ACCEPT,
+    });
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      const text = node.textContent?.toLowerCase() ?? "";
+      for (const term of terms) {
+        for (let at = text.indexOf(term); at !== -1; at = text.indexOf(term, at + term.length)) {
+          const range = document.createRange();
+          range.setStart(node, at);
+          range.setEnd(node, at + term.length);
+          ranges.push(range);
+        }
+      }
+    }
+  }
+  return ranges;
+}
+
 function options(list: HTMLElement | null) {
   return Array.from(
     list?.querySelectorAll<HTMLElement>('[role="option"]:not([aria-disabled="true"])') ?? [],
@@ -70,7 +112,7 @@ const commandMenuVariants = cva(
       variant: {
         panel: "rounded-[14px] border p-0",
         floating:
-          "rounded-[14px] border-0 p-1 shadow-[0_0_0_1px_var(--border-strong),0_16px_32px_-12px_oklch(0_0_0/0.32),0_4px_8px_-4px_oklch(0_0_0/0.12)]",
+          "rounded-[14px] border-0 p-0 shadow-[0_0_0_1px_var(--border-strong),0_10px_28px_oklch(0_0_0/0.42)]",
         compact: "rounded-xl border p-0",
       },
     },
@@ -94,6 +136,8 @@ export function CommandMenu({
   const [internal, setInternal] = useState(defaultValue);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [empty, setEmpty] = useState(false);
+  const [ready, setReady] = useState(false);
+  const flip = useRef<Map<string, number> | null>(null);
   const query = value ?? internal;
   // Keep the active option valid after filtering and when the result set changes.
   useIsomorphicLayoutEffect(() => {
@@ -109,26 +153,49 @@ export function CommandMenu({
     setActiveId(options(listRef.current)[0]?.id ?? null);
   }, [query]);
   const floating = variant === "floating";
-  const reduceMotion = useRef(false);
+  // Open: pop in from the input. A panel that is part of the page's first paint stays put;
+  // one mounted later (by a trigger) or a floating palette always pops.
   useEffect(() => {
-    reduceMotion.current =
-      typeof window.matchMedia === "function" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!floating || reduceMotion.current) return;
-    rootRef.current?.animate?.(
-      [
-        { opacity: 0, transform: "scale(0.96)" },
-        { opacity: 1, transform: "scale(1)" },
-      ],
-      { duration: 180, easing: "cubic-bezier(0.16, 1, 0.3, 1)" },
+    setReady(true);
+    const root = rootRef.current;
+    const opened = floating || pageSettled;
+    if (!pageSettled) requestAnimationFrame(() => (pageSettled = true));
+    if (!opened || !root?.animate) return;
+    const reduced = prefersReducedMotion();
+    root.animate(
+      reduced
+        ? [{ opacity: 0 }, { opacity: 1 }]
+        : [
+            { opacity: 0, scale: "0.96" },
+            { opacity: 1, scale: "1" },
+          ],
+      { duration: reduced ? 120 : 180, easing: reduced ? "ease-out" : EASE_POP },
     );
   }, [floating]);
+  // Matched characters turn foreground through the CSS Custom Highlight API, so item
+  // children stay untouched and widths never change while typing.
+  useEffect(() => {
+    const list = listRef.current;
+    const registry = typeof CSS !== "undefined" ? CSS.highlights : undefined;
+    if (!list || !registry || typeof Highlight === "undefined") return;
+    registry.set(HIGHLIGHT_NAME, new Highlight(...matchRanges(list, query)));
+    return () => {
+      registry.delete(HIGHLIGHT_NAME);
+    };
+  });
   return (
     <Context.Provider
       value={{
         id,
         query,
+        flip,
+        ready,
         setQuery: (next) => {
+          const positions = new Map<string, number>();
+          for (const option of listRef.current?.querySelectorAll<HTMLElement>('[role="option"]') ??
+            [])
+            positions.set(option.id, option.offsetTop);
+          flip.current = positions;
           if (value === undefined) setInternal(next);
           onValueChange?.(next);
         },
@@ -184,21 +251,20 @@ export function CommandMenuInput({
     } else return;
     event.preventDefault();
     if (!target) return;
+    // Key repeat moves the highlight faster so it never trails the key.
+    context.listRef.current?.toggleAttribute("data-repeat", event.repeat);
     context.setActiveId(target.id);
     target.scrollIntoView?.({ block: "nearest" });
   };
   return (
     <div
+      data-slot="command-menu-input-row"
       className={cn(
-        "flex items-center border-b text-subtle-foreground",
-        compact
-          ? "gap-2 px-2.5 py-1.5"
-          : context.variant === "floating"
-            ? "gap-2.5 px-2.5 py-2"
-            : "gap-2.5 px-3.5 py-2.5",
+        "flex flex-none items-center border-b text-muted-foreground",
+        compact ? "h-10 gap-2 px-3" : "h-12 gap-2.5 px-3.5",
       )}
     >
-      <Search size={compact ? 14 : 16} strokeWidth={1.75} aria-hidden="true" />
+      <Search size={16} strokeWidth={1.75} aria-hidden="true" className="flex-none" />
       <input
         type="text"
         role="combobox"
@@ -208,8 +274,8 @@ export function CommandMenuInput({
         placeholder={placeholder}
         data-slot="command-menu-input"
         className={cn(
-          "min-w-0 flex-1 border-0 bg-transparent text-foreground outline-none placeholder:text-subtle-foreground",
-          compact ? "h-6 text-[12.5px]/[18px]" : "h-7 text-[13px]/[18px]",
+          "min-w-0 flex-1 border-0 bg-transparent text-foreground outline-none placeholder:text-muted-foreground",
+          compact ? "h-6 text-[12.5px]/[18px]" : "h-7 text-[13.5px]/[18px]",
           className,
         )}
         {...props}
@@ -226,23 +292,114 @@ export function CommandMenuInput({
           onKeyDown?.(event);
           if (!event.defaultPrevented) move(event);
         }}
+        onKeyUp={(event) => {
+          props.onKeyUp?.(event);
+          context.listRef.current?.removeAttribute("data-repeat");
+        }}
       />
+      <span
+        aria-hidden="true"
+        className="flex-none rounded-md bg-foreground/6 px-1.25 font-mono text-[11px]/[18px] font-medium text-muted-foreground"
+      >
+        esc
+      </span>
     </div>
   );
 }
 
-export function CommandMenuList({ className, ...props }: ComponentProps<"div">) {
+export function CommandMenuList({ className, children, style, ...props }: ComponentProps<"div">) {
   const context = useMenu("CommandMenuList");
+  const contentRef = useRef<HTMLDivElement>(null);
+  const highlightRef = useRef<HTMLSpanElement>(null);
+  const [height, setHeight] = useState<number | null>(null);
+  const [measured, setMeasured] = useState(false);
+  // The panel follows its results: measure the content and transition the list height
+  // (approved exception E5 in quality/premium-exceptions.json).
+  useIsomorphicLayoutEffect(() => {
+    const content = contentRef.current;
+    if (!content || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(() => setHeight(content.offsetHeight));
+    observer.observe(content);
+    setHeight(content.offsetHeight);
+    const frame = requestAnimationFrame(() => setMeasured(true));
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+    };
+  }, []);
+  // One shared highlight slides to the active row.
+  useIsomorphicLayoutEffect(() => {
+    const highlight = highlightRef.current;
+    const row = context.activeId ? document.getElementById(context.activeId) : null;
+    if (!highlight) return;
+    if (!row || !context.listRef.current?.contains(row)) {
+      highlight.style.opacity = "0";
+      return;
+    }
+    const wasHidden = highlight.style.opacity !== "1";
+    if (wasHidden) highlight.style.transitionProperty = "none";
+    highlight.style.translate = `0 ${row.offsetTop}px`;
+    highlight.style.height = `${row.offsetHeight}px`;
+    highlight.style.opacity = "1";
+    if (wasHidden) {
+      void highlight.offsetHeight;
+      highlight.style.transitionProperty = "";
+    }
+  });
+  // Filter: surviving rows slide from where they were; new rows fade in without moving.
+  useIsomorphicLayoutEffect(() => {
+    const before = context.flip.current;
+    context.flip.current = null;
+    const list = context.listRef.current;
+    if (!before || !list || prefersReducedMotion()) return;
+    for (const option of list.querySelectorAll<HTMLElement>('[role="option"]')) {
+      if (typeof option.animate !== "function") continue;
+      const from = before.get(option.id);
+      if (from === undefined) {
+        option.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 120, easing: "ease-out" });
+        continue;
+      }
+      const dy = from - option.offsetTop;
+      if (Math.abs(dy) > 0.5)
+        option.animate([{ translate: `0 ${dy}px` }, { translate: "0 0" }], {
+          duration: 200,
+          easing: EASE_QUINT,
+        });
+    }
+  }, [context.query]);
+  const compact = context.variant === "compact";
   return (
     <div
       role="listbox"
       aria-label={context.label}
       data-slot="command-menu-list"
-      className={cn("max-h-80 overflow-y-auto overscroll-contain scroll-py-1 p-1", className)}
+      data-measured={measured || undefined}
+      className={cn(
+        "relative max-h-80 overflow-y-auto overscroll-contain scroll-py-1",
+        "data-measured:transition-[height] data-measured:duration-160 data-measured:ease-out-quint motion-reduce:transition-none",
+        "[&_*::highlight(uai-command-match)]:text-foreground",
+        className,
+      )}
+      style={height === null ? style : { height: Math.min(height, 320), ...style }}
       {...props}
       ref={context.listRef}
       id={`${context.id}-list`}
-    />
+    >
+      <span
+        ref={highlightRef}
+        aria-hidden="true"
+        data-slot="command-menu-highlight"
+        className={cn(
+          "pointer-events-none absolute inset-x-1 top-0 bg-accent opacity-0",
+          compact ? "rounded-[7px]" : "rounded-lg",
+          "transition-[translate,opacity,background-color,scale] duration-160 ease-out-quint in-data-repeat:duration-100 motion-reduce:transition-[opacity,background-color]",
+          "data-running:scale-[0.99] data-running:bg-[color-mix(in_oklab,var(--accent)_80%,var(--foreground))]",
+        )}
+      />
+      <div ref={contentRef} data-slot="command-menu-list-content" className="relative p-1">
+        {children}
+      </div>
+    </div>
   );
 }
 
@@ -280,7 +437,7 @@ export function CommandMenuGroupLabel({ className, ...props }: ComponentProps<"d
     <div
       data-slot="command-menu-group-label"
       className={cn(
-        "px-2.5 pt-2 pb-1 text-[11.5px]/4 font-normal text-subtle-foreground",
+        "px-2.5 pt-2 pb-1.5 text-[11.5px]/4 font-normal text-subtle-foreground",
         className,
       )}
       {...props}
@@ -313,6 +470,15 @@ export function CommandMenuItem({
   if (!matches(context.query, [value, ...keywords].join(" "))) return null;
   const active = context.activeId === id;
   const compact = context.variant === "compact";
+  // Run: flash the shared highlight for 120ms (scale .99 and a deeper tint).
+  const flash = () => {
+    const highlight = context.listRef.current?.querySelector<HTMLElement>(
+      '[data-slot="command-menu-highlight"]',
+    );
+    if (!highlight) return;
+    highlight.setAttribute("data-running", "");
+    window.setTimeout(() => highlight.removeAttribute("data-running"), 120);
+  };
   return (
     // biome-ignore lint/a11y/useFocusableInteractive: options are navigated with aria-activedescendant from the combobox input.
     // biome-ignore lint/a11y/useKeyWithClickEvents: keyboard selection is handled by the combobox input.
@@ -320,14 +486,14 @@ export function CommandMenuItem({
       role="option"
       data-slot="command-menu-item"
       className={cn(
-        "flex items-center font-medium select-none [&>svg]:shrink-0 [&>svg]:text-muted-foreground data-[active]:[&>svg]:text-foreground",
+        "relative flex items-center font-medium select-none [&>svg]:size-4 [&>svg]:shrink-0",
+        "transition-colors duration-120 ease-out motion-reduce:transition-none [&>svg]:transition-colors [&>svg]:duration-100 [&>svg]:ease-out",
         compact
-          ? "min-h-7 gap-2 rounded-[7px] px-2 text-[12.5px]"
-          : "min-h-8 gap-2.5 rounded-lg px-2.5 text-[13px]",
-        active ? "bg-accent" : "bg-transparent",
+          ? "min-h-7 gap-2 rounded-[7px] px-2 text-[12.5px]/[18px]"
+          : "min-h-9 gap-2.5 rounded-lg px-2.5 text-[13px]/[18px]",
         disabled
-          ? "cursor-not-allowed text-muted-foreground opacity-45"
-          : "cursor-pointer text-foreground",
+          ? "cursor-not-allowed text-subtle-foreground [&>svg]:text-subtle-foreground [&>svg]:opacity-60"
+          : "cursor-pointer text-muted-foreground data-active:text-foreground [&>svg]:text-muted-foreground data-active:[&>svg]:text-foreground",
         className,
       )}
       {...props}
@@ -341,7 +507,10 @@ export function CommandMenuItem({
       }}
       onClick={(event) => {
         onClick?.(event);
-        if (!disabled && !event.defaultPrevented) onSelect?.();
+        if (disabled || event.defaultPrevented) return;
+        if (!active) context.setActiveId(id);
+        if (!prefersReducedMotion()) flash();
+        onSelect?.();
       }}
     />
   );
@@ -352,7 +521,7 @@ export function CommandMenuShortcut({ className, ...props }: ComponentProps<"kbd
     <kbd
       data-slot="command-menu-shortcut"
       className={cn(
-        "ml-auto min-w-5 rounded-md bg-foreground/6 px-1.25 text-center [font-family:inherit] text-[11px]/[18px] font-medium tracking-[0.02em] text-subtle-foreground",
+        "ml-auto min-w-5 rounded-md bg-foreground/6 px-1.25 text-center font-mono text-[11px]/[18px] font-medium text-muted-foreground",
         className,
       )}
       {...props}
@@ -362,18 +531,75 @@ export function CommandMenuShortcut({ className, ...props }: ComponentProps<"kbd
 
 export function CommandMenuEmpty({ className, children, ...props }: ComponentProps<"div">) {
   const context = useMenu("CommandMenuEmpty");
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!context.empty || !context.ready || prefersReducedMotion()) return;
+    ref.current?.animate?.(
+      [
+        { opacity: 0, translate: "0 4px" },
+        { opacity: 1, translate: "0 0" },
+      ],
+      { duration: 200, easing: EASE_QUINT },
+    );
+  }, [context.empty, context.ready]);
   return (
     <div
+      ref={ref}
       role="status"
       data-slot="command-menu-empty"
       className={cn(
-        context.empty ? "block" : "hidden",
-        "px-3 py-6 text-center text-[12.5px] text-subtle-foreground",
+        context.empty ? "grid" : "hidden",
+        "justify-items-center gap-1 px-4 pt-6 pb-7 text-center",
         className,
       )}
       {...props}
     >
-      {context.empty ? (children ?? `No results for “${context.query}”.`) : null}
+      {context.empty ? (
+        <>
+          <span
+            aria-hidden="true"
+            className="mb-2 grid size-8 place-items-center rounded-full bg-muted text-muted-foreground"
+          >
+            <Search size={16} strokeWidth={1.75} />
+          </span>
+          <span className="text-[13px]/[18px] font-medium text-foreground">
+            {context.query ? `No results for “${context.query}”` : "No results"}
+          </span>
+          {children ? (
+            <span className="text-[12.5px]/[18px] text-muted-foreground">{children}</span>
+          ) : null}
+        </>
+      ) : null}
+    </div>
+  );
+}
+
+/** Optional key legend under the list. Put a context action in it with `ml-auto`. */
+export function CommandMenuFooter({ className, children, ...props }: ComponentProps<"div">) {
+  const context = useMenu("CommandMenuFooter");
+  return (
+    <div
+      data-slot="command-menu-footer"
+      className={cn(
+        "flex h-9 flex-none items-center gap-3 border-t px-3 text-[11.5px]/4 text-subtle-foreground",
+        context.variant === "compact" && "h-8 px-2.5",
+        className,
+      )}
+      {...props}
+    >
+      {children ?? (
+        <>
+          <span>
+            <kbd className="font-mono">↑↓</kbd> Navigate
+          </span>
+          <span>
+            <kbd className="font-mono">↵</kbd> Open
+          </span>
+          <span>
+            <kbd className="font-mono">esc</kbd> Close
+          </span>
+        </>
+      )}
     </div>
   );
 }
