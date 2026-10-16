@@ -39,6 +39,9 @@ const controls: Record<DataDisplayItemId, { variants: readonly string[]; label: 
   "audit-log": { variants: AUDIT_LOG_VARIANTS, label: "audit log" },
 };
 
+/** Preview-only states shown after the variants (rubric L1/L2), not component variants. */
+const previewStates: Record<string, readonly string[]> = { "kanban-board": ["loading"] };
+
 const wide = new Set(["comparison-table", "kanban-board", "calendar-view", "data-table-toolbar"]);
 
 export function getDataDisplayPreviewControl(itemId: string): PreviewControl | undefined {
@@ -47,7 +50,7 @@ export function getDataDisplayPreviewControl(itemId: string): PreviewControl | u
   return {
     ariaLabel: `${control.label} variant`,
     defaultValue: control.variants[0] ?? "",
-    options: control.variants.map((id) => ({
+    options: [...control.variants, ...(previewStates[itemId] ?? [])].map((id) => ({
       id,
       label: id.charAt(0).toUpperCase() + id.slice(1),
     })),
@@ -76,7 +79,10 @@ export function DataDisplayPreview({ itemId, selection }: { itemId: string; sele
           <ComparisonTablePreview variant={selection as ComparisonTableVariant} />
         )}
         {itemId === "kanban-board" && (
-          <KanbanBoardPreview variant={selection as KanbanBoardVariant} />
+          <KanbanBoardPreview
+            variant={selection === "loading" ? "board" : (selection as KanbanBoardVariant)}
+            loading={selection === "loading"}
+          />
         )}
         {itemId === "calendar-view" && (
           <CalendarViewPreview variant={selection as CalendarViewVariant} />

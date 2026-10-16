@@ -23,13 +23,16 @@ const controls: Record<string, { label: string; variants: readonly string[] }> =
   "split-pane": { label: "split pane variant", variants: SPLIT_PANE_VARIANTS },
 };
 
+/** Preview-only states shown after the variants (rubric L1/L2), not component variants. */
+const previewStates: Record<string, readonly string[]> = { "command-menu": ["loading", "error"] };
+
 export function getNavigationPreviewControl(itemId: string): PreviewControl | undefined {
   const control = controls[itemId];
   if (!control) return undefined;
   return {
     ariaLabel: control.label,
     defaultValue: control.variants[0] ?? "",
-    options: control.variants.map((id) => ({
+    options: [...control.variants, ...(previewStates[itemId] ?? [])].map((id) => ({
       id,
       label: id.charAt(0).toUpperCase() + id.slice(1),
     })),
@@ -53,7 +56,15 @@ export function NavigationPreview({ itemId, selection }: { itemId: string; selec
         )}
         {itemId === "page-tabs" && <PageTabsPreview variant={selection as PageTabsVariant} />}
         {itemId === "command-menu" && (
-          <CommandMenuPreview variant={selection as CommandMenuVariant} />
+          <CommandMenuPreview
+            key={selection}
+            variant={
+              selection === "loading" || selection === "error"
+                ? "panel"
+                : (selection as CommandMenuVariant)
+            }
+            state={selection === "loading" || selection === "error" ? selection : "ready"}
+          />
         )}
         {itemId === "split-pane" && <SplitPanePreview variant={selection as SplitPaneVariant} />}
       </div>

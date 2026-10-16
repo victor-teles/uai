@@ -313,15 +313,17 @@ export function DashboardShellPreview({ variant = "split" }: { variant?: Dashboa
     category: "Application",
     icon: Settings2,
     description:
-      "Grouped settings with field validation, a sticky save state, and a guarded danger zone.",
+      "Grouped settings with edited markers, inline validation, a floating save state, and a quiet danger zone.",
     usage: `"use client";
 
+import { CircleAlert } from "lucide-react";
 import { useState } from "react";
 import {
   SettingsPage,
   SettingsPageConfirm,
   SettingsPageDescription,
   SettingsPageField,
+  SettingsPageFieldEdited,
   SettingsPageHeader,
   SettingsPageSaveBar,
   SettingsPageSection,
@@ -356,23 +358,45 @@ import {
   UnsavedChangesBarSave,
 } from "@/components/ui/uai/unsaved-changes-bar";
 
-const initial = { name: "Northwind Goods", email: "support@northwind.example" };
+type Settings = { name: string; email: string; url: string };
+const saved0: Settings = {
+  name: "Northwind Goods",
+  email: "support@northwind.example",
+  url: "northwind-goods-co",
+};
+// Opens dirty and invalid, as in the design mockup.
+const draft0: Settings = { ...saved0, name: "Northwind Goods Co.", url: "northwind" };
+const taken = ["northwind", "northwind-co"];
 
 export function SettingsPagePreview({ variant = "stacked" }: { variant?: SettingsPageVariant }) {
-  const [saved, setSaved] = useState(initial);
-  const [draft, setDraft] = useState(initial);
+  const [saved, setSaved] = useState(saved0);
+  const [draft, setDraft] = useState(draft0);
   const [status, setStatus] = useState<"idle" | "saving" | "error">("idle");
+  const [attempts, setAttempts] = useState(0);
+  const [blocked, setBlocked] = useState(false);
   const [deleted, setDeleted] = useState(false);
-  const dirty = draft.name !== saved.name || draft.email !== saved.email;
-  const emailInvalid = !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(draft.email);
-  const nameInvalid = draft.name.trim().length === 0;
+  const edited = {
+    name: draft.name !== saved.name,
+    email: draft.email !== saved.email,
+    url: draft.url !== saved.url,
+  };
+  const changes = Object.values(edited).filter(Boolean).length;
+  const invalid = {
+    name: draft.name.trim().length === 0,
+    email: !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(draft.email),
+    url: !/^[a-z0-9-]+$/.test(draft.url) || (edited.url && taken.includes(draft.url)),
+  };
+  const invalidCount = Object.values(invalid).filter(Boolean).length;
 
   function save() {
     setStatus("saving");
+    // The first save fails so the preview shows recovery; Retry then succeeds.
     window.setTimeout(() => {
+      if (attempts === 0) return setStatus("error");
       setSaved(draft);
       setStatus("idle");
     }, 900);
+    setAttempts(attempts + 1);
   }
 
   return (
@@ -393,43 +417,78 @@ export function SettingsPagePreview({ variant = "stacked" }: { variant?: Setting
         <SettingsPageSectionContent>
           <SettingsPageField
             required
-            invalid={nameInvalid}
+            edited={edited.name}
+            invalid={invalid.name}
             value={draft.name}
             onValueChange={(name) => setDraft({ ...draft, name })}
           >
-            <FormFieldLabel>Workspace name</FormFieldLabel>
+            <FormFieldLabel>
+              Workspace name <SettingsPageFieldEdited />
+            </FormFieldLabel>
             <FormFieldInput autoComplete="organization" />
-            <FormFieldError>Enter a workspace name.</FormFieldError>
+            <FormFieldError>
+              <CircleAlert aria-hidden="true" />
+              Enter a workspace name.
+            </FormFieldError>
           </SettingsPageField>
           <SettingsPageField
             required
-            invalid={emailInvalid}
+            edited={edited.email}
+            invalid={invalid.email}
             value={draft.email}
             onValueChange={(email) => setDraft({ ...draft, email })}
           >
-            <FormFieldLabel>Support email</FormFieldLabel>
+            <FormFieldLabel>
+              Support email <SettingsPageFieldEdited />
+            </FormFieldLabel>
             <FormFieldInput type="email" autoComplete="email" />
             <FormFieldDescription>Replies to order emails go here.</FormFieldDescription>
-            <FormFieldError>Enter an email address such as help@northwind.example.</FormFieldError>
+            <FormFieldError>
+              <CircleAlert aria-hidden="true" />
+              Enter an email address such as help@northwind.example.
+            </FormFieldError>
+          </SettingsPageField>
+          <SettingsPageField
+            required
+            edited={edited.url}
+            invalid={invalid.url}
+            value={draft.url}
+            onValueChange={(url) => setDraft({ ...draft, url })}
+          >
+            <FormFieldLabel>
+              Workspace URL <SettingsPageFieldEdited />
+            </FormFieldLabel>
+            <FormFieldInput autoComplete="off" spellCheck={false} />
+            <FormFieldDescription>uai.app/{draft.url || "your-workspace"}</FormFieldDescription>
+            <FormFieldError>
+              <CircleAlert aria-hidden="true" />
+              {taken.includes(draft.url)
+                ? "That URL is taken. Try northwind-goods."
+                : "Use lowercase letters, numbers, and dashes."}
+            </FormFieldError>
           </SettingsPageField>
         </SettingsPageSectionContent>
       </SettingsPageSection>
       <SettingsPageSection tone="danger">
         <SettingsPageSectionHeader>
-          <SettingsPageSectionTitle>Delete workspace</SettingsPageSectionTitle>
+          <SettingsPageSectionTitle>Danger zone</SettingsPageSectionTitle>
           <SettingsPageSectionDescription>
-            {deleted
-              ? "Workspace scheduled for deletion. Contact support within 30 days to restore it."
-              : "Removes every order, product, and team member. This cannot be undone."}
+            Permanent actions. We ask you to confirm first.
           </SettingsPageSectionDescription>
         </SettingsPageSectionHeader>
         <SettingsPageSectionContent>
+          <div>
+            <strong>Delete workspace</strong>
+            <p>
+              {deleted
+                ? "Workspace scheduled for deletion. Contact support within 30 days to restore it."
+                : "Removes every order, product, and team member. This can’t be undone."}
+            </p>
+          </div>
           <SettingsPageConfirm>
-            <div>
-              <ConfirmationDialogTrigger disabled={deleted}>
-                Delete workspace
-              </ConfirmationDialogTrigger>
-            </div>
+            <ConfirmationDialogTrigger disabled={deleted}>
+              Delete workspace…
+            </ConfirmationDialogTrigger>
             <ConfirmationDialogContent>
               <ConfirmationDialogTitle>Delete Northwind Goods?</ConfirmationDialogTitle>
               <ConfirmationDialogDescription>
@@ -452,22 +511,35 @@ export function SettingsPagePreview({ variant = "stacked" }: { variant?: Setting
         </SettingsPageSectionContent>
       </SettingsPageSection>
       <SettingsPageSaveBar
-        dirty={dirty}
+        dirty={changes > 0}
         status={status}
         warnBeforeUnload={false}
         onSave={save}
-        onDiscard={() => setDraft(saved)}
+        onDiscard={() => {
+          setDraft(saved);
+          setStatus("idle");
+          setBlocked(false);
+        }}
       >
         <UnsavedChangesBarMessage>
-          {status === "saving"
-            ? "Saving workspace settings…"
-            : nameInvalid || emailInvalid
-              ? "Fix the highlighted fields before saving."
-              : "You have unsaved changes."}
+          {status === "error" ? (
+            "Couldn’t save. Your changes are still here."
+          ) : blocked && invalidCount > 0 ? (
+            \`Fix \${invalidCount} \${invalidCount === 1 ? "field" : "fields"} to save\`
+          ) : (
+            <span
+              key={changes}
+              className="tabular-nums motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-[3px] motion-safe:duration-200 motion-safe:ease-out-quint"
+            >
+              {changes} unsaved {changes === 1 ? "change" : "changes"}
+            </span>
+          )}
         </UnsavedChangesBarMessage>
         <UnsavedChangesBarActions>
           <UnsavedChangesBarDiscard />
-          <UnsavedChangesBarSave disabled={nameInvalid || emailInvalid} />
+          <UnsavedChangesBarSave onClick={() => setBlocked(invalidCount > 0)}>
+            {status === "error" ? "Retry" : "Save changes"}
+          </UnsavedChangesBarSave>
         </UnsavedChangesBarActions>
       </SettingsPageSaveBar>
     </SettingsPage>
@@ -476,8 +548,9 @@ export function SettingsPagePreview({ variant = "stacked" }: { variant?: Setting
 `,
     accessibility: [
       "Each settings group is a section named by its h3 title and described by its summary text.",
-      'Fields are Form Fields: visible labels, required text, and errors announced with role="alert" and linked with aria-describedby.',
-      "The save bar is a labelled region whose message is a live status, or an alert when saving fails. Save is disabled while saving.",
+      'Fields are Form Fields: visible labels, errors announced with role="alert" and linked with aria-describedby. Required fields keep the native required state; only optional ones are marked visually.',
+      "The Edited marker is part of the label while a field differs from the saved value, and hidden from assistive tech otherwise.",
+      "The save bar is a labelled region whose message is a live status, or an alert when saving fails. Save stays enabled with invalid fields: pressing it moves focus to the first one.",
       "Destructive actions open a modal alert dialog that traps focus, focuses Cancel, can require a typed phrase, and returns focus to the trigger.",
     ],
   },

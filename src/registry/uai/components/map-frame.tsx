@@ -79,12 +79,91 @@ export function MapFrameSurface({ className, ...props }: ComponentProps<"div">) 
   );
 }
 
+export const MAP_FRAME_PLACEHOLDER_STATUSES = ["loading", "error"] as const;
+export type MapFramePlaceholderStatus = (typeof MAP_FRAME_PLACEHOLDER_STATUSES)[number];
+export type MapFramePlaceholderProps = ComponentProps<"svg"> & {
+  /**
+   * Replaces the basemap with a designed state. "loading" shows a shimmering grid while tiles
+   * stream in; "error" explains that the map failed and offers a retry.
+   */
+  status?: MapFramePlaceholderStatus;
+  /** Shows a "Try again" button in the error state. */
+  onRetry?: () => void;
+};
+
 /**
  * A decorative street grid shown before tiles load or where no map provider is configured.
- * It is hidden from assistive technology; label the frame instead.
+ * It is hidden from assistive technology; label the frame instead. Pass `status` for the
+ * loading and error states; those sit above the map surface and below overlays.
  */
-export function MapFramePlaceholder({ className, ...props }: ComponentProps<"svg">) {
-  useFrame("MapFramePlaceholder");
+export function MapFramePlaceholder({
+  status,
+  onRetry,
+  className,
+  style,
+  ...props
+}: MapFramePlaceholderProps) {
+  const context = useFrame("MapFramePlaceholder");
+  if (status === "loading") {
+    return (
+      <div
+        data-slot="map-frame-placeholder"
+        data-status="loading"
+        className={cn(
+          "pointer-events-none absolute inset-0 z-0 grid place-items-center bg-muted",
+          className,
+        )}
+        style={style}
+      >
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-[linear-gradient(var(--border)_1px,transparent_1px),linear-gradient(90deg,var(--border)_1px,transparent_1px)] bg-size-[32px_32px] opacity-60"
+        />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 animate-[skeleton-shimmer_1.6s_ease-in-out_infinite] bg-[linear-gradient(90deg,transparent_25%,var(--muted)_50%,transparent_75%)] bg-size-[200%_100%] bg-no-repeat motion-reduce:animate-none"
+        />
+        <div className="relative grid justify-items-center gap-2">
+          <span
+            aria-hidden="true"
+            className="h-2.5 w-30 animate-[skeleton-shimmer_1.6s_ease-in-out_infinite] rounded-full bg-border bg-[linear-gradient(90deg,transparent_0%,color-mix(in_oklab,var(--foreground)_7%,transparent)_50%,transparent_100%)] bg-size-[200%_100%] bg-no-repeat motion-reduce:animate-none motion-reduce:bg-none"
+          />
+          <span className="text-[12px]/4 text-subtle-foreground">Loading map tiles…</span>
+        </div>
+      </div>
+    );
+  }
+  if (status === "error") {
+    return (
+      <div
+        data-slot="map-frame-placeholder"
+        data-status="error"
+        role="alert"
+        className={cn(
+          "absolute inset-0 z-0 grid place-items-center bg-muted text-center",
+          context.variant === "compact" ? "p-4" : "p-6",
+          className,
+        )}
+        style={style}
+      >
+        <div className="grid justify-items-center gap-1.5">
+          <p className="m-0 text-[13px]/[18px] font-medium text-foreground">The map didn’t load</p>
+          <p className="m-0 text-pretty text-[12.5px]/[18px] text-muted-foreground">
+            Check your connection and try again.
+          </p>
+          {onRetry && (
+            <button
+              type="button"
+              onClick={onRetry}
+              className="mt-0.5 inline-flex h-6.5 cursor-pointer items-center rounded-full border-0 bg-card px-3 text-[12px]/4 font-medium text-foreground shadow-[0_0_0_1px_var(--border-strong)] transition-[background-color,scale] duration-[120ms,140ms] ease-[ease-out,cubic-bezier(0.23,1,0.32,1)] outline-none hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100"
+            >
+              Try again
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
   return (
     <svg
       data-slot="map-frame-placeholder"
@@ -93,6 +172,7 @@ export function MapFramePlaceholder({ className, ...props }: ComponentProps<"svg
       viewBox="0 0 640 400"
       preserveAspectRatio="xMidYMid slice"
       className={cn("absolute inset-0 -z-10 size-full", className)}
+      style={style}
       {...props}
     >
       <rect width="640" height="400" className="fill-muted" />
@@ -138,6 +218,13 @@ const overlayPositions: Record<MapFramePosition, string> = {
   "bottom-right": "right-0 bottom-0 items-end",
 };
 
+/**
+ * Map controls placed in an overlay float above the tiles: a translucent popover surface with a
+ * strong ring and a soft drop shadow, 28px buttons, and a hairline between grouped buttons.
+ */
+const floatingControls =
+  "[&_[data-slot=map-controls]:not([data-variant=bar])>[data-slot=map-controls-group]]:gap-0.5 [&_[data-slot=map-controls]:not([data-variant=bar])>[data-slot=map-controls-group]]:overflow-visible [&_[data-slot=map-controls]:not([data-variant=bar])>[data-slot=map-controls-group]]:rounded-xl [&_[data-slot=map-controls]:not([data-variant=bar])>[data-slot=map-controls-group]]:bg-[color-mix(in_oklab,var(--popover)_92%,transparent)] [&_[data-slot=map-controls]:not([data-variant=bar])>[data-slot=map-controls-group]]:p-[3px] [&_[data-slot=map-controls]:not([data-variant=bar])>[data-slot=map-controls-group]]:shadow-[0_0_0_1px_var(--border-strong),0_10px_28px_oklch(0_0_0/0.12)] [&_[data-slot=map-controls]:not([data-variant=bar])>[data-slot=map-controls-group]]:backdrop-blur-[12px] dark:[&_[data-slot=map-controls]:not([data-variant=bar])>[data-slot=map-controls-group]]:shadow-[0_0_0_1px_var(--border-strong),0_10px_28px_oklch(0_0_0/0.42)] [&_[data-slot=map-controls][data-variant=stacked]_[data-slot=map-controls-button]]:size-7 [&_[data-slot=map-controls]:not([data-variant=bar])_[data-slot=map-controls-button]]:rounded-lg [&_[data-slot=map-controls]:not([data-variant=bar])_[data-slot=map-controls-button]:hover]:bg-accent [&_[data-slot=map-controls]:not([data-variant=bar])_[data-slot=map-controls-button]+[data-slot=map-controls-button]]:relative [&_[data-slot=map-controls]:not([data-variant=bar])_[data-slot=map-controls-button]+[data-slot=map-controls-button]]:before:pointer-events-none [&_[data-slot=map-controls]:not([data-variant=bar])_[data-slot=map-controls-button]+[data-slot=map-controls-button]]:before:absolute [&_[data-slot=map-controls]:not([data-variant=bar])_[data-slot=map-controls-button]+[data-slot=map-controls-button]]:before:inset-x-1 [&_[data-slot=map-controls]:not([data-variant=bar])_[data-slot=map-controls-button]+[data-slot=map-controls-button]]:before:-top-[1.5px] [&_[data-slot=map-controls]:not([data-variant=bar])_[data-slot=map-controls-button]+[data-slot=map-controls-button]]:before:h-px [&_[data-slot=map-controls]:not([data-variant=bar])_[data-slot=map-controls-button]+[data-slot=map-controls-button]]:before:bg-border";
+
 export type MapFrameOverlayProps = ComponentProps<"div"> & { position?: MapFramePosition };
 
 /** Pins controls, legends, or cards to one edge of the frame. */
@@ -153,6 +240,7 @@ export function MapFrameOverlay({
       data-position={position}
       className={cn(
         "pointer-events-none absolute z-10 flex max-w-full flex-col gap-2 [&>*]:pointer-events-auto",
+        floatingControls,
         context.variant === "compact" ? "p-2" : "p-3",
         overlayPositions[position],
         className,
@@ -164,12 +252,13 @@ export function MapFrameOverlay({
 
 /** Data and tile credits. Required by most map providers. */
 export function MapFrameAttribution({ className, ...props }: ComponentProps<"p">) {
-  useFrame("MapFrameAttribution");
+  const context = useFrame("MapFrameAttribution");
   return (
     <p
       data-slot="map-frame-attribution"
       className={cn(
-        "absolute right-0 bottom-0 z-10 m-0 rounded-tl-md bg-card/80 px-1.5 py-0.5 text-[10.5px]/[14px] text-subtle-foreground backdrop-blur-sm [&_a]:text-muted-foreground [&_a]:underline-offset-2 [&_a:hover]:underline",
+        "absolute z-10 m-0 h-5 max-w-[calc(100%-1rem)] truncate rounded-full bg-[color-mix(in_oklab,var(--popover)_94%,transparent)] px-2 text-[10.5px]/5 text-muted-foreground shadow-[0_0_0_1px_var(--border)] backdrop-blur-sm [&_a]:text-muted-foreground [&_a]:underline-offset-2 [&_a:hover]:text-foreground [&_a:hover]:underline",
+        context.variant === "compact" ? "right-1.5 bottom-1.5" : "right-2 bottom-2",
         className,
       )}
       {...props}
