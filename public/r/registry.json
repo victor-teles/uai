@@ -1507,8 +1507,10 @@
       "title": "Hero Section",
       "description": "Positioning, a primary action, supporting proof, and product media.",
       "registryDependencies": [
+        "badge",
         "button",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
+        "https://uaiblocks.vercel.app/r/task-list.json",
         "https://uaiblocks.vercel.app/r/trust-panel.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -1520,7 +1522,7 @@
         }
       ],
       "categories": ["marketing", "hero"],
-      "dependencies": ["class-variance-authority"]
+      "dependencies": ["class-variance-authority", "lucide-react"]
     },
     {
       "name": "feature-showcase",
