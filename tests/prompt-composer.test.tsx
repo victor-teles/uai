@@ -140,7 +140,10 @@ test("model select opens a radio menu and reports the chosen model", async () =>
     </PromptComposer>,
   );
 
-  await user.click(screen.getByRole("button", { name: "Choose model" }));
+  const trigger = screen.getByRole("button", { name: "Choose model: Fast" });
+  // Label in name (WCAG 2.5.3): the accessible name contains the visible model label.
+  expect(trigger.getAttribute("aria-label")).toContain(trigger.textContent ?? "");
+  await user.click(trigger);
   expect(screen.getByRole("menuitemradio", { name: "Fast" }).getAttribute("aria-checked")).toBe(
     "true",
   );
@@ -148,5 +151,5 @@ test("model select opens a radio menu and reports the chosen model", async () =>
 
   expect(onValueChange).toHaveBeenCalledWith("deep");
   expect(screen.queryByRole("menu")).toBeNull();
-  expect(screen.getByRole("button", { name: "Choose model" }).textContent).toContain("Deep");
+  expect(screen.getByRole("button", { name: "Choose model: Deep" }).textContent).toContain("Deep");
 });

@@ -95,7 +95,7 @@ export function FileUploadPreview({ variant = "dropzone" }: { variant?: FileUplo
                 }
               />
               <FileUploadRemove
-                aria-label={`Remove ${file.name}`}
+                aria-label={`Remove file ${file.name}`}
                 onClick={() => setFiles((current) => current.filter((item) => item.id !== file.id))}
               />
             </div>

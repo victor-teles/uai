@@ -54,7 +54,7 @@ export function AppHeaderPreview({ variant = "bar" }: { variant?: AppHeaderVaria
           <AppHeaderAction aria-label="Notifications">
             <Bell className="size-4" strokeWidth={1.8} aria-hidden="true" />
           </AppHeaderAction>
-          <AppHeaderAction aria-label="Open account menu" emphasis="primary">
+          <AppHeaderAction aria-label="AC, open account menu" emphasis="primary">
             AC
           </AppHeaderAction>
         </AppHeaderActions>
