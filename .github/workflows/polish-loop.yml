@@ -1,0 +1,83 @@
+name: Polish loop
+
+# Weekly design review: screenshots every registry item, scores each one 1-10
+# against quality/premium-rubric.md with scripts/design-review.ts, and publishes the
+# lowest scores. Later, the lowest item goes to an agent and comes back as a draft PR.
+#
+# Manual only for now. Enable the schedule once these are configured:
+#   - secrets.ANTHROPIC_API_KEY or secrets.OPENAI_API_KEY
+#   - vars.AI_MODEL (and optionally vars.AI_PROVIDER)
+on:
+  workflow_dispatch:
+    inputs:
+      items:
+        description: Comma-separated item ids to review (default: all)
+        required: false
+      limit:
+        description: Review at most this many items
+        required: false
+        default: "10"
+  # schedule:
+  #   - cron: "0 6 * * 1" # Mondays 06:00 UTC; enable after the secrets are set
+
+concurrency:
+  group: polish-loop
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  review:
+    name: Screenshot and score
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+
+      - name: Guardrail - at most 2 open bot PRs
+        id: guard
+        run: bun scripts/automation/bot-pr.ts check
+
+      - name: Require the rubric
+        run: test -f quality/premium-rubric.md || { echo "::error::quality/premium-rubric.md is missing. It comes from Designer; see quality/README.md."; exit 1; }
+
+      - run: bun run build
+      - run: bunx playwright install --with-deps chromium
+      - name: Screenshots
+        # An axe failure here is CI's job to report; the review only needs the images.
+        continue-on-error: true
+        run: bunx playwright test e2e/components.e2e.ts --project=desktop
+
+      - name: Design review
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          AI_PROVIDER: ${{ vars.AI_PROVIDER }}
+          AI_MODEL: ${{ vars.AI_MODEL }}
+          REVIEW_LIMIT: ${{ inputs.limit || '10' }}
+          REVIEW_ITEMS: ${{ inputs.items }}
+        run: |
+          args=(--project desktop --limit "$REVIEW_LIMIT")
+          if [ -n "$REVIEW_ITEMS" ]; then args+=(--items "$REVIEW_ITEMS"); fi
+          bun scripts/design-review.ts "${args[@]}" | tee "$RUNNER_TEMP/review.txt"
+          { echo '### Design review (lowest first)'; echo '```'; cat "$RUNNER_TEMP/review.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: design-review
+          path: |
+            e2e-artifacts/design-review.json
+            e2e-artifacts/screenshots/
+          retention-days: 30
+
+      # Skeleton: once an agent is wired, polish the lowest-scoring item here, run the
+      # checks, and open it with:
+      #   bun scripts/automation/bot-pr.ts open --branch bot/polish-<id> --title "Polish <name>" --body-file …
+      # The guard output (steps.guard.outputs.allowed) must be 'true' before that step.
