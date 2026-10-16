@@ -1,8 +1,9 @@
 import { expect, test } from "bun:test";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import {
   METRIC_CARD_VARIANTS,
   MetricCard,
+  MetricCardChart,
   MetricCardComparison,
   MetricCardLabel,
   MetricCardTrend,
@@ -54,4 +55,62 @@ test("renders every variant and guards compound children", () => {
   expect(() => render(<MetricCardValue>1</MetricCardValue>)).toThrow(
     "MetricCardValue must be used within MetricCard",
   );
+});
+
+test("renders skeletons while busy and keeps the label for assistive tech", () => {
+  render(
+    <MetricCard aria-busy>
+      <MetricCardLabel>MRR</MetricCardLabel>
+      <MetricCardTrend direction="up">12%</MetricCardTrend>
+      <MetricCardValue>$48,290</MetricCardValue>
+      <MetricCardComparison>vs. $42,960</MetricCardComparison>
+      <MetricCardChart data={[1, 2, 3]} label="MRR trend" />
+    </MetricCard>,
+  );
+  const group = screen.getByRole("group", { name: "MRR" });
+  expect(group.getAttribute("aria-busy")).toBe("true");
+  expect(group.textContent).not.toContain("$48,290");
+  expect(screen.queryByRole("img")).toBeNull();
+});
+
+test("the chart takes the trend's sentiment and is scrubbable with the keyboard", () => {
+  render(
+    <MetricCard>
+      <MetricCardLabel>Median first response</MetricCardLabel>
+      <MetricCardTrend direction="down" sentiment="positive">
+        3 min
+      </MetricCardTrend>
+      <MetricCardValue>
+        14<span data-unit>min</span>
+      </MetricCardValue>
+      <MetricCardComparison>vs. 17 min last week</MetricCardComparison>
+      <MetricCardChart
+        data={[17, 15, 14]}
+        label="Fell from 17 to 14 minutes"
+        pointLabels={["Sun · 17 min", "Mon · 15 min", "Tue · 14 min"]}
+      />
+    </MetricCard>,
+  );
+  const chart = screen.getByRole("img", { name: "Fell from 17 to 14 minutes" });
+  expect(chart.getAttribute("data-sentiment")).toBe("positive");
+  expect(chart.tabIndex).toBe(0);
+  fireEvent.keyDown(chart, { key: "ArrowLeft" });
+  expect(screen.getAllByText("Mon · 15 min").length).toBeGreaterThan(0);
+  expect(document.querySelector("[data-slot=metric-card-comparison]")?.textContent).toBe(
+    "Mon · 15 min",
+  );
+  fireEvent.blur(chart);
+  expect(screen.getByText("vs. 17 min last week")).toBeTruthy();
+});
+
+test("an empty chart draws a baseline and is not focusable", () => {
+  render(
+    <MetricCard>
+      <MetricCardLabel>Expansion</MetricCardLabel>
+      <MetricCardChart data={[]} label="No data yet" />
+    </MetricCard>,
+  );
+  const chart = screen.getByRole("img", { name: "No data yet" });
+  expect(chart.hasAttribute("tabindex")).toBe(false);
+  expect(chart.querySelector("line")?.getAttribute("stroke-dasharray")).toBe("2 3");
 });
