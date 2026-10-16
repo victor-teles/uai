@@ -15,14 +15,24 @@ const customers = [
   { name: "Quillon", mark: <rect x="1" y="1" width="14" height="14" rx="3" /> },
   { name: "Tessaline", mark: <path d="M8 1 15 15H1z" /> },
   { name: "Orvik", mark: <path d="M1 8a7 7 0 0 1 14 0z" /> },
-  { name: "Calder Works", mark: <rect x="1" y="5" width="14" height="6" rx="3" /> },
+  { name: "Calder", mark: <rect x="1" y="5" width="14" height="6" rx="3" /> },
   { name: "Lumen Row", mark: <path d="M8 1v14M1 8h14" stroke="currentColor" strokeWidth="3" /> },
 ];
 
 export function TrustPanelPreview({ variant = "card" }: { variant?: TrustPanelVariant }) {
   return (
     <TrustPanel variant={variant}>
-      <TrustPanelTitle>Trusted by 2,400 operations teams</TrustPanelTitle>
+      <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+        <TrustPanelTitle>
+          <b>2,400</b> operations teams run their week on Ferrow
+        </TrustPanelTitle>
+        <TrustPanelRating
+          value={4.8}
+          className={variant === "card" ? "justify-items-end" : undefined}
+        >
+          1,240 verified reviews on G2
+        </TrustPanelRating>
+      </div>
       <TrustPanelLogos>
         {customers.map((customer) => (
           <TrustPanelLogo key={customer.name} name={customer.name}>
@@ -33,14 +43,15 @@ export function TrustPanelPreview({ variant = "card" }: { variant?: TrustPanelVa
           </TrustPanelLogo>
         ))}
       </TrustPanelLogos>
-      <TrustPanelRating value={4.8}>from 1,240 verified reviews</TrustPanelRating>
       <TrustPanelBadges aria-label="Security and compliance">
-        <TrustPanelBadge>SOC 2 Type II report</TrustPanelBadge>
-        <TrustPanelBadge icon={<ShieldCheck size={14} aria-hidden="true" />}>
-          ISO/IEC 27001 certified
+        <TrustPanelBadge>
+          <b>SOC 2 Type II</b> report on request
         </TrustPanelBadge>
-        <TrustPanelBadge icon={<LockKeyhole size={14} aria-hidden="true" />}>
-          Encrypted at rest and in transit
+        <TrustPanelBadge icon={<ShieldCheck size={13} aria-hidden="true" />}>
+          <b>ISO/IEC 27001</b> certified
+        </TrustPanelBadge>
+        <TrustPanelBadge icon={<LockKeyhole size={13} aria-hidden="true" />}>
+          <b>AES-256</b> at rest and in transit
         </TrustPanelBadge>
       </TrustPanelBadges>
     </TrustPanel>

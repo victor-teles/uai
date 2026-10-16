@@ -178,10 +178,5 @@
     "rule": "subtle-size",
     "item": "product-detail",
     "detail": "src/registry/uai/blocks/product-detail.tsx: text-subtle-foreground with text-[13px]"
-  },
-  {
-    "rule": "subtle-size",
-    "item": "trust-panel",
-    "detail": "src/registry/uai/components/trust-panel.tsx: text-subtle-foreground with text-[13px]"
   }
 ]
