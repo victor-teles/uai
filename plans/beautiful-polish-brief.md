@@ -19,8 +19,8 @@ the shadcn token classes they map to (see Theme tokens in `DESIGN.md` and
 | `--uai-border` | `oklch(0.315 0.006 268)` | Hairlines. Use sparingly — prefer tone. |
 | `--uai-border-strong` | `oklch(0.39 0.007 268)` | Focused fields, floating-menu outline, idle send. |
 | `--uai-text` | `oklch(0.964 0.002 248)` | Primary ink. |
-| `--uai-muted` | `oklch(0.731 0.008 261)` | Secondary text, inactive nav, body copy in dense cards. |
-| `--uai-subtle` | `oklch(0.62 0.01 264)` | NEW. Tertiary metadata only: timestamps, counts, captions, placeholders. |
+| `--uai-muted` | `oklch(0.79 0.008 261)` | Secondary text, inactive nav, body copy in dense cards. |
+| `--uai-subtle` | `oklch(0.69 0.01 264)` | NEW. Tertiary metadata only: timestamps, counts, captions, placeholders. |
 | `--uai-accent` | `oklch(0.57 0.185 257)` | Primary affirmative button fill (white text), links, focus rings, selected checkbox/radio. |
 | `--uai-success` / `--uai-warning` / `--uai-danger` | green / amber / red | Status. |
 
