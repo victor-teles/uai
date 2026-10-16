@@ -14,16 +14,16 @@ colors:
   border-light: "oklch(0.915 0.003 260)"
   border-strong-light: "oklch(0.84 0.005 260)"
   text-light: "oklch(0.247 0.006 258)"
-  muted-light: "oklch(0.47 0.01 260)"
-  subtle-light: "oklch(0.55 0.01 260)"
+  muted-light: "oklch(0.43 0.01 260)"
+  subtle-light: "oklch(0.52 0.01 260)"
   canvas-dark: "oklch(0.226 0.004 264)"
   surface-dark: "oklch(0.26 0.006 271)"
   surface-raised-dark: "oklch(0.293 0.006 271)"
   border-dark: "oklch(0.315 0.006 268)"
   border-strong-dark: "oklch(0.39 0.007 268)"
   text-dark: "oklch(0.964 0.002 248)"
-  muted-dark: "oklch(0.731 0.008 261)"
-  subtle-dark: "oklch(0.62 0.01 264)"
+  muted-dark: "oklch(0.79 0.008 261)"
+  subtle-dark: "oklch(0.69 0.01 264)"
   success: "oklch(0.705 0.154 154)"
   warning: "oklch(0.746 0.156 56)"
   danger: "oklch(0.666 0.18 21)"
@@ -374,8 +374,8 @@ Warm graphite neutrals carry structure on both layers. The site adds a lime sign
 - **Border** (`oklch(0.315 0.006 268)`): Hairlines. Prefer tone and spacing first.
 - **Border Strong** (`oklch(0.39 0.007 268)`): Focused fields, floating-menu outlines, idle send, and the segmented thumb ring.
 - **Text** (`oklch(0.964 0.002 248)`): Headings and primary labels.
-- **Muted** (`oklch(0.731 0.008 261)`): Body copy in dense surfaces and inactive navigation.
-- **Subtle** (`oklch(0.62 0.01 264)`): Tertiary metadata only: numbers, timestamps, counts, captions, and placeholders.
+- **Muted** (`oklch(0.79 0.008 261)` dark, `oklch(0.43 0.01 260)` light): Body copy in dense surfaces and inactive navigation.
+- **Subtle** (`oklch(0.69 0.01 264)` dark, `oklch(0.52 0.01 260)` light): Tertiary metadata only: numbers, timestamps, counts, captions, and placeholders.
 
 ### Status
 
