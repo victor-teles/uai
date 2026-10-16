@@ -6,13 +6,28 @@ import { RootProvider } from "fumadocs-ui/provider/next";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
+import { siteDescription, siteName, siteTitle, siteUrl } from "@/lib/site";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
+  applicationName: siteName,
   title: {
-    default: "Uai — Open code for web products",
-    template: "%s — Uai",
+    default: siteTitle,
+    template: `%s — ${siteName}`,
   },
-  description:
-    "Open-code React patterns for websites and web applications, distributed through the shadcn CLI.",
+  description: siteDescription,
+  openGraph: {
+    type: "website",
+    siteName,
+    locale: "en_US",
+    title: siteTitle,
+    description: siteDescription,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteTitle,
+    description: siteDescription,
+  },
 };
 
 const designContract = `<!--
