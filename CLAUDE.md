@@ -9,8 +9,9 @@ CSS, and the shadcn registry schema.
 - Update `registry.json`, documentation, previews, and tests together.
 - When the visual contract changes, update `DESIGN.md` and `PRODUCT.md` in the
   same change.
-- Run `bun run typecheck`, `bun run lint`, `bun run test`, and `bun run build`
-  before handing off a change.
+- Run `bun run typecheck`, `bun run lint`, `bun run registry:check`, `bun run test`,
+  `bun run build`, and `bun run test:e2e` before handing off a change. See
+  `CONTRIBUTING.md` for the baselines these checks use.
 - Read the matching guide in `node_modules/next/dist/docs` before changing a
   Next.js convention or API.
 

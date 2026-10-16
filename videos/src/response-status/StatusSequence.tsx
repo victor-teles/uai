@@ -23,7 +23,13 @@ const layerCss = `
 // A linear crossfade keeps the combined opacity at 1, so the content never dips.
 const crossfadeFrames = 4;
 
-export const StatusSequence = ({ variant, steps, detail, hovered, pressed }: StatusSequenceProps) => {
+export const StatusSequence = ({
+  variant,
+  steps,
+  detail,
+  hovered,
+  pressed,
+}: StatusSequenceProps) => {
   const frame = useCurrentFrame();
   const index = Math.max(
     0,

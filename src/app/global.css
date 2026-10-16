@@ -503,7 +503,7 @@ a {
   padding: 0 4px 0 10px;
   border-radius: 999px;
   background: var(--uai-surface-raised);
-  color: var(--uai-subtle);
+  color: var(--uai-muted);
   font-family: var(--uai-mono);
   font-size: 0.72rem;
   transition:
@@ -2194,7 +2194,7 @@ html[data-uai-resizing="y"] * {
 
   .uai-site-search:hover {
     background: color-mix(in oklab, var(--uai-surface-raised) 80%, var(--uai-text));
-    color: var(--uai-muted);
+    color: var(--uai-text);
   }
 
   .uai-inspector .uai-install-command button:hover {

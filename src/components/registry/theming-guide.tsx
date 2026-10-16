@@ -1,8 +1,8 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
-
 import { InstallCommand } from "@/components/install-command";
+import { codeBlockOptions } from "./code-themes";
 import { CopyButton } from "./copy-button";
 import { themeCss } from "./theme-css";
 
@@ -59,6 +59,7 @@ function Code({ code, lang, label }: { code: string; lang: string; label: string
         <CopyButton text={code} label={label} />
       </div>
       <DynamicCodeBlock
+        options={codeBlockOptions}
         lang={lang}
         code={code}
         codeblock={{

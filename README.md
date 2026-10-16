@@ -62,12 +62,14 @@ time. shadcn requires full URLs for custom registry dependencies.
 
 ## Add a component
 
-1. Add the source file under `src/registry/uai/components` or `src/registry/uai/blocks`, and copy it
-   byte-for-byte to `src/components/ui/uai` or `src/components/uai`.
+1. Add the source file under `src/registry/uai/components` or `src/registry/uai/blocks`, and add
+   a one-line re-export of it at `src/components/ui/uai` or `src/components/uai`.
 2. Define the public item, target path, and dependencies in `registry.json`.
 3. Add the catalog entry and live preview in the matching group folder under
    `src/components/registry/<group>`. The entry's `usage` must equal the preview file.
 4. Run the validation suite.
+
+See `CONTRIBUTING.md` for the full checklist.
 
 Keep public interfaces small. A compound component should own its shared behavior
 and delegate replaceable content to named children.
@@ -77,9 +79,18 @@ and delegate replaceable content to named children.
 ```bash
 bun run typecheck
 bun run lint
+bun run registry:check
 bun run test
 bun run build
+bun run test:e2e
 ```
 
 `bun run test` regenerates the registry before checking its public documents.
-`bun run build` does the same before creating the production site.
+`bun run build` does the same before creating the production site. `bun run test:e2e`
+screenshots every component page in both themes on desktop and mobile, runs axe, and
+checks reduced motion against the production build; run `bun run test:e2e:install` once
+first.
+
+## License
+
+[MIT](LICENSE) © 2026 Victor Mesquita
