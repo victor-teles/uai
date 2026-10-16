@@ -12,7 +12,7 @@ import {
 import { type PreviewControl, PreviewStage } from "../preview-chrome";
 import type { MapsItemId } from "./catalog";
 import { MapControlsPreview } from "./map-controls-preview";
-import { MapFramePreview } from "./map-frame-preview";
+import { MapFramePreview, type MapFramePreviewState } from "./map-frame-preview";
 import { MapLegendPreview } from "./map-legend-preview";
 import { MapMarkerPreview } from "./map-marker-preview";
 import { PlaceCardPreview } from "./place-card-preview";
@@ -27,6 +27,15 @@ const controls: Record<MapsItemId, { variants: readonly string[]; label: string 
   "route-summary": { variants: ROUTE_SUMMARY_VARIANTS, label: "route summary" },
 };
 
+/** Preview-only states composed from the parts, appended to the variant control. */
+const previewStates: Partial<Record<MapsItemId, { id: string; label: string }[]>> = {
+  "map-frame": [
+    { id: "loading", label: "Loading" },
+    { id: "error", label: "Error" },
+    { id: "empty", label: "Empty results" },
+  ],
+};
+
 const narrow = new Set<string>(["route-summary"]);
 
 export function getMapsPreviewControl(itemId: string): PreviewControl | undefined {
@@ -35,10 +44,13 @@ export function getMapsPreviewControl(itemId: string): PreviewControl | undefine
   return {
     ariaLabel: `${control.label} variant`,
     defaultValue: control.variants[0] ?? "",
-    options: control.variants.map((id) => ({
-      id,
-      label: id.charAt(0).toUpperCase() + id.slice(1),
-    })),
+    options: [
+      ...control.variants.map((id) => ({
+        id,
+        label: id.charAt(0).toUpperCase() + id.slice(1),
+      })),
+      ...(previewStates[itemId as MapsItemId] ?? []),
+    ],
   };
 }
 
@@ -55,7 +67,12 @@ export function MapsPreview({ itemId, selection }: { itemId: string; selection: 
           padding: "24px 0",
         }}
       >
-        {itemId === "map-frame" && <MapFramePreview variant={selection as MapFrameVariant} />}
+        {itemId === "map-frame" &&
+          (MAP_FRAME_VARIANTS.includes(selection as MapFrameVariant) ? (
+            <MapFramePreview variant={selection as MapFrameVariant} />
+          ) : (
+            <MapFramePreview state={selection as MapFramePreviewState} />
+          ))}
         {itemId === "map-controls" && (
           <MapControlsPreview variant={selection as MapControlsVariant} />
         )}
