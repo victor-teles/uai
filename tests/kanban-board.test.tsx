@@ -135,23 +135,136 @@ test("renders every variant and guards compound children", () => {
   ).toThrow("KanbanBoardColumnTitle must be used within KanbanBoardColumn");
 });
 
-test("marks the dragged card and the column under the pointer", async () => {
-  render(<Stateful />);
-  const card = screen.getByText("Alpha").closest("li") as HTMLElement;
-  const doing = screen.getByRole("region", { name: "Doing" });
-  const dataTransfer = {
-    types: ["application/x-uai-kanban"],
-    setData: () => {},
-    getData: () => "a",
-    effectAllowed: "all",
+function withReducedMotion() {
+  const original = window.matchMedia;
+  window.matchMedia = ((query: string) => ({
+    matches: query.includes("reduce"),
+    media: query,
+    addEventListener() {},
+    removeEventListener() {},
+  })) as unknown as typeof window.matchMedia;
+  return () => {
+    window.matchMedia = original;
   };
-  fireEvent.dragStart(card, { dataTransfer });
-  await act(() => new Promise((resolve) => requestAnimationFrame(resolve)));
-  expect(card.hasAttribute("data-dragging")).toBe(true);
-  fireEvent.dragEnter(doing, { dataTransfer });
-  expect(doing.hasAttribute("data-drop-target")).toBe(true);
-  fireEvent.dragLeave(doing, { dataTransfer, relatedTarget: null });
-  expect(doing.hasAttribute("data-drop-target")).toBe(false);
-  fireEvent.dragEnd(card, { dataTransfer });
-  expect(card.hasAttribute("data-dragging")).toBe(false);
+}
+
+function pointUnder(element: () => Element | null) {
+  const original = document.elementsFromPoint;
+  document.elementsFromPoint = (() => {
+    const hit = element();
+    return hit ? [hit] : [];
+  }) as typeof document.elementsFromPoint;
+  return () => {
+    document.elementsFromPoint = original;
+  };
+}
+
+const pointer = { pointerId: 1, pointerType: "mouse", button: 0 };
+
+test("drags a card with the pointer onto another column through a lifted overlay", () => {
+  const restoreMotion = withReducedMotion();
+  const change = mock((_value: KanbanBoardValue) => {});
+  render(<Stateful onChange={change} />);
+  const doing = screen.getByRole("region", { name: "Doing" });
+  const restorePoint = pointUnder(() => doing);
+  const card = cardNamed("Alpha");
+  try {
+    fireEvent.pointerDown(card, { ...pointer, clientX: 10, clientY: 10 });
+    // Under the 4px threshold it is still a click.
+    fireEvent.pointerMove(window, { ...pointer, clientX: 12, clientY: 11 });
+    expect(document.querySelector("[data-slot=kanban-board-overlay]")).toBeNull();
+    fireEvent.pointerMove(window, { ...pointer, clientX: 200, clientY: 14 });
+    const overlay = document.querySelector("[data-slot=kanban-board-overlay]");
+    expect(overlay?.getAttribute("aria-hidden")).toBe("true");
+    expect(overlay?.hasAttribute("tabindex")).toBe(false);
+    expect(card.hasAttribute("data-dragging")).toBe(true);
+    expect(doing.hasAttribute("data-drop-target")).toBe(true);
+    expect(screen.getByRole("status").textContent).toBe(
+      "Alpha picked up in To do, position 1 of 2.",
+    );
+    // The empty column becomes the insertion slot.
+    expect(
+      doing.querySelector("[data-slot=kanban-board-column-empty]")?.hasAttribute("data-drop-slot"),
+    ).toBe(true);
+    act(() => {
+      fireEvent.pointerUp(window, { ...pointer, clientX: 200, clientY: 14 });
+    });
+    expect(change).toHaveBeenLastCalledWith({ todo: ["b"], doing: ["a"] });
+    expect(document.querySelector("[data-slot=kanban-board-overlay]")).toBeNull();
+    expect(screen.getByRole("status").textContent).toBe("Alpha dropped in Doing, position 1 of 1.");
+    expect(cardNamed("Alpha").hasAttribute("data-dragging")).toBe(false);
+  } finally {
+    restorePoint();
+    restoreMotion();
+  }
+});
+
+test("Escape cancels a pointer drag and a press without movement stays a click", () => {
+  const restoreMotion = withReducedMotion();
+  const change = mock((_value: KanbanBoardValue) => {});
+  render(<Stateful onChange={change} />);
+  const restorePoint = pointUnder(() => screen.getByRole("region", { name: "Doing" }));
+  try {
+    const card = cardNamed("Beta");
+    fireEvent.pointerDown(card, { ...pointer, clientX: 0, clientY: 0 });
+    fireEvent.pointerUp(window, { ...pointer, clientX: 1, clientY: 1 });
+    expect(document.querySelector("[data-slot=kanban-board-overlay]")).toBeNull();
+
+    fireEvent.pointerDown(card, { ...pointer, clientX: 0, clientY: 0 });
+    fireEvent.pointerMove(window, { ...pointer, clientX: 80, clientY: 0 });
+    expect(document.querySelector("[data-slot=kanban-board-overlay]")).not.toBeNull();
+    act(() => {
+      fireEvent.keyDown(window, { key: "Escape" });
+    });
+    expect(document.querySelector("[data-slot=kanban-board-overlay]")).toBeNull();
+    expect(change).not.toHaveBeenCalled();
+    expect(screen.getByRole("status").textContent).toBe(
+      "Move cancelled. Beta returned to To do, position 2 of 2.",
+    );
+  } finally {
+    restorePoint();
+    restoreMotion();
+  }
+});
+
+test("announces and restores a move the consumer rejects", () => {
+  const restoreMotion = withReducedMotion();
+  const change = mock((_value: KanbanBoardValue) => {});
+  render(<Board value={{ todo: ["a"], doing: [] }} onValueChange={change} />);
+  const restorePoint = pointUnder(() => screen.getByRole("region", { name: "Doing" }));
+  try {
+    fireEvent.pointerDown(cardNamed("Alpha"), { ...pointer, clientX: 0, clientY: 0 });
+    fireEvent.pointerMove(window, { ...pointer, clientX: 90, clientY: 0 });
+    act(() => {
+      fireEvent.pointerUp(window, { ...pointer, clientX: 90, clientY: 0 });
+    });
+    expect(change).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("region", { name: "To do" }).textContent).toContain("Alpha");
+    expect(screen.getByRole("status").textContent).toBe("Couldn't move Alpha. It's back in To do.");
+  } finally {
+    restorePoint();
+    restoreMotion();
+  }
+});
+
+test("disabled cards cannot be picked up", async () => {
+  const user = userEvent.setup();
+  render(
+    <KanbanBoard defaultValue={{ todo: ["a"] }}>
+      <KanbanBoardColumn value="todo" label="To do">
+        <KanbanBoardCards>
+          <KanbanBoardCard value="a" label="Alpha" aria-disabled="true">
+            Alpha
+          </KanbanBoardCard>
+        </KanbanBoardCards>
+      </KanbanBoardColumn>
+    </KanbanBoard>,
+  );
+  const card = cardNamed("Alpha");
+  fireEvent.pointerDown(card, { ...pointer, clientX: 0, clientY: 0 });
+  fireEvent.pointerMove(window, { ...pointer, clientX: 80, clientY: 0 });
+  expect(document.querySelector("[data-slot=kanban-board-overlay]")).toBeNull();
+  card.focus();
+  await user.keyboard(" ");
+  expect(screen.getByRole("status").textContent).toBe("");
 });

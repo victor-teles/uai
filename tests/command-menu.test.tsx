@@ -5,6 +5,7 @@ import {
   COMMAND_MENU_VARIANTS,
   CommandMenu,
   CommandMenuEmpty,
+  CommandMenuFooter,
   CommandMenuGroup,
   CommandMenuGroupLabel,
   CommandMenuInput,
@@ -125,5 +126,42 @@ test("renders every variant and guards compound children", () => {
   }
   expect(() => render(<CommandMenuItem value="x">X</CommandMenuItem>)).toThrow(
     "CommandMenuItem must be used within CommandMenu",
+  );
+});
+
+test("slides one shared, hidden highlight to the active row", async () => {
+  const user = userEvent.setup();
+  const view = render(<Fixture />);
+  const highlights = view.container.querySelectorAll("[data-slot=command-menu-highlight]");
+  expect(highlights).toHaveLength(1);
+  const highlight = highlights[0] as HTMLElement;
+  expect(highlight.getAttribute("aria-hidden")).toBe("true");
+  expect(highlight.style.opacity).toBe("1");
+  await user.click(screen.getByRole("combobox"));
+  await user.keyboard("{ArrowDown}");
+  expect(active()).toBe("Invite teammate");
+  const row = screen.getByRole("option", { name: "Invite teammate" });
+  expect(highlight.style.translate).toBe(`0 ${row.offsetTop}px`);
+  // Rows no longer paint their own background; the highlight does.
+  expect(row.className).not.toContain("bg-accent");
+});
+
+test("echoes the query in the empty state and keeps the consumer's hint", async () => {
+  const user = userEvent.setup();
+  render(
+    <CommandMenu label="Commands">
+      <CommandMenuInput />
+      <CommandMenuList>
+        <CommandMenuItem value="Open">Open</CommandMenuItem>
+        <CommandMenuEmpty>Try “invoices”.</CommandMenuEmpty>
+      </CommandMenuList>
+      <CommandMenuFooter />
+    </CommandMenu>,
+  );
+  await user.type(screen.getByRole("combobox"), "payroll");
+  const status = screen.getByRole("status");
+  expect(status.textContent).toBe("No results for “payroll”Try “invoices”.");
+  expect(document.querySelector("[data-slot=command-menu-footer]")?.textContent).toBe(
+    "↑↓ Navigate↵ Openesc Close",
   );
 });
