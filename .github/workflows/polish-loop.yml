@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       items:
-        description: Comma-separated item ids to review (default: all)
+        description: "Comma-separated item ids to review (default: all)"
         required: false
       limit:
         description: Review at most this many items
