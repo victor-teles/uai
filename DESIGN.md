@@ -14,16 +14,16 @@ colors:
   border-light: "oklch(0.915 0.003 260)"
   border-strong-light: "oklch(0.84 0.005 260)"
   text-light: "oklch(0.247 0.006 258)"
-  muted-light: "oklch(0.47 0.01 260)"
-  subtle-light: "oklch(0.55 0.01 260)"
+  muted-light: "oklch(0.43 0.01 260)"
+  subtle-light: "oklch(0.52 0.01 260)"
   canvas-dark: "oklch(0.226 0.004 264)"
   surface-dark: "oklch(0.26 0.006 271)"
   surface-raised-dark: "oklch(0.293 0.006 271)"
   border-dark: "oklch(0.315 0.006 268)"
   border-strong-dark: "oklch(0.39 0.007 268)"
   text-dark: "oklch(0.964 0.002 248)"
-  muted-dark: "oklch(0.731 0.008 261)"
-  subtle-dark: "oklch(0.62 0.01 264)"
+  muted-dark: "oklch(0.79 0.008 261)"
+  subtle-dark: "oklch(0.69 0.01 264)"
   success: "oklch(0.705 0.154 154)"
   warning: "oklch(0.746 0.156 56)"
   danger: "oklch(0.666 0.18 21)"
@@ -374,8 +374,8 @@ Warm graphite neutrals carry structure on both layers. The site adds a lime sign
 - **Border** (`oklch(0.315 0.006 268)`): Hairlines. Prefer tone and spacing first.
 - **Border Strong** (`oklch(0.39 0.007 268)`): Focused fields, floating-menu outlines, idle send, and the segmented thumb ring.
 - **Text** (`oklch(0.964 0.002 248)`): Headings and primary labels.
-- **Muted** (`oklch(0.731 0.008 261)`): Body copy in dense surfaces and inactive navigation.
-- **Subtle** (`oklch(0.62 0.01 264)`): Tertiary metadata only: numbers, timestamps, counts, captions, and placeholders.
+- **Muted** (`oklch(0.79 0.008 261)` dark, `oklch(0.43 0.01 260)` light): Body copy in dense surfaces and inactive navigation.
+- **Subtle** (`oklch(0.69 0.01 264)` dark, `oklch(0.52 0.01 260)` light): Tertiary metadata only: numbers, timestamps, counts, captions, and placeholders.
 
 ### Status
 
@@ -1105,7 +1105,7 @@ All six marketing components use the the warm graphite tokens in light and dark 
 | Trust Panel | card / plain / compact | Customer logos, a rating with a text equivalent, and certification badges. |
 | Newsletter Form | inline / stacked / card | Email signup with consent, validation, pending, success, duplicate, and error states. |
 
-Announcement Bar uses the raised surface with a bottom hairline, a bordered 14px card, or a 24px-radius floating pill with the visible outline and a soft offset shadow; its label is an ink pill and its action is a 28px ink pill. Pricing Toggle places options in a 12px raised track with an outlined surface segment (Segmented), fills the selected option with ink inside a full pill (Pill), or shrinks to a 10px track with 24px options (Compact); savings labels tint `currentColor` so they read on both selected and idle options. Testimonial Card uses a bordered 14px card with 15px quote type, an editorial 20px quote beside a 2px strong rule, or a 12px compact card with 13px quote type; avatars are 36px raised circles (28px compact). Product Gallery uses a 4:3 raised viewport with 14px corners (12px compact) and 64px thumbnails (48px compact) whose selection is a 2px ink ring; Side moves thumbnails into a 72px column and stacks below 560px. Overlay controls are 28px surface circles with the strong outline. The fullscreen dialog follows the floating rule: 14px corners, 4px padding, the visible outline, an offset shadow, and a pop-in from `scale(0.96)` in 180ms `cubic-bezier(0.23, 1, 0.32, 1)`. Trust Panel logos sit in 48px raised tiles (32px compact, outlined in Plain); stars use ink and the strong border, and badges are 28px outlined pills. Newsletter Form wraps the input and a 28px ink submit in a 14px shell (Inline and Card) or stacks a 36px field above a full-width button (Stacked); the submit turns `--uai-border-strong` while pending. Errors mix 75% danger with primary ink; success mixes 75% success with primary ink.
+Announcement Bar uses the raised surface with a bottom hairline, a bordered 14px card, or a 24px-radius floating pill with the visible outline and a soft offset shadow; its label is an ink pill and its action is a 28px ink pill. Pricing Toggle places options in a 12px raised track with an outlined surface segment (Segmented), fills the selected option with ink inside a full pill (Pill), or shrinks to a 10px track with 24px options (Compact); savings labels tint `currentColor` so they read on both selected and idle options. Testimonial Card uses a bordered 14px card with 15px quote type, an editorial 20px quote beside a 2px strong rule, or a 12px compact card with 13px quote type; avatars are 36px raised circles (28px compact). Product Gallery uses a 4:3 raised viewport with 14px corners (12px compact) and 64px thumbnails (48px compact) whose selection is a 2px ink ring; Side moves thumbnails into a 72px column and stacks below 560px. Overlay controls are 28px surface circles with the strong outline. The fullscreen dialog follows the floating rule: 14px corners, 4px padding, the visible outline, an offset shadow, and a pop-in from `scale(0.96)` in 180ms `cubic-bezier(0.23, 1, 0.32, 1)`. Trust Panel leads with the proof: the title is 15px muted with the count in a `<b>` at 600 foreground, and the rating sits top-right as a 20px 600 numeral over partial stars (an 18% foreground track with a foreground fill clipped to the value, so 4.8 fills 96%; never a status color). Logos are monochrome 14.5px 600 marks in muted-foreground in one row between hairlines (no tiles; left-aligned without hairlines in Plain, 28px muted pills in Compact); a linked logo turns foreground in 120ms, and a logo image that fails to load falls back to the company name. Badges are 26px muted pills whose claim sits in a `<b>` at 500 foreground. The panel enters once at 30% visibility: logos fade up 4px in 240ms with a 40ms stagger capped at six, then the star fill wipes in over 480ms; with reduced motion everything renders at rest. Newsletter Form wraps the input and a 28px ink submit in a 14px shell (Inline and Card) or stacks a 36px field above a full-width button (Stacked); the submit turns `--uai-border-strong` while pending. Errors mix 75% danger with primary ink; success mixes 75% success with primary ink.
 
 Campaign scheduling, billing logic and currency formatting, testimonial sourcing, media assets, the truth of trust claims, and email delivery remain consumer-owned. Announcement dismissal persists only when given a `storageKey`. Newsletter validation checks the email shape and consent; `onSubscribe` decides success, duplicate, or error.
 
