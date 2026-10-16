@@ -1,7 +1,6 @@
 import { AbsoluteFill, Sequence } from "remotion";
-
-import { useFrameSyncedAnimations } from "./response-status/useFrameSyncedAnimations";
 import { LifecycleScene } from "./response-status/LifecycleScene";
+import { useFrameSyncedAnimations } from "./response-status/useFrameSyncedAnimations";
 import { VariantsScene } from "./response-status/VariantsScene";
 import { LogoScene } from "./thinking-v2/LogoScene";
 

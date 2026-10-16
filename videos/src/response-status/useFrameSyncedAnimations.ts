@@ -14,6 +14,7 @@ export const useFrameSyncedAnimations = () => {
   const handle = useRef<number | null>(null);
 
   // Hold the frame until child effects (which create WAAPI animations) have run.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the render must be delayed again on every frame.
   useLayoutEffect(() => {
     handle.current = delayRender("Syncing component animations");
   }, [frame]);

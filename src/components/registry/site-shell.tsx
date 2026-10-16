@@ -67,12 +67,13 @@ function ThemeToggle() {
 
 function Brand({ onClick }: { onClick: (event: MouseEvent<HTMLAnchorElement>) => void }) {
   return (
-    <Link href="/" className="uai-brand" aria-label="Uai home" onClick={onClick}>
+    <Link href="/" className="uai-brand" onClick={onClick}>
       <span className="uai-brand__tile" aria-hidden="true">
         <span className="uai-brand__mark" />
       </span>
-      <span className="uai-wordmark" aria-hidden="true">
-        ai
+      {/* The tile draws the "U"; the hidden letter keeps the visible "ai" inside the name. */}
+      <span className="uai-wordmark">
+        <span className="sr-only">U</span>ai
       </span>
     </Link>
   );

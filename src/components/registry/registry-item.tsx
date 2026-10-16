@@ -4,7 +4,6 @@ import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
 import { ArrowDown, ArrowLeft, ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
 import { type CSSProperties, type ReactNode, useEffect, useId, useRef, useState } from "react";
-
 import { InstallCommand } from "@/components/install-command";
 import { getAnatomyModules, getAnatomyTree } from "./anatomy";
 import {
@@ -16,6 +15,7 @@ import {
   type RegistryItemKind,
   registryCatalog,
 } from "./catalog";
+import { codeBlockOptions } from "./code-themes";
 import { CopyButton } from "./copy-button";
 import { getPreviewControl, RegistryPreviewCanvas, RegistryVariants } from "./registry-preview";
 import { ResizeHandle, usePersistentSize } from "./resize-handle";
@@ -195,6 +195,7 @@ function ManualInstall({ selectedId }: { selectedId: RegistryItemId }) {
               Create <code>{manualSource.path}</code> and paste the source.
             </p>
             <DynamicCodeBlock
+              options={codeBlockOptions}
               lang="tsx"
               code={manualSource.code}
               codeblock={{
@@ -385,6 +386,7 @@ export function RegistryItem({ id }: { id: RegistryItemId }) {
               <CopyButton text={item.usage} label="Copy code example" />
             </div>
             <DynamicCodeBlock
+              options={codeBlockOptions}
               lang="tsx"
               code={item.usage}
               codeblock={{

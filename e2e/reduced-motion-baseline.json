@@ -1,0 +1,4 @@
+{
+  "$comment": "Components that still move with prefers-reduced-motion: reduce. Fix one, then delete it.",
+  "known": []
+}
