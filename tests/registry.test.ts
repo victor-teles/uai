@@ -307,18 +307,13 @@ describe("Uai registry", () => {
   });
 
   test("cart item usage derives the displayed price from its controlled quantity", async () => {
-    const catalog = await Bun.file("src/components/registry/catalog.ts").text();
-    const cartItemUsage = catalog.slice(
-      catalog.indexOf('id: "cart-item"'),
-      catalog.indexOf('id: "price-summary"'),
-    );
+    const preview = await Bun.file("src/components/registry/core/cart-item-preview.tsx").text();
 
-    expect(cartItemUsage).toContain('usage: `import { useState } from "react"');
-    expect(cartItemUsage).toContain("const [quantity, setQuantity] = useState(2)");
-    expect(cartItemUsage).toContain("<CartItemPrice>{formatPrice(quantity * 48)}</CartItemPrice>");
-    expect(cartItemUsage).toContain(
-      "<QuantityPicker value={quantity} onValueChange={setQuantity} min={1} max={5}>",
-    );
+    expect(getRegistryItem("cart-item").usage).toBe(preview);
+    expect(preview).toContain("const [quantity, setQuantity] = useState(2)");
+    expect(preview).toContain("<CartItemPrice>$" + "{(quantity * 48).toFixed(2)}</CartItemPrice>");
+    expect(preview).toContain("value={quantity}");
+    expect(preview).toContain("onValueChange={setQuantity}");
   });
 
   test("order status composes fulfillment evidence across visual variants", async () => {
@@ -396,7 +391,8 @@ describe("Uai registry", () => {
     expect(getAnatomyTree(composer.usage)).toEqual([
       { name: "PromptComposer", depth: 0, guide: "" },
       { name: "PromptComposerAdd", depth: 1, guide: "├ " },
-      { name: "PromptComposerFileItem", depth: 2, guide: "│ └ " },
+      { name: "PromptComposerFileItem", depth: 2, guide: "│ ├ " },
+      { name: "PromptComposerAddItem", depth: 2, guide: "│ └ " },
       { name: "PromptComposerInput", depth: 1, guide: "├ " },
       { name: "PromptComposerActions", depth: 1, guide: "└ " },
       { name: "PromptComposerModelSelect", depth: 2, guide: "  ├ " },

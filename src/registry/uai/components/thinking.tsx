@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import {
   AlertTriangle,
   Check,
@@ -23,11 +24,14 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/uai-utils";
 
+export const THINKING_VARIANTS = ["card", "inline", "compact"] as const;
 export const THINKING_STATUSES = ["thinking", "complete", "error"] as const;
 
+export type ThinkingVariant = (typeof THINKING_VARIANTS)[number];
 export type ThinkingStatus = (typeof THINKING_STATUSES)[number];
 
 export type ThinkingProps = ComponentProps<"section"> & {
+  variant?: ThinkingVariant;
   status?: ThinkingStatus;
   defaultOpen?: boolean;
 };
@@ -57,6 +61,7 @@ const statusDetails: Record<
 };
 
 type ThinkingContextValue = {
+  variant: ThinkingVariant;
   status: ThinkingStatus;
   open: boolean;
 };
@@ -69,7 +74,29 @@ function useThinking(name: string) {
   return context;
 }
 
+const thinkingVariants = cva(
+  "overflow-hidden text-card-foreground transition-colors duration-150 motion-reduce:transition-none",
+  {
+    variants: {
+      variant: {
+        card: "rounded-[14px] border bg-card",
+        inline: "rounded-none border-0 bg-transparent",
+        compact: "rounded-xl border bg-card",
+      },
+      error: { true: "", false: "" },
+    },
+    compoundVariants: [
+      {
+        variant: ["card", "compact"],
+        error: true,
+        className: "border-[color-mix(in_oklab,var(--destructive)_40%,var(--border))]",
+      },
+    ],
+  },
+);
+
 export function Thinking({
+  variant = "card",
   status = "thinking",
   defaultOpen = true,
   className,
@@ -79,17 +106,13 @@ export function Thinking({
   const [open, setOpen] = useState(defaultOpen);
 
   return (
-    <ThinkingContext.Provider value={{ status, open }}>
+    <ThinkingContext.Provider value={{ variant, status, open }}>
       <Collapsible asChild open={open} onOpenChange={setOpen}>
         <section
           data-slot="thinking"
-          className={cn(
-            "overflow-hidden rounded-[14px] border bg-card text-card-foreground transition-colors duration-150 motion-reduce:transition-none",
-            status === "error" &&
-              "border-[color-mix(in_oklab,var(--destructive)_40%,var(--border))]",
-            className,
-          )}
+          className={cn(thinkingVariants({ variant, error: status === "error" }), className)}
           {...props}
+          data-variant={variant}
           data-status={status}
           aria-busy={status === "thinking"}
         >
@@ -123,6 +146,8 @@ export function ThinkingTrigger({
       data-slot="thinking-trigger"
       className={cn(
         "group/trigger flex w-full items-center gap-3 px-3.5 py-3 text-left outline-none transition-colors duration-120 ease-out hover:bg-accent/60 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset motion-reduce:transition-none",
+        context.variant === "inline" && "rounded-[10px] px-2 py-2",
+        context.variant === "compact" && "gap-2.5 px-3 py-2",
         className,
       )}
       {...props}
@@ -130,6 +155,7 @@ export function ThinkingTrigger({
       <span
         className={cn(
           "grid size-7 shrink-0 place-items-center rounded-lg bg-muted",
+          context.variant === "compact" && "size-6 rounded-md",
           context.status === "complete" && "bg-success/14",
           context.status === "error" && "bg-destructive/14",
         )}
@@ -226,7 +252,12 @@ export function ThinkingContent({
         <CollapsibleContent
           data-slot="thinking-content"
           forceMount
-          className={cn("border-t px-3.5 pt-1 pb-1.5", className)}
+          className={cn(
+            "border-t px-3.5 pt-1 pb-1.5",
+            context.variant === "inline" && "ml-[18px] border-t-0 border-l pl-3 pr-2",
+            context.variant === "compact" && "px-3 pb-1",
+            className,
+          )}
           {...props}
         >
           {hasActivity ? (
