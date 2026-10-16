@@ -1,14 +1,18 @@
 import { expect, test } from "bun:test";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { useState } from "react";
 
 import {
   PRICE_SUMMARY_VARIANTS,
   PriceSummary,
+  PriceSummaryCode,
   PriceSummaryDescription,
   PriceSummaryHeader,
   PriceSummaryItem,
   PriceSummaryList,
   PriceSummaryNote,
+  PriceSummarySavings,
   PriceSummaryTitle,
   PriceSummaryTotal,
   type PriceSummaryVariant,
@@ -75,7 +79,7 @@ test("keeps discount meaning visible in text and semantic markup", () => {
 
   const discountValue = screen.getByText("−$20.00");
   expect(discountValue.tagName).toBe("DD");
-  expect(discountValue.className).toContain("text-success");
+  expect(discountValue.className).toContain("var(--success)");
   expect(screen.getByText("WELCOME20").tagName).toBe("DT");
 });
 
@@ -107,4 +111,66 @@ test("compound price summary children require their root", () => {
   expect(() => render(<PriceSummaryItem label="Subtotal">$10.00</PriceSummaryItem>)).toThrow(
     "PriceSummaryItem must be used within PriceSummary",
   );
+});
+
+function CodeFixture({ busy = false }: { busy?: boolean }) {
+  const [code, setCode] = useState(true);
+  return (
+    <PriceSummary aria-busy={busy}>
+      <PriceSummaryHeader>
+        <PriceSummaryTitle>Order summary</PriceSummaryTitle>
+      </PriceSummaryHeader>
+      <PriceSummaryList>
+        {code && (
+          <PriceSummaryItem
+            label={<PriceSummaryCode onRemove={() => setCode(false)}>WELCOME20</PriceSummaryCode>}
+            tone="success"
+          >
+            −$20.00
+          </PriceSummaryItem>
+        )}
+        <PriceSummaryItem label="Estimated tax" aria-busy={busy}>
+          $9.72
+        </PriceSummaryItem>
+        <PriceSummaryTotal>{code ? "$117.72" : "$137.72"}</PriceSummaryTotal>
+      </PriceSummaryList>
+      <PriceSummarySavings>
+        {code ? "You’re saving $20.00 on this order" : null}
+      </PriceSummarySavings>
+    </PriceSummary>
+  );
+}
+
+test("renders a removable code chip and states the savings", async () => {
+  const user = userEvent.setup();
+  render(<CodeFixture />);
+  const savings = document.querySelector("[data-slot=price-summary-savings]");
+  expect(savings?.getAttribute("data-state")).toBe("open");
+  expect(screen.getByText("You’re saving $20.00 on this order")).toBeTruthy();
+  await user.click(screen.getByRole("button", { name: "Remove code WELCOME20" }));
+  await act(() => new Promise((resolve) => setTimeout(resolve, 160)));
+  expect(screen.queryByText("WELCOME20")).toBeNull();
+  expect(screen.getByText("$137.72").tagName).toBe("DD");
+  expect(savings?.getAttribute("data-state")).toBe("closed");
+  expect(savings?.getAttribute("aria-hidden")).toBe("true");
+});
+
+test("shows skeletons only for pending amounts and dims the total while busy", () => {
+  render(<CodeFixture busy />);
+  expect(screen.queryByText("$9.72")).toBeNull();
+  expect(screen.getByText("Updating")).toBeTruthy();
+  expect(screen.getByText("−$20.00").tagName).toBe("DD");
+  const total = screen.getByText("$117.72");
+  expect(total.getAttribute("aria-live")).toBe("polite");
+  expect(total.getAttribute("aria-busy")).toBe("true");
+  expect(total.className).toContain("opacity-45");
+});
+
+test("an alert note uses the danger ink", () => {
+  render(
+    <PriceSummary>
+      <PriceSummaryNote role="alert">We couldn’t update shipping.</PriceSummaryNote>
+    </PriceSummary>,
+  );
+  expect(screen.getByRole("alert").className).toContain("var(--destructive)");
 });

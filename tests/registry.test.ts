@@ -16,10 +16,15 @@ const registry = (await Bun.file("registry.json").json()) as Registry;
 const itemNames = registry.items.map((item) => item.name);
 
 describe("Uai registry", () => {
-  test("publishes the theme, utilities, and every catalog item", () => {
+  test("publishes the theme, the shared libs, and every catalog item", () => {
     expect(itemNames.slice(0, 2)).toEqual(["uai-theme", "uai-utils"]);
     expect([...itemNames].sort()).toEqual(
-      ["uai-theme", "uai-utils", ...registryCatalog.map((item) => item.id)].sort(),
+      [
+        "uai-theme",
+        "uai-utils",
+        "uai-number-tick",
+        ...registryCatalog.map((item) => item.id),
+      ].sort(),
     );
   });
 
