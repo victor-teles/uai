@@ -11,6 +11,7 @@
     "lint": "biome check .",
     "registry:build": "shadcn build registry.json",
     "registry:check": "bun scripts/registry-check.ts",
+    "og:capture": "bun scripts/og-capture.ts",
     "start": "next start",
     "test": "bun run registry:build && bun test",
     "test:e2e": "playwright test",

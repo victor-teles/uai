@@ -1,11 +1,7 @@
 import { notFound } from "next/navigation";
 
-import {
-  findRegistryItem,
-  getRegistryItemKind,
-  registryCatalog,
-} from "@/components/registry/catalog";
-import { ogImageContentType, ogImageSize, renderOgImage } from "@/lib/og";
+import { findRegistryItem, registryCatalog } from "@/components/registry/catalog";
+import { ogImageContentType, ogImageSize, renderRegistryOgImage } from "@/lib/og";
 
 type ImageProps = { params: Promise<{ id: string }> };
 
@@ -20,10 +16,5 @@ export function generateStaticParams() {
 export default async function Image({ params }: ImageProps) {
   const item = findRegistryItem((await params).id);
   if (!item) notFound();
-  return renderOgImage({
-    eyebrow: `${item.category} · ${getRegistryItemKind(item.id)}`,
-    title: item.name,
-    description: item.description,
-    path: `/components/${item.id}`,
-  });
+  return renderRegistryOgImage(item);
 }
