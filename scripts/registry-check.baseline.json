@@ -1,1 +1,187 @@
-[]
+[
+  {
+    "rule": "cheap-properties",
+    "item": "app-sidebar",
+    "detail": "src/registry/uai/components/app-sidebar.tsx: transition-[width]"
+  },
+  {
+    "rule": "cheap-properties",
+    "item": "approval-queue",
+    "detail": "src/registry/uai/blocks/approval-queue.tsx: transition-[translate,width]"
+  },
+  {
+    "rule": "cheap-properties",
+    "item": "article-page",
+    "detail": "src/registry/uai/blocks/article-page.tsx: transition-[translate,width]"
+  },
+  {
+    "rule": "cheap-properties",
+    "item": "comment-thread",
+    "detail": "src/registry/uai/blocks/comment-thread.tsx: transition-[translate,width]"
+  },
+  {
+    "rule": "cheap-properties",
+    "item": "documentation-page",
+    "detail": "src/registry/uai/blocks/documentation-page.tsx: before:transition-[translate,height]"
+  },
+  {
+    "rule": "cheap-properties",
+    "item": "page-tabs",
+    "detail": "src/registry/uai/components/page-tabs.tsx: transition-[transform,width]"
+  },
+  {
+    "rule": "cheap-properties",
+    "item": "pricing-toggle",
+    "detail": "src/registry/uai/components/pricing-toggle.tsx: [transition:transform_220ms_cubic-bezier(0.23,1,0.32,1),width_220ms_cubic-bezier(0.23,1,0.32,1),opacity_120ms_ease-out]"
+  },
+  {
+    "rule": "cheap-properties",
+    "item": "route-summary",
+    "detail": "src/registry/uai/components/route-summary.tsx: transition-[translate,width]"
+  },
+  {
+    "rule": "exit-missing",
+    "item": "inline-feedback",
+    "detail": "src/registry/uai/components/inline-feedback.tsx: floating layer animates in without an animate-out or closed-state exit"
+  },
+  {
+    "rule": "exit-missing",
+    "item": "installment-picker",
+    "detail": "src/registry/uai/components/installment-picker.tsx: floating layer animates in without an animate-out or closed-state exit"
+  },
+  {
+    "rule": "exit-missing",
+    "item": "pix-payment",
+    "detail": "src/registry/uai/components/pix-payment.tsx: floating layer animates in without an animate-out or closed-state exit"
+  },
+  {
+    "rule": "exit-missing",
+    "item": "place-card",
+    "detail": "src/registry/uai/components/place-card.tsx: floating layer animates in without an animate-out or closed-state exit"
+  },
+  {
+    "rule": "motion-duration",
+    "item": "author-card",
+    "detail": "src/registry/uai/components/author-card.tsx: duration-220"
+  },
+  {
+    "rule": "motion-duration",
+    "item": "cart-drawer",
+    "detail": "src/registry/uai/blocks/cart-drawer.tsx: data-[state=closed]:duration-220"
+  },
+  {
+    "rule": "motion-duration",
+    "item": "cart-drawer",
+    "detail": "src/registry/uai/blocks/cart-drawer.tsx: data-[state=open]:duration-220"
+  },
+  {
+    "rule": "motion-duration",
+    "item": "reaction-bar",
+    "detail": "src/registry/uai/components/reaction-bar.tsx: duration-260"
+  },
+  {
+    "rule": "motion-duration",
+    "item": "share-menu",
+    "detail": "src/registry/uai/components/share-menu.tsx: data-copied:[&_svg]:duration-220"
+  },
+  {
+    "rule": "motion-easing",
+    "item": "message",
+    "detail": "src/registry/uai/components/message.tsx: ease-in-out"
+  },
+  {
+    "rule": "motion-easing",
+    "item": "response-status",
+    "detail": "src/registry/uai/components/response-status.tsx: ease-in-out"
+  },
+  {
+    "rule": "no-literal-color",
+    "item": "pix-payment",
+    "detail": "src/registry/uai/components/pix-payment.tsx: oklch(0.247 0.006 258)"
+  },
+  {
+    "rule": "press-scale",
+    "item": "app-sidebar",
+    "detail": "src/registry/uai/components/app-sidebar.tsx: active:scale-[0.985]"
+  },
+  {
+    "rule": "press-scale",
+    "item": "calendar-view",
+    "detail": "src/registry/uai/components/calendar-view.tsx: active:scale-[0.98]"
+  },
+  {
+    "rule": "press-scale",
+    "item": "calendar-view",
+    "detail": "src/registry/uai/components/calendar-view.tsx: active:scale-[0.99]"
+  },
+  {
+    "rule": "press-scale",
+    "item": "public-profile",
+    "detail": "src/registry/uai/blocks/public-profile.tsx: active:scale-[0.98]"
+  },
+  {
+    "rule": "press-transform",
+    "item": "app-sidebar",
+    "detail": "src/registry/uai/components/app-sidebar.tsx: transition-transform"
+  },
+  {
+    "rule": "press-transform",
+    "item": "attachment",
+    "detail": "src/registry/uai/components/attachment.tsx: *:data-[slot=progress-indicator]:transition-transform"
+  },
+  {
+    "rule": "press-transform",
+    "item": "documentation-page",
+    "detail": "src/registry/uai/blocks/documentation-page.tsx: [&_svg]:transition-transform"
+  },
+  {
+    "rule": "press-transform",
+    "item": "order-tracking",
+    "detail": "src/registry/uai/blocks/order-tracking.tsx: transition-transform"
+  },
+  {
+    "rule": "press-transform",
+    "item": "page-tabs",
+    "detail": "src/registry/uai/components/page-tabs.tsx: transition-[transform,width]"
+  },
+  {
+    "rule": "press-transform",
+    "item": "product-listing",
+    "detail": "src/registry/uai/blocks/product-listing.tsx: *:transition-transform"
+  },
+  {
+    "rule": "press-transform",
+    "item": "prompt-composer",
+    "detail": "src/registry/uai/components/prompt-composer.tsx: transition-transform"
+  },
+  {
+    "rule": "press-transform",
+    "item": "testimonial-card",
+    "detail": "src/registry/uai/components/testimonial-card.tsx: [&_svg]:transition-transform"
+  },
+  {
+    "rule": "reduced-motion-pair",
+    "item": "attachment",
+    "detail": "src/registry/uai/components/attachment.tsx: data-indeterminate:*:data-[slot=progress-indicator]:animate-[indeterminate_1.2s_cubic-bezier(0.65,0,0.35,1)_infinite]"
+  },
+  {
+    "rule": "reduced-motion-pair",
+    "item": "notification-center",
+    "detail": "src/registry/uai/blocks/notification-center.tsx: animate-[enter_240ms_cubic-bezier(0.23,1,0.32,1)_both]"
+  },
+  {
+    "rule": "stagger-cap",
+    "item": "response-status",
+    "detail": "src/registry/uai/components/response-status.tsx: step of 160ms"
+  },
+  {
+    "rule": "subtle-size",
+    "item": "product-detail",
+    "detail": "src/registry/uai/blocks/product-detail.tsx: text-subtle-foreground with text-[13px]"
+  },
+  {
+    "rule": "subtle-size",
+    "item": "trust-panel",
+    "detail": "src/registry/uai/components/trust-panel.tsx: text-subtle-foreground with text-[13px]"
+  }
+]
