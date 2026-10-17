@@ -29,6 +29,8 @@ export default defineConfig({
     {
       name: "mobile",
       use: { ...devices["Pixel 7"] },
+      // These suites skip every test on mobile. Leaving them out keeps CI shards balanced.
+      testIgnore: ["**/premium.e2e.ts", "**/reduced-motion.e2e.ts"],
     },
   ],
   webServer: process.env.E2E_BASE_URL
