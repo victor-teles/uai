@@ -59,7 +59,7 @@ function iconFor(mimeType: string): LucideIcon {
   return File;
 }
 
-const dangerText = "text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))]";
+const dangerText = "text-destructive-ink";
 
 const attachmentVariants = cva(
   "relative min-w-0 border bg-card text-[13px]/[18px] text-card-foreground animate-in fade-in-0 zoom-in-98 duration-200 ease-out-quint [transition:border-color_120ms_ease-out,background-color_120ms_ease-out] data-[status=ready]:hover:border-border-strong motion-reduce:animate-none motion-reduce:transition-none",

@@ -52,9 +52,9 @@ const progressSummaryVariants = cva(
 const statusTextClass: Record<ProgressSummaryStatus, string> = {
   running: "shimmer-text motion-reduce:text-muted-foreground",
   paused: "text-subtle-foreground",
-  complete: "text-success",
+  complete: "text-success-ink",
   cancelled: "text-subtle-foreground",
-  error: "text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))]",
+  error: "text-destructive-ink",
 };
 const fillClass: Record<ProgressSummaryStatus, string> = {
   running:

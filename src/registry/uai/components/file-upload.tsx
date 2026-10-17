@@ -36,7 +36,7 @@ const buttonBase =
 const raisedButton =
   "bg-secondary text-foreground hover:bg-secondary not-disabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]";
 const actionClass = "h-6.5 justify-self-start px-2.5 text-[12px] has-[>svg]:px-2.5";
-const dangerText = "text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))]";
+const dangerText = "text-destructive-ink";
 function useUpload() {
   const context = useContext(Context);
   if (!context) throw new Error("FileUpload children must be used within FileUpload");
@@ -165,7 +165,7 @@ export function FileUploadDropzone({
       <span
         aria-hidden="true"
         className={cn(
-          "grid shrink-0 place-items-center rounded-full bg-muted text-muted-foreground [transition:color_120ms_ease-out,translate_180ms_cubic-bezier(0.23,1,0.32,1)] group-data-dragging:-translate-y-0.5 group-data-dragging:text-primary motion-reduce:transition-none",
+          "grid shrink-0 place-items-center rounded-full bg-muted text-muted-foreground [transition:color_120ms_ease-out,translate_180ms_cubic-bezier(0.23,1,0.32,1)] group-data-dragging:-translate-y-0.5 group-data-dragging:text-primary-ink motion-reduce:transition-none",
           context.variant === "compact" ? "size-7" : "size-9",
         )}
       >
@@ -255,7 +255,7 @@ function useItem() {
 }
 const statusTextClass: Record<FileItemContext["status"], string> = {
   uploading: "shimmer-text motion-reduce:text-subtle-foreground",
-  complete: "text-success",
+  complete: "text-success-ink",
   error: dangerText,
 };
 export function FileUploadItem({

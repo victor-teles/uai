@@ -248,7 +248,7 @@ export function CommentBody({ className, children, ...props }: ComponentProps<"d
       <div data-slot="comment-body" className={cn("grid min-w-0 gap-1.5", className)} {...props}>
         {context.moderation === "flagged" && (
           <p className={noticeClasses}>
-            <span className="inline-flex items-center gap-1.25 rounded-full bg-warning/14 px-2 py-0.5 text-[11.5px]/4 font-medium text-warning">
+            <span className="inline-flex items-center gap-1.25 rounded-full bg-warning/14 px-2 py-0.5 text-[11.5px]/4 font-medium text-warning-ink">
               <Flag size={12} className="size-3" strokeWidth={2} aria-hidden="true" />
               Flagged for review
             </span>

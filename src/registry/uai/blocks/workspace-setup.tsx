@@ -645,7 +645,7 @@ export function WorkspaceSetupSubmit({
       className={cn(
         buttonBase,
         "bg-primary text-primary-foreground hover:bg-primary not-disabled:hover:brightness-108 disabled:cursor-default disabled:bg-secondary disabled:text-subtle-foreground",
-        created && "gap-1.5 disabled:bg-success/14 disabled:text-success",
+        created && "gap-1.5 disabled:bg-success/14 disabled:text-success-ink",
         compact
           ? "h-7 px-3 text-[12.5px] has-[>svg]:px-3"
           : "h-8 px-3.5 text-[13px] has-[>svg]:px-3.5",

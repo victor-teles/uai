@@ -169,8 +169,8 @@ export function ThinkingTrigger({
               "animate-in duration-200 ease-out-quint fade-in-0 zoom-in-50 motion-reduce:animate-none",
             context.status === "thinking" &&
               "text-muted-foreground motion-safe:animate-spin motion-reduce:animate-none",
-            context.status === "complete" && "text-success",
-            context.status === "error" && "text-destructive",
+            context.status === "complete" && "text-success-ink",
+            context.status === "error" && "text-destructive-ink",
           )}
           aria-hidden="true"
         />
@@ -189,8 +189,8 @@ export function ThinkingTrigger({
             className={cn(
               "shrink-0 rounded-full px-2 py-px text-[11.5px]/4 font-medium",
               context.status === "thinking" && "bg-muted text-muted-foreground",
-              context.status === "complete" && "bg-success/14 text-success",
-              context.status === "error" && "bg-destructive/14 text-destructive",
+              context.status === "complete" && "bg-success/14 text-success-ink",
+              context.status === "error" && "bg-destructive/14 text-destructive-ink",
             )}
           >
             {copy.label}

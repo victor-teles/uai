@@ -163,7 +163,7 @@ const teamButtonEmphasis = {
   primary: "bg-primary text-primary-foreground hover:bg-primary enabled:hover:brightness-108",
   secondary:
     "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
-  danger: "bg-destructive/12 text-destructive hover:bg-destructive/20",
+  danger: "bg-destructive/12 text-destructive-ink hover:bg-destructive/20",
 };
 
 export function TeamManagementButton({
@@ -463,9 +463,9 @@ export function TeamManagementMemberEmail({ className, ...props }: ComponentProp
 
 const statusTones = {
   neutral: "bg-muted-foreground/16 text-muted-foreground",
-  accent: "bg-primary/14 text-[color-mix(in_oklab,var(--primary)_70%,var(--foreground))]",
-  success: "bg-success/14 text-success",
-  warning: "bg-warning/14 text-warning",
+  accent: "bg-primary/14 text-primary-ink",
+  success: "bg-success/14 text-success-ink",
+  warning: "bg-warning/14 text-warning-ink",
 } as const;
 
 /** Access or invitation status, such as "Pending invite" or "Owner". `tone` tints the badge. */

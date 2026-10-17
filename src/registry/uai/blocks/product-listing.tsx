@@ -498,7 +498,7 @@ export function ProductListingProductBadge({ className, ...props }: ComponentPro
     <span
       data-slot="product-listing-product-badge"
       className={cn(
-        "inline-flex h-5 items-center justify-self-start rounded-full bg-primary/16 px-2 text-[11.5px] font-medium text-[color-mix(in_oklab,var(--primary)_70%,var(--foreground))]",
+        "inline-flex h-5 items-center justify-self-start rounded-full bg-primary/16 px-2 text-[11.5px] font-medium text-primary-ink",
         className,
       )}
       {...props}

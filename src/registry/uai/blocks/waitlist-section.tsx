@@ -239,10 +239,7 @@ export function WaitlistSectionConfirmationTitle({ className, ...props }: Compon
   return (
     <p
       data-slot="waitlist-section-confirmation-title"
-      className={cn(
-        "m-0 text-[15px]/5 font-medium text-[color-mix(in_oklab,var(--success)_75%,var(--foreground))]",
-        className,
-      )}
+      className={cn("m-0 text-[15px]/5 font-medium text-success-ink", className)}
       {...props}
     />
   );

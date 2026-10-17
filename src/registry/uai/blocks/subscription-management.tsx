@@ -60,9 +60,9 @@ const statusVariants = cva(
   {
     variants: {
       tone: {
-        active: "bg-success/14 text-[color-mix(in_oklab,var(--success)_80%,var(--foreground))]",
-        trial: "bg-primary/14 text-[color-mix(in_oklab,var(--primary)_80%,var(--foreground))]",
-        "past-due": "bg-warning/14 text-[color-mix(in_oklab,var(--warning)_80%,var(--foreground))]",
+        active: "bg-success/14 text-success-ink",
+        trial: "bg-primary/14 text-primary-ink",
+        "past-due": "bg-warning/14 text-warning-ink",
         canceled:
           "bg-muted-foreground/14 text-[color-mix(in_oklab,var(--muted-foreground)_80%,var(--foreground))]",
       },
@@ -323,9 +323,7 @@ export function SubscriptionManagementMeter({
           aria-hidden="true"
           className={cn(
             "text-[12.5px] tabular-nums",
-            near
-              ? "text-[color-mix(in_oklab,var(--warning)_70%,var(--foreground))]"
-              : "text-subtle-foreground",
+            near ? "text-warning-ink" : "text-subtle-foreground",
           )}
         >
           {valueText}

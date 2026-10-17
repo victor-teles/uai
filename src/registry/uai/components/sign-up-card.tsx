@@ -420,9 +420,7 @@ export function SignUpCardFieldMessage({
       data-slot="sign-up-card-field-message"
       className={cn(
         "text-[11.5px] leading-4 wrap-anywhere",
-        invalid
-          ? "text-[color-mix(in_oklab,var(--destructive)_80%,var(--foreground))]"
-          : "text-subtle-foreground",
+        invalid ? "text-destructive-ink" : "text-subtle-foreground",
         className,
       )}
       role={role ?? (invalid ? "alert" : undefined)}
@@ -469,7 +467,7 @@ export function SignUpCardPasswordRequirement({
       data-slot="sign-up-card-password-requirement"
       className={cn(
         "flex items-start gap-1.5 transition-colors duration-[120ms] ease-out motion-reduce:transition-none",
-        met && "text-muted-foreground [&_svg]:text-success",
+        met && "text-muted-foreground [&_svg]:text-success-ink",
         className,
       )}
       {...props}
@@ -516,7 +514,7 @@ export function SignUpCardConsent({
         htmlFor={htmlFor ?? controlId}
         data-slot="sign-up-card-consent"
         className={cn(
-          "flex items-start gap-2 text-[12px] leading-4 text-muted-foreground [&_a]:font-medium [&_a]:text-primary [&_a]:underline-offset-4 [&_a:hover]:underline",
+          "flex items-start gap-2 text-[12px] leading-4 text-muted-foreground [&_a]:font-medium [&_a]:text-primary-ink [&_a]:underline-offset-4 [&_a:hover]:underline",
           className,
         )}
         {...props}
@@ -556,7 +554,7 @@ export function SignUpCardError({ children, className, id, ...props }: SignUpCar
       id={id ?? errorId}
       data-slot="sign-up-card-error"
       className={cn(
-        "rounded-[10px] bg-destructive/10 px-3 py-2.5 text-[12px] leading-4 text-[color-mix(in_oklab,var(--destructive)_80%,var(--foreground))] inset-ring inset-ring-destructive/24 wrap-anywhere animate-in fade-in-0 slide-in-from-top-1 duration-200 ease-out-quint motion-reduce:animate-none",
+        "rounded-[10px] bg-destructive/10 px-3 py-2.5 text-[12px] leading-4 text-destructive-ink inset-ring inset-ring-destructive/24 wrap-anywhere animate-in fade-in-0 slide-in-from-top-1 duration-200 ease-out-quint motion-reduce:animate-none",
         className,
       )}
       role="alert"
@@ -617,7 +615,7 @@ export function SignUpCardVerification({
       role="status"
       {...props}
     >
-      <span className="flex size-9 items-center justify-center rounded-full bg-primary/16 text-primary">
+      <span className="flex size-9 items-center justify-center rounded-full bg-primary/16 text-primary-ink">
         <MailCheck className="size-[18px]" strokeWidth={1.8} aria-hidden="true" />
       </span>
       {children}
@@ -633,7 +631,7 @@ export function SignUpCardFooter({ children, className, ...props }: SignUpCardFo
     <footer
       data-slot="sign-up-card-footer"
       className={cn(
-        "border-t text-center text-[12px] leading-4 text-muted-foreground [&_a]:font-medium [&_a]:text-primary [&_a]:underline-offset-4 [&_a:hover]:underline",
+        "border-t text-center text-[12px] leading-4 text-muted-foreground [&_a]:font-medium [&_a]:text-primary-ink [&_a]:underline-offset-4 [&_a:hover]:underline",
         chrome.footerClass,
         className,
       )}

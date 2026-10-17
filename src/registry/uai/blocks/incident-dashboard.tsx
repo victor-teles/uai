@@ -69,8 +69,8 @@ const impactVariants: Record<IncidentDashboardVariant, DescriptionListVariant> =
   compact: "stacked",
 };
 const severityClasses: Record<IncidentDashboardSeverityLevel, string> = {
-  critical: "bg-destructive/14 text-destructive",
-  major: "bg-warning/14 text-warning",
+  critical: "bg-destructive/14 text-destructive-ink",
+  major: "bg-warning/14 text-warning-ink",
   minor: "bg-muted-foreground/14 text-muted-foreground",
 };
 

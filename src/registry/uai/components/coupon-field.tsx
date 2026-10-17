@@ -308,7 +308,7 @@ export function CouponFieldApply({
         isApplying
           ? "cursor-progress bg-primary text-primary-foreground opacity-80 hover:bg-primary disabled:opacity-80"
           : isApplied
-            ? "cursor-default bg-success/14 text-success hover:bg-success/14 disabled:opacity-100"
+            ? "cursor-default bg-success/14 text-success-ink hover:bg-success/14 disabled:opacity-100"
             : isDisabled
               ? "cursor-not-allowed bg-secondary text-subtle-foreground hover:bg-secondary disabled:opacity-100"
               : "bg-primary text-primary-foreground hover:bg-primary hover:brightness-[1.08] active:scale-[0.97] motion-reduce:active:scale-100",
@@ -358,7 +358,7 @@ export function CouponFieldFeedback({ children, className, ...props }: CouponFie
       className={cn(
         "flex animate-in items-start duration-240 ease-out-quint fade-in-0 slide-in-from-bottom-1 motion-reduce:animate-none",
         context.chrome.feedbackClass,
-        isError ? "text-destructive" : "text-muted-foreground",
+        isError ? "text-destructive-ink" : "text-muted-foreground",
         className,
       )}
       {...props}
@@ -370,7 +370,7 @@ export function CouponFieldFeedback({ children, className, ...props }: CouponFie
         />
       ) : isApplied ? (
         <CheckCircle2
-          className={cn("mt-px shrink-0 text-success", context.chrome.iconClass)}
+          className={cn("mt-px shrink-0 text-success-ink", context.chrome.iconClass)}
           aria-hidden="true"
         />
       ) : isApplying ? (

@@ -82,9 +82,9 @@ const recordStatusVariants = cva(
     variants: {
       tone: {
         neutral: "bg-muted text-muted-foreground",
-        success: "bg-success/14 text-success",
-        warning: "bg-warning/14 text-warning",
-        danger: "bg-destructive/14 text-destructive",
+        success: "bg-success/14 text-success-ink",
+        warning: "bg-warning/14 text-warning-ink",
+        danger: "bg-destructive/14 text-destructive-ink",
       },
     },
   },

@@ -47,7 +47,7 @@ function useToolCall(part: string) {
   return context;
 }
 
-const dangerText = "text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))]";
+const dangerText = "text-destructive-ink";
 const statusDetails: Record<
   ToolCallStatus,
   { label: string; icon: LucideIcon; color: string; tint: string }
@@ -67,7 +67,7 @@ const statusDetails: Record<
   success: {
     label: "Succeeded",
     icon: Check,
-    color: "text-success",
+    color: "text-success-ink",
     tint: "bg-success/14",
   },
   error: {

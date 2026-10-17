@@ -402,7 +402,7 @@ export function DateRangePickerCalendar({
                         endpoint
                           ? "bg-primary font-medium text-primary-foreground"
                           : cn(
-                              "font-normal aria-[current=date]:font-medium aria-[current=date]:text-primary",
+                              "font-normal aria-[current=date]:font-medium aria-[current=date]:text-primary-ink",
                               selected
                                 ? "bg-primary/16 enabled:hover:bg-primary/26"
                                 : "bg-transparent enabled:hover:bg-accent",

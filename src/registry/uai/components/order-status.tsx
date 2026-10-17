@@ -159,9 +159,9 @@ export type OrderStatusBadgeProps = ComponentProps<"span"> & {
 
 const orderStatusBadgeToneClass: Record<OrderStatusBadgeTone, string> = {
   neutral: "bg-muted text-muted-foreground",
-  progress: "bg-primary/16 text-[color-mix(in_oklab,var(--primary)_72%,var(--foreground))]",
-  success: "bg-success/14 text-success",
-  warning: "bg-warning/14 text-warning",
+  progress: "bg-primary/16 text-primary-ink",
+  success: "bg-success/14 text-success-ink",
+  warning: "bg-warning/14 text-warning-ink",
 };
 
 export function OrderStatusBadge({
@@ -224,9 +224,9 @@ const orderStatusStepLabel: Record<OrderStatusStepStatus, string> = {
 
 const orderStatusStepTextClass: Record<OrderStatusStepStatus, string> = {
   complete: "text-subtle-foreground",
-  current: "text-[color-mix(in_oklab,var(--primary)_72%,var(--foreground))]",
+  current: "text-primary-ink",
   upcoming: "text-subtle-foreground",
-  issue: "text-destructive",
+  issue: "text-destructive-ink",
 };
 
 const orderStatusStepTitleClass: Record<OrderStatusStepStatus, string> = {
@@ -247,12 +247,12 @@ function OrderStatusMarker({
 }) {
   const markerClass = {
     complete:
-      "border-transparent bg-[color-mix(in_oklab,var(--success)_16%,var(--card))] text-success",
+      "border-transparent bg-[color-mix(in_oklab,var(--success)_16%,var(--card))] text-success-ink",
     current:
-      "border-transparent bg-[color-mix(in_oklab,var(--primary)_18%,var(--card))] text-primary ring-3 ring-primary/10 motion-safe:animate-ring-pulse",
+      "border-transparent bg-[color-mix(in_oklab,var(--primary)_18%,var(--card))] text-primary-ink ring-3 ring-primary/10 motion-safe:animate-ring-pulse",
     upcoming: "border-border bg-card text-subtle-foreground",
     issue:
-      "border-transparent bg-[color-mix(in_oklab,var(--destructive)_16%,var(--card))] text-destructive",
+      "border-transparent bg-[color-mix(in_oklab,var(--destructive)_16%,var(--card))] text-destructive-ink",
   }[status];
   const Icon = status === "complete" ? Check : status === "issue" ? CircleAlert : Circle;
 

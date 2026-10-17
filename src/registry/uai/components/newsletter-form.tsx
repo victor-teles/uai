@@ -60,8 +60,8 @@ function useNewsletter(part: string) {
 }
 const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const dangerText = "text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))]";
-const successText = "text-[color-mix(in_oklab,var(--success)_75%,var(--foreground))]";
+const dangerText = "text-destructive-ink";
+const successText = "text-success-ink";
 const invalidRing = "shadow-[0_0_0_1px_color-mix(in_oklab,var(--destructive)_70%,transparent)]";
 const fieldRing =
   "shadow-[0_0_0_1px_var(--border)] focus-within:shadow-[0_0_0_1px_var(--border-strong),0_0_0_4px_color-mix(in_oklab,var(--primary)_14%,transparent)]";
@@ -249,7 +249,7 @@ export function NewsletterFormSubmit({
         "flex-none rounded-full border-0 bg-primary px-3.5 py-0 text-[13px] font-medium whitespace-nowrap text-primary-foreground [transition:filter_120ms_ease-out,opacity_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-primary focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid has-[>svg]:px-3.5 motion-reduce:transition-none",
         stacked ? "h-8.5" : "h-7.5",
         subscribed
-          ? "cursor-default gap-1.5 bg-success/14 text-success hover:bg-success/14"
+          ? "cursor-default gap-1.5 bg-success/14 text-success-ink hover:bg-success/14"
           : pending
             ? "cursor-progress opacity-70"
             : "cursor-pointer hover:brightness-108 active:scale-[0.97] motion-reduce:active:scale-100",

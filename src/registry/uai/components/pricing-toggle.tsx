@@ -233,7 +233,7 @@ export function PricingToggleSavings({ className, ...props }: ComponentProps<"sp
     <span
       data-slot="pricing-toggle-savings"
       className={cn(
-        "inline-flex h-[18px] items-center rounded-full bg-success/14 px-1.5 text-[11px]/4 font-medium text-success tabular-nums",
+        "inline-flex h-[18px] items-center rounded-full bg-success/14 px-1.5 text-[11px]/4 font-medium text-success-ink tabular-nums",
         className,
       )}
       {...props}

@@ -368,8 +368,8 @@ export type QuantityPickerMessageProps = ComponentProps<"p"> & {
 
 const quantityPickerMessageToneClass: Record<QuantityPickerMessageTone, string> = {
   muted: "text-subtle-foreground",
-  warning: "text-warning",
-  danger: "text-destructive",
+  warning: "text-warning-ink",
+  danger: "text-destructive-ink",
 };
 
 export function QuantityPickerMessage({

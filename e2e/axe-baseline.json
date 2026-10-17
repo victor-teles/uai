@@ -1,22 +1,16 @@
 {
   "$comment": "Serious/critical axe findings that predate e2e/components.e2e.ts, as <rule>:<component>:<theme>. Fix one, then delete its line. Do not add entries for new work.",
   "known": [
-    "color-contrast:agent-run:light",
-    "color-contrast:approval-card:light",
     "color-contrast:approval-queue:dark",
-    "color-contrast:approval-queue:light",
     "color-contrast:billing-portal:dark",
-    "color-contrast:billing-portal:light",
     "color-contrast:cart-item:light",
     "color-contrast:checkout:light",
     "color-contrast:command-menu:dark",
     "color-contrast:command-menu:light",
     "color-contrast:comparison-table:dark",
-    "color-contrast:comparison-table:light",
     "color-contrast:dashboard-shell:light",
     "color-contrast:data-explorer:dark",
     "color-contrast:data-explorer:light",
-    "color-contrast:file-upload:light",
     "color-contrast:import-workflow:dark",
     "color-contrast:incident-dashboard:light",
     "color-contrast:installment-picker:dark",
@@ -25,18 +19,11 @@
     "color-contrast:kanban-board:light",
     "color-contrast:onboarding-wizard:dark",
     "color-contrast:password-recovery:dark",
-    "color-contrast:pix-payment:light",
-    "color-contrast:place-card:light",
     "color-contrast:pricing-section:dark",
-    "color-contrast:research-session:light",
     "color-contrast:resource-manager:dark",
     "color-contrast:resource-manager:light",
     "color-contrast:route-summary:light",
     "color-contrast:sign-in-card:dark",
-    "color-contrast:subscription-management:light",
-    "color-contrast:task-list:light",
-    "color-contrast:team-management:dark",
-    "color-contrast:team-management:light",
-    "color-contrast:tool-call:light"
+    "color-contrast:subscription-management:light"
   ]
 }

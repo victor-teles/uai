@@ -130,7 +130,7 @@ const profilePageActionVariants = cva(
         primary: "bg-primary text-primary-foreground hover:bg-primary enabled:hover:brightness-108",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))]",
-        danger: "bg-destructive/12 text-destructive hover:bg-destructive/20",
+        danger: "bg-destructive/12 text-destructive-ink hover:bg-destructive/20",
       },
       compact: {
         true: "h-[26px] px-2.5 text-[12px] has-[>svg]:px-2.5",

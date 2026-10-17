@@ -242,9 +242,9 @@ export type CartItemAvailabilityProps = ComponentProps<"p"> & {
 };
 
 const availabilityToneClass: Record<CartItemAvailabilityTone, string> = {
-  available: "bg-success/14 text-success",
-  low: "bg-warning/14 text-warning",
-  unavailable: "bg-destructive/14 text-destructive",
+  available: "bg-success/14 text-success-ink",
+  low: "bg-warning/14 text-warning-ink",
+  unavailable: "bg-destructive/14 text-destructive-ink",
 };
 
 export function CartItemAvailability({
@@ -314,7 +314,7 @@ export function CartItemRemove({
       size="sm"
       type={type}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full font-medium text-muted-foreground transition-[scale,color,background-color] duration-140 ease-out-quint hover:bg-destructive/12 hover:text-destructive focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.97] disabled:pointer-events-none disabled:opacity-60 motion-reduce:transition-none motion-reduce:active:scale-100 dark:hover:bg-destructive/12",
+        "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full font-medium text-muted-foreground transition-[scale,color,background-color] duration-140 ease-out-quint hover:bg-destructive/12 hover:text-destructive-ink focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.97] disabled:pointer-events-none disabled:opacity-60 motion-reduce:transition-none motion-reduce:active:scale-100 dark:hover:bg-destructive/12",
         context.chrome.removeClass,
         className,
       )}

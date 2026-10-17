@@ -110,7 +110,7 @@ export function MessageAvatar({ children, className, ...props }: ComponentProps<
         "grid flex-none place-items-center overflow-hidden rounded-full font-medium tracking-[0.01em] ring-1 ring-foreground/8",
         compact ? "size-6 text-[10px]" : "size-7 text-[10.5px]",
         context.role === "assistant"
-          ? "bg-[color-mix(in_oklab,var(--primary)_18%,var(--card))] text-[color-mix(in_oklab,var(--primary)_70%,var(--foreground))]"
+          ? "bg-[color-mix(in_oklab,var(--primary)_18%,var(--card))] text-primary-ink"
           : "bg-muted text-muted-foreground",
         className,
       )}
@@ -325,7 +325,7 @@ export function MessageCopy({
               copied ? "scale-100 opacity-100 blur-none" : "scale-50 opacity-0 blur-[2px]",
             )}
           >
-            <Check size={14} aria-hidden="true" className="text-success size-3.5" />
+            <Check size={14} aria-hidden="true" className="text-success-ink size-3.5" />
           </span>
           <span
             className={cn(

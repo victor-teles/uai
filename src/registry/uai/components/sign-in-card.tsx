@@ -439,9 +439,7 @@ export function SignInCardFieldMessage({
       id={id ?? messageId}
       className={cn(
         "text-[11.5px] leading-4 wrap-anywhere",
-        invalid
-          ? "text-[color-mix(in_oklab,var(--destructive)_80%,var(--foreground))]"
-          : "text-subtle-foreground",
+        invalid ? "text-destructive-ink" : "text-subtle-foreground",
         className,
       )}
       role={role ?? (invalid ? "alert" : undefined)}
@@ -461,7 +459,7 @@ export function SignInCardOptions({ children, className, ...props }: SignInCardO
     <div
       data-slot="sign-in-card-options"
       className={cn(
-        "flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[12px] leading-4 text-muted-foreground [&_a]:font-medium [&_a]:text-primary [&_a]:underline-offset-4 [&_a:hover]:underline [&_input]:size-3.5 [&_input]:accent-primary [&_label]:inline-flex [&_label]:items-center [&_label]:gap-2",
+        "flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[12px] leading-4 text-muted-foreground [&_a]:font-medium [&_a]:text-primary-ink [&_a]:underline-offset-4 [&_a:hover]:underline [&_input]:size-3.5 [&_input]:accent-primary [&_label]:inline-flex [&_label]:items-center [&_label]:gap-2",
         className,
       )}
       {...props}
@@ -482,7 +480,7 @@ export function SignInCardError({ children, className, id, ...props }: SignInCar
       data-slot="sign-in-card-error"
       id={id ?? errorId}
       className={cn(
-        "rounded-[10px] bg-destructive/10 px-3 py-2.5 text-[12px] leading-4 text-[color-mix(in_oklab,var(--destructive)_80%,var(--foreground))] shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--destructive)_24%,transparent)] wrap-anywhere animate-in fade-in-0 slide-in-from-top-1 duration-200 ease-out-quint motion-reduce:animate-none",
+        "rounded-[10px] bg-destructive/10 px-3 py-2.5 text-[12px] leading-4 text-destructive-ink shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--destructive)_24%,transparent)] wrap-anywhere animate-in fade-in-0 slide-in-from-top-1 duration-200 ease-out-quint motion-reduce:animate-none",
         className,
       )}
       role="alert"
@@ -537,7 +535,7 @@ export function SignInCardFooter({ children, className, ...props }: SignInCardFo
     <footer
       data-slot="sign-in-card-footer"
       className={cn(
-        "border-t text-center text-[12px] leading-4 text-muted-foreground [&_a]:font-medium [&_a]:text-primary [&_a]:underline-offset-4 [&_a:hover]:underline",
+        "border-t text-center text-[12px] leading-4 text-muted-foreground [&_a]:font-medium [&_a]:text-primary-ink [&_a]:underline-offset-4 [&_a:hover]:underline",
         chrome.footerClass,
         className,
       )}

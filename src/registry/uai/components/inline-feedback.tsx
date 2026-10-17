@@ -131,9 +131,9 @@ export function InlineFeedbackStatus({ className, children, ...props }: Componen
         "inline-flex min-h-6 items-center gap-1.5 text-[12.5px]",
         variant === "text" ? "font-normal" : "font-medium",
         status === "error"
-          ? "text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))]"
+          ? "text-destructive-ink"
           : status === "success" && variant === "pill"
-            ? "text-success"
+            ? "text-success-ink"
             : "text-muted-foreground",
         visible &&
           variant === "pill" &&
@@ -190,7 +190,7 @@ export function InlineFeedbackMessage({
         className={cn(
           "size-3.5",
           "flex-none",
-          status === "success" && "text-success",
+          status === "success" && "text-success-ink",
           pending &&
             "animate-[spin_900ms_linear_infinite] text-subtle-foreground motion-reduce:animate-none",
         )}

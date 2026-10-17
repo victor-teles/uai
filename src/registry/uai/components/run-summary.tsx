@@ -38,16 +38,16 @@ function useRunSummary(part: string) {
   return context;
 }
 
-const dangerText = "text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))]";
+const dangerText = "text-destructive-ink";
 const outcomeDetails: Record<
   RunSummaryOutcome,
   { label: string; icon: LucideIcon; className: string }
 > = {
-  success: { label: "Completed", icon: CircleCheck, className: "bg-success/14 text-success" },
+  success: { label: "Completed", icon: CircleCheck, className: "bg-success/14 text-success-ink" },
   partial: {
     label: "Completed with warnings",
     icon: TriangleAlert,
-    className: "bg-warning/14 text-warning",
+    className: "bg-warning/14 text-warning-ink",
   },
   failed: { label: "Failed", icon: CircleAlert, className: cn("bg-destructive/14", dangerText) },
 };
@@ -246,7 +246,7 @@ const changeDetails: Record<
   RunSummaryArtifactChange,
   { label: string; icon: LucideIcon; className: string }
 > = {
-  added: { label: "Added", icon: Plus, className: "text-success" },
+  added: { label: "Added", icon: Plus, className: "text-success-ink" },
   modified: { label: "Modified", icon: PencilLine, className: "text-muted-foreground" },
   deleted: { label: "Deleted", icon: Minus, className: dangerText },
 };
@@ -344,7 +344,7 @@ export function RunSummaryWarning({ className, children, ...props }: ComponentPr
       <TriangleAlert
         size={14}
         aria-hidden="true"
-        className="mt-0.5 flex-none text-warning size-3.5"
+        className="mt-0.5 flex-none text-warning-ink size-3.5"
       />
       <span className="min-w-0 wrap-anywhere">{children}</span>
     </li>

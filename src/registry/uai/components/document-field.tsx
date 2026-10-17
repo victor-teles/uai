@@ -400,7 +400,7 @@ export function DocumentFieldStatusIcon({ className, ...props }: DocumentFieldSt
       aria-hidden="true"
       className={cn(
         "inline-flex shrink-0 animate-in items-center duration-180 ease-out-quint fade-in-0 motion-reduce:animate-none",
-        context.showInvalid ? "zoom-in-96 text-destructive" : "zoom-in-75 text-success",
+        context.showInvalid ? "zoom-in-96 text-destructive-ink" : "zoom-in-75 text-success-ink",
         className,
       )}
       {...props}
@@ -443,7 +443,7 @@ export function DocumentFieldError({ children, className, ...props }: DocumentFi
     <p
       data-slot="document-field-error"
       className={cn(
-        "flex animate-in items-start text-destructive duration-240 ease-out-quint fade-in-0 slide-in-from-bottom-1 motion-reduce:animate-none",
+        "flex animate-in items-start text-destructive-ink duration-240 ease-out-quint fade-in-0 slide-in-from-bottom-1 motion-reduce:animate-none",
         context.chrome.messageClass,
         className,
       )}

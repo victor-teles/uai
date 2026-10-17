@@ -216,7 +216,7 @@ export function PasswordRecoveryProgressItem({
           state === "upcoming" && "[&_svg]:opacity-0",
           state === "complete" && "border-transparent bg-primary text-primary-foreground",
           state === "current" &&
-            "border-primary text-primary shadow-[0_0_0_3px_color-mix(in_oklab,var(--primary)_18%,transparent)] [&_svg]:fill-current",
+            "border-primary text-primary-ink shadow-[0_0_0_3px_color-mix(in_oklab,var(--primary)_18%,transparent)] [&_svg]:fill-current",
         )}
       >
         <Icon
@@ -519,9 +519,7 @@ export function PasswordRecoveryFieldMessage({
       id={id ?? messageId}
       className={cn(
         "text-[11.5px] leading-4 wrap-anywhere",
-        invalid
-          ? "text-[color-mix(in_oklab,var(--destructive)_80%,var(--foreground))]"
-          : "text-subtle-foreground",
+        invalid ? "text-destructive-ink" : "text-subtle-foreground",
         className,
       )}
       role={role ?? (invalid ? "alert" : undefined)}
@@ -569,7 +567,7 @@ export function PasswordRecoveryPasswordRequirement({
       data-slot="password-recovery-password-requirement"
       className={cn(
         "flex items-start gap-1.5 transition-colors duration-120 ease-out motion-reduce:transition-none",
-        met && "text-muted-foreground [&_svg]:text-success",
+        met && "text-muted-foreground [&_svg]:text-success-ink",
         className,
       )}
       {...props}
@@ -606,7 +604,7 @@ export function PasswordRecoveryError({
       data-slot="password-recovery-error"
       id={id ?? errorId}
       className={cn(
-        "rounded-[10px] bg-destructive/10 px-3 py-2.5 text-[12px] leading-4 text-[color-mix(in_oklab,var(--destructive)_80%,var(--foreground))] shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--destructive)_24%,transparent)] wrap-anywhere animate-in fade-in-0 slide-in-from-top-1 duration-200 ease-out-quint motion-reduce:animate-none",
+        "rounded-[10px] bg-destructive/10 px-3 py-2.5 text-[12px] leading-4 text-destructive-ink shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--destructive)_24%,transparent)] wrap-anywhere animate-in fade-in-0 slide-in-from-top-1 duration-200 ease-out-quint motion-reduce:animate-none",
         className,
       )}
       role="alert"
@@ -699,9 +697,9 @@ export function PasswordRecoveryStatus({
       <span
         className={cn(
           "flex size-9 items-center justify-center rounded-full",
-          tone === "sent" && "bg-primary/16 text-primary",
-          tone === "expired" && "bg-warning/16 text-warning",
-          tone === "success" && "bg-success/16 text-success",
+          tone === "sent" && "bg-primary/16 text-primary-ink",
+          tone === "expired" && "bg-warning/16 text-warning-ink",
+          tone === "success" && "bg-success/16 text-success-ink",
         )}
       >
         <Icon className="size-[18px]" strokeWidth={1.8} aria-hidden="true" />
@@ -769,7 +767,7 @@ export function PasswordRecoveryFooter({
     <footer
       data-slot="password-recovery-footer"
       className={cn(
-        "border-t text-center text-[12px] leading-4 text-muted-foreground [&_a]:font-medium [&_a]:text-primary [&_a]:underline-offset-4 [&_a:hover]:underline",
+        "border-t text-center text-[12px] leading-4 text-muted-foreground [&_a]:font-medium [&_a]:text-primary-ink [&_a]:underline-offset-4 [&_a:hover]:underline",
         chrome.footerClass,
         className,
       )}

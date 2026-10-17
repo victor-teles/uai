@@ -206,7 +206,7 @@ export function RouteSummaryDetail({ className, ...props }: ComponentProps<"p">)
     <p
       data-slot="route-summary-detail"
       className={cn(
-        "m-0 text-[12px]/4 text-muted-foreground tabular-nums data-[tone=warning]:text-warning data-[tone=success]:text-success",
+        "m-0 text-[12px]/4 text-muted-foreground tabular-nums data-[tone=warning]:text-warning-ink data-[tone=success]:text-success-ink",
         className,
       )}
       {...props}
