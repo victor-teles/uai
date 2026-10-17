@@ -72,10 +72,12 @@ test("keeps the hero copy as written", async ({ page }) => {
     "Uai/waj/sounds like “why”, or “UI” said fast. The Minas Gerais word for surprise",
   );
   await expect(intro.getByRole("heading", { level: 1 })).toHaveText(
-    "Open-code components for websites and web apps.",
+    "Components that feel finished.",
   );
+  // The hero count comes from the catalog, so it must match the cards listed below.
+  const itemCount = await page.locator(".uai-overview__card").count();
   await expect(intro.locator("p").nth(1)).toHaveText(
-    "Uai is a shadcn registry of compound React components and page blocks. The CLI copies every line into your project, so you own the markup, the styles, and the behavior.",
+    `${itemCount} shadcn components and blocks with real motion and micro-interactions built in. Copy them with the CLI and own every line.`,
   );
   await expect(intro.getByRole("textbox", { name: "Install command" })).toHaveValue(
     /^bunx shadcn@latest add .+\/prompt-composer\.json$/,

@@ -4,7 +4,12 @@ import Link from "next/link";
 import { InstallCommand } from "@/components/install-command";
 import { FeaturedTiles } from "@/components/showcase/featured-tiles";
 import { LiveScene } from "@/components/showcase/live-scene";
-import { getRegistryItemKind, getRegistryPosition, registryGroups } from "./catalog";
+import {
+  getRegistryItemKind,
+  getRegistryPosition,
+  registryCatalog,
+  registryGroups,
+} from "./catalog";
 
 export function RegistryOverview() {
   return (
@@ -15,10 +20,10 @@ export function RegistryOverview() {
           <span>/waj/</span>
           <span>sounds like “why”, or “UI” said fast. The Minas Gerais word for surprise</span>
         </p>
-        <h1 id="uai-overview-title">Open-code components for websites and web apps.</h1>
+        <h1 id="uai-overview-title">Components that feel finished.</h1>
         <p>
-          Uai is a shadcn registry of compound React components and page blocks. The CLI copies
-          every line into your project, so you own the markup, the styles, and the behavior.
+          {registryCatalog.length} shadcn components and blocks with real motion and
+          micro-interactions built in. Copy them with the CLI and own every line.
         </p>
         <InstallCommand item="prompt-composer" />
       </header>
