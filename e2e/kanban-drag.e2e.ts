@@ -22,16 +22,37 @@ async function startDrag(page: Page) {
   return { to, card };
 }
 
-async function overlayAnimations(page: Page) {
-  return page.evaluate(() => {
-    const overlay = document.querySelector('[data-slot="kanban-board-overlay"]');
-    return (overlay?.getAnimations() ?? []).map((animation) => ({
-      duration: Number(animation.effect?.getTiming().duration),
-      properties: (animation.effect as KeyframeEffect | null)
-        ?.getKeyframes()
-        .flatMap((frame) => Object.keys(frame)),
-    }));
+type Started = { duration: number; properties: string[] };
+
+/**
+ * Logs every Web Animation started on the drag overlay as it starts. Reading
+ * `getAnimations()` after the pointer move raced the clock: the 180ms lift has no fill, so on a
+ * busy runner it had already finished and left the list before the test looked.
+ */
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    const started: Started[] = [];
+    (window as unknown as { __overlayAnimations: Started[] }).__overlayAnimations = started;
+    const animate = Element.prototype.animate;
+    Element.prototype.animate = function (this: Element, ...args: Parameters<Element["animate"]>) {
+      const animation = animate.apply(this, args);
+      if (this.getAttribute("data-slot") === "kanban-board-overlay") {
+        const effect = animation.effect as KeyframeEffect | null;
+        started.push({
+          duration: Number(effect?.getTiming().duration),
+          properties: effect?.getKeyframes().flatMap((frame) => Object.keys(frame)) ?? [],
+        });
+      }
+      return animation;
+    };
   });
+});
+
+/** Overlay animations started since the last call. */
+function overlayAnimations(page: Page) {
+  return page.evaluate(() =>
+    (window as unknown as { __overlayAnimations: Started[] }).__overlayAnimations.splice(0),
+  );
 }
 
 test("drags a card into another column with a lift, a slot, and a settle", async ({ page }) => {
@@ -77,6 +98,12 @@ test("reduced motion drops the lift scale, tilt, and spring", async ({ page }) =
   await openComponent(page, "kanban-board");
   const { to } = await startDrag(page);
   expect(await overlayAnimations(page)).toEqual([]);
+  // No CSS transition runs on the overlay either.
+  expect(
+    await page
+      .locator('[data-slot="kanban-board-overlay"]')
+      .evaluate((overlay) => overlay.getAnimations().length),
+  ).toBe(0);
   const style = await page.locator('[data-slot="kanban-board-overlay"]').evaluate((overlay) => ({
     scale: getComputedStyle(overlay).scale,
     rotate: getComputedStyle(overlay).rotate,
