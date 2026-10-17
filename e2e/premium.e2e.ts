@@ -207,16 +207,48 @@ async function focusChecks(page: Page): Promise<Finding[]> {
   return findings;
 }
 
+/**
+ * Resolves once the specimen has gone `idle` ms without a DOM change, or after `max` ms. Some
+ * previews run a timed demo after load (Response Status streams tokens for ~4s, then drops its
+ * Stop button), and settle() only waits for finite CSS/Web animations, not for timers.
+ */
+async function quiet(page: Page, idle = 500, max = 8_000) {
+  await page.locator(WORLD).evaluate(
+    (world, [idle, max]) =>
+      new Promise<void>((resolve) => {
+        const done = () => {
+          observer.disconnect();
+          window.clearTimeout(timer);
+          window.clearTimeout(cap);
+          resolve();
+        };
+        const observer = new MutationObserver(() => {
+          window.clearTimeout(timer);
+          timer = window.setTimeout(done, idle);
+        });
+        let timer = window.setTimeout(done, idle);
+        const cap = window.setTimeout(done, max);
+        observer.observe(world, { subtree: true, childList: true, characterData: true });
+      }),
+    [idle, max],
+  );
+}
+
 /** P4: hovering a control must not move it or its siblings. */
 async function layoutShiftChecks(page: Page): Promise<Finding[]> {
   const findings: Finding[] = [];
-  const buttons = page.locator(`${WORLD} button:not([disabled])`);
-  const count = Math.min(await buttons.count(), 6);
-  for (let index = 0; index < count; index += 1) {
-    const button = buttons.nth(index);
+  // Measure the resting specimen: a timed demo that reflows mid-check reads as a hover shift.
+  await quiet(page);
+  // Hold the controls themselves. A `nth(i)` locator re-queries on each call, so a button that
+  // left the DOM after counting made every later call wait for the 90s test timeout.
+  const buttons = (await page.locator(`${WORLD} button:not([disabled])`).elementHandles()).slice(
+    0,
+    6,
+  );
+  for (const button of buttons) {
     if (!(await button.isVisible())) continue;
     // Tag the control and its current siblings so popups added on hover don't count.
-    await button.evaluate((element) => {
+    await button.evaluate((element: Element) => {
       const nodes = [
         element,
         ...(element.parentElement ? [...element.parentElement.children] : []),
@@ -226,7 +258,8 @@ async function layoutShiftChecks(page: Page): Promise<Finding[]> {
       });
     });
     const measure = () =>
-      button.evaluate((element) => {
+      button.evaluate((element: Element) => {
+        if (!element.isConnected) return null;
         const scope = element.parentElement ?? element;
         const nodes = [element, ...scope.querySelectorAll(":scope > [data-premium-sibling]")];
         return nodes.map((node) => {
@@ -237,10 +270,13 @@ async function layoutShiftChecks(page: Page): Promise<Finding[]> {
         });
       });
     const before = await measure();
+    if (!before) continue;
     await button.hover({ timeout: 2_000 }).catch(() => undefined);
     await page.waitForTimeout(200);
     const after = await measure();
     await page.mouse.move(0, 0);
+    // The preview removed this control on its own; there's nothing to compare.
+    if (!after) continue;
     // Compare sizes, and positions relative to the first rect so panning doesn't count.
     const shift = before.some((rect, i) => {
       const other = after[i];
