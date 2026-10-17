@@ -2,6 +2,7 @@ import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
 import { InstallCommand } from "@/components/install-command";
+import { FeaturedTiles } from "@/components/showcase/featured-tiles";
 import { getRegistryItemKind, getRegistryPosition, registryGroups } from "./catalog";
 import { RegistryPreview } from "./registry-preview";
 
@@ -23,6 +24,8 @@ export function RegistryOverview() {
       </header>
 
       <RegistryPreview itemId="prompt-composer" />
+
+      <FeaturedTiles />
 
       {registryGroups.map((group) => (
         <section
