@@ -79,7 +79,7 @@ test("keeps discount meaning visible in text and semantic markup", () => {
 
   const discountValue = screen.getByText("−$20.00");
   expect(discountValue.tagName).toBe("DD");
-  expect(discountValue.className).toContain("var(--success)");
+  expect(discountValue.className).toContain("text-success-ink");
   expect(screen.getByText("WELCOME20").tagName).toBe("DT");
 });
 
@@ -172,5 +172,5 @@ test("an alert note uses the danger ink", () => {
       <PriceSummaryNote role="alert">We couldn’t update shipping.</PriceSummaryNote>
     </PriceSummary>,
   );
-  expect(screen.getByRole("alert").className).toContain("var(--destructive)");
+  expect(screen.getByRole("alert").className).toContain("text-destructive-ink");
 });

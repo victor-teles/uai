@@ -62,9 +62,6 @@ type PriceSummaryContextValue = {
   chrome: ReturnType<typeof priceSummaryChrome>;
 };
 
-// Stand-ins for `--success-ink` / `--destructive-ink` until the ink tokens land.
-const successInk = "text-[color-mix(in_oklab,var(--success)_75%,var(--foreground))]";
-const destructiveInk = "text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))]";
 const isBusy = (value: unknown) => value === true || value === "true";
 /** Ticks a plain-text amount with NumberTick; other children render as given. */
 function tickable(children: ReactNode) {
@@ -193,7 +190,7 @@ export type PriceSummaryItemProps = ComponentProps<"div"> & {
 const priceSummaryToneClass: Record<PriceSummaryTone, string> = {
   default: "text-card-foreground",
   muted: "text-muted-foreground",
-  success: successInk,
+  success: "text-success-ink",
 };
 
 export function PriceSummaryItem({
@@ -322,8 +319,7 @@ export function PriceSummarySavings({ children, className, ...props }: PriceSumm
       <div className="min-h-0 overflow-hidden">
         <p
           className={cn(
-            "m-0 mt-3 flex h-7.5 items-center gap-2 rounded-lg bg-success/10 px-2.5 text-[12px] leading-4 font-medium tabular-nums",
-            successInk,
+            "m-0 mt-3 flex h-7.5 items-center gap-2 rounded-lg bg-success/10 px-2.5 text-[12px] leading-4 font-medium text-success-ink tabular-nums",
           )}
         >
           <Check className="size-3.5 shrink-0" strokeWidth={2.2} aria-hidden="true" />
@@ -392,7 +388,7 @@ export function PriceSummaryNote({ children, className, ...props }: PriceSummary
       data-slot="price-summary-note"
       className={cn(
         "text-subtle-foreground",
-        props.role === "alert" && destructiveInk,
+        props.role === "alert" && "text-destructive-ink",
         context.chrome.noteClass,
         className,
       )}

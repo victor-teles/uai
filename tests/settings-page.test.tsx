@@ -1,7 +1,8 @@
 import { expect, test } from "bun:test";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
+import { SettingsPagePreview } from "@/components/registry/app-blocks/settings-page-preview";
 import {
   ConfirmationDialogActions,
   ConfirmationDialogCancel,
@@ -199,4 +200,20 @@ test("keeps danger on the button only", () => {
   expect(title.className).not.toContain("destructive");
   const danger = screen.getByRole("region", { name: "Delete workspace" });
   expect(danger.className).not.toContain("destructive");
+});
+
+test("preview confirms a save without counting zero changes", async () => {
+  const user = userEvent.setup();
+  render(<SettingsPagePreview />);
+  const url = screen.getByLabelText(/Workspace URL/);
+  await user.clear(url);
+  await user.type(url, "northwind-goods");
+  await user.click(screen.getByRole("button", { name: "Save changes" }));
+  // The preview's first save fails on purpose so it can show recovery.
+  const retry = await screen.findByRole("button", { name: "Retry" }, { timeout: 3000 });
+  await user.click(retry);
+  await waitFor(() => expect(screen.getByText("All changes saved")).toBeTruthy(), {
+    timeout: 3000,
+  });
+  expect(screen.queryByText(/0 unsaved/)).toBeNull();
 });

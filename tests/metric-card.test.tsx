@@ -30,6 +30,8 @@ test("labels the card and states the trend in text", () => {
   expect(group.textContent).toContain("1,284");
   expect(group.textContent).toContain("Decreased 4.1%");
   expect(group.querySelector("[data-sentiment]")?.getAttribute("data-sentiment")).toBe("negative");
+  // Status text uses the ink token, never a status colour mixed toward the foreground.
+  expect(group.querySelector("[data-sentiment]")?.className).toContain("text-destructive-ink");
 });
 
 test("derives sentiment from direction by default", () => {
@@ -42,6 +44,7 @@ test("derives sentiment from direction by default", () => {
   );
   const trends = document.querySelectorAll("[data-direction]");
   expect(trends[0]?.getAttribute("data-sentiment")).toBe("positive");
+  expect(trends[0]?.className).toContain("text-success-ink");
   expect(trends[1]?.getAttribute("data-sentiment")).toBe("neutral");
   expect(trends[1]?.textContent).toContain("Unchanged");
 });

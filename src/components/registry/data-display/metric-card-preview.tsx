@@ -103,7 +103,7 @@ export function MetricCardPreview({ variant = "card" }: { variant?: MetricCardVa
               <button
                 type="button"
                 onClick={retry}
-                className="cursor-pointer rounded-sm border-0 bg-transparent p-0 font-medium text-[color-mix(in_oklab,var(--primary)_80%,var(--foreground))] underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                className="cursor-pointer rounded-sm border-0 bg-transparent p-0 font-medium text-primary-ink underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
               >
                 Retry
               </button>
