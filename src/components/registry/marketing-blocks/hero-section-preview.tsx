@@ -166,14 +166,14 @@ export function HeroSectionPreview({ variant = "split" }: { variant?: HeroSectio
                       <Badge
                         key={routed ? "routing" : "new"}
                         variant="secondary"
-                        className="rounded-full border-0 bg-primary/14 text-[11.5px] text-[color-mix(in_oklab,var(--primary)_60%,var(--foreground))] animate-in fade-in-0 duration-200 ease-out-quint motion-reduce:animate-none"
+                        className="rounded-full border-0 bg-primary/14 text-[11.5px] text-primary-ink animate-in fade-in-0 duration-200 ease-out-quint motion-reduce:animate-none"
                       >
                         {routed ? "Routing" : "New"}
                       </Badge>
                     ) : (
                       <Badge
                         variant="secondary"
-                        className={`rounded-full border-0 text-[11.5px] ${request.tone === "success" ? "bg-success/14 text-[color-mix(in_oklab,var(--success)_75%,var(--foreground))]" : "bg-muted text-muted-foreground"}`}
+                        className={`rounded-full border-0 text-[11.5px] ${request.tone === "success" ? "bg-success/14 text-success-ink" : "bg-muted text-muted-foreground"}`}
                       >
                         {request.badge}
                       </Badge>

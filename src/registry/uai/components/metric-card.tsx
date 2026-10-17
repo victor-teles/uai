@@ -44,9 +44,6 @@ function useMetric(part: string) {
 }
 const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-// Stand-ins for `--success-ink` / `--destructive-ink` until the ink tokens land.
-const successInk = "text-[color-mix(in_oklab,var(--success)_75%,var(--foreground))]";
-const destructiveInk = "text-[color-mix(in_oklab,var(--destructive)_75%,var(--foreground))]";
 const skeleton =
   "block rounded-[4px] bg-[linear-gradient(90deg,var(--muted)_0%,color-mix(in_oklab,var(--muted)_55%,var(--card))_50%,var(--muted)_100%)] bg-size-[200%_100%] motion-safe:animate-skeleton-shimmer";
 
@@ -172,8 +169,8 @@ const metricCardTrendVariants = cva(
   {
     variants: {
       sentiment: {
-        positive: cn("bg-success/14", successInk),
-        negative: cn("bg-destructive/14", destructiveInk),
+        positive: "bg-success/14 text-success-ink",
+        negative: "bg-destructive/14 text-destructive-ink",
         neutral: "bg-foreground/7 text-muted-foreground",
       },
     },
