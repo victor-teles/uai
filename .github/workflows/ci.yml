@@ -33,13 +33,21 @@ jobs:
       - run: bun run test
 
   browser:
-    name: Build and browser checks (${{ matrix.project }})
+    # Desktop runs ~570 tests and mobile ~230 (the premium checks are desktop only), so
+    # desktop gets four shards and mobile two. Every test still runs exactly once.
+    name: Build and browser checks (${{ matrix.project }} ${{ matrix.shard }}/${{ matrix.total }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        project: [desktop, mobile]
+        include:
+          - { project: desktop, shard: 1, total: 4 }
+          - { project: desktop, shard: 2, total: 4 }
+          - { project: desktop, shard: 3, total: 4 }
+          - { project: desktop, shard: 4, total: 4 }
+          - { project: mobile, shard: 1, total: 2 }
+          - { project: mobile, shard: 2, total: 2 }
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -50,6 +58,12 @@ jobs:
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
+      - name: Cache Next.js build
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: next-${{ runner.os }}-${{ hashFiles('bun.lock') }}-${{ hashFiles('src/**', 'registry.json', 'next.config.mjs', 'postcss.config.mjs', 'tsconfig.json') }}
+          restore-keys: next-${{ runner.os }}-${{ hashFiles('bun.lock') }}-
       - run: bun run build
       - name: Cache Playwright browsers
         id: playwright-cache
@@ -64,11 +78,11 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit == 'true'
         run: bunx playwright install-deps chromium
       - name: Screenshots, axe, and reduced motion
-        run: bunx playwright test --project=${{ matrix.project }}
+        run: bunx playwright test --project=${{ matrix.project }} --shard=${{ matrix.shard }}/${{ matrix.total }}
       - name: Upload screenshots and report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: browser-${{ matrix.project }}
+          name: browser-${{ matrix.project }}-${{ matrix.shard }}of${{ matrix.total }}
           path: e2e-artifacts/
           retention-days: 14
