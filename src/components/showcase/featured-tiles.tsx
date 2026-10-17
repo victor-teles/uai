@@ -117,6 +117,12 @@ type Demo = {
   wide?: boolean;
   /** Upper bound for the fit zoom, for tall items. */
   maxZoom?: number;
+  /**
+   * Narrow tiles lay this item out at the specimen's real width instead of zooming it down.
+   * For pointer-driven items (the kanban drag) whose text would otherwise shrink below reading
+   * size.
+   */
+  narrowFill?: boolean;
   /** What the demo shows (docs and tests only; the tile shows the catalog description). */
   onView: string;
   render: (props: DemoProps) => ReactNode;
@@ -310,7 +316,7 @@ export const FEATURED: readonly Demo[] = [
     id: "kanban-board",
     duration: 1900,
     width: 860,
-    narrowWidth: 448,
+    narrowFill: true,
     wide: true,
     onView: "A card lifts, opens a slot, and settles",
     render: ({ t, epoch, narrow, playing }) => (
@@ -420,13 +426,16 @@ function KanbanDemo({ t, narrow, playing }: { t: number; narrow: boolean; playin
       const lane = board.querySelectorAll<HTMLElement>("[data-slot='kanban-board-column']")[
         narrow ? 1 : 2
       ];
-      const to = lane?.getBoundingClientRect() ?? from;
-      path.current = {
-        x0: from.left + from.width * 0.4,
-        y0: from.top + from.height * 0.5,
-        x1: to.left + to.width * 0.45,
-        y1: to.top + 58,
-      };
+      // Aim at where the card will actually land: the review column's empty slot. The pointer
+      // keeps its grip on the card, so moving it by the slot's offset puts the lifted card
+      // right on the slot and the settle is only the scale and tilt easing out.
+      const to =
+        lane
+          ?.querySelector<HTMLElement>("[data-slot='kanban-board-column-empty']")
+          ?.getBoundingClientRect() ?? from;
+      const x0 = from.left + from.width * 0.4;
+      const y0 = from.top + from.height * 0.5;
+      path.current = { x0, y0, x1: x0 + to.left - from.left, y1: y0 + to.top - from.top };
       fire(card, "pointerdown", path.current.x0, path.current.y0);
       phase.current = "down";
     }
@@ -446,6 +455,9 @@ function KanbanDemo({ t, narrow, playing }: { t: number; narrow: boolean; playin
     <div ref={root}>
       <KanbanBoard
         variant={narrow ? "compact" : "board"}
+        // Phones: the two columns share the tile's real width, unzoomed, and keep the height
+        // they start with, so the board doesn't shrink under the card as it lands.
+        className={narrow ? "min-h-[250px] auto-cols-[minmax(0,1fr)]" : undefined}
         value={Object.fromEntries(columns.map((column) => [column, value[column] ?? []]))}
         onValueChange={(next) => setValue((current) => ({ ...current, ...next }))}
       >
@@ -647,7 +659,8 @@ function FeaturedTile({ demo, order, still }: { demo: Demo; order: number; still
   const specimen = useRef<HTMLDivElement>(null);
   const specimenWidth = useSpecimenWidth(specimen);
   const narrow = specimenWidth > 0 && specimenWidth < 560;
-  const width = narrow ? (demo.narrowWidth ?? demo.width) : demo.width;
+  const natural = narrow ? (demo.narrowWidth ?? demo.width) : demo.width;
+  const width = narrow && demo.narrowFill ? specimenWidth - 48 : natural;
   const zoom = specimenWidth ? Math.min(demo.maxZoom ?? 1, (specimenWidth - 48) / width) : 1;
   const state: TileState =
     played && !slotted ? "rest" : running ? "playing" : slotted || t > 0 ? "paused" : "waiting";

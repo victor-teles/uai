@@ -135,6 +135,21 @@ const prefersReducedMotion = () =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const canAnimate = (element: Element) => typeof element.animate === "function";
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+/**
+ * The CSS zoom applied to `element` by itself and its ancestors. Rects and pointer coordinates
+ * are in screen pixels; lengths set inside a zoomed subtree (translate, height) are multiplied
+ * by this, so they are divided by it first.
+ */
+const zoomOf = (element: Element) => {
+  const zoom = (element as Element & { currentCSSZoom?: number }).currentCSSZoom;
+  return typeof zoom === "number" && zoom > 0 ? zoom : 1;
+};
+/** The vertical part of an element's `translate`, including a running FLIP animation. */
+const translateY = (element: Element) => {
+  const value = getComputedStyle(element).translate;
+  if (!value || value === "none") return 0;
+  return Number.parseFloat(value.split(" ")[1] ?? "0") || 0;
+};
 /** Interactive content inside a card keeps its own pointer behaviour. */
 const INTERACTIVE = "a, button, input, textarea, select, label, [contenteditable=true]";
 
@@ -170,8 +185,10 @@ type Gesture = {
   startY: number;
   x: number;
   y: number;
-  /** The card's rect at pickup; the overlay is fixed here and translated. */
+  /** The card's rect at pickup, in screen pixels; the overlay is fixed here and translated. */
   rect: DOMRect;
+  /** The card's CSS zoom at pickup, so the overlay renders at the card's on-screen size. */
+  zoom: number;
   origin: { column: string; index: number };
   holdTimer: number;
   armed: boolean;
@@ -242,8 +259,10 @@ export function KanbanBoard({
       const from = before.get(card);
       if (!from || !canAnimate(element)) continue;
       const to = element.getBoundingClientRect();
-      const dx = from.left - to.left;
-      const dy = from.top - to.top;
+      // Screen-pixel deltas, scaled into the card's own (possibly zoomed) coordinate space.
+      const zoom = zoomOf(element);
+      const dx = (from.left - to.left) / zoom;
+      const dy = (from.top - to.top) / zoom;
       if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) continue;
       element.animate([{ translate: `${dx}px ${dy}px` }, { translate: "0px 0px" }], {
         duration: 200,
@@ -360,14 +379,15 @@ export function KanbanBoard({
       const element = elements.current.get(card);
       const list = element?.parentElement;
       if (!element || !list) return;
-      // Layout position, ignoring any FLIP translate still running on the card.
-      const offset =
-        element.offsetParent === list ? element.offsetTop : element.offsetTop - list.offsetTop;
-      let top = list.getBoundingClientRect().top + offset;
+      // Everything in screen pixels, so a zoomed board measures the same as the pointer.
+      // Layout position: take off any FLIP translate still running on the card.
+      const zoom = zoomOf(element);
+      const rect = element.getBoundingClientRect();
+      let top = rect.top - translateY(element) * zoom;
       // Measure as if the open slot were not there, so the slot can't push the gap away.
       if (open && position >= open.index)
-        top -= open.height + (Number.parseFloat(getComputedStyle(list).rowGap) || 0);
-      if (centre > top + element.offsetHeight / 2) index += 1;
+        top -= (open.height + (Number.parseFloat(getComputedStyle(list).rowGap) || 0)) * zoom;
+      if (centre > top + rect.height / 2) index += 1;
     });
     return { column, index };
   };
@@ -376,7 +396,9 @@ export function KanbanBoard({
     const { column, index } = hitTest(g);
     const atOrigin = column === g.origin.column && index === g.origin.index;
     const next: DragSlot | null =
-      column && !atOrigin ? { card: g.card, column, index, height: g.rect.height } : null;
+      column && !atOrigin
+        ? { card: g.card, column, index, height: g.element.offsetHeight || g.rect.height / g.zoom }
+        : null;
     const previous = slotRef.current;
     if (previous?.column === next?.column && previous?.index === next?.index) {
       setDropTarget(column);
@@ -403,12 +425,17 @@ export function KanbanBoard({
     overlay.setAttribute("aria-hidden", "true");
     overlay.setAttribute("data-slot", "kanban-board-overlay");
     const computed = getComputedStyle(g.element);
+    // The overlay lives on <body>, outside any zoom on the board. It takes the card's zoom, so
+    // its content renders at the card's on-screen size, and every length set on it is divided
+    // by that zoom. Width and height come from layout, which zoom does not touch.
+    const z = g.zoom;
     Object.assign(overlay.style, {
       position: "fixed",
-      left: `${g.rect.left}px`,
-      top: `${g.rect.top}px`,
-      width: `${g.rect.width}px`,
-      height: `${g.rect.height}px`,
+      zoom: `${z / zoomOf(document.body)}`,
+      left: `${g.rect.left / z}px`,
+      top: `${g.rect.top / z}px`,
+      width: `${g.element.offsetWidth || g.rect.width / z}px`,
+      height: `${g.element.offsetHeight || g.rect.height / z}px`,
       margin: "0",
       zIndex: "50",
       pointerEvents: "none",
@@ -417,11 +444,11 @@ export function KanbanBoard({
       color: computed.color,
       font: computed.font,
       transition: g.reduced ? "none" : "rotate 120ms ease-out",
-      transformOrigin: `${g.startX - g.rect.left}px ${g.startY - g.rect.top}px`,
+      transformOrigin: `${(g.startX - g.rect.left) / z}px ${(g.startY - g.rect.top) / z}px`,
       scale: g.reduced ? "1" : "1.03",
       rotate: g.reduced ? "0deg" : `${REST_TILT}deg`,
       opacity: g.reduced ? "0.92" : "1",
-      translate: `${g.x - g.startX}px ${g.y - g.startY}px`,
+      translate: `${(g.x - g.startX) / z}px ${(g.y - g.startY) / z}px`,
     } satisfies Partial<CSSStyleDeclaration>);
     document.body.append(overlay);
     g.overlay = overlay;
@@ -499,7 +526,7 @@ export function KanbanBoard({
       overlay?.remove();
     };
     if (!overlay || g.reduced || !canAnimate(overlay)) return finish();
-    const to = `${target.left - g.rect.left}px ${target.top - g.rect.top}px`;
+    const to = `${(target.left - g.rect.left) / g.zoom}px ${(target.top - g.rect.top) / g.zoom}px`;
     const from = getComputedStyle(overlay);
     overlay.style.transition = "none";
     const animation = overlay.animate(
@@ -601,7 +628,8 @@ export function KanbanBoard({
     g.lastX = g.x;
     g.lastTime = now;
     g.moved = true;
-    if (g.overlay) g.overlay.style.translate = `${g.x - g.startX}px ${g.y - g.startY}px`;
+    if (g.overlay)
+      g.overlay.style.translate = `${(g.x - g.startX) / g.zoom}px ${(g.y - g.startY) / g.zoom}px`;
     updateSlot(g);
   }
   function onWindowUp(event: PointerEvent) {
@@ -640,6 +668,7 @@ export function KanbanBoard({
       x: event.clientX,
       y: event.clientY,
       rect: element.getBoundingClientRect(),
+      zoom: zoomOf(element),
       origin: { column: spot.column, index: spot.index },
       holdTimer: 0,
       armed: false,
@@ -963,13 +992,16 @@ export function KanbanBoardCardMeta({ className, ...props }: ComponentProps<"p">
   );
 }
 
-export function KanbanBoardColumnEmpty({ className, ...props }: ComponentProps<"p">) {
+export function KanbanBoardColumnEmpty({ className, style, ...props }: ComponentProps<"p">) {
   const board = useBoard("KanbanBoardColumnEmpty");
   const column = useColumn("KanbanBoardColumnEmpty");
   if ((board.value[column.value]?.length ?? 0) > 0) return null;
   const isSlot = board.slot?.column === column.value;
   return (
     <p
+      // As the drop slot it is as tall as the card, so the card settles onto it exactly and
+      // nothing below moves when the card replaces it.
+      style={isSlot && board.slot ? { minHeight: board.slot.height, ...style } : style}
       data-slot="kanban-board-column-empty"
       data-drop-slot={isSlot || undefined}
       className={cn(
