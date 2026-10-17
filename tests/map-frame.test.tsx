@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { MapFramePreview } from "@/components/registry/maps/map-frame-preview";
 import {
   MAP_FRAME_PLACEHOLDER_STATUSES,
   MAP_FRAME_VARIANTS,
@@ -88,4 +89,12 @@ test("keeps the attribution readable and reachable", () => {
   expect(attribution?.getAttribute("aria-hidden")).toBeNull();
   expect(attribution?.className).toContain("text-muted-foreground");
   expect(attribution?.className).toContain("bottom-1.5");
+});
+
+test("preview shows every place the chip counts after the error is retried", () => {
+  const { container } = render(<MapFramePreview state="error" />);
+  expect(container.querySelectorAll('[data-slot="map-marker"]')).toHaveLength(0);
+  fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+  expect(screen.getByText(/· 3 cafés/)).toBeTruthy();
+  expect(container.querySelectorAll('[data-slot="map-marker"]')).toHaveLength(3);
 });

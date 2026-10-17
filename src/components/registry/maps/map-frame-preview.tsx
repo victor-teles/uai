@@ -179,7 +179,8 @@ export function MapFramePreview({
     );
   }, [state]);
 
-  const visible = state === "ready" ? places : [];
+  // After "Try again" the error clears and the map shows the same places the chip counts.
+  const visible = state === "loading" || state === "empty" || failed ? [] : places;
   const compact = variant === "compact";
 
   return (
