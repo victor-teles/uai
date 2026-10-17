@@ -267,11 +267,11 @@
     "variant": "panel",
     "dark": {
       "width": 1200,
-      "height": 808
+      "height": 928
     },
     "light": {
       "width": 1200,
-      "height": 808
+      "height": 928
     }
   },
   "comment": {
@@ -476,7 +476,7 @@
     "variant": "split",
     "dark": {
       "width": 1340,
-      "height": 861
+      "height": 872
     },
     "light": {
       "width": 1340,
@@ -531,11 +531,11 @@
     "variant": "split",
     "dark": {
       "width": 1340,
-      "height": 869
+      "height": 875
     },
     "light": {
       "width": 1340,
-      "height": 869
+      "height": 875
     }
   },
   "import-workflow": {
@@ -586,21 +586,21 @@
     "variant": "board",
     "dark": {
       "width": 1340,
-      "height": 487
+      "height": 493
     },
     "light": {
       "width": 1340,
-      "height": 487
+      "height": 493
     }
   },
   "map-controls": {
     "variant": "stacked",
     "dark": {
-      "width": 304,
+      "width": 308,
       "height": 656
     },
     "light": {
-      "width": 304,
+      "width": 308,
       "height": 656
     }
   },
@@ -652,11 +652,11 @@
     "variant": "card",
     "dark": {
       "width": 828,
-      "height": 592
+      "height": 596
     },
     "light": {
       "width": 828,
-      "height": 592
+      "height": 596
     }
   },
   "newsletter-form": {
@@ -762,11 +762,11 @@
     "variant": "card",
     "dark": {
       "width": 1000,
-      "height": 828
+      "height": 936
     },
     "light": {
       "width": 1000,
-      "height": 828
+      "height": 936
     }
   },
   "pricing-section": {
@@ -904,7 +904,7 @@
   "research-session": {
     "variant": "split",
     "dark": {
-      "width": 1030,
+      "width": 1102,
       "height": 1100
     },
     "light": {
@@ -981,12 +981,12 @@
   "settings-page": {
     "variant": "stacked",
     "dark": {
-      "width": 1340,
-      "height": 932
+      "width": 1326,
+      "height": 1100
     },
     "light": {
-      "width": 1340,
-      "height": 932
+      "width": 1326,
+      "height": 1100
     }
   },
   "share-menu": {
@@ -1114,11 +1114,11 @@
     "variant": "grid",
     "dark": {
       "width": 1340,
-      "height": 1063
+      "height": 1095
     },
     "light": {
       "width": 1340,
-      "height": 1063
+      "height": 1095
     }
   },
   "thinking": {
@@ -1147,11 +1147,11 @@
     "variant": "card",
     "dark": {
       "width": 1340,
-      "height": 713
+      "height": 775
     },
     "light": {
       "width": 1340,
-      "height": 713
+      "height": 775
     }
   },
   "unsaved-changes-bar": {
