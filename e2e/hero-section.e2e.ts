@@ -41,3 +41,16 @@ test("Centered media rows keep start alignment", async ({ page }) => {
   const title = page.locator(`${PREVIEW} [data-slot="hero-section-title"]`);
   expect(await title.evaluate((element) => getComputedStyle(element).textAlign)).toBe("center");
 });
+
+test("the media card keeps a gutter from the canvas edge", async ({ page }) => {
+  await openComponent(page, "hero-section");
+  for (const variant of ["Split", "Centered"]) {
+    await pick(page, variant);
+    const gap = await page.locator(`${PREVIEW} [data-slot="hero-section"]`).evaluate((hero) => {
+      const card = hero.querySelector('[data-slot="hero-section-media"] > div > div');
+      if (!card) return -1;
+      return hero.getBoundingClientRect().right - card.getBoundingClientRect().right;
+    });
+    expect(gap, variant).toBeGreaterThanOrEqual(16);
+  }
+});

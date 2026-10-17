@@ -132,7 +132,11 @@ export function HeroSectionPreview({ variant = "split" }: { variant?: HeroSectio
       </HeroSectionContent>
       <HeroSectionMedia aria-hidden="true">
         <div ref={ref} className="absolute inset-0">
-          <div className="absolute top-[30px] right-0 bottom-[70px] left-6 overflow-hidden rounded-[14px] bg-card text-[13px]/[18px] shadow-[0_0_0_1px_var(--border),0_24px_48px_-24px_oklch(0_0_0/0.35)]">
+          {/* Framed already pads the media; elsewhere the card keeps a gutter on its outer edge
+              instead of running into the canvas edge. */}
+          <div
+            className={`absolute top-[30px] bottom-[70px] left-6 overflow-hidden rounded-[14px] bg-card text-[13px]/[18px] shadow-[0_0_0_1px_var(--border),0_24px_48px_-24px_oklch(0_0_0/0.35)] ${variant === "framed" ? "right-0" : "right-6"}`}
+          >
             <div className="flex h-10 items-center gap-2 border-b px-3.5">
               <span className="font-medium">Inbox</span>
               <span className="text-muted-foreground">· 12 open</span>

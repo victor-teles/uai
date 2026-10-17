@@ -482,3 +482,66 @@ test.describe("live scene with reduced motion", () => {
     expect(await movingIn(page, SCENE)).toEqual([]);
   });
 });
+
+test.describe("kanban tile on a 390px phone", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test("lifts the card at the source card's size with nothing overflowing", async ({ page }) => {
+    await openHome(page);
+    const kanban = tile(page, "kanban-board");
+    // Sample every frame of the scripted drag: the overlay must match the card it lifted and
+    // never overflow its own box.
+    await page.evaluate(() => {
+      const record = { frames: 0, overflow: 0, mismatch: 0, zoomed: 0, worst: "" };
+      (window as unknown as { __kanbanLift: typeof record }).__kanbanLift = record;
+      const scope = document.querySelector('.uai-feature[data-id="kanban-board"]');
+      const tick = () => {
+        const overlay = document.querySelector<HTMLElement>('[data-slot="kanban-board-overlay"]');
+        const source = scope?.querySelector<HTMLElement>(
+          '[data-slot="kanban-board-card"][data-dragging]',
+        );
+        if (overlay && source) {
+          record.frames += 1;
+          if (
+            overlay.scrollHeight > overlay.clientHeight ||
+            overlay.scrollWidth > overlay.clientWidth
+          )
+            record.overflow += 1;
+          // Undo the lift's scale and tilt to get the overlay's own on-screen size.
+          const a = overlay.getBoundingClientRect();
+          const b = source.getBoundingClientRect();
+          const style = getComputedStyle(overlay);
+          const scale = Number.parseFloat(style.scale) || 1;
+          const angle = ((Number.parseFloat(style.rotate) || 0) * Math.PI) / 180;
+          const cos = Math.cos(angle);
+          const sin = Math.abs(Math.sin(angle));
+          const det = cos * cos - sin * sin;
+          const width = (a.width * cos - a.height * sin) / det / scale;
+          const height = (a.height * cos - a.width * sin) / det / scale;
+          if (Math.abs(width - b.width) > 2 || Math.abs(height - b.height) > 2) {
+            record.mismatch += 1;
+            record.worst = `${width}x${height} vs ${b.width}x${b.height}`;
+          }
+          if ((overlay as HTMLElement & { currentCSSZoom?: number }).currentCSSZoom !== 1)
+            record.zoomed += 1;
+        }
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+    await centre(page, "kanban-board");
+    await expect(kanban).toHaveAttribute("data-state", "rest", { timeout: 20_000 });
+    const record = await page.evaluate(
+      () => (window as unknown as { __kanbanLift: Record<string, number | string> }).__kanbanLift,
+    );
+    expect(record.frames, "the overlay was seen").toBeGreaterThan(5);
+    expect(record.overflow, "overlay content overflowed").toBe(0);
+    expect(record.mismatch, `overlay size differs from the card: ${record.worst}`).toBe(0);
+    // The phone tile lays the board out at its real width instead of zooming it down.
+    expect(record.zoomed).toBe(0);
+    const review = kanban.locator('[data-slot="kanban-board-column"][data-column="review"]');
+    await expect(review.locator('[data-slot="kanban-board-card"]')).toHaveText([
+      /Migrate invoices to the new ledger/,
+    ]);
+  });
+});
