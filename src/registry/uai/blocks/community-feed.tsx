@@ -11,7 +11,7 @@ import {
   useState,
 } from "react";
 import { Button } from "@/components/ui/button";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { toggleVariants } from "@/components/ui/toggle";
 import { AuthorCard, type AuthorCardProps } from "@/components/ui/uai/author-card";
 import { EmptyState, type EmptyStateProps } from "@/components/ui/uai/empty-state";
 import {
@@ -20,6 +20,12 @@ import {
   type ReactionBarVariant,
 } from "@/components/ui/uai/reaction-bar";
 import { cn } from "@/lib/uai-utils";
+
+/**
+ * Single-choice segments are plain radio buttons styled like ToggleGroupItem: ToggleGroup's value
+ * is a string on Radix but an array on Base UI, so the group's selection stays in uai state.
+ */
+const segmentClass = "w-auto min-w-0 shrink-0 px-3 focus:z-10 focus-visible:z-10";
 
 export const COMMUNITY_FEED_VARIANTS = ["list", "cards", "compact"] as const;
 export type CommunityFeedVariant = (typeof COMMUNITY_FEED_VARIANTS)[number];
@@ -183,16 +189,9 @@ export function CommunityFeedFilters({
   className,
   ...props
 }: CommunityFeedFiltersProps) {
-  const { filter, setFilter } = useFeed("CommunityFeedFilters");
+  useFeed("CommunityFeedFilters");
   return (
-    <ToggleGroup
-      type="single"
-      rovingFocus={false}
-      spacing={1}
-      value={filter}
-      onValueChange={(next) => {
-        if (next) setFilter(next);
-      }}
+    <div
       role="radiogroup"
       aria-label={label}
       data-slot="community-feed-filters"
@@ -206,17 +205,29 @@ export function CommunityFeedFilters({
   );
 }
 
-export type CommunityFeedFilterProps = Omit<ComponentProps<typeof ToggleGroupItem>, "value"> & {
+export type CommunityFeedFilterProps = Omit<ComponentProps<"button">, "value"> & {
   value: string;
 };
 
-export function CommunityFeedFilter({ value, className, ...props }: CommunityFeedFilterProps) {
+export function CommunityFeedFilter({
+  value,
+  onClick,
+  className,
+  ...props
+}: CommunityFeedFilterProps) {
   const context = useFeed("CommunityFeedFilter");
   const checked = context.filter === value;
   return (
-    <ToggleGroupItem
+    // biome-ignore lint/a11y/useSemanticElements: a segment button in a radio group; ToggleGroupItem renders the same role="radio" button.
+    <button
+      type="button"
+      role="radio"
+      aria-checked={checked}
       data-slot="community-feed-filter"
+      data-state={checked ? "on" : "off"}
       className={cn(
+        toggleVariants(),
+        segmentClass,
         "inline-flex min-w-0 cursor-pointer items-center gap-1.5 rounded-full border-0 px-3 text-[12.5px] font-medium whitespace-nowrap",
         context.variant === "compact" ? "h-6" : "h-7",
         checked ? pillSelected : pillIdle,
@@ -226,8 +237,11 @@ export function CommunityFeedFilter({ value, className, ...props }: CommunityFee
         className,
       )}
       {...props}
-      value={value}
       tabIndex={checked ? 0 : -1}
+      onClick={(event) => {
+        onClick?.(event);
+        if (!event.defaultPrevented) context.setFilter(value);
+      }}
     />
   );
 }

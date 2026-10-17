@@ -11,7 +11,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/uai-utils";
 
 export const PAGE_TABS_VARIANTS = ["underline", "pill", "segmented"] as const;
@@ -231,7 +231,8 @@ const pageTabsTabVariants = cva(
       },
       fallback: {
         true: "",
-        false: "data-[state=active]:bg-transparent dark:data-[state=active]:bg-transparent",
+        false:
+          "data-[state=active]:bg-transparent data-active:bg-transparent dark:data-[state=active]:bg-transparent dark:data-active:bg-transparent",
       },
     },
     compoundVariants: [
@@ -239,18 +240,19 @@ const pageTabsTabVariants = cva(
         variant: "underline",
         fallback: true,
         className:
-          "shadow-[inset_0_-2px_0_var(--foreground)] data-[state=active]:bg-transparent dark:data-[state=active]:bg-transparent",
+          "shadow-[inset_0_-2px_0_var(--foreground)] data-[state=active]:bg-transparent data-active:bg-transparent dark:data-[state=active]:bg-transparent dark:data-active:bg-transparent",
       },
       {
         variant: "pill",
         fallback: true,
-        className: "data-[state=active]:bg-accent dark:data-[state=active]:bg-accent",
+        className:
+          "data-[state=active]:bg-accent data-active:bg-accent dark:data-[state=active]:bg-accent dark:data-active:bg-accent",
       },
       {
         variant: "segmented",
         fallback: true,
         className:
-          "shadow-[0_0_0_1px_var(--border),0_1px_2px_oklch(0_0_0/0.08)] data-[state=active]:bg-card dark:data-[state=active]:bg-card",
+          "shadow-[0_0_0_1px_var(--border),0_1px_2px_oklch(0_0_0/0.08)] data-[state=active]:bg-card data-active:bg-card dark:data-[state=active]:bg-card dark:data-active:bg-card",
       },
     ],
   },
@@ -352,16 +354,19 @@ export function PageTabsPanel({
     );
   }, [selected]);
   return (
-    <TabsContent
-      // Inactive panels stay mounted so their state survives tab switches.
-      forceMount
+    // Inactive panels stay mounted so their state survives tab switches. A plain tabpanel rather
+    // than TabsContent: keeping it mounted needs `forceMount` on Radix and `keepMounted` on Base UI.
+    <div
+      role="tabpanel"
+      // biome-ignore lint/a11y/noNoninteractiveTabindex: a focusable tabpanel, as in the APG tabs pattern and TabsContent.
+      tabIndex={0}
       data-slot="page-tabs-panel"
+      data-state={selected ? "active" : "inactive"}
       className={cn(
         "min-w-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid",
         className,
       )}
       {...props}
-      value={value}
       id={`${context.id}-panel-${slug(value)}`}
       aria-labelledby={`${context.id}-tab-${slug(value)}`}
       ref={ref}

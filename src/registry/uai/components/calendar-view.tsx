@@ -2,9 +2,16 @@
 
 import { cva } from "class-variance-authority";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { type ComponentProps, createContext, useContext, useId, useState } from "react";
+import {
+  type ComponentProps,
+  createContext,
+  type KeyboardEvent,
+  useContext,
+  useId,
+  useState,
+} from "react";
 import { Button } from "@/components/ui/button";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { toggleVariants } from "@/components/ui/toggle";
 import { cn } from "@/lib/uai-utils";
 
 export const CALENDAR_VIEW_VARIANTS = ["card", "plain", "compact"] as const;
@@ -270,14 +277,43 @@ export function CalendarViewNavigation({ className, ...props }: ComponentProps<"
   );
 }
 
+/** Arrows move focus and selection together, as in an APG radio group. */
+function moveRadio(event: KeyboardEvent<HTMLElement>) {
+  const radios = Array.from(
+    event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="radio"]:not(:disabled)'),
+  );
+  const index = radios.indexOf(document.activeElement as HTMLButtonElement);
+  if (index === -1) return;
+  const next = {
+    ArrowRight: index + 1,
+    ArrowDown: index + 1,
+    ArrowLeft: index - 1,
+    ArrowUp: index - 1,
+    Home: 0,
+    End: radios.length - 1,
+  }[event.key];
+  if (next === undefined) return;
+  event.preventDefault();
+  const target = radios[(next + radios.length) % radios.length];
+  target?.focus();
+  target?.click();
+}
+
+/**
+ * Single-choice segments are plain radio buttons styled like ToggleGroupItem: ToggleGroup's value
+ * is a string on Radix but an array on Base UI, so the selected layout stays in uai state.
+ */
+const segmentClass = "w-auto min-w-0 shrink-0 px-3 focus:z-10 focus-visible:z-10";
+
 export function CalendarViewModes({
+  onKeyDown,
   className,
   ...props
 }: Omit<ComponentProps<"div">, "defaultValue" | "dir">) {
   const context = useCalendar("CalendarViewModes");
   return (
-    <ToggleGroup
-      type="single"
+    <div
+      role="radiogroup"
       aria-label="Calendar layout"
       data-slot="calendar-view-modes"
       className={cn(
@@ -285,10 +321,9 @@ export function CalendarViewModes({
         className,
       )}
       {...props}
-      value={context.view}
-      // A single toggle group clears its value when the active layout is pressed again.
-      onValueChange={(next) => {
-        if (next) context.setView(next as CalendarViewMode);
+      onKeyDown={(event) => {
+        onKeyDown?.(event);
+        if (!event.defaultPrevented) moveRadio(event);
       }}
     >
       {/* One thumb slides under the active layout instead of each button repainting. */}
@@ -302,15 +337,22 @@ export function CalendarViewModes({
       {CALENDAR_VIEW_MODES.map((mode) => {
         const active = context.view === mode;
         return (
-          <ToggleGroupItem
+          // biome-ignore lint/a11y/useSemanticElements: a segment button in a radio group; ToggleGroupItem renders the same role="radio" button.
+          <button
             key={mode}
             type="button"
-            value={mode}
+            role="radio"
+            aria-checked={active}
+            data-state={active ? "on" : "off"}
+            tabIndex={active ? 0 : -1}
+            onClick={() => context.setView(mode)}
             className={cn(
+              toggleVariants(),
+              segmentClass,
               controlClass(context.variant),
               context.variant === "compact" ? "h-5.5" : "h-6.5",
               // The thumb paints the active layout; the items stay transparent and fully rounded.
-              "bg-transparent hover:bg-transparent data-[spacing=0]:rounded-full data-[spacing=0]:first:rounded-full data-[spacing=0]:last:rounded-full data-[state=on]:bg-transparent",
+              "rounded-full bg-transparent hover:bg-transparent data-[state=on]:bg-transparent",
               active
                 ? "text-foreground hover:text-foreground data-[state=on]:text-foreground"
                 : "text-subtle-foreground hover:text-muted-foreground",
@@ -319,10 +361,10 @@ export function CalendarViewModes({
             )}
           >
             {mode.charAt(0).toUpperCase() + mode.slice(1)}
-          </ToggleGroupItem>
+          </button>
         );
       })}
-    </ToggleGroup>
+    </div>
   );
 }
 

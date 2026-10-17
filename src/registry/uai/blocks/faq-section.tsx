@@ -1,6 +1,7 @@
 "use client";
 
 import { cva } from "class-variance-authority";
+import { ChevronDown } from "lucide-react";
 import {
   type ComponentProps,
   createContext,
@@ -12,12 +13,7 @@ import {
   useRef,
   useState,
 } from "react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   SearchField,
   type SearchFieldProps,
@@ -218,31 +214,30 @@ export function FaqSectionItem({
   useEffect(() => () => report(id, null), [id, report]);
   return (
     <ItemContext.Provider value={{ id, open: current }}>
-      <Accordion
-        type="single"
-        collapsible
+      {/* Each question is its own disclosure. Collapsible's open/onOpenChange API is the same on
+          Radix and Base UI, where a single-item Accordion's value is a string on one and an array
+          on the other. */}
+      <Collapsible
         asChild
-        value={current ? id : ""}
-        onValueChange={(value) => {
-          const next = value === id;
+        open={current}
+        onOpenChange={(next) => {
           if (open === undefined) setInternal(next);
           onOpenChange?.(next);
         }}
       >
-        <AccordionItem
-          value={id}
-          asChild
-          className={cn(faqSectionItemVariants({ variant: section.variant }), className)}
-        >
-          <li
-            data-slot="faq-section-item"
-            data-variant={section.variant}
-            {...props}
-            ref={ref}
-            hidden={hidden}
-          />
-        </AccordionItem>
-      </Accordion>
+        <li
+          data-slot="faq-section-item"
+          data-variant={section.variant}
+          className={cn(
+            "border-b last:border-b-0",
+            faqSectionItemVariants({ variant: section.variant }),
+            className,
+          )}
+          {...props}
+          ref={ref}
+          hidden={hidden}
+        />
+      </Collapsible>
     </ItemContext.Provider>
   );
 }
@@ -250,27 +245,36 @@ export function FaqSectionItem({
 export function FaqSectionQuestion({ children, className, ...props }: ComponentProps<"button">) {
   const item = useItem("FaqSectionQuestion");
   return (
-    <AccordionTrigger
-      data-slot="faq-section-question"
-      className={cn(
-        "group/faq-question min-h-13 w-full cursor-pointer items-center gap-3 rounded-[6px] border-0 bg-transparent py-3.5 text-start text-sm/5 font-medium text-foreground hover:no-underline focus-visible:ring-0 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
-        "[&>svg]:translate-y-0 [&>svg]:stroke-[1.75] [&>svg]:text-subtle-foreground [&>svg]:[transition:rotate_180ms_cubic-bezier(0.23,1,0.32,1),color_120ms_ease-out] hover:[&>svg]:text-foreground motion-reduce:[&>svg]:transition-none",
-        className,
-      )}
-      {...props}
-      aria-controls={`${item.id}-answer`}
-    >
-      <span className="min-w-0">{children}</span>
-    </AccordionTrigger>
+    <h3 className="m-0 flex">
+      <CollapsibleTrigger
+        data-slot="faq-section-question"
+        className={cn(
+          "flex flex-1 items-start justify-between gap-4 rounded-md py-4 text-left text-sm font-medium outline-none hover:underline focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-expanded:[&>svg]:rotate-180",
+          "group/faq-question min-h-13 w-full cursor-pointer items-center gap-3 rounded-[6px] border-0 bg-transparent py-3.5 text-start text-sm/5 font-medium text-foreground hover:no-underline focus-visible:ring-0 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+          "[&>svg]:translate-y-0 [&>svg]:stroke-[1.75] [&>svg]:text-subtle-foreground [&>svg]:[transition:rotate_180ms_cubic-bezier(0.23,1,0.32,1),color_120ms_ease-out] hover:[&>svg]:text-foreground motion-reduce:[&>svg]:transition-none",
+          className,
+        )}
+        {...props}
+        aria-controls={`${item.id}-answer`}
+      >
+        <span className="min-w-0">{children}</span>
+        <ChevronDown
+          aria-hidden="true"
+          className="pointer-events-none size-4 shrink-0 translate-y-0.5 text-muted-foreground"
+        />
+      </CollapsibleTrigger>
+    </h3>
   );
 }
 
 /**
- * The answer stays mounted while collapsed so the search can match its text, and hides once
- * the collapse animation finishes.
+ * The answer stays mounted while collapsed so the search can match its text. Its height eases
+ * between 0fr and 1fr rows, `inert` takes the collapsing text out of focus and the a11y tree, and
+ * `hidden` lands once the transition ends.
  */
 export function FaqSectionAnswer({ className, children, ...props }: ComponentProps<"div">) {
   const item = useItem("FaqSectionAnswer");
+  const state = item.open ? "open" : "closed";
   const ref = useRef<HTMLDivElement>(null);
   const [rendered, setRendered] = useState(item.open);
   useEffect(() => {
@@ -278,31 +282,43 @@ export function FaqSectionAnswer({ className, children, ...props }: ComponentPro
       setRendered(true);
       return;
     }
+    // Without a running height transition (reduced motion, no CSS) the answer hides right away.
     const node = ref.current;
-    const animation = node ? window.getComputedStyle(node).animationName : "";
-    if (!animation || animation === "none") setRendered(false);
+    const duration = node ? window.getComputedStyle(node).transitionDuration : "";
+    if (!duration || duration.split(",").every((value) => Number.parseFloat(value) === 0)) {
+      setRendered(false);
+    }
   }, [item.open]);
   return (
-    <AccordionContent
-      forceMount
-      data-slot="faq-section-answer"
-      className={cn(
-        "grid max-w-[64ch] gap-2 pb-4 text-[13px]/5 text-pretty text-muted-foreground",
-        // The text fades with the height keyframe on its parent; onAnimationEnd ignores it by target.
-        "[[data-state=open]>&]:animate-in [[data-state=open]>&]:fade-in-0 [[data-state=open]>&]:duration-200 [[data-state=closed]>&]:animate-out [[data-state=closed]>&]:fade-out-0 [[data-state=closed]>&]:duration-150 motion-reduce:animate-none",
-        className,
-      )}
-      {...props}
+    <div
       ref={ref}
-      id={`${item.id}-answer`}
-      hidden={!item.open && !rendered}
-      onAnimationEnd={(event) => {
-        props.onAnimationEnd?.(event);
+      inert={!item.open}
+      onTransitionEnd={(event) => {
         if (event.target === event.currentTarget && !item.open) setRendered(false);
       }}
+      className={cn(
+        "grid overflow-hidden text-sm transition-[grid-template-rows] duration-200 ease-out motion-reduce:transition-none",
+        item.open ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+      )}
     >
-      {children}
-    </AccordionContent>
+      <div data-state={state} className="min-h-0">
+        <div
+          data-slot="faq-section-answer"
+          data-state={state}
+          className={cn(
+            "grid max-w-[64ch] gap-2 pt-0 pb-4 text-[13px]/5 text-pretty text-muted-foreground",
+            // The text fades with the height transition on its parent.
+            "[[data-state=open]>&]:animate-in [[data-state=open]>&]:fade-in-0 [[data-state=open]>&]:duration-200 [[data-state=closed]>&]:animate-out [[data-state=closed]>&]:fade-out-0 [[data-state=closed]>&]:duration-150 motion-reduce:animate-none",
+            className,
+          )}
+          {...props}
+          id={`${item.id}-answer`}
+          hidden={!item.open && !rendered}
+        >
+          {children}
+        </div>
+      </div>
+    </div>
   );
 }
 

@@ -42,6 +42,25 @@ bun run test:e2e:install    # once, for the browser checks
 7. **Tests.** Add `tests/<name>.test.tsx` for behaviour and accessibility, and
    extend the group's registry test.
 
+### Works on Base UI and Radix
+
+`shadcn init -d` creates a Base UI project; `shadcn init -b radix` creates a Radix one.
+Items install into both, so use only the API the two share:
+
+- No primitive-only props: `forceMount`, `loop`, `onOpenAutoFocus`, `onCloseAutoFocus`,
+  `position` on Select, and so on. Keep panels mounted with your own element (with the
+  right `role`, `id`, and `aria-*`), and own focus or keyboard wrap in a handler.
+- Menu items act in `onClick`; `onSelect` means different things in the two libraries.
+- Single-choice segmented controls are `role="radio"` buttons styled with
+  `toggleVariants`, not `ToggleGroup` (its value is a string on Radix, an array on Base).
+  One-question disclosures use `Collapsible`, not `Accordion`, for the same reason.
+- Pass a `SelectValue` the label for the current value; Base shows the raw value otherwise.
+- Style state with both forms: `data-[state=open]:` for Radix and `data-open:` for Base
+  (also `checked`, `unchecked`, `closed`, `active`, and `data-pressed` for `on`), or use
+  `aria-expanded:` / `aria-checked:`, which both set.
+
+`asChild` is fine: the CLI rewrites it to `render` for Base projects.
+
 ## Checks that must pass
 
 CI runs all of these on every pull request and on `main`:
@@ -53,6 +72,7 @@ CI runs all of these on every pull request and on `main`:
 | `bun run registry:check` | Mirrors, `registry.json` dependencies, catalog usage vs. preview file, variants reaching the preview, reduced-motion handling, and the static rules from [`quality/premium-rubric.md`](quality/premium-rubric.md) (`scripts/premium-lint.ts`). |
 | `bun run test` | Rebuilds `public/r` and runs the unit tests. |
 | `bun run build` | Rebuilds the registry and the production site. |
+| `bun scripts/consumer-check.ts --base base\|radix` | Serves this branch's `public/r`, creates a default Next app, runs `shadcn init` for that base, adds every `registry:ui` and `registry:block` item, then runs `tsc` and `next build`. CI runs both bases. Run `bun run registry:build` first. |
 | `bun run test:e2e` | Every `/components/<id>` page in light and dark, desktop and mobile: a screenshot, axe (serious and critical findings fail), a reduced-motion pass, and the premium rubric's live checks (`e2e/premium.e2e.ts`, desktop). Needs `bun run build` first. |
 
 Screenshots and the HTML report land in `e2e-artifacts/` locally. CI splits the

@@ -178,15 +178,15 @@ export function CartDrawerTrigger({
 }
 
 const cartDrawerContentVariants = cva(
-  "box-border max-w-full gap-0 overflow-hidden border-0 bg-popover p-0 text-[13px]/[18px] text-popover-foreground ease-[cubic-bezier(0.23,1,0.32,1)] data-[state=closed]:duration-220 data-[state=open]:duration-220 data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 sm:max-w-full motion-reduce:data-[state=closed]:animate-none motion-reduce:data-[state=open]:animate-none",
+  "box-border max-w-full gap-0 overflow-hidden border-0 bg-popover p-0 text-[13px]/[18px] text-popover-foreground ease-[cubic-bezier(0.23,1,0.32,1)] data-[state=closed]:duration-220 data-[state=open]:duration-220 data-[state=closed]:fade-out-0 data-closed:fade-out-0 data-[state=open]:fade-in-0 data-open:fade-in-0 sm:max-w-full motion-reduce:data-[state=closed]:animate-none motion-reduce:data-closed:animate-none motion-reduce:data-[state=open]:animate-none motion-reduce:data-open:animate-none",
   {
     variants: {
       variant: {
-        side: "h-full max-h-dvh w-[min(100%,420px)] rounded-none shadow-[0_0_0_1px_var(--border),-12px_0_32px_-16px_oklch(0_0_0/0.24)] data-[state=closed]:slide-out-to-right-6 data-[state=open]:slide-in-from-right-6",
+        side: "h-full max-h-dvh w-[min(100%,420px)] rounded-none shadow-[0_0_0_1px_var(--border),-12px_0_32px_-16px_oklch(0_0_0/0.24)] data-[state=closed]:slide-out-to-right-6 data-closed:slide-out-to-right-6 data-[state=open]:slide-in-from-right-6 data-open:slide-in-from-right-6",
         sheet:
-          "mx-auto h-auto max-h-[min(88dvh,720px)] w-[min(100%,640px)] rounded-t-3xl rounded-b-none shadow-[0_0_0_1px_var(--border),0_-12px_32px_-16px_oklch(0_0_0/0.24)] data-[state=closed]:slide-out-to-bottom-6 data-[state=open]:slide-in-from-bottom-6",
+          "mx-auto h-auto max-h-[min(88dvh,720px)] w-[min(100%,640px)] rounded-t-3xl rounded-b-none shadow-[0_0_0_1px_var(--border),0_-12px_32px_-16px_oklch(0_0_0/0.24)] data-[state=closed]:slide-out-to-bottom-6 data-closed:slide-out-to-bottom-6 data-[state=open]:slide-in-from-bottom-6 data-open:slide-in-from-bottom-6",
         compact:
-          "h-full max-h-dvh w-[min(100%,360px)] rounded-none shadow-[0_0_0_1px_var(--border),-12px_0_32px_-16px_oklch(0_0_0/0.24)] data-[state=closed]:slide-out-to-right-6 data-[state=open]:slide-in-from-right-6",
+          "h-full max-h-dvh w-[min(100%,360px)] rounded-none shadow-[0_0_0_1px_var(--border),-12px_0_32px_-16px_oklch(0_0_0/0.24)] data-[state=closed]:slide-out-to-right-6 data-closed:slide-out-to-right-6 data-[state=open]:slide-in-from-right-6 data-open:slide-in-from-right-6",
       },
     },
   },
@@ -199,13 +199,11 @@ const cartDrawerSides = { side: "right", sheet: "bottom", compact: "right" } as 
  */
 export function CartDrawerContent({
   className,
-  onOpenAutoFocus,
-  onCloseAutoFocus,
+  children,
   ...props
 }: Omit<ComponentProps<typeof SheetContent>, "side" | "showCloseButton">) {
   const context = useDrawer("CartDrawerContent");
-  const returnRef = useRef<HTMLElement | null>(null);
-  const { closeRef, triggerRef, variant } = context;
+  const { closeRef, variant } = context;
   return (
     <SheetContent
       aria-describedby={undefined}
@@ -215,25 +213,25 @@ export function CartDrawerContent({
       className={cn(cartDrawerContentVariants({ variant }), className)}
       {...props}
       data-variant={variant}
-      onOpenAutoFocus={(event) => {
-        const active = document.activeElement;
-        returnRef.current =
-          active instanceof HTMLElement && active !== document.body ? active : triggerRef.current;
-        onOpenAutoFocus?.(event);
-        if (event.defaultPrevented) return;
-        event.preventDefault();
-        const content = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
-        const preferred = content?.querySelector<HTMLElement>("[autofocus], [data-autofocus]");
-        (preferred ?? closeRef.current)?.focus();
-      }}
-      onCloseAutoFocus={(event) => {
-        onCloseAutoFocus?.(event);
-        if (event.defaultPrevented) return;
-        event.preventDefault();
-        (returnRef.current ?? triggerRef.current)?.focus();
-      }}
-    />
+    >
+      {children}
+      <InitialFocus fallback={closeRef} />
+    </SheetContent>
   );
+}
+
+/**
+ * Moves focus into the drawer as it mounts: an element marked `autofocus` or `data-autofocus`,
+ * else the close button. It runs before the primitive's own initial focus, which Radix and Base UI
+ * both skip when focus is already inside, so neither needs primitive-specific props.
+ */
+function InitialFocus({ fallback }: { fallback: React.RefObject<HTMLElement | null> }) {
+  useLayoutEffect(() => {
+    const content = fallback.current?.closest<HTMLElement>("[role=dialog], [role=alertdialog]");
+    const preferred = content?.querySelector<HTMLElement>("[autofocus], [data-autofocus]");
+    (preferred ?? fallback.current)?.focus();
+  }, [fallback]);
+  return null;
 }
 
 export function CartDrawerHeader({ children, className, ...props }: ComponentProps<"header">) {

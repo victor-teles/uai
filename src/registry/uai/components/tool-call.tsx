@@ -17,7 +17,7 @@ import {
   useId,
   useState,
 } from "react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/uai-utils";
 
 export const TOOL_CALL_VARIANTS = ["card", "inline", "compact"] as const;
@@ -196,7 +196,7 @@ export function ToolCallTrigger({ children, className, ...props }: ComponentProp
         aria-hidden="true"
         className={cn(
           "size-3.5",
-          "flex-none text-subtle-foreground [transition:rotate_180ms_cubic-bezier(0.23,1,0.32,1),color_120ms_ease-out] group-hover/tool-call-trigger:text-foreground group-data-[state=open]/tool-call-trigger:rotate-180 motion-reduce:transition-none",
+          "flex-none text-subtle-foreground [transition:rotate_180ms_cubic-bezier(0.23,1,0.32,1),color_120ms_ease-out] group-hover/tool-call-trigger:text-foreground group-aria-expanded/tool-call-trigger:rotate-180 motion-reduce:transition-none",
         )}
       />
     </CollapsibleTrigger>
@@ -259,8 +259,10 @@ export function ToolCallContent({ className, ...props }: ComponentProps<"div">) 
       )}
     >
       <div className="min-h-0 overflow-hidden">
-        <CollapsibleContent
+        {/* Always mounted: the outer grid animates the height, so the region never unmounts. */}
+        <div
           data-slot="tool-call-content"
+          data-state={context.open ? "open" : "closed"}
           className={cn(
             "grid gap-2.5",
             inline
@@ -270,7 +272,6 @@ export function ToolCallContent({ className, ...props }: ComponentProps<"div">) 
           )}
           {...props}
           id={`${context.id}-content`}
-          forceMount
         />
       </div>
     </div>

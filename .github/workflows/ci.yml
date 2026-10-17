@@ -32,6 +32,45 @@ jobs:
       - run: bun run registry:check
       - run: bun run test
 
+  consumer:
+    # Installs every registry:ui and registry:block item (108 today) into a fresh default Next app
+    # initialised the way shadcn users start: `shadcn init -d` (Base UI, the CLI default) and
+    # `shadcn init -b radix`. Items come from this PR's own public/r build, served locally, never
+    # from production. All items rather than a sample: the add, tsc, and next build take about a
+    # minute per base, and a Radix-only prop can hide in any of them. Versions are pinned so a new
+    # CLI or template release can't turn a PR red on its own; bump them deliberately.
+    name: Consumer install (${{ matrix.base }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        base: [base, radix]
+    env:
+      SHADCN_VERSION: 4.22.0
+      CREATE_NEXT_APP_VERSION: 16.4.2
+      NEXT_TELEMETRY_DISABLED: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Cache Bun and npx packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            ~/.npm
+          key: consumer-${{ runner.os }}-${{ matrix.base }}-${{ hashFiles('bun.lock') }}-${{ env.SHADCN_VERSION }}-${{ env.CREATE_NEXT_APP_VERSION }}
+          restore-keys: |
+            consumer-${{ runner.os }}-${{ matrix.base }}-${{ hashFiles('bun.lock') }}-
+            consumer-${{ runner.os }}-${{ matrix.base }}-
+      - run: bun install --frozen-lockfile
+      - run: bun run registry:build
+      - name: Add every item, then tsc and next build
+        run: bun scripts/consumer-check.ts --base ${{ matrix.base }}
+
   browser:
     # Desktop runs ~570 tests and mobile ~230 (the premium checks are desktop only), so
     # desktop gets four shards and mobile two. Every test still runs exactly once.

@@ -71,16 +71,16 @@ const buttonTones = cva(
 );
 
 const dialogVariants = cva(
-  "box-border border-0 bg-popover text-[13px]/[18px] text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_18px_48px_-16px_oklch(0_0_0/0.36)] motion-reduce:data-[state=closed]:animate-none motion-reduce:data-[state=open]:animate-none",
+  "box-border border-0 bg-popover text-[13px]/[18px] text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_18px_48px_-16px_oklch(0_0_0/0.36)] motion-reduce:data-[state=closed]:animate-none motion-reduce:data-closed:animate-none motion-reduce:data-[state=open]:animate-none motion-reduce:data-open:animate-none",
   {
     variants: {
       variant: {
         centered:
-          "w-[min(100%_-_32px,440px)] gap-4 rounded-[14px] p-5 duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-[state=open]:zoom-in-96",
+          "w-[min(100%_-_32px,440px)] gap-4 rounded-[14px] p-5 duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-closed:zoom-out-96 data-[state=open]:zoom-in-96 data-open:zoom-in-96",
         sheet:
-          "top-auto bottom-0 w-[min(100%,560px)] max-w-full translate-y-0 gap-4 rounded-t-3xl rounded-b-none px-5 pt-5 pb-6 duration-300 ease-out-quint data-[state=closed]:duration-200 data-[size=default]:sm:max-w-[560px] data-[state=closed]:slide-out-to-bottom-[24px] data-[state=open]:slide-in-from-bottom-[24px] data-[state=closed]:[--tw-exit-scale:1]! data-[state=open]:[--tw-enter-scale:1]!",
+          "top-auto bottom-0 w-[min(100%,560px)] max-w-full translate-y-0 gap-4 rounded-t-3xl rounded-b-none px-5 pt-5 pb-6 duration-300 ease-out-quint data-[state=closed]:duration-200 data-closed:duration-200 data-[size=default]:sm:max-w-[560px] data-[state=closed]:slide-out-to-bottom-[24px] data-closed:slide-out-to-bottom-[24px] data-[state=open]:slide-in-from-bottom-[24px] data-open:slide-in-from-bottom-[24px] data-[state=closed]:[--tw-exit-scale:1]! data-closed:[--tw-exit-scale:1]! data-[state=open]:[--tw-enter-scale:1]! data-open:[--tw-enter-scale:1]!",
         compact:
-          "w-[min(100%_-_32px,360px)] gap-3 rounded-xl p-4 duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-[state=open]:zoom-in-96",
+          "w-[min(100%_-_32px,360px)] gap-3 rounded-xl p-4 duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-closed:zoom-out-96 data-[state=open]:zoom-in-96 data-open:zoom-in-96",
       },
     },
   },
@@ -153,38 +153,35 @@ export function ConfirmationDialogTrigger({
 
 export function ConfirmationDialogContent({
   className,
-  onOpenAutoFocus,
-  onCloseAutoFocus,
+  children,
   ...props
 }: Omit<ComponentProps<typeof AlertDialogContent>, "size">) {
   const context = useConfirmation("ConfirmationDialogContent");
-  const returnRef = useRef<HTMLElement | null>(null);
-  const { cancelRef, triggerRef } = context;
   return (
     <AlertDialogContent
       data-slot="confirmation-dialog-content"
       className={cn(dialogVariants({ variant: context.variant }), className)}
       {...props}
       data-variant={context.variant}
-      onOpenAutoFocus={(event) => {
-        const active = document.activeElement;
-        returnRef.current =
-          active instanceof HTMLElement && active !== document.body ? active : triggerRef.current;
-        onOpenAutoFocus?.(event);
-        if (event.defaultPrevented) return;
-        event.preventDefault();
-        const content = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
-        const preferred = content?.querySelector<HTMLElement>("[autofocus], [data-autofocus]");
-        (preferred ?? cancelRef.current)?.focus();
-      }}
-      onCloseAutoFocus={(event) => {
-        onCloseAutoFocus?.(event);
-        if (event.defaultPrevented) return;
-        event.preventDefault();
-        (returnRef.current ?? triggerRef.current)?.focus();
-      }}
-    />
+    >
+      {children}
+      <InitialFocus fallback={context.cancelRef} />
+    </AlertDialogContent>
   );
+}
+
+/**
+ * Moves focus into the dialog as it mounts: an element marked `autofocus` or `data-autofocus`,
+ * else the cancel button. It runs before the primitive's own initial focus, which Radix and Base UI
+ * both skip when focus is already inside, so neither needs primitive-specific props.
+ */
+function InitialFocus({ fallback }: { fallback: React.RefObject<HTMLElement | null> }) {
+  useLayoutEffect(() => {
+    const content = fallback.current?.closest<HTMLElement>("[role=dialog], [role=alertdialog]");
+    const preferred = content?.querySelector<HTMLElement>("[autofocus], [data-autofocus]");
+    (preferred ?? fallback.current)?.focus();
+  }, [fallback]);
+  return null;
 }
 
 export function ConfirmationDialogTitle({ className, ...props }: ComponentProps<"h2">) {

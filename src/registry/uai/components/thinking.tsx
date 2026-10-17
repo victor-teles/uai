@@ -18,10 +18,11 @@ import {
   createContext,
   type ReactNode,
   useContext,
+  useId,
   useState,
 } from "react";
 
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/uai-utils";
 
 export const THINKING_VARIANTS = ["card", "inline", "compact"] as const;
@@ -61,6 +62,7 @@ const statusDetails: Record<
 };
 
 type ThinkingContextValue = {
+  contentId: string;
   variant: ThinkingVariant;
   status: ThinkingStatus;
   open: boolean;
@@ -104,9 +106,10 @@ export function Thinking({
   ...props
 }: ThinkingProps) {
   const [open, setOpen] = useState(defaultOpen);
+  const contentId = `${useId()}-content`;
 
   return (
-    <ThinkingContext.Provider value={{ variant, status, open }}>
+    <ThinkingContext.Provider value={{ contentId, variant, status, open }}>
       <Collapsible asChild open={open} onOpenChange={setOpen}>
         <section
           data-slot="thinking"
@@ -151,6 +154,7 @@ export function ThinkingTrigger({
         className,
       )}
       {...props}
+      aria-controls={context.contentId}
     >
       <span
         className={cn(
@@ -249,9 +253,10 @@ export function ThinkingContent({
       )}
     >
       <div className="min-h-0 overflow-hidden">
-        <CollapsibleContent
+        {/* Always mounted: the outer grid animates the height, so the region never unmounts. */}
+        <div
           data-slot="thinking-content"
-          forceMount
+          data-state={context.open ? "open" : "closed"}
           className={cn(
             "border-t px-3.5 pt-1 pb-1.5",
             context.variant === "inline" && "ml-[18px] border-t-0 border-l pl-3 pr-2",
@@ -259,6 +264,7 @@ export function ThinkingContent({
             className,
           )}
           {...props}
+          id={context.contentId}
         >
           {hasActivity ? (
             <div role="log" aria-live="polite" aria-relevant="additions text">
@@ -269,7 +275,7 @@ export function ThinkingContent({
               {emptyLabel ?? getEmptyLabel(context.status)}
             </p>
           )}
-        </CollapsibleContent>
+        </div>
       </div>
     </div>
   );

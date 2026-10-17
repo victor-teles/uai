@@ -12,7 +12,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { toggleVariants } from "@/components/ui/toggle";
 import { AuthorCard, type AuthorCardProps } from "@/components/ui/uai/author-card";
 import {
   ShareMenu,
@@ -20,6 +20,12 @@ import {
   type ShareMenuVariant,
 } from "@/components/ui/uai/share-menu";
 import { cn } from "@/lib/uai-utils";
+
+/**
+ * Single-choice segments are plain radio buttons styled like ToggleGroupItem: ToggleGroup's value
+ * is a string on Radix but an array on Base UI, so the group's selection stays in uai state.
+ */
+const segmentClass = "w-auto min-w-0 shrink-0 px-3 focus:z-10 focus-visible:z-10";
 
 export const ARTICLE_PAGE_VARIANTS = ["centered", "sidebar", "compact"] as const;
 export type ArticlePageVariant = (typeof ARTICLE_PAGE_VARIANTS)[number];
@@ -243,7 +249,7 @@ export function ArticlePageTextSizeControl({
   children,
   ...props
 }: ArticlePageTextSizeControlProps) {
-  const { variant, textSize, setTextSize } = useArticle("ArticlePageTextSizeControl");
+  const { variant, textSize } = useArticle("ArticlePageTextSizeControl");
   const ref = useRef<HTMLDivElement>(null);
   const [thumb, setThumb] = useState<{ x: number; y: number; width: number; height: number }>();
   useIsomorphicLayoutEffect(() => {
@@ -266,14 +272,7 @@ export function ArticlePageTextSizeControl({
     return () => observer.disconnect();
   }, [textSize]);
   return (
-    <ToggleGroup
-      type="single"
-      rovingFocus={false}
-      spacing={0.5}
-      value={textSize}
-      onValueChange={(next) => {
-        if (next) setTextSize(next as ArticlePageTextSize);
-      }}
+    <div
       role="radiogroup"
       aria-label={label}
       data-slot="article-page-text-size-control"
@@ -302,14 +301,11 @@ export function ArticlePageTextSizeControl({
         }}
       />
       {children}
-    </ToggleGroup>
+    </div>
   );
 }
 
-export type ArticlePageTextSizeOptionProps = Omit<
-  ComponentProps<typeof ToggleGroupItem>,
-  "value"
-> & {
+export type ArticlePageTextSizeOptionProps = Omit<ComponentProps<"button">, "value"> & {
   value: ArticlePageTextSize;
 };
 
@@ -321,6 +317,7 @@ const optionTextSize: Record<ArticlePageTextSize, string> = {
 
 export function ArticlePageTextSizeOption({
   value,
+  onClick,
   className,
   ...props
 }: ArticlePageTextSizeOptionProps) {
@@ -328,9 +325,16 @@ export function ArticlePageTextSizeOption({
   const checked = context.textSize === value;
   const compact = context.variant === "compact";
   return (
-    <ToggleGroupItem
+    // biome-ignore lint/a11y/useSemanticElements: a segment button in a radio group; ToggleGroupItem renders the same role="radio" button.
+    <button
+      type="button"
+      role="radio"
+      aria-checked={checked}
       data-slot="article-page-text-size-option"
+      data-state={checked ? "on" : "off"}
       className={cn(
+        toggleVariants(),
+        segmentClass,
         "grid cursor-pointer place-items-center rounded-full border-0 px-1.5 font-medium",
         "transition-[color,scale] duration-[120ms,140ms] ease-[ease-out,cubic-bezier(0.23,1,0.32,1)]",
         "focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring focus-visible:outline-solid active:scale-94",
@@ -343,8 +347,11 @@ export function ArticlePageTextSizeOption({
         className,
       )}
       {...props}
-      value={value}
       tabIndex={checked ? 0 : -1}
+      onClick={(event) => {
+        onClick?.(event);
+        if (!event.defaultPrevented) context.setTextSize(value);
+      }}
     />
   );
 }

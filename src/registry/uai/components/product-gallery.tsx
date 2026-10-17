@@ -88,7 +88,7 @@ function useScrollEdges(ref: RefObject<HTMLElement | null>) {
   return edges;
 }
 const controlClass =
-  "grid size-7 min-w-0 cursor-pointer place-items-center rounded-full border-0 bg-card/84 p-0 text-muted-foreground shadow-[0_0_0_1px_var(--border),0_1px_2px_oklch(0_0_0/0.08)] backdrop-blur-sm transition-[background-color,color,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] hover:bg-accent hover:text-accent-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.94] aria-pressed:bg-accent aria-pressed:text-accent-foreground data-[state=on]:bg-accent data-[state=on]:text-accent-foreground motion-reduce:transition-none motion-reduce:active:scale-100 dark:hover:bg-accent [&_svg:not([class*='size-'])]:size-3.5";
+  "grid size-7 min-w-0 cursor-pointer place-items-center rounded-full border-0 bg-card/84 p-0 text-muted-foreground shadow-[0_0_0_1px_var(--border),0_1px_2px_oklch(0_0_0/0.08)] backdrop-blur-sm transition-[background-color,color,scale] duration-[120ms,120ms,140ms] ease-[ease-out,ease-out,cubic-bezier(0.23,1,0.32,1)] hover:bg-accent hover:text-accent-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.94] aria-pressed:bg-accent aria-pressed:text-accent-foreground data-[state=on]:bg-accent data-pressed:bg-accent data-[state=on]:text-accent-foreground data-pressed:text-accent-foreground motion-reduce:transition-none motion-reduce:active:scale-100 dark:hover:bg-accent [&_svg:not([class*='size-'])]:size-3.5";
 
 const productGalleryVariants = cva(
   "grid min-w-0 grid-cols-[minmax(0,1fr)] text-[13px]/[18px] text-foreground [grid-template-areas:'view'_'thumbs']",
@@ -203,7 +203,11 @@ export function ProductGalleryViewport({ children, className, ...props }: Compon
   );
 }
 
-export function ProductGalleryZoom({ onClick, className, ...props }: ComponentProps<"button">) {
+export function ProductGalleryZoom({
+  onClick,
+  className,
+  ...props
+}: Omit<ComponentProps<"button">, "value">) {
   const context = useGallery("ProductGalleryZoom");
   return (
     <Toggle
@@ -223,6 +227,18 @@ export function ProductGalleryZoom({ onClick, className, ...props }: ComponentPr
       )}
     </Toggle>
   );
+}
+
+/**
+ * Moves focus to the close button as the fullscreen view mounts. It runs before the primitive's
+ * own initial focus, which Radix and Base UI both skip when focus is already inside, so neither
+ * needs primitive-specific props.
+ */
+function InitialFocus({ fallback }: { fallback: React.RefObject<HTMLElement | null> }) {
+  useLayoutEffect(() => {
+    fallback.current?.focus();
+  }, [fallback]);
+  return null;
 }
 
 export function ProductGalleryFullscreen({
@@ -260,11 +276,7 @@ export function ProductGalleryFullscreen({
       <DialogContent
         showCloseButton={false}
         aria-describedby={undefined}
-        className="box-border block max-h-[calc(100%_-_32px)] w-[min(100%_-_32px,1040px)] max-w-full gap-0 rounded-[14px] border-0 bg-popover p-1 text-[13px]/[18px] text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_16px_40px_-12px_oklch(0_0_0/0.32)] duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-[state=open]:zoom-in-96 sm:max-w-full motion-reduce:data-[state=closed]:animate-none motion-reduce:data-[state=open]:animate-none"
-        onOpenAutoFocus={(event) => {
-          event.preventDefault();
-          closeRef.current?.focus();
-        }}
+        className="box-border block max-h-[calc(100%_-_32px)] w-[min(100%_-_32px,1040px)] max-w-full gap-0 rounded-[14px] border-0 bg-popover p-1 text-[13px]/[18px] text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_16px_40px_-12px_oklch(0_0_0/0.32)] duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-closed:zoom-out-96 data-[state=open]:zoom-in-96 data-open:zoom-in-96 sm:max-w-full motion-reduce:data-[state=closed]:animate-none motion-reduce:data-closed:animate-none motion-reduce:data-[state=open]:animate-none motion-reduce:data-open:animate-none"
         onKeyDown={handleKeyDown}
       >
         <DialogTitle className="sr-only">Fullscreen product images</DialogTitle>
@@ -325,6 +337,7 @@ export function ProductGalleryFullscreen({
             </div>
           </div>
         ) : null}
+        <InitialFocus fallback={closeRef} />
       </DialogContent>
     </Dialog>
   );

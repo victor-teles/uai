@@ -1008,7 +1008,7 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "button",
-        "toggle-group",
+        "toggle",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -1174,7 +1174,7 @@
       "title": "Pricing Toggle",
       "description": "Switch billing periods while keeping prices, billing context, and savings labels in sync.",
       "registryDependencies": [
-        "toggle-group",
+        "toggle",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -1500,7 +1500,7 @@
       "dependencies": ["class-variance-authority"],
       "registryDependencies": [
         "button",
-        "toggle-group",
+        "toggle",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
       ],
@@ -1606,7 +1606,7 @@
       "description": "Searchable questions with accessible disclosure answers.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "accordion",
+        "collapsible",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/search-field.json",
         "https://uaiblocks.vercel.app/r/uai-utils.json"
@@ -2238,7 +2238,7 @@
       "description": "Long-form reading with metadata, text size controls, sharing, and related articles.",
       "dependencies": ["class-variance-authority"],
       "registryDependencies": [
-        "toggle-group",
+        "toggle",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/author-card.json",
         "https://uaiblocks.vercel.app/r/share-menu.json",
@@ -2308,7 +2308,7 @@
       "registryDependencies": [
         "button",
         "textarea",
-        "toggle-group",
+        "toggle",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/comment.json",
         "https://uaiblocks.vercel.app/r/reaction-bar.json",
@@ -2331,7 +2331,7 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "button",
-        "toggle-group",
+        "toggle",
         "https://uaiblocks.vercel.app/r/uai-theme.json",
         "https://uaiblocks.vercel.app/r/author-card.json",
         "https://uaiblocks.vercel.app/r/empty-state.json",
