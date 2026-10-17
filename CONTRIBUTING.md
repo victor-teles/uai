@@ -55,9 +55,11 @@ CI runs all of these on every pull request and on `main`:
 | `bun run build` | Rebuilds the registry and the production site. |
 | `bun run test:e2e` | Every `/components/<id>` page in light and dark, desktop and mobile: a screenshot, axe (serious and critical findings fail), a reduced-motion pass, and the premium rubric's live checks (`e2e/premium.e2e.ts`, desktop). Needs `bun run build` first. |
 
-Screenshots and the HTML report land in `e2e-artifacts/` locally and as the
-`browser-desktop` and `browser-mobile` artifacts in CI. Review them for the
-component you changed, in both themes and on mobile.
+Screenshots and the HTML report land in `e2e-artifacts/` locally. CI splits the
+browser checks into shards (four desktop, two mobile), and each shard uploads its
+own `browser-<project>-<n>of<total>` artifact with the screenshots and report for
+the tests it ran. Review them for the component you changed, in both themes and
+on mobile.
 
 ### Baselines
 
