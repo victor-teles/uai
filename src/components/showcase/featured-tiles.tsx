@@ -455,8 +455,9 @@ function KanbanDemo({ t, narrow, playing }: { t: number; narrow: boolean; playin
     <div ref={root}>
       <KanbanBoard
         variant={narrow ? "compact" : "board"}
-        // Phones: the two columns share the tile's real width, unzoomed.
-        className={narrow ? "auto-cols-[minmax(0,1fr)]" : undefined}
+        // Phones: the two columns share the tile's real width, unzoomed, and keep the height
+        // they start with, so the board doesn't shrink under the card as it lands.
+        className={narrow ? "min-h-[250px] auto-cols-[minmax(0,1fr)]" : undefined}
         value={Object.fromEntries(columns.map((column) => [column, value[column] ?? []]))}
         onValueChange={(next) => setValue((current) => ({ ...current, ...next }))}
       >
