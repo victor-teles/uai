@@ -3,11 +3,13 @@ import { expect, type Page, test } from "@playwright/test";
 import { THEMES, useTheme } from "./helpers";
 
 /**
- * The overview page: the hero copy stays as written, and "Best of Uai" shows eight live
- * tiles (uai-design/showcase/final/SPEC.md §B). The demos are decorative: each specimen is
+ * The overview page: the hero copy stays as written, a live scene runs one request through
+ * four components (SPEC §C), and "Best of Uai" shows eight live tiles
+ * (uai-design/showcase/final/SPEC.md §B). The demos are decorative: each specimen is
  * `aria-hidden` and `inert` at all times, so the tile link is the only tab stop.
  */
 const FEATURED = ".uai-featured";
+const SCENE = ".uai-scene";
 const TILES = [
   "prompt-composer",
   "thinking",
@@ -297,6 +299,8 @@ test("fits a 390px screen in one column", async ({ page }) => {
     .locator(".uai-feature")
     .evaluateAll((items) => items.map((item) => Math.round(item.getBoundingClientRect().left)));
   expect(new Set(lefts).size).toBe(1);
+  // The scene drops to one lane.
+  await expect(page.locator(SCENE)).toHaveAttribute("data-compact", "true");
 });
 
 for (const theme of THEMES) {
@@ -328,6 +332,156 @@ for (const theme of THEMES) {
     ).toEqual([]);
   });
 }
+
+test.describe("live scene", () => {
+  test.skip(
+    ({ isMobile }) => isMobile,
+    "Scene timing is checked on desktop; 390px is checked below.",
+  );
+
+  /** Fake clock so the scene's rAF clock advances only when the test says so. */
+  async function openWithClock(page: Page) {
+    const start = new Date("2026-10-03T14:00:00-03:00");
+    await page.clock.install({ time: start });
+    await page.clock.pauseAt(new Date(start.getTime() + 1_000));
+    await openHome(page);
+    // The stage sits under the hero, already ≥ 50% in view; let the observer report it.
+    await page.locator(SCENE).scrollIntoViewIfNeeded();
+    await page.clock.runFor(50);
+  }
+  const scene = (page: Page) => page.locator(SCENE);
+  /** The in-view observer reports in real time; step the fake clock until the scene plays. */
+  async function startScene(page: Page) {
+    await expect
+      .poll(async () => {
+        await page.clock.runFor(50);
+        return scene(page).getAttribute("data-state");
+      })
+      .toBe("playing");
+  }
+  const approval = (page: Page) => scene(page).locator('[data-slot="approval-card"]');
+  const pix = (page: Page) => scene(page).locator('[data-slot="pix-payment"]');
+  const composer = (page: Page) => scene(page).locator('[data-slot="prompt-composer-input"]');
+
+  test("starts after 200ms in view, reaches approved and Pago, then rests with Replay", async ({
+    page,
+  }) => {
+    await openWithClock(page);
+    await expect(scene(page)).toHaveAttribute("data-state", "waiting");
+    await page.clock.runFor(100);
+    await expect(scene(page)).toHaveAttribute("data-state", "waiting");
+    await page.clock.runFor(200);
+    await expect(scene(page)).toHaveAttribute("data-state", "playing");
+
+    await page.clock.runFor(4_500);
+    await expect(approval(page)).toHaveAttribute("data-status", "ready");
+    await page.clock.runFor(2_300);
+    await expect(approval(page)).toHaveAttribute("data-status", "approved");
+    await expect(scene(page)).toHaveAttribute("data-chapter", "4");
+    await page.clock.runFor(1_700);
+    await expect(pix(page)).toHaveAttribute("data-status", "paid");
+    await expect(pix(page)).toContainText("Pago");
+
+    // Two cycles, then it rests on the approved and paid frame.
+    await page.clock.runFor(11_000);
+    await expect(scene(page)).toHaveAttribute("data-state", "resting");
+    await expect(page.getByRole("button", { name: "Replay the scene" })).toBeVisible();
+    await expect(approval(page)).toHaveAttribute("data-status", "approved");
+    await expect(pix(page)).toHaveAttribute("data-status", "paid");
+
+    await page.getByRole("button", { name: "Replay the scene" }).click();
+    await page.clock.runFor(100);
+    await expect(scene(page)).toHaveAttribute("data-state", "playing");
+    await expect(scene(page)).toHaveAttribute("data-chapter", "1");
+  });
+
+  test("the pause button freezes the frame and play resumes it", async ({ page }) => {
+    await openWithClock(page);
+    await startScene(page);
+    await page.clock.runFor(1_000);
+    await page.getByRole("button", { name: "Pause the scene" }).click();
+    await expect(scene(page)).toHaveAttribute("data-state", "paused");
+    const frozen = await composer(page).inputValue();
+    expect(frozen.length).toBeGreaterThan(0);
+    await page.clock.runFor(5_000);
+    expect(await composer(page).inputValue()).toBe(frozen);
+    await expect(scene(page)).toHaveAttribute("data-chapter", "1");
+
+    await page.getByRole("button", { name: "Play the scene" }).click();
+    await page.clock.runFor(2_000);
+    await expect(scene(page)).toHaveAttribute("data-chapter", "2");
+  });
+
+  test("keyboard focus and scrolling away hold the scene", async ({ page }) => {
+    await openWithClock(page);
+    await startScene(page);
+
+    await page.getByRole("button", { name: "Pause the scene" }).focus();
+    await expect(scene(page)).toHaveAttribute("data-state", "paused");
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await expect(scene(page)).toHaveAttribute("data-state", "playing");
+
+    await tile(page, "unsaved-changes-bar").evaluate((element) => element.scrollIntoView());
+    await page.clock.runFor(50);
+    await expect(scene(page)).toHaveAttribute("data-state", "paused");
+  });
+
+  test("a chapter click seeks", async ({ page }) => {
+    await openWithClock(page);
+    await startScene(page);
+    await scene(page).getByRole("button", { name: "3 Approve" }).click();
+    await page.clock.runFor(400);
+    await expect(scene(page)).toHaveAttribute("data-chapter", "3");
+    await expect(approval(page)).toBeAttached();
+  });
+
+  test("only the chapter pill and the play button take focus", async ({ page }) => {
+    await openHome(page);
+    const stops = await page.evaluate((root) => {
+      const scope = document.querySelector(root);
+      return [
+        ...(scope?.querySelectorAll<HTMLElement>(
+          "button, a, input, textarea, select, [tabindex]",
+        ) ?? []),
+      ]
+        .filter((element) => !element.closest("[inert]") && element.tabIndex >= 0)
+        .map((element) => element.getAttribute("aria-label") ?? element.textContent?.trim());
+    }, SCENE);
+    expect(stops).toEqual(["1 Prompt", "2 Think", "3 Approve", "4 Pay", "Pause the scene"]);
+    // Everything else is the inert, hidden world, with the story in an sr-only caption.
+    const world = scene(page).locator(".uai-scene__world");
+    await expect(world).toHaveAttribute("aria-hidden", "true");
+    expect(await world.evaluate((element) => (element as HTMLElement).inert)).toBe(true);
+    await expect(scene(page).locator("figcaption")).toContainText("charge order #4821");
+    // The capture hook from the prototype never ships.
+    expect(await page.evaluate(() => "__uaiScene" in window)).toBe(false);
+  });
+});
+
+test.describe("live scene with reduced motion", () => {
+  test.use({ reducedMotion: "reduce" });
+
+  test("shows the rest frame, switches chapter stills, and nothing moves", async ({ page }) => {
+    await openHome(page);
+    await page.waitForTimeout(500);
+    const scene = page.locator(SCENE);
+    await expect(scene).toHaveAttribute("data-state", "still");
+    expect(await movingIn(page, SCENE)).toEqual([]);
+    await expect(scene.locator('[data-slot="approval-card"]')).toHaveAttribute(
+      "data-status",
+      "approved",
+    );
+    await expect(scene.locator('[data-slot="pix-payment"]')).toHaveAttribute("data-status", "paid");
+    // Nothing moves, so there is nothing to pause.
+    await expect(page.getByRole("button", { name: /the scene$/ })).toHaveCount(0);
+
+    await scene.getByRole("button", { name: /Think$/ }).click();
+    await expect(scene).toHaveAttribute("data-chapter", "2");
+    await expect(scene.locator('[data-slot="approval-card"]')).toHaveCount(0);
+    await page.waitForTimeout(500);
+    expect(await movingIn(page, SCENE)).toEqual([]);
+  });
+});
 
 test.describe("kanban tile on a 390px phone", () => {
   test.use({ viewport: { width: 390, height: 844 } });

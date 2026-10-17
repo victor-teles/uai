@@ -3,8 +3,8 @@ import Link from "next/link";
 
 import { InstallCommand } from "@/components/install-command";
 import { FeaturedTiles } from "@/components/showcase/featured-tiles";
+import { LiveScene } from "@/components/showcase/live-scene";
 import { getRegistryItemKind, getRegistryPosition, registryGroups } from "./catalog";
-import { RegistryPreview } from "./registry-preview";
 
 export function RegistryOverview() {
   return (
@@ -23,7 +23,7 @@ export function RegistryOverview() {
         <InstallCommand item="prompt-composer" />
       </header>
 
-      <RegistryPreview itemId="prompt-composer" />
+      <LiveScene />
 
       <FeaturedTiles />
 

@@ -434,7 +434,9 @@ Component pages are a workbench that fills the viewport like an editor: the work
 - **Inspector:** The header (eyebrow, title, description), then Install (with an "Install manually" link that jumps to the dock panel), Anatomy (Composes for blocks), and Accessibility sections, and the previous/next pager at the bottom.
 - **Resizing:** The sidebar (200–420px), the inspector (260–560px), and the dock (120–960px, always leaving 200px of canvas) resize from handles on their edges. Sizes persist per browser.
 
-The overview and Theming pages use a 1040px document column with 48px top padding: the overview intro, a live Prompt Composer showcase, "Best of Uai", and a grid of cards for every item, grouped by category.
+The overview and Theming pages use a 1040px document column with 48px top padding: the overview intro, a live scene, "Best of Uai", and a grid of cards for every item, grouped by category.
+
+The live scene ("One request, whole product") runs one request through four real components on a 600px ruled stage: Prompt Composer types "Charge order #4821 to Casa Aroeira with Pix" and sends, Thinking logs the lookup, Approval Card asks before the charge, and Pix Payment shows the QR code until it is paid, in a 10s cycle. The agent lane (400px) slides left in 300ms when the 360px checkout lane arrives; below a 760px stage there is one lane and checkout replaces the agent cards. Cards grow their row with grid rows in 300ms and pop in from 0.96 in 180ms; everything exits in 160ms. No single animation runs longer than 300ms. It starts after the stage has been at least 50% visible for 200ms, plays two cycles, and rests on the approved and paid frame with a Replay button. It pauses off screen, on a hidden tab, with its Pause button (WCAG 2.2.2), and while keyboard focus is inside it. A chapter pill (Prompt, Think, Approve, Pay) seeks. The components are `aria-hidden` and `inert`; an sr-only caption tells the story. With reduced motion it shows the rest frame, the pill switches between chapter stills, and there is no Pause button.
 
 "Best of Uai" is eight featured tiles in a two-column bento (one column at 760px and below); Agent Run and Kanban Board span the row. Each tile is a ruled specimen of the real component above an icon, catalog number, name, category, and the one-line catalog description. The name is a stretched link to `/components/<id>` and the tile's only tab stop; the specimen is `aria-hidden` and `inert`, so nothing in a demo can take focus. A tile plays its signature interaction once when at least 60% of it is on screen, at most two at a time, pauses off screen or on a hidden tab, and rests on its final frame. Hover (fine pointers) or keyboard focus replays it after a 300ms dwell. Tiles fade up 6px in 240ms with a 40ms stagger capped at the sixth; hover raises the background, rings it with the strong border in 120ms, and steps the crop marks out 4px in 160ms; focus draws a 2px signal-ink outline; press scales the tile to 0.99 in 140ms. With reduced motion, every tile renders its final frame and nothing moves.
 
@@ -942,7 +944,7 @@ step without owning data detection, navigation, dialogs, or persistence.
 
 ### Don't:
 
-- **Don't** turn the overview into a marketing page; it is an index with one live specimen and a featured grid of real components, never mockups or new marketing copy.
+- **Don't** turn the overview into a marketing page; it is an index with one live scene and a featured grid of real components, never mockups or new marketing copy.
 - **Don't** add gradients, decorative illustrations, or large ambient shadows.
 - **Don't** use weight 700, uppercase tracked labels, or bordered secondary buttons.
 - **Don't** use fictional registry inventory to create density.
