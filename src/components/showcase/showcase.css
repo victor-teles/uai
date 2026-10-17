@@ -1,3 +1,186 @@
+/* ---------- Live scene (home) ---------- */
+.uai-scene {
+  margin: 0;
+}
+
+.uai-scene__stage {
+  --uai-grid-line: color-mix(in oklab, var(--uai-border) 55%, transparent);
+  position: relative;
+  min-height: 600px;
+  overflow: hidden;
+  border-radius: 14px;
+  background-color: var(--uai-stage);
+  background-image:
+    linear-gradient(var(--uai-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--uai-grid-line) 1px, transparent 1px);
+  background-position: -1px -1px;
+  background-size: 24px 24px;
+  box-shadow: inset 0 0 0 1px var(--uai-border);
+}
+
+.uai-scene__label {
+  position: absolute;
+  top: 24px;
+  left: 34px;
+  z-index: 1;
+  margin: 0;
+  color: var(--uai-subtle);
+  font-family: var(--uai-mono);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.uai-scene__label--right {
+  right: 34px;
+  left: auto;
+  opacity: 0;
+  transition: opacity 200ms var(--uai-ease-out);
+}
+
+.uai-scene__label--right[data-show] {
+  opacity: 1;
+}
+
+.uai-scene__world {
+  position: absolute;
+  inset: 52px 24px 76px;
+  display: flex;
+  justify-content: center;
+}
+
+.uai-scene__row {
+  --lane: 400px;
+  --pix: 360px;
+  --gap: 48px;
+  display: grid;
+  grid-template-columns: var(--lane) var(--pix);
+  gap: var(--gap);
+  /* Chapters 1–3 centre the agent lane; chapter 4 slides it left to make room for checkout. */
+  translate: calc((var(--pix) + var(--gap)) / 2) 0;
+  transition: translate 300ms var(--uai-ease-out);
+}
+
+.uai-scene__row[data-shifted] {
+  translate: 0 0;
+}
+
+.uai-scene__lane {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.uai-scene__lane--pix {
+  justify-content: center;
+}
+
+.uai-scene__beat {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 300ms var(--uai-ease-out);
+}
+
+.uai-scene__beat[data-show] {
+  grid-template-rows: 1fr;
+}
+
+.uai-scene__beat-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.uai-scene__pop {
+  padding-bottom: 12px;
+  transform-origin: 50% 100%;
+  animation: uai-scene-pop 180ms var(--uai-ease-pop) 60ms both;
+}
+
+.uai-scene__beat--pix .uai-scene__pop {
+  padding-bottom: 0;
+  transform-origin: 50% 50%;
+}
+
+.uai-scene__beat[data-leaving] .uai-scene__pop {
+  opacity: 0;
+  scale: 0.98;
+  transition:
+    opacity 160ms var(--uai-ease-out),
+    scale 160ms var(--uai-ease-out);
+}
+
+@keyframes uai-scene-pop {
+  from {
+    opacity: 0;
+    scale: 0.96;
+  }
+}
+
+.uai-scene__composer {
+  position: relative;
+  z-index: 1;
+}
+
+.uai-scene__controls {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  translate: -50% 0;
+}
+
+.uai-scene__controls .uai-segmented,
+.uai-scene__toggle {
+  background: color-mix(in oklab, var(--uai-surface) 88%, transparent);
+  box-shadow:
+    0 0 0 1px var(--uai-border-strong),
+    0 10px 28px color-mix(in oklab, black 28%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+.uai-scene__controls .uai-segmented {
+  padding: 3px;
+}
+
+.uai-scene__controls .uai-segmented button {
+  height: 26px;
+  padding: 0 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.uai-scene__toggle {
+  width: 32px;
+  height: 32px;
+}
+
+.uai-scene__toggle svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Narrow stages: one lane; checkout replaces the agent cards. */
+.uai-scene[data-compact] .uai-scene__stage {
+  min-height: 600px;
+}
+
+.uai-scene[data-compact] .uai-scene__world {
+  inset: 48px 16px 72px;
+}
+
+.uai-scene[data-compact] .uai-scene__row {
+  width: 100%;
+  max-width: 400px;
+  grid-template-columns: minmax(0, 1fr);
+  translate: none;
+}
+
+.uai-scene[data-compact] .uai-scene__label {
+  left: 26px;
+}
+
 /* ---------- Best of Uai (home) ---------- */
 .uai-featured__grid {
   display: grid;
@@ -278,6 +461,16 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .uai-scene__row,
+  .uai-scene__beat,
+  .uai-scene__label--right {
+    transition: none;
+  }
+
+  .uai-scene__pop {
+    animation: none;
+  }
+
   .uai-feature {
     animation: none;
     transition:
