@@ -4,10 +4,12 @@ import { cva } from "class-variance-authority";
 import {
   type ComponentProps,
   createContext,
+  type ReactNode,
   useCallback,
   useContext,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useState,
 } from "react";
@@ -31,6 +33,33 @@ import {
   type FilterBarVariant,
 } from "@/components/ui/uai/filter-bar";
 import { cn } from "@/lib/uai-utils";
+
+const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
+
+type RegisterOptionLabel = (value: string, label: ReactNode) => () => void;
+
+/**
+ * Base UI's SelectValue prints the raw value unless it knows the label, and its items only mount
+ * while the list is open. Options render once more inside this context, outside the Select, to
+ * report their labels; Radix shows the same label either way.
+ */
+const OptionLabelsContext = createContext<RegisterOptionLabel | null>(null);
+
+function useOptionLabels() {
+  const [labels, setLabels] = useState<Record<string, ReactNode>>({});
+  const register = useCallback<RegisterOptionLabel>((value, label) => {
+    setLabels((current) => ({ ...current, [value]: label }));
+    return () => setLabels(({ [value]: _removed, ...rest }) => rest);
+  }, []);
+  return [labels, register] as const;
+}
+
+/** True inside the label collector, where an option only reports its label and renders nothing. */
+function useReportOptionLabel(value: string, label: ReactNode) {
+  const register = useContext(OptionLabelsContext);
+  useIsomorphicLayoutEffect(() => register?.(value, label), [register, value, label]);
+  return register !== null;
+}
 
 export const CHANGELOG_PAGE_VARIANTS = ["timeline", "cards", "compact"] as const;
 export type ChangelogPageVariant = (typeof CHANGELOG_PAGE_VARIANTS)[number];
@@ -229,7 +258,7 @@ const ALL_VALUE = "__uai-changelog-all__";
 const filterTriggerClass =
   "w-auto max-w-full cursor-pointer gap-1 rounded-full border-0 bg-secondary py-0 pr-2 pl-2.5 text-[12.5px]/[18px] font-medium text-secondary-foreground shadow-none transition-colors duration-120 ease-[ease-out] hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid motion-reduce:transition-none dark:bg-secondary dark:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] [&_svg]:size-3.5";
 const filterContentClass =
-  "min-w-36 rounded-[14px] border-0 bg-popover text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_12px_28px_-10px_oklch(0_0_0/0.32),0_2px_6px_-2px_oklch(0_0_0/0.12)] duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-[state=open]:zoom-in-96 data-[state=open]:[--tw-enter-translate-x:0]! data-[state=open]:[--tw-enter-translate-y:0]! motion-reduce:data-[state=closed]:animate-none motion-reduce:data-[state=open]:animate-none";
+  "min-w-36 rounded-[14px] border-0 bg-popover text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_12px_28px_-10px_oklch(0_0_0/0.32),0_2px_6px_-2px_oklch(0_0_0/0.12)] duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-closed:zoom-out-96 data-[state=open]:zoom-in-96 data-open:zoom-in-96 data-[state=open]:[--tw-enter-translate-x:0]! data-open:[--tw-enter-translate-x:0]! data-[state=open]:[--tw-enter-translate-y:0]! data-open:[--tw-enter-translate-y:0]! motion-reduce:data-[state=closed]:animate-none motion-reduce:data-closed:animate-none motion-reduce:data-[state=open]:animate-none motion-reduce:data-open:animate-none";
 
 /**
  * A labelled select bound to one page filter. Compose ChangelogPageFilterOption items inside;
@@ -245,6 +274,8 @@ export function ChangelogPageFilter({
   const context = usePage("ChangelogPageFilter");
   const id = useId();
   const compact = context.variant === "compact";
+  const [labels, registerLabel] = useOptionLabels();
+  const selected = context.filters[name] || ALL_VALUE;
   return (
     <span className="inline-flex min-w-0 items-center gap-2">
       <Label
@@ -255,8 +286,10 @@ export function ChangelogPageFilter({
       </Label>
       <Select
         name={name}
-        value={context.filters[name] || ALL_VALUE}
-        onValueChange={(next) => context.setFilter(name, next === ALL_VALUE ? "" : next)}
+        value={selected}
+        onValueChange={(next: string | null) => {
+          if (next !== null) context.setFilter(name, next === ALL_VALUE ? "" : next);
+        }}
       >
         <SelectTrigger
           data-slot="changelog-page-filter"
@@ -268,12 +301,11 @@ export function ChangelogPageFilter({
           {...props}
           id={id}
         >
-          <SelectValue />
+          <SelectValue>{labels[selected]}</SelectValue>
         </SelectTrigger>
-        <SelectContent position="popper" className={filterContentClass}>
-          {children}
-        </SelectContent>
+        <SelectContent className={filterContentClass}>{children}</SelectContent>
       </Select>
+      <OptionLabelsContext.Provider value={registerLabel}>{children}</OptionLabelsContext.Provider>
     </span>
   );
 }
@@ -290,6 +322,8 @@ export function ChangelogPageFilterOption({
   ...props
 }: ChangelogPageFilterOptionProps) {
   const context = usePage("ChangelogPageFilterOption");
+  const collecting = useReportOptionLabel(value === "" ? ALL_VALUE : value, props.children);
+  if (collecting) return null;
   return (
     <SelectItem
       data-slot="changelog-page-filter-option"

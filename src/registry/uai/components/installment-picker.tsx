@@ -144,13 +144,13 @@ export function InstallmentPickerOptions({ className, ...props }: InstallmentPic
 }
 
 const optionVariants = cva(
-  "group/option relative flex min-w-0 cursor-pointer items-center transition-[background-color,box-shadow] duration-[120ms] ease-out has-data-[state=checked]:bg-accent has-disabled:cursor-not-allowed has-disabled:opacity-55 has-focus-visible:outline-2 has-focus-visible:-outline-offset-2 has-focus-visible:outline-ring motion-reduce:transition-none",
+  "group/option relative flex min-w-0 cursor-pointer items-center transition-[background-color,box-shadow] duration-[120ms] ease-out has-data-[state=checked]:bg-accent has-data-checked:bg-accent has-disabled:cursor-not-allowed has-disabled:opacity-55 has-focus-visible:outline-2 has-focus-visible:-outline-offset-2 has-focus-visible:outline-ring motion-reduce:transition-none",
   {
     variants: {
       variant: {
         list: "gap-3 px-3.5 py-3 hover:bg-accent/60",
         tiles:
-          "flex-col items-start gap-1 rounded-xl bg-card p-3 shadow-[inset_0_0_0_1px_var(--border)] hover:shadow-[inset_0_0_0_1px_var(--border-strong)] has-data-[state=checked]:shadow-[inset_0_0_0_1px_var(--foreground)]",
+          "flex-col items-start gap-1 rounded-xl bg-card p-3 shadow-[inset_0_0_0_1px_var(--border)] hover:shadow-[inset_0_0_0_1px_var(--border-strong)] has-data-[state=checked]:shadow-[inset_0_0_0_1px_var(--foreground)] has-data-checked:shadow-[inset_0_0_0_1px_var(--foreground)]",
         compact: "gap-2.5 rounded-[10px] px-2.5 py-1.5 hover:bg-accent/60",
       },
     },
@@ -185,7 +185,7 @@ export function InstallmentPickerOption({
         disabled={context.disabled || disabled}
         aria-labelledby={contentId}
         className={cn(
-          "size-4 border-0 bg-transparent shadow-[inset_0_0_0_1.5px_var(--border-strong)] transition-[background-color,box-shadow] duration-[140ms] ease-out-quint focus-visible:ring-0 data-[state=checked]:bg-primary data-[state=checked]:shadow-none disabled:opacity-100 motion-reduce:transition-none dark:bg-transparent dark:data-[state=checked]:bg-primary [&_svg]:size-1.5 [&_svg]:fill-primary-foreground [&_svg]:stroke-0 [&_svg]:animate-in [&_svg]:zoom-in-0 [&_svg]:duration-150 [&_svg]:ease-out-quint motion-reduce:[&_svg]:animate-none",
+          "size-4 border-0 bg-transparent shadow-[inset_0_0_0_1.5px_var(--border-strong)] transition-[background-color,box-shadow] duration-[140ms] ease-out-quint focus-visible:ring-0 data-[state=checked]:bg-primary data-checked:bg-primary data-[state=checked]:shadow-none data-checked:shadow-none disabled:opacity-100 motion-reduce:transition-none dark:bg-transparent dark:data-[state=checked]:bg-primary dark:data-checked:bg-primary [&_svg]:size-1.5 [&_svg]:fill-primary-foreground [&_svg]:stroke-0 [&_svg]:animate-in [&_svg]:zoom-in-0 [&_svg]:duration-150 [&_svg]:ease-out-quint motion-reduce:[&_svg]:animate-none",
           context.variant === "tiles" && "absolute top-3 right-3",
           context.variant === "compact" && "size-3.5",
         )}

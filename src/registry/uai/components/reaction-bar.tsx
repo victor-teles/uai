@@ -59,7 +59,7 @@ const reactionBarVariants = cva(
 );
 
 const reactionBarItemVariants = cva(
-  `group/reaction-item inline-flex min-w-0 cursor-pointer items-center rounded-full border-0 bg-secondary font-medium text-muted-foreground tabular-nums shadow-none ${transitionChip} enabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] enabled:hover:text-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.94] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:enabled:active:scale-100 data-[state=on]:bg-primary/14 data-[state=on]:text-primary-ink data-[state=on]:shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_42%,transparent)] data-[state=on]:enabled:hover:bg-primary/20 data-[state=on]:enabled:hover:text-primary-ink data-[state=on]:enabled:hover:shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_55%,transparent)]`,
+  `group/reaction-item inline-flex min-w-0 cursor-pointer items-center rounded-full border-0 bg-secondary font-medium text-muted-foreground tabular-nums shadow-none ${transitionChip} enabled:hover:bg-[color-mix(in_oklab,var(--secondary)_85%,var(--foreground))] enabled:hover:text-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring enabled:active:scale-[0.94] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:enabled:active:scale-100 data-[state=on]:bg-primary/14 data-pressed:bg-primary/14 data-[state=on]:text-primary-ink data-pressed:text-primary-ink data-[state=on]:shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_42%,transparent)] data-pressed:shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_42%,transparent)] data-[state=on]:enabled:hover:bg-primary/20 data-pressed:enabled:hover:bg-primary/20 data-[state=on]:enabled:hover:text-primary-ink data-pressed:enabled:hover:text-primary-ink data-[state=on]:enabled:hover:shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_55%,transparent)] data-pressed:enabled:hover:shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_55%,transparent)]`,
   {
     variants: {
       variant: {
@@ -198,12 +198,16 @@ export function ReactionBarPicker({
     event.preventDefault();
     menuItems(event.currentTarget).at(-1)?.focus();
   };
-  // The picker is a horizontal row, so Left/Right rove like Up/Down.
+  // The picker is a horizontal row, so Left/Right rove like Up/Down. Up/Down past either end
+  // wrap here too, because Radix menus only loop with a Radix-only prop (Base UI menus loop).
   const onMenuKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+    const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[event.key];
+    if (step === undefined) return;
     const items = menuItems(event.currentTarget);
     const index = items.indexOf(document.activeElement as HTMLElement);
-    const next = index + (event.key === "ArrowRight" ? 1 : -1);
+    const next = index + step;
+    const vertical = event.key === "ArrowDown" || event.key === "ArrowUp";
+    if (vertical && next >= 0 && next < items.length) return;
     event.preventDefault();
     items[(next + items.length) % items.length]?.focus();
   };
@@ -245,10 +249,9 @@ export function ReactionBarPicker({
             aria-label={label}
             align="start"
             sideOffset={6}
-            loop
             onKeyDown={onMenuKeyDown}
             onFocus={onMenuFocus}
-            className="z-20 flex min-w-0 gap-0.5 rounded-[14px] border-0 bg-popover p-1 text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_12px_28px_-10px_oklch(0_0_0/0.32),0_2px_6px_-2px_oklch(0_0_0/0.12)] duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-[state=open]:zoom-in-96 data-[state=open]:[--tw-enter-translate-x:0]! data-[state=open]:[--tw-enter-translate-y:0]! motion-reduce:data-[state=closed]:animate-none motion-reduce:data-[state=open]:animate-none"
+            className="z-20 flex min-w-0 gap-0.5 rounded-[14px] border-0 bg-popover p-1 text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_12px_28px_-10px_oklch(0_0_0/0.32),0_2px_6px_-2px_oklch(0_0_0/0.12)] duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-closed:zoom-out-96 data-[state=open]:zoom-in-96 data-open:zoom-in-96 data-[state=open]:[--tw-enter-translate-x:0]! data-open:[--tw-enter-translate-x:0]! data-[state=open]:[--tw-enter-translate-y:0]! data-open:[--tw-enter-translate-y:0]! motion-reduce:data-[state=closed]:animate-none motion-reduce:data-closed:animate-none motion-reduce:data-[state=open]:animate-none motion-reduce:data-open:animate-none"
           >
             {children}
           </DropdownMenuContent>

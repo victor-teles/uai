@@ -12,8 +12,14 @@ import {
   useRef,
   useState,
 } from "react";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { toggleVariants } from "@/components/ui/toggle";
 import { cn } from "@/lib/uai-utils";
+
+/**
+ * Single-choice segments are plain radio buttons styled like ToggleGroupItem: ToggleGroup's value
+ * is a string on Radix but an array on Base UI, so the group's selection stays in uai state.
+ */
+const segmentClass = "w-auto min-w-0 shrink-0 px-3 focus:z-10 focus-visible:z-10";
 
 export const PRICING_TOGGLE_VARIANTS = ["segmented", "pill", "compact"] as const;
 export type PricingToggleVariant = (typeof PRICING_TOGGLE_VARIANTS)[number];
@@ -62,7 +68,7 @@ const pricingToggleThumbVariants = cva(
   },
 );
 const pricingToggleOptionVariants = cva(
-  "inline-flex min-w-0 cursor-pointer items-center justify-start gap-1.5 border-0 bg-transparent font-medium whitespace-nowrap text-subtle-foreground [transition:color_120ms_ease-out,background-color_120ms_ease-out,transform_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring focus-visible:outline-solid active:[transform:scale(0.97)] aria-checked:text-foreground data-[state=on]:text-foreground motion-reduce:transition-none motion-reduce:active:[transform:none]",
+  "inline-flex min-w-0 cursor-pointer items-center justify-start gap-1.5 border-0 bg-transparent font-medium whitespace-nowrap text-subtle-foreground [transition:color_120ms_ease-out,background-color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.97] aria-checked:text-foreground data-[state=on]:text-foreground motion-reduce:transition-none motion-reduce:active:scale-100",
   {
     variants: {
       // The thumb paints the checked option once measured; until then the option paints itself.
@@ -153,7 +159,7 @@ export function PricingToggleList({
     observer.observe(list);
     return () => observer.disconnect();
   }, [context.value]);
-  // Radix roving focus is off: arrows move focus and selection together, as in an APG radio group.
+  // Arrows move focus and selection together, as in an APG radio group.
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     onKeyDown?.(event);
     const move = MOVES[event.key];
@@ -169,10 +175,7 @@ export function PricingToggleList({
     if (next?.dataset.value) context.select(next.dataset.value);
   };
   return (
-    <ToggleGroup
-      type="single"
-      rovingFocus={false}
-      spacing={0.5}
+    <div
       role="radiogroup"
       data-slot="pricing-toggle-list"
       className={cn(
@@ -182,11 +185,6 @@ export function PricingToggleList({
       )}
       {...props}
       ref={ref}
-      value={context.value}
-      // A single toggle group clears its value when the checked option is pressed again.
-      onValueChange={(next) => {
-        if (next) context.select(next);
-      }}
       data-ready={thumb ? "" : undefined}
       onKeyDown={handleKeyDown}
     >
@@ -201,12 +199,13 @@ export function PricingToggleList({
         }}
       />
       {children}
-    </ToggleGroup>
+    </div>
   );
 }
 
 export function PricingToggleOption({
   value,
+  onClick,
   children,
   className,
   ...props
@@ -214,17 +213,29 @@ export function PricingToggleOption({
   const context = usePricing("PricingToggleOption");
   const checked = context.value === value;
   return (
-    <ToggleGroupItem
+    // biome-ignore lint/a11y/useSemanticElements: a segment button in a radio group; ToggleGroupItem renders the same role="radio" button.
+    <button
+      role="radio"
+      aria-checked={checked}
       data-slot="pricing-toggle-option"
-      className={cn(pricingToggleOptionVariants({ variant: context.variant }), className)}
+      data-state={checked ? "on" : "off"}
+      className={cn(
+        toggleVariants(),
+        segmentClass,
+        pricingToggleOptionVariants({ variant: context.variant }),
+        className,
+      )}
       {...props}
       type="button"
-      value={value}
       data-value={value}
       tabIndex={checked || context.value === "" ? 0 : -1}
+      onClick={(event) => {
+        onClick?.(event);
+        if (!event.defaultPrevented) context.select(value);
+      }}
     >
       {children}
-    </ToggleGroupItem>
+    </button>
   );
 }
 

@@ -3,6 +3,7 @@
 import { cva } from "class-variance-authority";
 import {
   type ComponentProps,
+  type CSSProperties,
   createContext,
   type ReactNode,
   useContext,
@@ -450,8 +451,10 @@ export function SubscriptionManagementPlanOptions({
 
 export type SubscriptionManagementPlanOptionProps = Omit<
   ComponentProps<typeof RadioGroupItem>,
-  "value" | "children"
+  "value" | "children" | "style"
 > & {
+  /** Applied to the option's label, which carries the visible card. */
+  style?: CSSProperties;
   value: string;
   children: ReactNode;
   /** Text appended to the current plan, announced with its name. */
@@ -474,7 +477,7 @@ export function SubscriptionManagementPlanOption({
     <Label
       data-slot="subscription-management-plan-option"
       className={cn(
-        "relative grid min-w-0 cursor-pointer content-start items-stretch gap-1 bg-muted text-[length:inherit] leading-[inherit] font-normal select-auto transition-[background-color,box-shadow] duration-120 ease-[ease-out] hover:bg-[color-mix(in_oklab,var(--muted)_88%,var(--foreground))] has-[[role=radio]:focus-visible]:outline-2 has-[[role=radio]:focus-visible]:outline-offset-2 has-[[role=radio]:focus-visible]:outline-ring has-[[role=radio][data-state=checked]]:bg-[color-mix(in_oklab,var(--primary)_8%,var(--card))] has-[[role=radio][data-state=checked]]:shadow-[inset_0_0_0_1.5px_var(--primary)] has-[[role=radio]:disabled]:cursor-not-allowed has-[[role=radio]:disabled]:opacity-55 motion-reduce:transition-none",
+        "relative grid min-w-0 cursor-pointer content-start items-stretch gap-1 bg-muted text-[length:inherit] leading-[inherit] font-normal select-auto transition-[background-color,box-shadow] duration-120 ease-[ease-out] hover:bg-[color-mix(in_oklab,var(--muted)_88%,var(--foreground))] has-[[role=radio]:focus-visible]:outline-2 has-[[role=radio]:focus-visible]:outline-offset-2 has-[[role=radio]:focus-visible]:outline-ring has-[[role=radio][aria-checked=true]]:bg-[color-mix(in_oklab,var(--primary)_8%,var(--card))] has-[[role=radio][aria-checked=true]]:shadow-[inset_0_0_0_1.5px_var(--primary)] has-[[role=radio]:disabled]:cursor-not-allowed has-[[role=radio]:disabled]:opacity-55 motion-reduce:transition-none",
         variant === "compact" ? "rounded-lg p-2.5" : "rounded-[10px] p-3",
         className,
       )}

@@ -14,7 +14,7 @@ import {
 } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { toggleVariants } from "@/components/ui/toggle";
 import { Comment, type CommentProps, type CommentVariant } from "@/components/ui/uai/comment";
 import {
   ReactionBar,
@@ -22,6 +22,12 @@ import {
   type ReactionBarVariant,
 } from "@/components/ui/uai/reaction-bar";
 import { cn } from "@/lib/uai-utils";
+
+/**
+ * Single-choice segments are plain radio buttons styled like ToggleGroupItem: ToggleGroup's value
+ * is a string on Radix but an array on Base UI, so the group's selection stays in uai state.
+ */
+const segmentClass = "w-auto min-w-0 shrink-0 px-3 focus:z-10 focus-visible:z-10";
 
 export const COMMENT_THREAD_VARIANTS = ["threaded", "cards", "compact"] as const;
 export type CommentThreadVariant = (typeof COMMENT_THREAD_VARIANTS)[number];
@@ -153,7 +159,7 @@ export function CommentThreadSort({
   children,
   ...props
 }: CommentThreadSortProps) {
-  const { variant, sort, setSort } = useThread("CommentThreadSort");
+  const { variant, sort } = useThread("CommentThreadSort");
   const ref = useRef<HTMLDivElement>(null);
   const [thumb, setThumb] = useState<{ x: number; y: number; width: number; height: number }>();
   useIsomorphicLayoutEffect(() => {
@@ -176,14 +182,7 @@ export function CommentThreadSort({
     return () => observer.disconnect();
   }, [sort]);
   return (
-    <ToggleGroup
-      type="single"
-      rovingFocus={false}
-      spacing={0.5}
-      value={sort}
-      onValueChange={(next) => {
-        if (next) setSort(next);
-      }}
+    <div
       role="radiogroup"
       aria-label={label}
       data-slot="comment-thread-sort"
@@ -214,16 +213,17 @@ export function CommentThreadSort({
         />
       ) : null}
       {children}
-    </ToggleGroup>
+    </div>
   );
 }
 
-export type CommentThreadSortOptionProps = Omit<ComponentProps<typeof ToggleGroupItem>, "value"> & {
+export type CommentThreadSortOptionProps = Omit<ComponentProps<"button">, "value"> & {
   value: string;
 };
 
 export function CommentThreadSortOption({
   value,
+  onClick,
   className,
   ...props
 }: CommentThreadSortOptionProps) {
@@ -231,9 +231,16 @@ export function CommentThreadSortOption({
   const checked = context.sort === value;
   const compact = context.variant === "compact";
   return (
-    <ToggleGroupItem
+    // biome-ignore lint/a11y/useSemanticElements: a segment button in a radio group; ToggleGroupItem renders the same role="radio" button.
+    <button
+      type="button"
+      role="radio"
+      aria-checked={checked}
       data-slot="comment-thread-sort-option"
+      data-state={checked ? "on" : "off"}
       className={cn(
+        toggleVariants(),
+        segmentClass,
         "min-w-0 cursor-pointer rounded-full border-0 px-2.5 text-[12px] font-medium [transition:background-color_180ms_cubic-bezier(0.23,1,0.32,1),color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.96] motion-reduce:transition-none motion-reduce:active:scale-100",
         compact ? "h-5.5" : "h-6",
         checked
@@ -242,8 +249,11 @@ export function CommentThreadSortOption({
         className,
       )}
       {...props}
-      value={value}
       tabIndex={checked ? 0 : -1}
+      onClick={(event) => {
+        onClick?.(event);
+        if (!event.defaultPrevented) context.setSort(value);
+      }}
     />
   );
 }

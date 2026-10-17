@@ -4,6 +4,7 @@ import { cva } from "class-variance-authority";
 import {
   type ComponentProps,
   createContext,
+  type KeyboardEvent,
   useContext,
   useEffect,
   useId,
@@ -12,7 +13,7 @@ import {
   useState,
 } from "react";
 import { Button } from "@/components/ui/button";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { toggleVariants } from "@/components/ui/toggle";
 import { cn } from "@/lib/uai-utils";
 
 export const ROUTE_SUMMARY_VARIANTS = ["card", "plain", "compact"] as const;
@@ -66,8 +67,8 @@ export function RouteSummary({
 }
 
 export type RouteSummaryModesProps = Omit<
-  ComponentProps<typeof ToggleGroup>,
-  "type" | "value" | "defaultValue" | "onValueChange"
+  ComponentProps<"div">,
+  "value" | "defaultValue" | "onChange" | "dir"
 > & {
   value?: string;
   defaultValue?: string;
@@ -76,12 +77,50 @@ export type RouteSummaryModesProps = Omit<
 
 const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
+type ModesContextValue = { selected: string; select: (value: string) => void };
+const ModesContext = createContext<ModesContextValue | null>(null);
+
+function useModes(part: string) {
+  const context = useContext(ModesContext);
+  if (!context) throw new Error(`${part} must be used within RouteSummaryModes`);
+  return context;
+}
+
+/** Arrows move focus and selection together, as in an APG radio group. */
+function moveRadio(event: KeyboardEvent<HTMLElement>) {
+  const radios = Array.from(
+    event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="radio"]:not(:disabled)'),
+  );
+  const index = radios.indexOf(document.activeElement as HTMLButtonElement);
+  if (index === -1) return;
+  const next = {
+    ArrowRight: index + 1,
+    ArrowDown: index + 1,
+    ArrowLeft: index - 1,
+    ArrowUp: index - 1,
+    Home: 0,
+    End: radios.length - 1,
+  }[event.key];
+  if (next === undefined) return;
+  event.preventDefault();
+  const target = radios[(next + radios.length) % radios.length];
+  target?.focus();
+  target?.click();
+}
+
+/**
+ * Single-choice segments are plain radio buttons styled like ToggleGroupItem: ToggleGroup's value
+ * is a string on Radix but an array on Base UI, so the group's selection stays in uai state.
+ */
+const segmentClass = "w-auto min-w-0 shrink-0 px-3 focus:z-10 focus-visible:z-10";
+
 /** Travel modes. One is always selected; arrow keys move between them. */
 export function RouteSummaryModes({
   value,
   defaultValue = "",
   onValueChange,
   "aria-label": label = "Travel mode",
+  onKeyDown,
   className,
   children,
   ...props
@@ -89,6 +128,12 @@ export function RouteSummaryModes({
   useSummary("RouteSummaryModes");
   const [internal, setInternal] = useState(defaultValue);
   const selected = value ?? internal;
+  const select = (next: string) => {
+    // One mode always stays selected: pressing the selected mode again changes nothing.
+    if (next === selected) return;
+    if (value === undefined) setInternal(next);
+    onValueChange?.(next);
+  };
   const ref = useRef<HTMLDivElement>(null);
   const [thumb, setThumb] = useState<{ x: number; y: number; width: number; height: number }>();
   useIsomorphicLayoutEffect(() => {
@@ -96,7 +141,7 @@ export function RouteSummaryModes({
     if (!list) return;
     const measure = () => {
       const active = list.querySelector<HTMLElement>(
-        "[data-slot=route-summary-mode][data-state=on]",
+        "[data-slot=route-summary-mode][aria-checked=true]",
       );
       if (!active || active.offsetWidth === 0) return setThumb(undefined);
       setThumb({
@@ -113,54 +158,70 @@ export function RouteSummaryModes({
     return () => observer.disconnect();
   }, [selected]);
   return (
-    <ToggleGroup
-      data-slot="route-summary-modes"
-      type="single"
-      aria-label={label}
-      value={selected}
-      onValueChange={(next) => {
-        if (!next) return;
-        if (value === undefined) setInternal(next);
-        onValueChange?.(next);
-      }}
-      className={cn(
-        "group/modes relative isolate flex w-full gap-1 rounded-full bg-muted p-1",
-        className,
-      )}
-      {...props}
-      ref={ref}
-      data-ready={thumb ? "" : undefined}
-    >
-      {/* One measured thumb slides between modes; until it is measured the active mode paints itself. */}
-      <span
-        aria-hidden="true"
-        data-slot="route-summary-modes-thumb"
-        className="pointer-events-none absolute top-0 left-0 -z-1 rounded-full bg-card opacity-0 shadow-[0_1px_2px_oklch(0_0_0/0.12),0_0_0_1px_var(--border)] transition-[translate,width] duration-240 ease-out-quint group-data-ready/modes:opacity-100 motion-reduce:transition-none"
-        style={{
-          width: thumb?.width ?? 0,
-          height: thumb?.height ?? 0,
-          translate: thumb ? `${thumb.x}px ${thumb.y}px` : undefined,
+    <ModesContext.Provider value={{ selected, select }}>
+      <div
+        role="radiogroup"
+        data-slot="route-summary-modes"
+        aria-label={label}
+        className={cn(
+          "group/modes relative isolate flex w-full gap-1 rounded-full bg-muted p-1",
+          className,
+        )}
+        {...props}
+        ref={ref}
+        data-ready={thumb ? "" : undefined}
+        onKeyDown={(event) => {
+          onKeyDown?.(event);
+          if (!event.defaultPrevented) moveRadio(event);
         }}
-      />
-      {children}
-    </ToggleGroup>
+      >
+        {/* One measured thumb slides between modes; until it is measured the active mode paints itself. */}
+        <span
+          aria-hidden="true"
+          data-slot="route-summary-modes-thumb"
+          className="pointer-events-none absolute top-0 left-0 -z-1 rounded-full bg-card opacity-0 shadow-[0_1px_2px_oklch(0_0_0/0.12),0_0_0_1px_var(--border)] transition-[translate,width] duration-240 ease-out-quint group-data-ready/modes:opacity-100 motion-reduce:transition-none"
+          style={{
+            width: thumb?.width ?? 0,
+            height: thumb?.height ?? 0,
+            translate: thumb ? `${thumb.x}px ${thumb.y}px` : undefined,
+          }}
+        />
+        {children}
+      </div>
+    </ModesContext.Provider>
   );
 }
 
-export type RouteSummaryModeProps = ComponentProps<typeof ToggleGroupItem> & {
+export type RouteSummaryModeProps = Omit<ComponentProps<"button">, "value"> & {
+  value: string;
   /** Spoken name, for example "Drive, 18 minutes". */
   label: string;
 };
 
 /** Pass the mode icon and its duration as children. */
-export function RouteSummaryMode({ label, className, ...props }: RouteSummaryModeProps) {
+export function RouteSummaryMode({
+  value,
+  label,
+  onClick,
+  className,
+  ...props
+}: RouteSummaryModeProps) {
   const context = useSummary("RouteSummaryMode");
+  const modes = useModes("RouteSummaryMode");
+  const checked = modes.selected === value;
   return (
-    <ToggleGroupItem
+    // biome-ignore lint/a11y/useSemanticElements: a segment button in a radio group; ToggleGroupItem renders the same role="radio" button.
+    <button
+      type="button"
+      role="radio"
+      aria-checked={checked}
       data-slot="route-summary-mode"
+      data-state={checked ? "on" : "off"}
       aria-label={label}
       title={label}
       className={cn(
+        toggleVariants(),
+        segmentClass,
         "h-auto min-w-0 flex-1 gap-1.5 rounded-full! border-0 bg-transparent font-medium text-subtle-foreground tabular-nums shadow-none transition-[color,scale] duration-[120ms,140ms] ease-[ease-out,cubic-bezier(0.23,1,0.32,1)] hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.97] data-[state=on]:bg-card data-[state=on]:text-foreground data-[state=on]:shadow-[0_1px_2px_oklch(0_0_0/0.12),0_0_0_1px_var(--border)] group-data-ready/modes:data-[state=on]:bg-transparent group-data-ready/modes:data-[state=on]:shadow-none motion-reduce:transition-none motion-reduce:active:scale-100 [&_svg]:stroke-[1.75]",
         context.variant === "compact"
           ? "min-h-6 px-2 text-[11.5px]/4 [&_svg:not([class*='size-'])]:size-3.5"
@@ -168,6 +229,11 @@ export function RouteSummaryMode({ label, className, ...props }: RouteSummaryMod
         className,
       )}
       {...props}
+      tabIndex={checked || modes.selected === "" ? 0 : -1}
+      onClick={(event) => {
+        onClick?.(event);
+        if (!event.defaultPrevented) modes.select(value);
+      }}
     />
   );
 }

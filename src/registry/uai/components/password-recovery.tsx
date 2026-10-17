@@ -477,7 +477,7 @@ export function PasswordRecoveryInput({
       {input}
       <Toggle
         type="button"
-        className="absolute inset-y-0 right-0 h-auto w-10 min-w-0 rounded-[inherit] px-0 text-subtle-foreground transition-colors duration-120 ease-out hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-[-3px] focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50 data-[state=on]:bg-transparent data-[state=on]:text-subtle-foreground data-[state=on]:hover:text-foreground motion-reduce:transition-none [&_svg]:stroke-[1.75]"
+        className="absolute inset-y-0 right-0 h-auto w-10 min-w-0 rounded-[inherit] px-0 text-subtle-foreground transition-colors duration-120 ease-out hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-[-3px] focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50 data-[state=on]:bg-transparent data-pressed:bg-transparent data-[state=on]:text-subtle-foreground data-pressed:text-subtle-foreground data-[state=on]:hover:text-foreground data-pressed:hover:text-foreground motion-reduce:transition-none [&_svg]:stroke-[1.75]"
         disabled={disabled || submitting}
         aria-label={revealed ? "Hide password" : "Show password"}
         pressed={revealed}

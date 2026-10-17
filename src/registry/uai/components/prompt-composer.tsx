@@ -124,6 +124,10 @@ type PromptComposerContextValue = {
   addRef: React.RefObject<HTMLDivElement | null>;
   actionsRef: React.RefObject<HTMLDivElement | null>;
   inputRef: React.RefObject<HTMLTextAreaElement | null>;
+  /** Set while a closed menu hands focus back to its trigger, which forwards it to the input. */
+  focusInputOnReturnRef: React.RefObject<boolean>;
+  /** Set while the file picker is up, so the menu (and its file input) stays mounted. */
+  keepMenuOpenRef: React.RefObject<boolean>;
   chrome: ReturnType<typeof composerChrome>;
 };
 
@@ -136,12 +140,38 @@ function usePromptComposer(name: string) {
 }
 
 function menuOpenChange(context: PromptComposerContextValue, menu: Exclude<OpenMenu, null>) {
-  return (open: boolean) =>
+  return (open: boolean) => {
+    if (!open && context.keepMenuOpenRef.current) return;
     context.setOpenMenu((current) => (open ? menu : current === menu ? null : current));
+  };
+}
+
+/** Clears a flag on the next key or pointer press anywhere, so a pending hand-off can't go stale. */
+function expireOnNextInput(flag: React.RefObject<boolean>) {
+  const expire = () => {
+    flag.current = false;
+    document.removeEventListener("keydown", expire, true);
+    document.removeEventListener("pointerdown", expire, true);
+  };
+  document.addEventListener("keydown", expire, true);
+  document.addEventListener("pointerdown", expire, true);
+  return expire;
+}
+
+/**
+ * Menu triggers forward the focus their menu returns on close to the input. Radix and Base UI
+ * both restore focus to the trigger, so this works on either without primitive-specific props.
+ */
+function forwardReturnedFocus(context: PromptComposerContextValue) {
+  return () => {
+    if (!context.focusInputOnReturnRef.current) return;
+    context.focusInputOnReturnRef.current = false;
+    context.inputRef.current?.focus();
+  };
 }
 
 function FloatingMenu({ kind, children }: { kind: "sources" | "models"; children: ReactNode }) {
-  const context = usePromptComposer("PromptComposerMenu");
+  usePromptComposer("PromptComposerMenu");
 
   return (
     <DropdownMenuContent
@@ -149,13 +179,9 @@ function FloatingMenu({ kind, children }: { kind: "sources" | "models"; children
       side="top"
       align={kind === "sources" ? "start" : "end"}
       sideOffset={8}
-      onCloseAutoFocus={(event) => {
-        event.preventDefault();
-        context.inputRef.current?.focus();
-      }}
       className={cn(
         "min-w-0 rounded-[14px] border-0 p-1 shadow-[0_0_0_1px_var(--border-strong),0_10px_28px_color-mix(in_oklab,black_42%,transparent)]",
-        "duration-180 ease-out-quint data-[side=top]:slide-in-from-bottom-0 data-[state=open]:zoom-in-96 motion-reduce:animate-none",
+        "duration-180 ease-out-quint data-[side=top]:slide-in-from-bottom-0 data-[state=open]:zoom-in-96 data-open:zoom-in-96 motion-reduce:animate-none",
         kind === "sources" ? "w-[min(340px,calc(100vw-32px))]" : "w-44",
       )}
     >
@@ -190,6 +216,9 @@ export function PromptComposer({
   const addRef = useRef<HTMLDivElement>(null);
   const actionsRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const focusInputOnReturnRef = useRef(false);
+  const keepMenuOpenRef = useRef(false);
+  const previousMenuRef = useRef<OpenMenu>(null);
   const measureRef = useRef<HTMLSpanElement>(null);
   const prompt = value ?? internalPrompt;
   const locked = busy || disabled;
@@ -214,6 +243,15 @@ export function PromptComposer({
     const needsFullWidth = prompt.includes("\n") || measure.offsetWidth + 8 > inlineInputWidth;
     if (needsFullWidth !== expanded) setExpanded(needsFullWidth);
   }, [prompt, expanded, chrome.controlSize]);
+
+  useEffect(() => {
+    const closed = previousMenuRef.current !== null && openMenu === null;
+    previousMenuRef.current = openMenu;
+    if (!closed) return;
+    focusInputOnReturnRef.current = true;
+    const expire = expireOnNextInput(focusInputOnReturnRef);
+    return expire;
+  }, [openMenu]);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -255,6 +293,8 @@ export function PromptComposer({
     addRef,
     actionsRef,
     inputRef,
+    focusInputOnReturnRef,
+    keepMenuOpenRef,
     chrome,
   };
 
@@ -372,8 +412,9 @@ export function PromptComposerAdd({
             size="icon"
             aria-label={label}
             disabled={context.locked}
+            onFocus={forwardReturnedFocus(context)}
             className={cn(
-              "text-muted-foreground transition-[background-color,color,scale] duration-150 focus-visible:bg-accent active:scale-[0.94] disabled:opacity-100 dark:hover:bg-accent data-[state=open]:bg-accent data-[state=open]:text-accent-foreground motion-reduce:transition-none motion-reduce:active:scale-100",
+              "text-muted-foreground transition-[background-color,color,scale] duration-150 focus-visible:bg-accent active:scale-[0.94] disabled:opacity-100 dark:hover:bg-accent aria-expanded:bg-accent aria-expanded:text-accent-foreground motion-reduce:transition-none motion-reduce:active:scale-100",
               context.chrome.controlClass,
               context.chrome.controlRadiusClass,
             )}
@@ -409,16 +450,22 @@ function PromptComposerMenuItem({
   children,
   className,
   disabled,
+  onSelect,
+  onClick,
   ...props
-}: Omit<PromptComposerAddItemProps, "onSelect"> & {
-  onSelect: (event: Event) => void;
-}) {
+}: PromptComposerAddItemProps) {
   const context = usePromptComposer("PromptComposerAddItem");
 
   return (
+    // `onClick` rather than Radix's `onSelect`: both menu primitives fire it for pointer, Enter,
+    // and Space, and Base UI has no `onSelect` item event.
     <DropdownMenuItem
       data-slot="prompt-composer-add-item"
       {...props}
+      onClick={(event) => {
+        onClick?.(event);
+        onSelect?.();
+      }}
       disabled={context.locked || disabled}
       className={cn(promptComposerMenuItemClass, className)}
     >
@@ -441,8 +488,8 @@ function PromptComposerMenuItem({
   );
 }
 
-export function PromptComposerAddItem({ onSelect, ...props }: PromptComposerAddItemProps) {
-  return <PromptComposerMenuItem {...props} onSelect={() => onSelect?.()} />;
+export function PromptComposerAddItem(props: PromptComposerAddItemProps) {
+  return <PromptComposerMenuItem {...props} />;
 }
 
 export type PromptComposerFileItemProps = Omit<
@@ -464,16 +511,19 @@ export function PromptComposerFileItem({
 }: PromptComposerFileItemProps) {
   const context = usePromptComposer("PromptComposerFileItem");
   const inputRef = useRef<HTMLInputElement>(null);
-  const { setOpenMenu } = context;
+  const { setOpenMenu, keepMenuOpenRef } = context;
 
   // The menu stays open while the file picker is up so the input remains mounted.
   useEffect(() => {
     const input = inputRef.current;
     if (!input) return;
-    const close = () => setOpenMenu(null);
+    const close = () => {
+      keepMenuOpenRef.current = false;
+      setOpenMenu(null);
+    };
     input.addEventListener("cancel", close);
     return () => input.removeEventListener("cancel", close);
-  }, [setOpenMenu]);
+  }, [setOpenMenu, keepMenuOpenRef]);
 
   return (
     <>
@@ -481,8 +531,11 @@ export function PromptComposerFileItem({
         icon={<Paperclip className="size-4" strokeWidth={1.8} aria-hidden="true" />}
         description={description}
         disabled={disabled}
-        onSelect={(event) => {
-          event.preventDefault();
+        onSelect={() => {
+          // Hold the menu open (it would close on click) until the picker reports back. If the
+          // browser never fires `cancel`, the next key or pointer press releases it.
+          keepMenuOpenRef.current = true;
+          expireOnNextInput(keepMenuOpenRef);
           inputRef.current?.click();
         }}
       >
@@ -503,6 +556,7 @@ export function PromptComposerFileItem({
           const files = Array.from(event.target.files ?? []);
           if (files.length) context.addFiles(files);
           event.target.value = "";
+          keepMenuOpenRef.current = false;
           setOpenMenu(null);
         }}
       />
@@ -629,8 +683,9 @@ export function PromptComposerModelSelect({
               size="sm"
               aria-label={`${label}: ${selected.label}`}
               disabled={context.locked}
+              onFocus={forwardReturnedFocus(context)}
               className={cn(
-                "gap-1 px-2 text-muted-foreground transition-colors duration-120 ease-out focus-visible:bg-accent disabled:opacity-100 has-[>svg]:px-2 motion-reduce:transition-none dark:hover:bg-accent data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
+                "gap-1 px-2 text-muted-foreground transition-colors duration-120 ease-out focus-visible:bg-accent disabled:opacity-100 has-[>svg]:px-2 motion-reduce:transition-none dark:hover:bg-accent aria-expanded:bg-accent aria-expanded:text-accent-foreground",
                 context.chrome.controlHeightClass,
                 context.chrome.controlRadiusClass,
                 context.chrome.modelClass,

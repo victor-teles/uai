@@ -183,6 +183,7 @@ export function ShareMenuContent({
   align = "start",
   "aria-label": label = "Share options",
   onFocus,
+  onKeyDown,
   className,
   ...props
 }: Omit<ComponentProps<typeof DropdownMenuContent>, "align"> & { align?: "start" | "end" }) {
@@ -193,16 +194,32 @@ export function ShareMenuContent({
       aria-label={label}
       align={align}
       sideOffset={6}
-      loop
       data-slot="share-menu-content"
       data-align={align}
       className={cn(
         "z-20 grid gap-px rounded-[14px] border-0 bg-popover p-1 shadow-[0_0_0_1px_var(--border-strong),0_12px_28px_-10px_oklch(0_0_0/0.32),0_2px_6px_-2px_oklch(0_0_0/0.12)]",
-        "duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-[state=open]:zoom-in-96 data-[state=open]:[--tw-enter-translate-x:0]! data-[state=open]:[--tw-enter-translate-y:0]! motion-reduce:data-[state=closed]:animate-none motion-reduce:data-[state=open]:animate-none",
+        "duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-closed:zoom-out-96 data-[state=open]:zoom-in-96 data-open:zoom-in-96 data-[state=open]:[--tw-enter-translate-x:0]! data-open:[--tw-enter-translate-x:0]! data-[state=open]:[--tw-enter-translate-y:0]! data-open:[--tw-enter-translate-y:0]! motion-reduce:data-[state=closed]:animate-none motion-reduce:data-closed:animate-none motion-reduce:data-[state=open]:animate-none motion-reduce:data-open:animate-none",
         context.variant === "compact" ? "min-w-[184px]" : "min-w-[200px]",
         className,
       )}
       {...props}
+      onKeyDown={(event) => {
+        onKeyDown?.(event);
+        // Up/Down past either end wrap, because Radix menus only loop with a Radix-only prop
+        // (Base UI menus loop on their own). The menu's own item handler has already marked the
+        // event handled by now, so defaultPrevented can't gate this.
+        const step = { ArrowDown: 1, ArrowUp: -1 }[event.key];
+        if (step === undefined) return;
+        const items = Array.from(
+          event.currentTarget.querySelectorAll<HTMLElement>(
+            '[role="menuitem"]:not([data-disabled])',
+          ),
+        );
+        const next = items.indexOf(document.activeElement as HTMLElement) + step;
+        if (next >= 0 && next < items.length) return;
+        event.preventDefault();
+        items[(next + items.length) % items.length]?.focus();
+      }}
       onFocus={(event) => {
         onFocus?.(event);
         if (event.defaultPrevented || event.target !== event.currentTarget) return;

@@ -245,7 +245,7 @@ export function DateRangePickerPreset({
       data-slot="date-range-picker-preset"
       className={cn(
         ghostButton,
-        "h-7 min-w-0 justify-start px-3 text-left text-[12.5px] font-medium whitespace-nowrap aria-pressed:bg-accent aria-pressed:text-foreground data-[state=on]:bg-accent data-[state=on]:text-foreground",
+        "h-7 min-w-0 justify-start px-3 text-left text-[12.5px] font-medium whitespace-nowrap aria-pressed:bg-accent aria-pressed:text-foreground data-[state=on]:bg-accent data-pressed:bg-accent data-[state=on]:text-foreground data-pressed:text-foreground",
         context.variant === "split" ? "rounded-lg" : "rounded-full",
         className,
       )}

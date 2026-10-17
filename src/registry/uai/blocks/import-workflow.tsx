@@ -5,10 +5,13 @@ import { ArrowRight } from "lucide-react";
 import {
   type ComponentProps,
   createContext,
+  type ReactNode,
   type RefObject,
+  useCallback,
   useContext,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -44,6 +47,33 @@ import {
   type StepIndicatorVariant,
 } from "@/components/ui/uai/step-indicator";
 import { cn } from "@/lib/uai-utils";
+
+const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
+
+type RegisterOptionLabel = (value: string, label: ReactNode) => () => void;
+
+/**
+ * Base UI's SelectValue prints the raw value unless it knows the label, and its items only mount
+ * while the list is open. Options render once more inside this context, outside the Select, to
+ * report their labels; Radix shows the same label either way.
+ */
+const OptionLabelsContext = createContext<RegisterOptionLabel | null>(null);
+
+function useOptionLabels() {
+  const [labels, setLabels] = useState<Record<string, ReactNode>>({});
+  const register = useCallback<RegisterOptionLabel>((value, label) => {
+    setLabels((current) => ({ ...current, [value]: label }));
+    return () => setLabels(({ [value]: _removed, ...rest }) => rest);
+  }, []);
+  return [labels, register] as const;
+}
+
+/** True inside the label collector, where an option only reports its label and renders nothing. */
+function useReportOptionLabel(value: string, label: ReactNode) {
+  const register = useContext(OptionLabelsContext);
+  useIsomorphicLayoutEffect(() => register?.(value, label), [register, value, label]);
+  return register !== null;
+}
 
 export const IMPORT_WORKFLOW_VARIANTS = ["wizard", "sidebar", "compact"] as const;
 export type ImportWorkflowVariant = (typeof IMPORT_WORKFLOW_VARIANTS)[number];
@@ -411,38 +441,43 @@ export function ImportWorkflowMappingTarget({
   const context = useWorkflow("ImportWorkflowMappingTarget");
   const [internal, setInternal] = useState(defaultValue);
   const current = value ?? internal;
+  const selected = current === "" ? SKIP_VALUE : (current ?? "");
+  const [labels, registerLabel] = useOptionLabels();
   return (
-    <Select
-      name={name}
-      value={current === "" ? SKIP_VALUE : (current ?? "")}
-      onValueChange={(next) => {
-        const target = next === SKIP_VALUE ? "" : next;
-        if (value === undefined) setInternal(target);
-        onValueChange?.(target);
-      }}
-    >
-      <SelectTrigger
-        data-slot="import-workflow-mapping-target"
-        data-skipped={current === "" ? "" : undefined}
-        className={cn(
-          "w-auto min-w-0 flex-[1_1_160px] cursor-pointer gap-1.5 rounded-lg border-0 bg-card py-0 pr-1.5 pl-2 text-inherit shadow-none inset-ring-1 inset-ring-border transition-shadow duration-120 ease-out hover:inset-ring-border-strong focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring focus-visible:outline-solid motion-reduce:transition-none data-[placeholder]:text-subtle-foreground data-skipped:text-subtle-foreground dark:bg-card dark:hover:bg-card [&_svg]:size-3.5",
-          context.variant === "compact"
-            ? "text-[12px]/[18px] data-[size=default]:h-[26px]"
-            : "text-[13px]/[18px] data-[size=default]:h-[30px]",
-          className,
-        )}
-        {...props}
-        id={id}
+    <>
+      <Select
+        name={name}
+        value={selected}
+        onValueChange={(next: string | null) => {
+          if (next === null) return;
+          const target = next === SKIP_VALUE ? "" : next;
+          if (value === undefined) setInternal(target);
+          onValueChange?.(target);
+        }}
       >
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent
-        position="popper"
-        className="rounded-[14px] border-0 bg-popover text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_12px_28px_-10px_oklch(0_0_0/0.32),0_2px_6px_-2px_oklch(0_0_0/0.12)] duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-[state=open]:zoom-in-96 data-[state=open]:[--tw-enter-translate-x:0]! data-[state=open]:[--tw-enter-translate-y:0]! motion-reduce:data-[state=closed]:animate-none motion-reduce:data-[state=open]:animate-none"
-      >
-        {children}
-      </SelectContent>
-    </Select>
+        <SelectTrigger
+          data-slot="import-workflow-mapping-target"
+          data-skipped={current === "" ? "" : undefined}
+          className={cn(
+            "w-auto min-w-0 flex-[1_1_160px] cursor-pointer gap-1.5 rounded-lg border-0 bg-card py-0 pr-1.5 pl-2 text-inherit shadow-none inset-ring-1 inset-ring-border transition-shadow duration-120 ease-out hover:inset-ring-border-strong focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring focus-visible:outline-solid motion-reduce:transition-none data-[placeholder]:text-subtle-foreground data-skipped:text-subtle-foreground dark:bg-card dark:hover:bg-card [&_svg]:size-3.5",
+            context.variant === "compact"
+              ? "text-[12px]/[18px] data-[size=default]:h-[26px]"
+              : "text-[13px]/[18px] data-[size=default]:h-[30px]",
+            className,
+          )}
+          {...props}
+          id={id}
+        >
+          <SelectValue placeholder={placeholder}>
+            {labels[selected] ?? (selected ? undefined : placeholder)}
+          </SelectValue>
+        </SelectTrigger>
+        <SelectContent className="rounded-[14px] border-0 bg-popover text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_12px_28px_-10px_oklch(0_0_0/0.32),0_2px_6px_-2px_oklch(0_0_0/0.12)] duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-closed:zoom-out-96 data-[state=open]:zoom-in-96 data-open:zoom-in-96 data-[state=open]:[--tw-enter-translate-x:0]! data-open:[--tw-enter-translate-x:0]! data-[state=open]:[--tw-enter-translate-y:0]! data-open:[--tw-enter-translate-y:0]! motion-reduce:data-[state=closed]:animate-none motion-reduce:data-closed:animate-none motion-reduce:data-[state=open]:animate-none motion-reduce:data-open:animate-none">
+          {children}
+        </SelectContent>
+      </Select>
+      <OptionLabelsContext.Provider value={registerLabel}>{children}</OptionLabelsContext.Provider>
+    </>
   );
 }
 
@@ -458,6 +493,8 @@ export function ImportWorkflowMappingOption({
   ...props
 }: ImportWorkflowMappingOptionProps) {
   const context = useWorkflow("ImportWorkflowMappingOption");
+  const collecting = useReportOptionLabel(value === "" ? SKIP_VALUE : value, props.children);
+  if (collecting) return null;
   return (
     <SelectItem
       data-slot="import-workflow-mapping-option"

@@ -2,7 +2,17 @@
 
 import { cva } from "class-variance-authority";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { type ComponentProps, createContext, useContext, useId, useState } from "react";
+import {
+  type ComponentProps,
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useState,
+} from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -29,6 +39,33 @@ import {
 } from "@/components/ui/uai/search-field";
 import { SkeletonGroup, type SkeletonGroupProps } from "@/components/ui/uai/skeleton-group";
 import { cn } from "@/lib/uai-utils";
+
+const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
+
+type RegisterOptionLabel = (value: string, label: ReactNode) => () => void;
+
+/**
+ * Base UI's SelectValue prints the raw value unless it knows the label, and its items only mount
+ * while the list is open. Options render once more inside this context, outside the Select, to
+ * report their labels; Radix shows the same label either way.
+ */
+const OptionLabelsContext = createContext<RegisterOptionLabel | null>(null);
+
+function useOptionLabels() {
+  const [labels, setLabels] = useState<Record<string, ReactNode>>({});
+  const register = useCallback<RegisterOptionLabel>((value, label) => {
+    setLabels((current) => ({ ...current, [value]: label }));
+    return () => setLabels(({ [value]: _removed, ...rest }) => rest);
+  }, []);
+  return [labels, register] as const;
+}
+
+/** True inside the label collector, where an option only reports its label and renders nothing. */
+function useReportOptionLabel(value: string, label: ReactNode) {
+  const register = useContext(OptionLabelsContext);
+  useIsomorphicLayoutEffect(() => register?.(value, label), [register, value, label]);
+  return register !== null;
+}
 
 export const SEARCH_RESULTS_VARIANTS = ["list", "sidebar", "compact"] as const;
 export type SearchResultsVariant = (typeof SEARCH_RESULTS_VARIANTS)[number];
@@ -193,6 +230,9 @@ export function SearchResultsSort({
 }: SearchResultsSortProps) {
   const context = useResults("SearchResultsSort");
   const compact = context.variant === "compact";
+  const [internal, setInternal] = useState(defaultValue);
+  const current = value ?? internal;
+  const [labels, registerLabel] = useOptionLabels();
   return (
     <span className="inline-flex items-center gap-2">
       <Label
@@ -201,7 +241,15 @@ export function SearchResultsSort({
       >
         {label}
       </Label>
-      <Select name={name} value={value} defaultValue={defaultValue} onValueChange={onValueChange}>
+      <Select
+        name={name}
+        value={current}
+        onValueChange={(next: string | null) => {
+          if (next === null) return;
+          if (value === undefined) setInternal(next);
+          onValueChange?.(next);
+        }}
+      >
         <SelectTrigger
           data-slot="search-results-sort"
           className={cn(
@@ -216,16 +264,13 @@ export function SearchResultsSort({
           {...props}
           id={`${context.id}-sort`}
         >
-          <SelectValue />
+          <SelectValue>{current === undefined ? undefined : labels[current]}</SelectValue>
         </SelectTrigger>
-        <SelectContent
-          position="popper"
-          align="end"
-          className="min-w-36 rounded-[14px] border-0 bg-popover text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_12px_28px_-10px_oklch(0_0_0/0.32),0_2px_6px_-2px_oklch(0_0_0/0.12)] duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-[state=open]:zoom-in-96 data-[state=open]:[--tw-enter-translate-x:0]! data-[state=open]:[--tw-enter-translate-y:0]! motion-reduce:data-[state=closed]:animate-none motion-reduce:data-[state=open]:animate-none"
-        >
+        <SelectContent className="min-w-36 rounded-[14px] border-0 bg-popover text-popover-foreground shadow-[0_0_0_1px_var(--border-strong),0_12px_28px_-10px_oklch(0_0_0/0.32),0_2px_6px_-2px_oklch(0_0_0/0.12)] duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] data-[state=closed]:zoom-out-96 data-closed:zoom-out-96 data-[state=open]:zoom-in-96 data-open:zoom-in-96 data-[state=open]:[--tw-enter-translate-x:0]! data-open:[--tw-enter-translate-x:0]! data-[state=open]:[--tw-enter-translate-y:0]! data-open:[--tw-enter-translate-y:0]! motion-reduce:data-[state=closed]:animate-none motion-reduce:data-closed:animate-none motion-reduce:data-[state=open]:animate-none motion-reduce:data-open:animate-none">
           {children}
         </SelectContent>
       </Select>
+      <OptionLabelsContext.Provider value={registerLabel}>{children}</OptionLabelsContext.Provider>
     </span>
   );
 }
@@ -236,6 +281,8 @@ export function SearchResultsSortOption({
   ...props
 }: ComponentProps<typeof SelectItem>) {
   const context = useResults("SearchResultsSortOption");
+  const collecting = useReportOptionLabel(String(props.value), props.children);
+  if (collecting) return null;
   return (
     <SelectItem
       data-slot="search-results-sort-option"
