@@ -988,24 +988,36 @@ const tasks = [
   { title: "Deploy to staging", start: 4, end: 6 },
 ];
 
-export function AgentRunPreview({ variant = "split" }: { variant?: AgentRunVariant }) {
-  const [step, setStep] = useState(0);
+type AgentRunPreviewProps = {
+  variant?: AgentRunVariant;
+  /** False holds the scripted run on its current step, for example while it is off screen. */
+  playing?: boolean;
+  /** The step the script starts on. Pass the approval step to show the waiting run at once. */
+  initialStep?: number;
+};
+
+export function AgentRunPreview({
+  variant = "split",
+  playing = true,
+  initialStep = 0,
+}: AgentRunPreviewProps) {
+  const [step, setStep] = useState(initialStep);
   const [stopped, setStopped] = useState(false);
   const [decision, setDecision] = useState<Decision>("pending");
 
   // Advances a fixed script locally and pauses for the approval. Applications stream real run events.
   useEffect(() => {
-    if (stopped || step >= LAST_STEP) return;
+    if (!playing || stopped || step >= LAST_STEP) return;
     if (step === APPROVAL_STEP && decision !== "approved") return;
     const timer = window.setTimeout(() => setStep((current) => current + 1), 900);
     return () => window.clearTimeout(timer);
-  }, [step, stopped, decision]);
+  }, [playing, step, stopped, decision]);
 
   useEffect(() => {
-    if (decision !== "submitting") return;
+    if (!playing || decision !== "submitting") return;
     const timer = window.setTimeout(() => setDecision("approved"), 600);
     return () => window.clearTimeout(timer);
-  }, [decision]);
+  }, [playing, decision]);
 
   const rejected = decision === "rejected";
   const done = step >= LAST_STEP || rejected;
