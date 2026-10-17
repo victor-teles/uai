@@ -210,6 +210,9 @@ export function SettingsPagePreview({ variant = "stacked" }: { variant?: Setting
             "Couldn’t save. Your changes are still here."
           ) : blocked && invalidCount > 0 ? (
             `Fix ${invalidCount} ${invalidCount === 1 ? "field" : "fields"} to save`
+          ) : changes === 0 ? (
+            // The bar stays up briefly after a save to confirm it; there is nothing to count.
+            "All changes saved"
           ) : (
             <span
               key={changes}

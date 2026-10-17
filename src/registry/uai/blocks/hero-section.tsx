@@ -133,12 +133,15 @@ export function HeroSectionEyebrow({
 }
 
 export function HeroSectionTitle({ className, ...props }: ComponentProps<"h1">) {
-  const { id } = useHero("HeroSectionTitle");
+  const { id, variant } = useHero("HeroSectionTitle");
   return (
     <h1
       data-slot="hero-section-title"
       className={cn(
         "m-0 mt-4 text-[length:clamp(30px,4cqi_+_10px,42px)] leading-[1.06] font-medium tracking-[-0.035em] text-balance first:mt-0",
+        // In two columns the title gets half the width, so scale with the column: 42px at a
+        // 960px hero (456px column) and down in step, which keeps it to three lines.
+        variant !== "centered" && "@min-[720px]:text-[length:clamp(30px,4.6cqi_-_2px,42px)]",
         // An <em> sets the second clause in muted ink, not italic.
         "[&_em]:text-muted-foreground [&_em]:not-italic",
         className,
@@ -240,7 +243,8 @@ export function HeroSectionMedia({ className, ...props }: ComponentProps<"figure
     <figure
       data-slot="hero-section-media"
       className={cn(
-        "relative m-0 box-border w-full min-w-0",
+        // Media composes its own surfaces, so it never inherits the Centered text alignment.
+        "relative m-0 box-border w-full min-w-0 text-start",
         mediaIn,
         variant === "centered"
           ? "mx-auto aspect-[16/9] max-w-[880px]"
