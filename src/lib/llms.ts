@@ -6,6 +6,7 @@ import {
   type RegistryCatalogItem,
   registryGroups,
 } from "@/components/registry/catalog";
+import { registrySourceUrl, repositoryUrl } from "@/lib/repository";
 
 /** Same base the install command uses, so llms.txt links match the deployed registry. */
 export const registryUrl = process.env.NEXT_PUBLIC_REGISTRY_URL ?? "http://localhost:3000/r";
@@ -52,6 +53,8 @@ const intro = `# ${title}
 
 Uai is pronounced /waj/, like "why", or "UI" said fast. It is the Minas Gerais word for surprise.
 
+Source code, issues, and contributions: ${repositoryUrl} (MIT license).
+
 ## Install
 
 Install any item with the shadcn CLI. Each item pulls in the \`uai-theme\` tokens, the \`cn()\` utility, and the shadcn primitives it composes:
@@ -91,6 +94,7 @@ export function renderLlmsPage(page: (typeof llmsPages)[number]) {
 - Kind: ${kind}
 - Page: ${siteUrl}/components/${item.id}
 - Registry item: ${registryUrl}/${item.id}.json
+- Source: ${registrySourceUrl(item.id, kind)}
 
 ## Install
 
