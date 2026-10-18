@@ -8,12 +8,12 @@
   ],
   "registryDependencies": [
     "button",
-    "https://uaiblocks.vercel.app/r/uai-theme.json",
-    "https://uaiblocks.vercel.app/r/uai-utils.json",
-    "https://uaiblocks.vercel.app/r/confirmation-dialog.json",
-    "https://uaiblocks.vercel.app/r/data-table-toolbar.json",
-    "https://uaiblocks.vercel.app/r/description-list.json",
-    "https://uaiblocks.vercel.app/r/empty-state.json"
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json",
+    "https://uaiblocks.dev/r/confirmation-dialog.json",
+    "https://uaiblocks.dev/r/data-table-toolbar.json",
+    "https://uaiblocks.dev/r/description-list.json",
+    "https://uaiblocks.dev/r/empty-state.json"
   ],
   "files": [
     {

@@ -36,7 +36,7 @@ export type OgTemplateProps = {
   position?: string;
   title: string;
   description: string;
-  /** Host shown in the footer, such as `uaiblocks.vercel.app`. */
+  /** Host shown in the footer, such as `uaiblocks.dev`. */
   host: string;
   /** Data URL of the uai mark tinted for the Signal tile. */
   mark: string;

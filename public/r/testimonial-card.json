@@ -9,8 +9,8 @@
   ],
   "registryDependencies": [
     "avatar",
-    "https://uaiblocks.vercel.app/r/uai-theme.json",
-    "https://uaiblocks.vercel.app/r/uai-utils.json"
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
   ],
   "files": [
     {
