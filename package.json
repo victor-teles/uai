@@ -3,6 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "license": "MIT",
+  "homepage": "https://uaiblocks.dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/victor-teles/uai.git"
+  },
+  "bugs": {
+    "url": "https://github.com/victor-teles/uai/issues"
+  },
   "type": "module",
   "scripts": {
     "build": "bun run registry:build && next build --webpack",

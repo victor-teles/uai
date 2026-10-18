@@ -5,6 +5,7 @@ import { ArrowDown, ArrowLeft, ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
 import { type CSSProperties, type ReactNode, useEffect, useId, useRef, useState } from "react";
 import { InstallCommand } from "@/components/install-command";
+import { registrySourceUrl } from "@/lib/repository";
 import { getAnatomyModules, getAnatomyTree } from "./anatomy";
 import {
   findRegistryItem,
@@ -17,6 +18,7 @@ import {
 } from "./catalog";
 import { codeBlockOptions } from "./code-themes";
 import { CopyButton } from "./copy-button";
+import { GitHubMark } from "./github-mark";
 import { getPreviewControl, RegistryPreviewCanvas, RegistryVariants } from "./registry-preview";
 import { ResizeHandle, usePersistentSize } from "./resize-handle";
 
@@ -299,6 +301,10 @@ export function RegistryItem({ id }: { id: RegistryItemId }) {
           <a href={`#${manualAnchor}`} className="uai-inspector__link">
             <ArrowDown aria-hidden="true" />
             Install manually
+          </a>
+          <a href={registrySourceUrl(item.id, kind)} className="uai-inspector__link">
+            <GitHubMark />
+            View source on GitHub
           </a>
         </InspectorSection>
 

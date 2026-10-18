@@ -25,8 +25,10 @@ import {
   useState,
 } from "react";
 
+import { repositoryUrl } from "@/lib/repository";
 import { findRegistryItem, getRegistryItemKind, registryCatalog, registryGroups } from "./catalog";
 import { CommandPalette } from "./command-palette";
+import { GitHubMark } from "./github-mark";
 import { PaoDeQueijoBurst } from "./pao-de-queijo";
 import { ResizeHandle, usePersistentSize } from "./resize-handle";
 
@@ -279,13 +281,23 @@ export function SiteShell({ children }: { children: ReactNode }) {
         <div className="uai-site-topbar__actions">
           <SearchButton onOpen={openPalette} />
           <ThemeToggle />
+          <a
+            href={repositoryUrl}
+            className="uai-icon-button uai-site-topbar__github"
+            aria-label="GitHub"
+          >
+            <GitHubMark />
+          </a>
         </div>
       </header>
 
       <aside id="uai-site-sidebar" className="uai-site-sidebar" data-open={menuOpen || undefined}>
         <SidebarNav pathname={pathname} />
         <p className="uai-site-sidebar__footer">
-          {registryCatalog.length - blockCount} components · {blockCount} blocks
+          <span>
+            {registryCatalog.length - blockCount} components · {blockCount} blocks
+          </span>
+          <a href={repositoryUrl}>GitHub</a>
         </p>
         <ResizeHandle
           label="Resize sidebar"

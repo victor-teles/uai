@@ -12,12 +12,12 @@
     "label",
     "select",
     "table",
-    "https://uaiblocks.vercel.app/r/uai-theme.json",
-    "https://uaiblocks.vercel.app/r/uai-utils.json",
-    "https://uaiblocks.vercel.app/r/file-upload.json",
-    "https://uaiblocks.vercel.app/r/progress-summary.json",
-    "https://uaiblocks.vercel.app/r/status-banner.json",
-    "https://uaiblocks.vercel.app/r/step-indicator.json"
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json",
+    "https://uaiblocks.dev/r/file-upload.json",
+    "https://uaiblocks.dev/r/progress-summary.json",
+    "https://uaiblocks.dev/r/status-banner.json",
+    "https://uaiblocks.dev/r/step-indicator.json"
   ],
   "files": [
     {

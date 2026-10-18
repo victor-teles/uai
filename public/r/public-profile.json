@@ -7,10 +7,10 @@
     "class-variance-authority"
   ],
   "registryDependencies": [
-    "https://uaiblocks.vercel.app/r/uai-theme.json",
-    "https://uaiblocks.vercel.app/r/activity-timeline.json",
-    "https://uaiblocks.vercel.app/r/author-card.json",
-    "https://uaiblocks.vercel.app/r/uai-utils.json"
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/activity-timeline.json",
+    "https://uaiblocks.dev/r/author-card.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
   ],
   "files": [
     {

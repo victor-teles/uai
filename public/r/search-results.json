@@ -11,12 +11,12 @@
     "button",
     "label",
     "select",
-    "https://uaiblocks.vercel.app/r/uai-theme.json",
-    "https://uaiblocks.vercel.app/r/empty-state.json",
-    "https://uaiblocks.vercel.app/r/filter-bar.json",
-    "https://uaiblocks.vercel.app/r/search-field.json",
-    "https://uaiblocks.vercel.app/r/skeleton-group.json",
-    "https://uaiblocks.vercel.app/r/uai-utils.json"
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/empty-state.json",
+    "https://uaiblocks.dev/r/filter-bar.json",
+    "https://uaiblocks.dev/r/search-field.json",
+    "https://uaiblocks.dev/r/skeleton-group.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
   ],
   "files": [
     {

@@ -33,7 +33,7 @@ bun run test:e2e:install    # once, for the browser checks
 5. **Registry entry.** Add the item to `registry.json` with its `files`, `target`,
    npm `dependencies`, and `registryDependencies`. List shadcn primitives by bare name
    (`button`) and Uai items by full URL
-   (`https://uaiblocks.vercel.app/r/<name>.json`). Always include `uai-utils` when
+   (`https://uaiblocks.dev/r/<name>.json`). Always include `uai-utils` when
    you import `cn`, and `uai-theme`.
 6. **Catalog and preview.** In `src/components/registry/<group>/`, add
    `<name>-preview.tsx`, a catalog entry in that group's `catalog.ts` whose `usage`

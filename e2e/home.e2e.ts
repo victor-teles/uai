@@ -305,6 +305,24 @@ test("fits a 390px screen in one column", async ({ page }) => {
   await expect(page.locator(SCENE)).toHaveAttribute("data-compact", "true");
 });
 
+test("links the GitHub repository from the header, sidebar and component pages", async ({
+  page,
+}) => {
+  const repo = "https://github.com/victor-teles/uai";
+  await openHome(page);
+  const header = page.locator(".uai-site-topbar").getByRole("link", { name: "GitHub" });
+  await expect(header).toBeVisible();
+  await expect(header).toHaveAttribute("href", repo);
+  // The sidebar sits behind the menu on phones, so check the link, not its visibility.
+  await expect(page.locator(".uai-site-sidebar__footer a")).toHaveAttribute("href", repo);
+
+  await page.goto("/components/agent-run");
+  await expect(page.getByRole("link", { name: "View source on GitHub" })).toHaveAttribute(
+    "href",
+    `${repo}/blob/main/src/registry/uai/blocks/agent-run.tsx`,
+  );
+});
+
 for (const theme of THEMES) {
   test(`axe finds nothing on / in the ${theme} theme`, async ({ page }, testInfo) => {
     await useTheme(page, theme);

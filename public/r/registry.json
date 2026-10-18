@@ -1,7 +1,7 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry.json",
   "name": "uai",
-  "homepage": "https://uaiblocks.vercel.app",
+  "homepage": "https://uaiblocks.dev",
   "items": [
     {
       "name": "uai-theme",
@@ -190,7 +190,7 @@
       "type": "registry:lib",
       "title": "Uai Number Tick",
       "description": "Moves only the characters of a formatted number that changed, in one grid cell per character so widths never jump. Shared by Metric Card and Price Summary.",
-      "registryDependencies": ["https://uaiblocks.vercel.app/r/uai-theme.json"],
+      "registryDependencies": ["https://uaiblocks.dev/r/uai-theme.json"],
       "files": [
         {
           "path": "src/registry/uai/lib/uai-number-tick.tsx",
@@ -208,8 +208,8 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "collapsible",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -230,8 +230,8 @@
         "button",
         "input",
         "label",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -249,8 +249,8 @@
       "description": "A compound blank-slate surface with card, plain, compact, and page variants.",
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -270,8 +270,8 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "badge",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -292,8 +292,8 @@
         "button",
         "dropdown-menu",
         "textarea",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -316,8 +316,8 @@
         "label",
         "separator",
         "toggle",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -341,8 +341,8 @@
         "label",
         "separator",
         "toggle",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -364,8 +364,8 @@
         "input",
         "label",
         "toggle",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -386,8 +386,8 @@
         "button",
         "input",
         "label",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -408,8 +408,8 @@
         "button",
         "input",
         "label",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -428,9 +428,9 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json",
-        "https://uaiblocks.vercel.app/r/quantity-picker.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json",
+        "https://uaiblocks.dev/r/quantity-picker.json"
       ],
       "files": [
         {
@@ -447,9 +447,9 @@
       "title": "Price Summary",
       "description": "A compound order total with card, plain, and compact variants.",
       "registryDependencies": [
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-number-tick.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-number-tick.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -470,8 +470,8 @@
       "registryDependencies": [
         "badge",
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -491,8 +491,8 @@
       "registryDependencies": [
         "button",
         "input",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -513,8 +513,8 @@
         "input",
         "label",
         "textarea",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -535,8 +535,8 @@
         "button",
         "input",
         "label",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -556,8 +556,8 @@
       "registryDependencies": [
         "badge",
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -577,8 +577,8 @@
       "registryDependencies": [
         "button",
         "progress",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -600,8 +600,8 @@
         "input",
         "label",
         "toggle",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -619,8 +619,8 @@
       "description": "A submission error summary with links that focus the matching fields.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -639,8 +639,8 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -658,8 +658,8 @@
       "description": "Current, complete, optional, blocked, and error steps with explicit status text.",
       "dependencies": ["class-variance-authority"],
       "registryDependencies": [
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -679,8 +679,8 @@
       "registryDependencies": [
         "button",
         "collapsible",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -700,8 +700,8 @@
       "registryDependencies": [
         "breadcrumb",
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -719,8 +719,8 @@
       "description": "Primary tabs with counts, page actions, and horizontal overflow.",
       "registryDependencies": [
         "tabs",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -739,8 +739,8 @@
       "description": "Search and run grouped actions with full keyboard navigation.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -757,8 +757,8 @@
       "title": "Split Pane",
       "description": "Two resizable regions with keyboard controls and saved proportions.",
       "registryDependencies": [
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -778,8 +778,8 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -798,8 +798,8 @@
       "registryDependencies": [
         "button",
         "progress",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -819,8 +819,8 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -841,8 +841,8 @@
         "button",
         "input",
         "label",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -860,8 +860,8 @@
       "title": "Activity Timeline",
       "description": "Events, actors, timestamps, metadata, and grouped dates in an ordered timeline.",
       "registryDependencies": [
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -880,8 +880,8 @@
       "description": "Composable loading placeholders that match page structure without layout shift.",
       "registryDependencies": [
         "skeleton",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -905,8 +905,8 @@
         "input",
         "label",
         "popover",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -925,9 +925,9 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "badge",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-number-tick.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-number-tick.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -945,8 +945,8 @@
       "description": "Labeled facts with responsive alignment and optional actions.",
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -968,8 +968,8 @@
         "checkbox",
         "label",
         "table",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -987,8 +987,8 @@
       "description": "Columns, cards, keyboard movement, and empty states.",
       "registryDependencies": [
         "badge",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1009,8 +1009,8 @@
       "registryDependencies": [
         "button",
         "toggle",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1029,8 +1029,8 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "collapsible",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1050,8 +1050,8 @@
       "registryDependencies": [
         "avatar",
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1073,8 +1073,8 @@
         "button",
         "collapsible",
         "textarea",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1095,8 +1095,8 @@
         "button",
         "dropdown-menu",
         "toggle",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1116,8 +1116,8 @@
       "registryDependencies": [
         "button",
         "dropdown-menu",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1136,8 +1136,8 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "badge",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1156,8 +1156,8 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1175,8 +1175,8 @@
       "description": "Switch billing periods while keeping prices, billing context, and savings labels in sync.",
       "registryDependencies": [
         "toggle",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1196,8 +1196,8 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "avatar",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1218,8 +1218,8 @@
         "button",
         "dialog",
         "toggle",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1238,8 +1238,8 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "badge",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1260,8 +1260,8 @@
         "checkbox",
         "input",
         "label",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1281,8 +1281,8 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1301,8 +1301,8 @@
       "dependencies": ["lucide-react"],
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1322,8 +1322,8 @@
       "registryDependencies": [
         "button",
         "progress",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1342,8 +1342,8 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "collapsible",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1362,8 +1362,8 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1382,8 +1382,8 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1401,8 +1401,8 @@
       "description": "A labelled map region that hosts any map library, anchors overlays to its edges, and shows a placeholder basemap.",
       "dependencies": ["class-variance-authority"],
       "registryDependencies": [
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1421,8 +1421,8 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1440,8 +1440,8 @@
       "description": "Selectable map pins, dots, and price labels with tones, captions, and cluster counts.",
       "dependencies": ["class-variance-authority"],
       "registryDependencies": [
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1460,8 +1460,8 @@
       "dependencies": ["class-variance-authority"],
       "registryDependencies": [
         "checkbox",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1480,8 +1480,8 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1501,8 +1501,8 @@
       "registryDependencies": [
         "button",
         "toggle",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1521,10 +1521,10 @@
       "registryDependencies": [
         "badge",
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/task-list.json",
-        "https://uaiblocks.vercel.app/r/trust-panel.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/task-list.json",
+        "https://uaiblocks.dev/r/trust-panel.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1542,9 +1542,9 @@
       "title": "Feature Showcase",
       "description": "Benefits through alternating copy, media, and supporting details.",
       "registryDependencies": [
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/description-list.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/description-list.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1565,9 +1565,9 @@
       "registryDependencies": [
         "badge",
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/pricing-toggle.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/pricing-toggle.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1584,10 +1584,10 @@
       "title": "Testimonials Section",
       "description": "Customer stories with people, roles, organizations, and a rating summary.",
       "registryDependencies": [
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/testimonial-card.json",
-        "https://uaiblocks.vercel.app/r/trust-panel.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/testimonial-card.json",
+        "https://uaiblocks.dev/r/trust-panel.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1607,9 +1607,9 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "collapsible",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/search-field.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/search-field.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1628,9 +1628,9 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/trust-panel.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/trust-panel.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1648,10 +1648,10 @@
       "description": "Collect interest with qualification fields, consent, and confirmation.",
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/newsletter-form.json",
-        "https://uaiblocks.vercel.app/r/form-field.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/newsletter-form.json",
+        "https://uaiblocks.dev/r/form-field.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1671,10 +1671,10 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/status-banner.json",
-        "https://uaiblocks.vercel.app/r/form-field.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/status-banner.json",
+        "https://uaiblocks.dev/r/form-field.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1693,11 +1693,11 @@
       "dependencies": ["class-variance-authority"],
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/app-sidebar.json",
-        "https://uaiblocks.vercel.app/r/breadcrumb-trail.json",
-        "https://uaiblocks.vercel.app/r/metric-card.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/app-sidebar.json",
+        "https://uaiblocks.dev/r/breadcrumb-trail.json",
+        "https://uaiblocks.dev/r/metric-card.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1715,11 +1715,11 @@
       "description": "Grouped settings with field validation, a sticky save state, and a guarded danger zone.",
       "dependencies": ["class-variance-authority"],
       "registryDependencies": [
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/confirmation-dialog.json",
-        "https://uaiblocks.vercel.app/r/form-field.json",
-        "https://uaiblocks.vercel.app/r/unsaved-changes-bar.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/confirmation-dialog.json",
+        "https://uaiblocks.dev/r/form-field.json",
+        "https://uaiblocks.dev/r/unsaved-changes-bar.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1738,11 +1738,11 @@
       "dependencies": ["class-variance-authority"],
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/activity-timeline.json",
-        "https://uaiblocks.vercel.app/r/author-card.json",
-        "https://uaiblocks.vercel.app/r/description-list.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/activity-timeline.json",
+        "https://uaiblocks.dev/r/author-card.json",
+        "https://uaiblocks.dev/r/description-list.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1762,11 +1762,11 @@
       "registryDependencies": [
         "button",
         "select",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/confirmation-dialog.json",
-        "https://uaiblocks.vercel.app/r/data-table-toolbar.json",
-        "https://uaiblocks.vercel.app/r/empty-state.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/confirmation-dialog.json",
+        "https://uaiblocks.dev/r/data-table-toolbar.json",
+        "https://uaiblocks.dev/r/empty-state.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1785,10 +1785,10 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/empty-state.json",
-        "https://uaiblocks.vercel.app/r/page-tabs.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/empty-state.json",
+        "https://uaiblocks.dev/r/page-tabs.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1808,12 +1808,12 @@
       "registryDependencies": [
         "button",
         "table",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/confirmation-dialog.json",
-        "https://uaiblocks.vercel.app/r/description-list.json",
-        "https://uaiblocks.vercel.app/r/progress-summary.json",
-        "https://uaiblocks.vercel.app/r/status-banner.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/confirmation-dialog.json",
+        "https://uaiblocks.dev/r/description-list.json",
+        "https://uaiblocks.dev/r/progress-summary.json",
+        "https://uaiblocks.dev/r/status-banner.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1834,12 +1834,12 @@
         "button",
         "label",
         "select",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/empty-state.json",
-        "https://uaiblocks.vercel.app/r/filter-bar.json",
-        "https://uaiblocks.vercel.app/r/search-field.json",
-        "https://uaiblocks.vercel.app/r/skeleton-group.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/empty-state.json",
+        "https://uaiblocks.dev/r/filter-bar.json",
+        "https://uaiblocks.dev/r/search-field.json",
+        "https://uaiblocks.dev/r/skeleton-group.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -1857,12 +1857,12 @@
       "description": "List, create, inspect, edit, archive, and delete domain records.",
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json",
-        "https://uaiblocks.vercel.app/r/confirmation-dialog.json",
-        "https://uaiblocks.vercel.app/r/data-table-toolbar.json",
-        "https://uaiblocks.vercel.app/r/description-list.json",
-        "https://uaiblocks.vercel.app/r/empty-state.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json",
+        "https://uaiblocks.dev/r/confirmation-dialog.json",
+        "https://uaiblocks.dev/r/data-table-toolbar.json",
+        "https://uaiblocks.dev/r/description-list.json",
+        "https://uaiblocks.dev/r/empty-state.json"
       ],
       "files": [
         {
@@ -1885,11 +1885,11 @@
         "label",
         "table",
         "textarea",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json",
-        "https://uaiblocks.vercel.app/r/data-table-toolbar.json",
-        "https://uaiblocks.vercel.app/r/empty-state.json",
-        "https://uaiblocks.vercel.app/r/page-tabs.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json",
+        "https://uaiblocks.dev/r/data-table-toolbar.json",
+        "https://uaiblocks.dev/r/empty-state.json",
+        "https://uaiblocks.dev/r/page-tabs.json"
       ],
       "files": [
         {
@@ -1911,12 +1911,12 @@
         "label",
         "select",
         "table",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json",
-        "https://uaiblocks.vercel.app/r/file-upload.json",
-        "https://uaiblocks.vercel.app/r/progress-summary.json",
-        "https://uaiblocks.vercel.app/r/status-banner.json",
-        "https://uaiblocks.vercel.app/r/step-indicator.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json",
+        "https://uaiblocks.dev/r/file-upload.json",
+        "https://uaiblocks.dev/r/progress-summary.json",
+        "https://uaiblocks.dev/r/status-banner.json",
+        "https://uaiblocks.dev/r/step-indicator.json"
       ],
       "files": [
         {
@@ -1936,12 +1936,12 @@
         "button",
         "label",
         "radio-group",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json",
-        "https://uaiblocks.vercel.app/r/approval-card.json",
-        "https://uaiblocks.vercel.app/r/empty-state.json",
-        "https://uaiblocks.vercel.app/r/filter-bar.json",
-        "https://uaiblocks.vercel.app/r/metric-card.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json",
+        "https://uaiblocks.dev/r/approval-card.json",
+        "https://uaiblocks.dev/r/empty-state.json",
+        "https://uaiblocks.dev/r/filter-bar.json",
+        "https://uaiblocks.dev/r/metric-card.json"
       ],
       "files": [
         {
@@ -1960,11 +1960,11 @@
       "description": "Filters, events, details, and export controls.",
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json",
-        "https://uaiblocks.vercel.app/r/audit-log.json",
-        "https://uaiblocks.vercel.app/r/date-range-picker.json",
-        "https://uaiblocks.vercel.app/r/filter-bar.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json",
+        "https://uaiblocks.dev/r/audit-log.json",
+        "https://uaiblocks.dev/r/date-range-picker.json",
+        "https://uaiblocks.dev/r/filter-bar.json"
       ],
       "files": [
         {
@@ -1985,12 +1985,12 @@
         "button",
         "label",
         "textarea",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json",
-        "https://uaiblocks.vercel.app/r/activity-timeline.json",
-        "https://uaiblocks.vercel.app/r/description-list.json",
-        "https://uaiblocks.vercel.app/r/metric-card.json",
-        "https://uaiblocks.vercel.app/r/status-banner.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json",
+        "https://uaiblocks.dev/r/activity-timeline.json",
+        "https://uaiblocks.dev/r/description-list.json",
+        "https://uaiblocks.dev/r/metric-card.json",
+        "https://uaiblocks.dev/r/status-banner.json"
       ],
       "files": [
         {
@@ -2009,10 +2009,10 @@
       "description": "Select metrics, dimensions, filters, visualization, and export format.",
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json",
-        "https://uaiblocks.vercel.app/r/filter-bar.json",
-        "https://uaiblocks.vercel.app/r/metric-card.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json",
+        "https://uaiblocks.dev/r/filter-bar.json",
+        "https://uaiblocks.dev/r/metric-card.json"
       ],
       "files": [
         {
@@ -2032,10 +2032,10 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/product-gallery.json",
-        "https://uaiblocks.vercel.app/r/quantity-picker.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/product-gallery.json",
+        "https://uaiblocks.dev/r/quantity-picker.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -2056,9 +2056,9 @@
         "button",
         "label",
         "select",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/filter-bar.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/filter-bar.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -2078,12 +2078,12 @@
       "registryDependencies": [
         "button",
         "sheet",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/cart-item.json",
-        "https://uaiblocks.vercel.app/r/coupon-field.json",
-        "https://uaiblocks.vercel.app/r/price-summary.json",
-        "https://uaiblocks.vercel.app/r/quantity-picker.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/cart-item.json",
+        "https://uaiblocks.dev/r/coupon-field.json",
+        "https://uaiblocks.dev/r/price-summary.json",
+        "https://uaiblocks.dev/r/quantity-picker.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -2102,11 +2102,11 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/price-summary.json",
-        "https://uaiblocks.vercel.app/r/status-banner.json",
-        "https://uaiblocks.vercel.app/r/step-indicator.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/price-summary.json",
+        "https://uaiblocks.dev/r/status-banner.json",
+        "https://uaiblocks.dev/r/step-indicator.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -2126,10 +2126,10 @@
       "registryDependencies": [
         "button",
         "collapsible",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/description-list.json",
-        "https://uaiblocks.vercel.app/r/order-status.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/description-list.json",
+        "https://uaiblocks.dev/r/order-status.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -2149,11 +2149,11 @@
         "button",
         "label",
         "radio-group",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/confirmation-dialog.json",
-        "https://uaiblocks.vercel.app/r/description-list.json",
-        "https://uaiblocks.vercel.app/r/pricing-toggle.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/confirmation-dialog.json",
+        "https://uaiblocks.dev/r/description-list.json",
+        "https://uaiblocks.dev/r/pricing-toggle.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -2172,10 +2172,10 @@
       "description": "One-time code entry with paste, resend timing, errors, and alternate methods.",
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/inline-feedback.json",
-        "https://uaiblocks.vercel.app/r/status-banner.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/inline-feedback.json",
+        "https://uaiblocks.dev/r/status-banner.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -2194,10 +2194,10 @@
       "description": "Resumable setup steps with validation, progress, optional steps, and completion.",
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/step-indicator.json",
-        "https://uaiblocks.vercel.app/r/status-banner.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/step-indicator.json",
+        "https://uaiblocks.dev/r/status-banner.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -2217,10 +2217,10 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/form-field.json",
-        "https://uaiblocks.vercel.app/r/status-banner.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/form-field.json",
+        "https://uaiblocks.dev/r/status-banner.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -2239,10 +2239,10 @@
       "dependencies": ["class-variance-authority"],
       "registryDependencies": [
         "toggle",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/author-card.json",
-        "https://uaiblocks.vercel.app/r/share-menu.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/author-card.json",
+        "https://uaiblocks.dev/r/share-menu.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -2261,10 +2261,10 @@
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/app-sidebar.json",
-        "https://uaiblocks.vercel.app/r/breadcrumb-trail.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/app-sidebar.json",
+        "https://uaiblocks.dev/r/breadcrumb-trail.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -2284,11 +2284,11 @@
       "registryDependencies": [
         "label",
         "select",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/changelog-entry.json",
-        "https://uaiblocks.vercel.app/r/empty-state.json",
-        "https://uaiblocks.vercel.app/r/filter-bar.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/changelog-entry.json",
+        "https://uaiblocks.dev/r/empty-state.json",
+        "https://uaiblocks.dev/r/filter-bar.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -2309,10 +2309,10 @@
         "button",
         "textarea",
         "toggle",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/comment.json",
-        "https://uaiblocks.vercel.app/r/reaction-bar.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/comment.json",
+        "https://uaiblocks.dev/r/reaction-bar.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -2332,11 +2332,11 @@
       "registryDependencies": [
         "button",
         "toggle",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/author-card.json",
-        "https://uaiblocks.vercel.app/r/empty-state.json",
-        "https://uaiblocks.vercel.app/r/reaction-bar.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/author-card.json",
+        "https://uaiblocks.dev/r/empty-state.json",
+        "https://uaiblocks.dev/r/reaction-bar.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -2354,10 +2354,10 @@
       "description": "Identity, links, follower counts, pinned work, and recent activity.",
       "dependencies": ["class-variance-authority"],
       "registryDependencies": [
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/activity-timeline.json",
-        "https://uaiblocks.vercel.app/r/author-card.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/activity-timeline.json",
+        "https://uaiblocks.dev/r/author-card.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -2374,12 +2374,12 @@
       "title": "Conversation Thread",
       "description": "Messages, cited sources, response states, and a prompt composer in one thread.",
       "registryDependencies": [
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json",
-        "https://uaiblocks.vercel.app/r/citation.json",
-        "https://uaiblocks.vercel.app/r/message.json",
-        "https://uaiblocks.vercel.app/r/prompt-composer.json",
-        "https://uaiblocks.vercel.app/r/response-status.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json",
+        "https://uaiblocks.dev/r/citation.json",
+        "https://uaiblocks.dev/r/message.json",
+        "https://uaiblocks.dev/r/prompt-composer.json",
+        "https://uaiblocks.dev/r/response-status.json"
       ],
       "files": [
         {
@@ -2397,13 +2397,13 @@
       "title": "Research Session",
       "description": "A research plan, live search activity, sources, and a cited synthesis.",
       "registryDependencies": [
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json",
-        "https://uaiblocks.vercel.app/r/citation.json",
-        "https://uaiblocks.vercel.app/r/progress-summary.json",
-        "https://uaiblocks.vercel.app/r/response-status.json",
-        "https://uaiblocks.vercel.app/r/task-list.json",
-        "https://uaiblocks.vercel.app/r/thinking.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json",
+        "https://uaiblocks.dev/r/citation.json",
+        "https://uaiblocks.dev/r/progress-summary.json",
+        "https://uaiblocks.dev/r/response-status.json",
+        "https://uaiblocks.dev/r/task-list.json",
+        "https://uaiblocks.dev/r/thinking.json"
       ],
       "files": [
         {
@@ -2422,11 +2422,11 @@
       "description": "Attached files, extraction status, and findings that cite the page or cell they came from.",
       "registryDependencies": [
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json",
-        "https://uaiblocks.vercel.app/r/attachment.json",
-        "https://uaiblocks.vercel.app/r/citation.json",
-        "https://uaiblocks.vercel.app/r/progress-summary.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json",
+        "https://uaiblocks.dev/r/attachment.json",
+        "https://uaiblocks.dev/r/citation.json",
+        "https://uaiblocks.dev/r/progress-summary.json"
       ],
       "files": [
         {
@@ -2444,14 +2444,14 @@
       "title": "Agent Run",
       "description": "Agent thinking and tool calls, task progress, approvals, and a final run summary.",
       "registryDependencies": [
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json",
-        "https://uaiblocks.vercel.app/r/approval-card.json",
-        "https://uaiblocks.vercel.app/r/response-status.json",
-        "https://uaiblocks.vercel.app/r/run-summary.json",
-        "https://uaiblocks.vercel.app/r/task-list.json",
-        "https://uaiblocks.vercel.app/r/thinking.json",
-        "https://uaiblocks.vercel.app/r/tool-call.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json",
+        "https://uaiblocks.dev/r/approval-card.json",
+        "https://uaiblocks.dev/r/response-status.json",
+        "https://uaiblocks.dev/r/run-summary.json",
+        "https://uaiblocks.dev/r/task-list.json",
+        "https://uaiblocks.dev/r/thinking.json",
+        "https://uaiblocks.dev/r/tool-call.json"
       ],
       "files": [
         {
@@ -2473,8 +2473,8 @@
         "badge",
         "input",
         "label",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -2495,8 +2495,8 @@
         "button",
         "input",
         "label",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -2516,8 +2516,8 @@
       "registryDependencies": [
         "badge",
         "button",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {
@@ -2536,8 +2536,8 @@
       "dependencies": ["class-variance-authority"],
       "registryDependencies": [
         "radio-group",
-        "https://uaiblocks.vercel.app/r/uai-theme.json",
-        "https://uaiblocks.vercel.app/r/uai-utils.json"
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
       ],
       "files": [
         {

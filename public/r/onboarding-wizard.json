@@ -8,10 +8,10 @@
   ],
   "registryDependencies": [
     "button",
-    "https://uaiblocks.vercel.app/r/uai-theme.json",
-    "https://uaiblocks.vercel.app/r/step-indicator.json",
-    "https://uaiblocks.vercel.app/r/status-banner.json",
-    "https://uaiblocks.vercel.app/r/uai-utils.json"
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/step-indicator.json",
+    "https://uaiblocks.dev/r/status-banner.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
   ],
   "files": [
     {

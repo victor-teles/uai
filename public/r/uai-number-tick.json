@@ -4,7 +4,7 @@
   "title": "Uai Number Tick",
   "description": "Moves only the characters of a formatted number that changed, in one grid cell per character so widths never jump. Shared by Metric Card and Price Summary.",
   "registryDependencies": [
-    "https://uaiblocks.vercel.app/r/uai-theme.json"
+    "https://uaiblocks.dev/r/uai-theme.json"
   ],
   "files": [
     {

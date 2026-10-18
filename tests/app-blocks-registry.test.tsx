@@ -28,9 +28,7 @@ test("publishes every application block without drift and keeps examples executa
     expect(item.accessibility.length).toBeGreaterThanOrEqual(3);
     expect(source).not.toContain("@/registry/");
     for (const [, component] of source.matchAll(/@\/components\/ui\/uai\/([\w-]+)/g)) {
-      expect(output.registryDependencies).toContain(
-        `https://uaiblocks.vercel.app/r/${component}.json`,
-      );
+      expect(output.registryDependencies).toContain(`https://uaiblocks.dev/r/${component}.json`);
     }
   }
 });

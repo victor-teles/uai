@@ -8,7 +8,7 @@ The repository includes a component browser built with Next.js, Fumadocs UI,
 Tailwind CSS, and Bun.
 
 <p align="center">
-  <a href="https://uaiblocks.vercel.app">
+  <a href="https://uaiblocks.dev">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset=".github/readme/uai-hero-dark.gif">
       <source media="(prefers-color-scheme: light)" srcset=".github/readme/uai-hero-light.gif">
@@ -18,7 +18,7 @@ Tailwind CSS, and Bun.
 </p>
 
 ```bash
-bunx shadcn@latest add https://uaiblocks.vercel.app/r/prompt-composer.json
+bunx shadcn@latest add https://uaiblocks.dev/r/prompt-composer.json
 ```
 
 ## Best of Uai
@@ -26,97 +26,97 @@ bunx shadcn@latest add https://uaiblocks.vercel.app/r/prompt-composer.json
 <table>
   <tr>
     <td width="50%" valign="top">
-      <a href="https://uaiblocks.vercel.app/components/prompt-composer">
+      <a href="https://uaiblocks.dev/components/prompt-composer">
         <picture>
           <source media="(prefers-color-scheme: dark)" srcset=".github/readme/tiles/prompt-composer-dark.png">
           <img src=".github/readme/tiles/prompt-composer-light.png" alt="Prompt Composer with a typed message and the ink send button">
         </picture>
       </a>
-      <br><a href="https://uaiblocks.vercel.app/components/prompt-composer"><b>Prompt Composer</b></a> · Forms
+      <br><a href="https://uaiblocks.dev/components/prompt-composer"><b>Prompt Composer</b></a> · Forms
       <br><sub>A prompt bar with ghost plus, ink send, and rounded, pill, ghost, and compact variants.</sub>
     </td>
     <td width="50%" valign="top">
-      <a href="https://uaiblocks.vercel.app/components/thinking">
+      <a href="https://uaiblocks.dev/components/thinking">
         <picture>
           <source media="(prefers-color-scheme: dark)" srcset=".github/readme/tiles/thinking-dark.png">
           <img src=".github/readme/tiles/thinking-light.png" alt="Thinking, complete, with three logged steps">
         </picture>
       </a>
-      <br><a href="https://uaiblocks.vercel.app/components/thinking"><b>Thinking</b></a> · AI
+      <br><a href="https://uaiblocks.dev/components/thinking"><b>Thinking</b></a> · AI
       <br><sub>A live and inspectable activity disclosure with explicit states and structured evidence.</sub>
     </td>
   </tr>
   <tr>
     <td colspan="2" valign="top">
-      <a href="https://uaiblocks.vercel.app/components/agent-run">
+      <a href="https://uaiblocks.dev/components/agent-run">
         <picture>
           <source media="(prefers-color-scheme: dark)" srcset=".github/readme/tiles/agent-run-dark.png">
           <img src=".github/readme/tiles/agent-run-light.png" alt="Agent Run waiting for approval at step 5 of 7, with activity and tasks">
         </picture>
       </a>
-      <br><a href="https://uaiblocks.vercel.app/components/agent-run"><b>Agent Run</b></a> · AI · Block
+      <br><a href="https://uaiblocks.dev/components/agent-run"><b>Agent Run</b></a> · AI · Block
       <br><sub>Agent thinking and tool calls, task progress, approvals, and a final run summary.</sub>
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
-      <a href="https://uaiblocks.vercel.app/components/approval-card">
+      <a href="https://uaiblocks.dev/components/approval-card">
         <picture>
           <source media="(prefers-color-scheme: dark)" srcset=".github/readme/tiles/approval-card-dark.png">
           <img src=".github/readme/tiles/approval-card-light.png" alt="Approval Card, low risk, approved">
         </picture>
       </a>
-      <br><a href="https://uaiblocks.vercel.app/components/approval-card"><b>Approval Card</b></a> · Feedback
+      <br><a href="https://uaiblocks.dev/components/approval-card"><b>Approval Card</b></a> · Feedback
       <br><sub>A controlled decision surface for reviewing an AI action's risk, evidence, and impact.</sub>
     </td>
     <td width="50%" valign="top">
-      <a href="https://uaiblocks.vercel.app/components/pix-payment">
+      <a href="https://uaiblocks.dev/components/pix-payment">
         <picture>
           <source media="(prefers-color-scheme: dark)" srcset=".github/readme/tiles/pix-payment-dark.png">
           <img src=".github/readme/tiles/pix-payment-light.png" alt="Pix Payment for order #4821, paid, with the QR code blurred behind a check">
         </picture>
       </a>
-      <br><a href="https://uaiblocks.vercel.app/components/pix-payment"><b>Pix Payment</b></a> · Brazil
+      <br><a href="https://uaiblocks.dev/components/pix-payment"><b>Pix Payment</b></a> · Brazil
       <br><sub>A Pix charge with QR code, copy-and-paste code, expiry countdown, and payment status.</sub>
     </td>
   </tr>
   <tr>
     <td colspan="2" valign="top">
-      <a href="https://uaiblocks.vercel.app/components/kanban-board">
+      <a href="https://uaiblocks.dev/components/kanban-board">
         <picture>
           <source media="(prefers-color-scheme: dark)" srcset=".github/readme/tiles/kanban-board-dark.png">
           <img src=".github/readme/tiles/kanban-board-light.png" alt="Kanban Board with Backlog, In progress, and In review columns">
         </picture>
       </a>
-      <br><a href="https://uaiblocks.vercel.app/components/kanban-board"><b>Kanban Board</b></a> · Data Display
+      <br><a href="https://uaiblocks.dev/components/kanban-board"><b>Kanban Board</b></a> · Data Display
       <br><sub>Columns, cards, keyboard movement, and empty states.</sub>
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
-      <a href="https://uaiblocks.vercel.app/components/coupon-field">
+      <a href="https://uaiblocks.dev/components/coupon-field">
         <picture>
           <source media="(prefers-color-scheme: dark)" srcset=".github/readme/tiles/coupon-field-dark.png">
           <img src=".github/readme/tiles/coupon-field-light.png" alt="Coupon Field with WELCOME20 applied and the total at $72.00">
         </picture>
       </a>
-      <br><a href="https://uaiblocks.vercel.app/components/coupon-field"><b>Coupon Field</b></a> · Commerce
+      <br><a href="https://uaiblocks.dev/components/coupon-field"><b>Coupon Field</b></a> · Commerce
       <br><sub>A checkout-safe discount field with rounded, pill, and compact variants.</sub>
     </td>
     <td width="50%" valign="top">
-      <a href="https://uaiblocks.vercel.app/components/unsaved-changes-bar">
+      <a href="https://uaiblocks.dev/components/unsaved-changes-bar">
         <picture>
           <source media="(prefers-color-scheme: dark)" srcset=".github/readme/tiles/unsaved-changes-bar-dark.png">
           <img src=".github/readme/tiles/unsaved-changes-bar-light.png" alt="Unsaved Changes Bar floating under an edited workspace name">
         </picture>
       </a>
-      <br><a href="https://uaiblocks.vercel.app/components/unsaved-changes-bar"><b>Unsaved Changes Bar</b></a> · Forms
+      <br><a href="https://uaiblocks.dev/components/unsaved-changes-bar"><b>Unsaved Changes Bar</b></a> · Forms
       <br><sub>Persistent save and discard actions with busy, error, and page-exit warnings.</sub>
     </td>
   </tr>
 </table>
 
-<p align="center"><a href="https://uaiblocks.vercel.app">Browse all 108 items →</a></p>
+<p align="center"><a href="https://uaiblocks.dev">Browse all 108 items →</a></p>
 
 ## Run the site
 
