@@ -7,14 +7,19 @@ import {
   registryGroups,
 } from "@/components/registry/catalog";
 import { registrySourceUrl, repositoryUrl } from "@/lib/repository";
+import { heroDescription, heroTitle } from "@/lib/site";
 
 /** Same base the install command uses, so llms.txt links match the deployed registry. */
 export const registryUrl = process.env.NEXT_PUBLIC_REGISTRY_URL ?? "http://localhost:3000/r";
 export const siteUrl = registryUrl.replace(/\/r\/?$/, "");
 
 const title = "Uai";
-const summary =
-  "Open-code React components and page blocks for websites and web apps, distributed as a shadcn registry. The CLI copies every line into your project, so you own the markup, the styles, and the behavior.";
+/** The approved hero, verbatim: the llms.txt summary line. */
+const summary = `${heroTitle} ${heroDescription}`;
+
+/** What the registry is, for readers that never see the page. */
+const about =
+  "Uai is an open-code shadcn registry of React and Tailwind CSS components and page blocks for websites and web apps. The CLI copies each item and its dependencies into your project, so you own the markup, the styles, and the behavior.";
 
 type ItemPageData = PageData & { title: string; description: string; item: RegistryCatalogItem };
 
@@ -50,6 +55,8 @@ const llmsSource = loader({
 const intro = `# ${title}
 
 > ${summary}
+
+${about}
 
 Uai is pronounced /waj/, like "why", or "UI" said fast. It is the Minas Gerais word for surprise.
 

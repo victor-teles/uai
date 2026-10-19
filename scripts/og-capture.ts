@@ -48,6 +48,9 @@ const transparentCanvas = `
   .uai-registry-specimen::before, .uai-registry-specimen::after,
   .uai-registry-specimen__world::before, .uai-registry-specimen__world::after,
   .uai-registry-specimen__marks { display: none !important; }
+  /* Site chrome that floats over the canvas (variant switch, zoom controls) must never
+     land in a capture; the lime signal is site-only. */
+  .uai-registry-variants, .uai-canvas-controls { visibility: hidden !important; }
 `;
 
 type Size = { width: number; height: number };
@@ -117,19 +120,8 @@ async function withShadow(shot: Buffer, file: string): Promise<Size> {
   return { width: width + shadowPad * 2, height: height + shadowPad * 2 };
 }
 
-/** The uai mark tinted Signal Foreground for the 36px tile, at 2x of its 22px size. */
-async function writeMark() {
-  const source = path.join(import.meta.dirname, "..", "public", "brand", "uai-mark.png");
-  const alpha = await sharp(source).resize(44, 44).extractChannel("alpha").toBuffer();
-  await sharp({ create: { width: 44, height: 44, channels: 3, background: "#14180d" } })
-    .joinChannel(alpha)
-    .png({ compressionLevel: 9 })
-    .toFile(path.join(outDir, "uai-mark.png"));
-}
-
 async function main() {
   mkdirSync(outDir, { recursive: true });
-  await writeMark();
   const manifest = readManifest();
   const browser = await chromium.launch();
 
