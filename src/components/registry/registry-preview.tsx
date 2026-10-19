@@ -5,6 +5,7 @@ import { AiPreview, getAiPreviewControl } from "./ai/preview";
 import { AiBlocksPreview, getAiBlocksPreviewControl } from "./ai-blocks/preview";
 import { AppBlocksPreview, getAppBlocksPreviewControl } from "./app-blocks/preview";
 import { BrazilPreview, getBrazilPreviewControl } from "./brazil/preview";
+import { BrazilBlocksPreview, getBrazilBlocksPreviewControl } from "./brazil-blocks/preview";
 import type { RegistryItemId } from "./catalog";
 import { CommerceBlocksPreview, getCommerceBlocksPreviewControl } from "./commerce-blocks/preview";
 import { CommunityPreview, getCommunityPreviewControl } from "./community/preview";
@@ -50,6 +51,7 @@ const groupPreviews = [
   { getControl: getCommunityBlocksPreviewControl, Preview: CommunityBlocksPreview },
   { getControl: getAiBlocksPreviewControl, Preview: AiBlocksPreview },
   { getControl: getBrazilPreviewControl, Preview: BrazilPreview },
+  { getControl: getBrazilBlocksPreviewControl, Preview: BrazilBlocksPreview },
   { getControl: getCorePreviewControl, Preview: CorePreview },
 ] as const;
 

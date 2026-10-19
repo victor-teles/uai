@@ -10,6 +10,17 @@
       "height": 840
     }
   },
+  "address-form": {
+    "variant": "stacked",
+    "dark": {
+      "width": 962,
+      "height": 1100
+    },
+    "light": {
+      "width": 962,
+      "height": 1100
+    }
+  },
   "agent-run": {
     "variant": "split",
     "dark": {

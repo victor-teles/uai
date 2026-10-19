@@ -3,6 +3,7 @@ import { type AiItemId, aiCatalog } from "./ai/catalog";
 import { type AiBlocksItemId, aiBlocksCatalog } from "./ai-blocks/catalog";
 import { type AppBlocksItemId, appBlocksCatalog } from "./app-blocks/catalog";
 import { type BrazilItemId, brazilCatalog } from "./brazil/catalog";
+import { type BrazilBlocksItemId, brazilBlocksCatalog } from "./brazil-blocks/catalog";
 import { type CommerceBlocksItemId, commerceBlocksCatalog } from "./commerce-blocks/catalog";
 import { type CommunityItemId, communityCatalog } from "./community/catalog";
 import { type CommunityBlocksItemId, communityBlocksCatalog } from "./community-blocks/catalog";
@@ -41,7 +42,8 @@ export type RegistryItemId =
   | CommerceBlocksItemId
   | CommunityBlocksItemId
   | AiBlocksItemId
-  | BrazilItemId;
+  | BrazilItemId
+  | BrazilBlocksItemId;
 
 export type RegistryCategory =
   | "All"
@@ -87,6 +89,7 @@ export const registryCatalog: readonly RegistryCatalogItem[] = [
   ...communityBlocksCatalog,
   ...aiBlocksCatalog,
   ...brazilCatalog,
+  ...brazilBlocksCatalog,
 ] as const;
 
 export const registryCategories: readonly RegistryCategory[] = [
@@ -115,6 +118,7 @@ const registryBlockIds: ReadonlySet<RegistryItemId> = new Set(
     ...commerceBlocksCatalog,
     ...communityBlocksCatalog,
     ...aiBlocksCatalog,
+    ...brazilBlocksCatalog,
   ].map((item) => item.id),
 );
 

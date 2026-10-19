@@ -41,7 +41,7 @@ ideas:
     title: Address Form (ViaCEP)
     category: Brazil
     kind: block
-    status: todo
+    status: done
     description: >-
       A Brazilian address form that starts from the CEP and fills logradouro, bairro,
       cidade, and UF from ViaCEP (https://viacep.com.br/ws/<cep>/json/). Número and
