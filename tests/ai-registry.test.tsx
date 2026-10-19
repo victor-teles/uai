@@ -5,7 +5,11 @@ import { getAiPreviewControl } from "@/components/registry/ai/preview";
 import { AiCompositionFixture } from "./ai-composition.fixture";
 
 test("publishes every AI source without drift and keeps examples executable", async () => {
-  expect(aiCatalog.length).toBe(6);
+  // Derived, not counted: every AI preview file has a catalog entry and the reverse.
+  const previews = Array.from(new Bun.Glob("*-preview.tsx").scanSync("src/components/registry/ai"))
+    .map((file) => file.replace(/-preview\.tsx$/, ""))
+    .sort();
+  expect(aiCatalog.map((item): string => item.id).sort()).toEqual(previews);
   for (const item of aiCatalog) {
     const source = await Bun.file(`src/registry/uai/components/${item.id}.tsx`).text();
     const mirror = await Bun.file(`src/components/ui/uai/${item.id}.tsx`).text();
@@ -17,14 +21,17 @@ test("publishes every AI source without drift and keeps examples executable", as
     expect(item.category).toBe("AI");
     expect(item.accessibility.length).toBeGreaterThanOrEqual(3);
     expect(source).not.toContain("@/registry/");
-    expect(getAiPreviewControl(item.id)?.options.length).toBe(3);
+    // Diff Review ships unified and compact; split side-by-side is a follow-up.
+    expect(getAiPreviewControl(item.id)?.options.length).toBeGreaterThanOrEqual(2);
   }
 });
 
-test("composes all six examples together with unique identifiers", () => {
+test("composes every example together with unique identifiers", () => {
   const view = render(<AiCompositionFixture />);
   const ids = Array.from(view.container.querySelectorAll("[id]")).map((element) => element.id);
   expect(new Set(ids).size).toBe(ids.length);
-  expect(view.container.querySelectorAll("[data-variant]").length).toBeGreaterThanOrEqual(6);
+  expect(view.container.querySelectorAll("[data-variant]").length).toBeGreaterThanOrEqual(
+    aiCatalog.length,
+  );
   view.unmount();
 });

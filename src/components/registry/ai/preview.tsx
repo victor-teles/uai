@@ -1,7 +1,9 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { ATTACHMENT_VARIANTS, type AttachmentVariant } from "@/components/ui/uai/attachment";
 import { CITATION_VARIANTS, type CitationVariant } from "@/components/ui/uai/citation";
+import type { DiffReviewVariant } from "@/components/ui/uai/diff-review";
 import { MESSAGE_VARIANTS, type MessageVariant } from "@/components/ui/uai/message";
 import {
   RESPONSE_STATUS_VARIANTS,
@@ -18,9 +20,16 @@ import { ResponseStatusPreview } from "./response-status-preview";
 import { RunSummaryPreview } from "./run-summary-preview";
 import { ToolCallPreview } from "./tool-call-preview";
 
+// The diff engine (@pierre/diffs and Shiki) loads only on the Diff Review page, so this
+// file names its variants instead of importing DIFF_REVIEW_VARIANTS from the component.
+const DiffReviewPreview = dynamic(() =>
+  import("./diff-review-preview").then((module) => module.DiffReviewPreview),
+);
+
 const controls: Record<string, { label: string; variants: readonly string[] }> = {
   message: { label: "message variant", variants: MESSAGE_VARIANTS },
   citation: { label: "citation variant", variants: CITATION_VARIANTS },
+  "diff-review": { label: "diff review variant", variants: ["unified", "compact"] },
   attachment: { label: "attachment variant", variants: ATTACHMENT_VARIANTS },
   "tool-call": { label: "tool call variant", variants: TOOL_CALL_VARIANTS },
   "response-status": { label: "response status variant", variants: RESPONSE_STATUS_VARIANTS },
@@ -47,7 +56,12 @@ export function AiPreview({ itemId, selection }: { itemId: string; selection: st
       <div
         style={{
           width: "100%",
-          maxWidth: itemId === "attachment" && selection !== "row" ? 600 : 540,
+          maxWidth:
+            itemId === "diff-review" && selection !== "compact"
+              ? 560
+              : itemId === "attachment" && selection !== "row"
+                ? 600
+                : 540,
           minWidth: 0,
           padding: "24px 0",
           minHeight: itemId === "citation" ? 240 : undefined,
@@ -55,6 +69,7 @@ export function AiPreview({ itemId, selection }: { itemId: string; selection: st
       >
         {itemId === "message" && <MessagePreview variant={selection as MessageVariant} />}
         {itemId === "citation" && <CitationPreview variant={selection as CitationVariant} />}
+        {itemId === "diff-review" && <DiffReviewPreview variant={selection as DiffReviewVariant} />}
         {itemId === "attachment" && <AttachmentPreview variant={selection as AttachmentVariant} />}
         {itemId === "tool-call" && <ToolCallPreview variant={selection as ToolCallVariant} />}
         {itemId === "response-status" && (

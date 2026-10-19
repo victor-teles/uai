@@ -195,6 +195,8 @@ The catalog includes Message, Citation, Attachment, Tool Call, Response Status, 
 
 These components own local interaction and accessibility: message roles and streaming busy state, copy confirmation, the citation preview disclosure, upload progress and failure semantics, the tool disclosure, polite status announcements, and focus continuity between Stop and Retry. Applications own model calls, streaming transport, source retrieval, uploads, tool execution, cancellation, and run data. Previews simulate everything locally: the assistant reply streams from a fixed string, the upload advances on a timer, the response status moves from queued to complete on timers, and the tool-call result is chosen from a select.
 
+Diff Review covers the moment before an agent's edit lands: per-change accept and reject with undo, counters and footer copy derived from the decisions, a stale-file guard, and a compact multi-file summary for run sidebars. It renders lines with the Apache-2.0 `@pierre/diffs` library; parsing the edit (or calling `diffReviewFilesFromPatch` on a unified patch), applying it, and deciding what is stale stay with the application.
+
 ## Marketing sites
 
 The catalog includes Hero Section, Feature Showcase, Pricing Section, Testimonials Section, FAQ Section, Call to Action, Waitlist Section, and Contact Section. Each block composes existing Uai components, ships three named layout variants with replaceable compound regions, an interactive preview, installation source, usage code, accessibility notes, and behavior tests. Blocks stack on narrow containers.

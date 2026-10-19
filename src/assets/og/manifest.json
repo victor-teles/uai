@@ -417,6 +417,17 @@
       "height": 616
     }
   },
+  "diff-review": {
+    "variant": "unified",
+    "dark": {
+      "width": 1159,
+      "height": 1100
+    },
+    "light": {
+      "width": 1159,
+      "height": 1100
+    }
+  },
   "document-field": {
     "variant": "rounded",
     "dark": {
