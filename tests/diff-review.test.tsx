@@ -1,4 +1,4 @@
-import { expect, mock, test } from "bun:test";
+import { afterEach, expect, mock, test } from "bun:test";
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -82,11 +82,26 @@ function Review(props: Partial<DiffReviewProps>) {
   );
 }
 
+const originalMatchMedia = window.matchMedia;
 const reduce = () =>
   Object.defineProperty(window, "matchMedia", {
     configurable: true,
-    value: (query: string) => ({ matches: query.includes("reduce"), addEventListener() {} }),
+    writable: true,
+    value: (query: string) => ({
+      matches: query.includes("reduce"),
+      addEventListener() {},
+      removeEventListener() {},
+    }),
   });
+
+// Other test files share this window; put the real matchMedia back.
+afterEach(() => {
+  Object.defineProperty(window, "matchMedia", {
+    configurable: true,
+    writable: true,
+    value: originalMatchMedia,
+  });
+});
 
 test("exports the unified and compact variants", () => {
   expect(DIFF_REVIEW_VARIANTS).toEqual(["unified", "compact"]);
