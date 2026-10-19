@@ -142,6 +142,17 @@
       "height": 945
     }
   },
+  "boleto-payment": {
+    "variant": "card",
+    "dark": {
+      "width": 1124,
+      "height": 1100
+    },
+    "light": {
+      "width": 1124,
+      "height": 1100
+    }
+  },
   "breadcrumb-trail": {
     "variant": "chevron",
     "dark": {

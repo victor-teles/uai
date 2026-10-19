@@ -33,7 +33,7 @@ jobs:
       - run: bun run test
 
   consumer:
-    # Installs every registry:ui and registry:block item (108 today) into a fresh default Next app
+    # Installs every registry:ui and registry:block item into a fresh default Next app
     # initialised the way shadcn users start: `shadcn init -d` (Base UI, the CLI default) and
     # `shadcn init -b radix`. Items come from this PR's own public/r build, served locally, never
     # from production. All items rather than a sample: the add, tsc, and next build take about a
