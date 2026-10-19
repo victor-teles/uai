@@ -262,6 +262,7 @@ export function AddressForm({
   const cepRef = useRef<HTMLDivElement>(null);
   const inputs = useRef(new Map<string, HTMLElement>());
   const timers = useRef<number[]>([]);
+  const focusTimer = useRef<number | undefined>(undefined);
   const focusWasInCep = useRef(false);
   const appliedResult = useRef<AddressLookupResult | null | undefined>(undefined);
 
@@ -281,11 +282,16 @@ export function AddressForm({
   const clearTimers = useCallback(() => {
     for (const timer of timers.current) window.clearTimeout(timer);
     timers.current = [];
+    window.clearTimeout(focusTimer.current);
   }, []);
+
+  /** Typing anywhere in the block cancels a pending focus move: the person has moved on. */
+  const cancelFocusMove = () => window.clearTimeout(focusTimer.current);
 
   useEffect(() => clearTimers, [clearTimers]);
 
   const setField = <Key extends keyof Address>(field: Key, next: Address[Key]) => {
+    cancelFocusMove();
     if ((RESOLVABLE_FIELDS as readonly string[]).includes(field)) {
       const resolvable = field as ResolvableField;
       edited.current.add(resolvable);
@@ -295,6 +301,7 @@ export function AddressForm({
   };
 
   const setCep = (cep: string) => {
+    cancelFocusMove();
     commit({ ...latest.current, cep });
   };
 
@@ -382,7 +389,7 @@ export function AddressForm({
           ? "complement"
           : "number";
     if (reduced) moveFocus(target);
-    else timers.current.push(window.setTimeout(() => moveFocus(target), FOCUS_AFTER_MS));
+    else focusTimer.current = window.setTimeout(() => moveFocus(target), FOCUS_AFTER_MS);
   }, [status, lookedUpCep, lookupResult, clearTimers, moveFocus]);
 
   // Native constraint validation: the consumer's form won't submit while a required field is
@@ -404,8 +411,16 @@ export function AddressForm({
       const field = event.target.dataset.addressField;
       (field ? inputs.current.get(field) : event.target)?.focus();
     };
+    // A press or key in the block means the person has moved on; drop a pending focus move.
+    const cancel = () => window.clearTimeout(focusTimer.current);
     fieldset.addEventListener("invalid", onInvalid, true);
-    return () => fieldset.removeEventListener("invalid", onInvalid, true);
+    fieldset.addEventListener("pointerdown", cancel, true);
+    fieldset.addEventListener("keydown", cancel, true);
+    return () => {
+      fieldset.removeEventListener("invalid", onInvalid, true);
+      fieldset.removeEventListener("pointerdown", cancel, true);
+      fieldset.removeEventListener("keydown", cancel, true);
+    };
   }, []);
 
   const registerInput = useCallback((field: string, element: HTMLElement | null) => {

@@ -225,6 +225,15 @@ test("never steals focus from outside the CEP field", async () => {
   expect(document.activeElement?.id).toBe(field("Complemento").id);
 });
 
+test("going back to the CEP right after a result cancels the pending focus move", async () => {
+  const { harness, user } = setup();
+  await user.type(field("CEP"), "30130110");
+  act(() => harness.resolve("found", afonsoPena));
+  await user.click(field("CEP"));
+  await new Promise((resolve) => setTimeout(resolve, 300));
+  expect(document.activeElement?.id).toBe(field("CEP").id);
+});
+
 test("editing drops the marker and a new CEP re-fills only the unedited fields", async () => {
   const { harness, user, view } = setup();
   await user.type(field("CEP"), "30130110");
