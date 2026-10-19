@@ -19,11 +19,11 @@ import {
   useTheme as applyTheme,
   componentIds,
   openComponent,
-  PREVIEW,
   settle,
   THEMES,
   type Theme,
 } from "../e2e/helpers";
+import { FLOATING_CHROME, findSpecimen } from "./og-clip";
 
 const baseURL = process.env.OG_BASE_URL ?? "http://127.0.0.1:3100";
 const outDir = path.join(import.meta.dirname, "..", "src", "assets", "og");
@@ -48,6 +48,12 @@ const transparentCanvas = `
   .uai-registry-specimen::before, .uai-registry-specimen::after,
   .uai-registry-specimen__world::before, .uai-registry-specimen__world::after,
   .uai-registry-specimen__marks { display: none !important; }
+  /* Site chrome that floats over the canvas (variant switch, zoom controls) must never
+     land in a capture; the lime signal is site-only. */
+  ${FLOATING_CHROME} { visibility: hidden !important; }
+  /* The page below the canvas ("Code example" and the other panels) never paints into
+     a capture either; specimenClip() also keeps the clip off it. */
+  .uai-bench__dock { visibility: hidden !important; }
 `;
 
 type Size = { width: number; height: number };
@@ -65,29 +71,19 @@ function readManifest(): Manifest {
 }
 
 /**
- * The item's own root when it renders visibly on the canvas, otherwise the preview's
- * top element (dialogs and sheets render a trigger until they open).
+ * The part of the specimen inside the canvas (`findSpecimen` in `og-clip.ts`), never the
+ * element's whole box: a tall block runs below the canvas, where the page's "Code
+ * example" sits.
  */
 async function captureSpecimen(page: Page, id: string) {
-  const candidates = [
-    page.locator(`${PREVIEW} [data-slot="${id}"]:visible`).first(),
-    page
-      .locator(`${PREVIEW} .uai-registry-specimen__world > :not(.uai-registry-specimen__marks)`)
-      .first(),
-  ];
-  for (const candidate of candidates) {
-    if ((await candidate.count()) === 0) continue;
-    try {
-      return await candidate.screenshot({
-        omitBackground: true,
-        animations: "disabled",
-        timeout: 5_000,
-      });
-    } catch {
-      // Not visible or not an element box; try the next candidate.
-    }
-  }
-  throw new Error(`No visible specimen for ${id}`);
+  const { clip, clipped } = await findSpecimen(page, id);
+  const shot = await page.screenshot({
+    clip,
+    omitBackground: true,
+    animations: "disabled",
+    timeout: 5_000,
+  });
+  return { shot, clipped };
 }
 
 /** Fits the capture to the panel and composites it over its soft shadow. */
@@ -117,19 +113,8 @@ async function withShadow(shot: Buffer, file: string): Promise<Size> {
   return { width: width + shadowPad * 2, height: height + shadowPad * 2 };
 }
 
-/** The uai mark tinted Signal Foreground for the 36px tile, at 2x of its 22px size. */
-async function writeMark() {
-  const source = path.join(import.meta.dirname, "..", "public", "brand", "uai-mark.png");
-  const alpha = await sharp(source).resize(44, 44).extractChannel("alpha").toBuffer();
-  await sharp({ create: { width: 44, height: 44, channels: 3, background: "#14180d" } })
-    .joinChannel(alpha)
-    .png({ compressionLevel: 9 })
-    .toFile(path.join(outDir, "uai-mark.png"));
-}
-
 async function main() {
   mkdirSync(outDir, { recursive: true });
-  await writeMark();
   const manifest = readManifest();
   const browser = await chromium.launch();
 
@@ -151,14 +136,14 @@ async function main() {
         .textContent()
         .catch(() => null);
       await page.addStyleTag({ content: transparentCanvas });
-      const shot = await captureSpecimen(page, id);
+      const { shot, clipped } = await captureSpecimen(page, id);
       const size = await withShadow(shot, path.join(outDir, `${id}-${theme}.png`));
       manifest[id] = {
         ...manifest[id],
         variant: variant?.match(/"(.*)"/)?.[1] ?? null,
         [theme]: size,
       };
-      console.log(`${theme} ${id}`);
+      console.log(`${theme} ${id}${clipped ? " (clipped to the canvas)" : ""}`);
     }
     await context.close();
   }

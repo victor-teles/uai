@@ -1,17 +1,10 @@
-import { registryCatalog } from "@/components/registry/catalog";
-import { ogImageContentType, ogImageSize, renderOgImage } from "@/lib/og";
-import { siteDescription } from "@/lib/site";
+import { ogImageContentType, ogImageSize, renderSiteOgImage } from "@/lib/og";
+import { siteTitle } from "@/lib/site";
 
-export const alt = "Uai — Open code for web products";
+export const alt = siteTitle;
 export const size = ogImageSize;
 export const contentType = ogImageContentType;
 
 export default function Image() {
-  return renderOgImage({
-    kind: "registry",
-    eyebrow: "shadcn",
-    position: `${registryCatalog.length} items`,
-    title: "Open code for web products",
-    description: siteDescription,
-  });
+  return renderSiteOgImage();
 }

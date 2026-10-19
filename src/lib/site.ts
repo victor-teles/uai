@@ -1,3 +1,4 @@
+import { registryCatalog } from "@/components/registry/catalog";
 import registry from "../../registry.json";
 
 /**
@@ -12,10 +13,18 @@ export const siteUrl = registry.homepage.replace(/\/$/, "");
 
 export const siteName = "Uai";
 
-export const siteTitle = "Uai — Open code for web products";
+/**
+ * Approved home hero (17 Oct 2026). The overview `<h1>` and intro, the default title,
+ * the meta and social descriptions, the share image, and llms.txt all read these, so
+ * the story is told once. The count is the catalog length, as on the home page.
+ */
+export const heroTitle = "Components that feel finished.";
 
-export const siteDescription =
-  "Open-code React patterns for websites and web applications, distributed through the shadcn CLI.";
+export const heroDescription = `${registryCatalog.length} shadcn components and blocks with real motion and micro-interactions built in. Copy them with the CLI and own every line.`;
+
+export const siteTitle = `${siteName} — ${heroTitle}`;
+
+export const siteDescription = heroDescription;
 
 /** Absolute URL for a site path such as `/components/thinking`. */
 export function absoluteUrl(pathname: string) {
