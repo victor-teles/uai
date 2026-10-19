@@ -305,6 +305,26 @@
       "categories": ["ai", "forms"]
     },
     {
+      "name": "voice-input",
+      "type": "registry:ui",
+      "title": "Voice Input",
+      "description": "Dictation for the composer: the mic opens into a live waveform with a timer, cancel and finish, then washes the words it added.",
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "button",
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/voice-input.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/voice-input.tsx"
+        }
+      ],
+      "categories": ["ai", "voice"]
+    },
+    {
       "name": "sign-in-card",
       "type": "registry:ui",
       "title": "Sign-in Card",

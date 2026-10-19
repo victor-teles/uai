@@ -195,6 +195,8 @@ The catalog includes Message, Citation, Attachment, Tool Call, Response Status, 
 
 These components own local interaction and accessibility: message roles and streaming busy state, copy confirmation, the citation preview disclosure, upload progress and failure semantics, the tool disclosure, polite status announcements, and focus continuity between Stop and Retry. Applications own model calls, streaming transport, source retrieval, uploads, tool execution, cancellation, and run data. Previews simulate everything locally: the assistant reply streams from a fixed string, the upload advances on a timer, the response status moves from queued to complete on timers, and the tool-call result is chosen from a select.
 
+Voice Input adds dictation to Prompt Composer. The component owns the recorder overlay, the live waveform, focus moving to Finish and back to the field, Esc and Enter, ⌥ Space while the composer has focus, one polite announcement per step, and the wash over inserted words. Applications own getUserMedia, recording, transcription, permissions, and inserting the transcript into the field; the preview simulates the level with a seeded function and the transcript with timers.
+
 ## Marketing sites
 
 The catalog includes Hero Section, Feature Showcase, Pricing Section, Testimonials Section, FAQ Section, Call to Action, Waitlist Section, and Contact Section. Each block composes existing Uai components, ships three named layout variants with replaceable compound regions, an interactive preview, installation source, usage code, accessibility notes, and behavior tests. Blocks stack on narrow containers.

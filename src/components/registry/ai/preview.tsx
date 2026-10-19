@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/uai/response-status";
 import { RUN_SUMMARY_VARIANTS, type RunSummaryVariant } from "@/components/ui/uai/run-summary";
 import { TOOL_CALL_VARIANTS, type ToolCallVariant } from "@/components/ui/uai/tool-call";
+import { VOICE_INPUT_VARIANTS, type VoiceInputVariant } from "@/components/ui/uai/voice-input";
 import type { PreviewControl } from "../preview-chrome";
 import { PreviewStage } from "../preview-chrome";
 import { AttachmentPreview } from "./attachment-preview";
@@ -17,9 +18,11 @@ import { MessagePreview } from "./message-preview";
 import { ResponseStatusPreview } from "./response-status-preview";
 import { RunSummaryPreview } from "./run-summary-preview";
 import { ToolCallPreview } from "./tool-call-preview";
+import { VoiceInputPreview } from "./voice-input-preview";
 
 const controls: Record<string, { label: string; variants: readonly string[] }> = {
   message: { label: "message variant", variants: MESSAGE_VARIANTS },
+  "voice-input": { label: "voice input variant", variants: VOICE_INPUT_VARIANTS },
   citation: { label: "citation variant", variants: CITATION_VARIANTS },
   attachment: { label: "attachment variant", variants: ATTACHMENT_VARIANTS },
   "tool-call": { label: "tool call variant", variants: TOOL_CALL_VARIANTS },
@@ -54,6 +57,7 @@ export function AiPreview({ itemId, selection }: { itemId: string; selection: st
         }}
       >
         {itemId === "message" && <MessagePreview variant={selection as MessageVariant} />}
+        {itemId === "voice-input" && <VoiceInputPreview variant={selection as VoiceInputVariant} />}
         {itemId === "citation" && <CitationPreview variant={selection as CitationVariant} />}
         {itemId === "attachment" && <AttachmentPreview variant={selection as AttachmentVariant} />}
         {itemId === "tool-call" && <ToolCallPreview variant={selection as ToolCallVariant} />}

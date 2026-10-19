@@ -1165,6 +1165,17 @@
       "height": 344
     }
   },
+  "voice-input": {
+    "variant": "inline",
+    "dark": {
+      "width": 1320,
+      "height": 324
+    },
+    "light": {
+      "width": 1320,
+      "height": 324
+    }
+  },
   "waitlist-section": {
     "variant": "split",
     "dark": {
