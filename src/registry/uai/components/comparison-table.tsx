@@ -145,7 +145,7 @@ export function ComparisonTableDifferencesToggle({
         id={checkboxId}
         checked={context.highlight}
         onCheckedChange={(checked) => context.setHighlight(checked === true)}
-        className="m-0 size-3.5 shadow-none [&_svg]:size-3"
+        className="m-0 size-3.5 border-subtle-foreground data-[state=checked]:border-primary data-checked:border-primary shadow-none [&_svg]:size-3"
       />
       {children}
     </Label>
