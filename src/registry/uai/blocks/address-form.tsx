@@ -133,8 +133,10 @@ export function getMissingAddressFields(address: Address): RequiredField[] {
   return missing;
 }
 
-/** Cascade timing from the motion spec: 60ms between fields, the wash settles 120ms after each. */
-const CASCADE_STEP_MS = 60;
+/**
+ * Cascade timing: fields fill 40ms apart (the S1 stagger cap; the step is written inline in the
+ * cascade as `index * 40` so the motion lint checks it), and the wash settles 120ms after each.
+ */
 const WASH_SETTLE_MS = 120;
 const FOCUS_AFTER_MS = 250;
 
@@ -368,15 +370,16 @@ export function AddressForm({
     } else {
       commit(start);
       queue.forEach(([field, next], index) => {
-        const begin = index * CASCADE_STEP_MS;
+        // Stagger step: keep it at or under 40ms (S1). premium-lint reads this delay.
+        const delay = index * 40;
         const schedule = (ms: number, run: () => void) =>
           timers.current.push(window.setTimeout(run, ms));
-        schedule(begin, () => {
+        schedule(delay, () => {
           commit({ ...latest.current, [field]: next });
           setFills((current) => ({ ...current, [field]: "enter" }));
         });
-        schedule(begin + 16, () => setFills((current) => ({ ...current, [field]: "wash" })));
-        schedule(begin + WASH_SETTLE_MS, () =>
+        schedule(delay + 16, () => setFills((current) => ({ ...current, [field]: "wash" })));
+        schedule(delay + WASH_SETTLE_MS, () =>
           setFills((current) => ({ ...current, [field]: "settled" })),
         );
       });

@@ -1,4 +1,5 @@
 import { afterEach, expect, test } from "bun:test";
+import { readFileSync } from "node:fs";
 import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
@@ -26,6 +27,7 @@ import {
   EMPTY_ADDRESS,
   getMissingAddressFields,
 } from "@/registry/uai/blocks/address-form";
+import { lintSource } from "../scripts/premium-lint";
 
 const afonsoPena: AddressLookupResult = {
   street: "Avenida Afonso Pena",
@@ -172,6 +174,37 @@ test("looks up, cascades the found address with markers, announces it, and focus
     field("Rua").getAttribute("aria-describedby")?.split(" ")[0] ?? "",
   );
   expect(description?.textContent).toBe("Preenchido pelo CEP");
+});
+
+test("the cascade staggers fields at most 40ms apart (S1), and the motion lint sees the step", async () => {
+  const file = "src/registry/uai/blocks/address-form.tsx";
+  const source = readFileSync(file, "utf8");
+  const stagger = (code: string) =>
+    lintSource(file, code).filter((finding) => finding.rule === "stagger-cap").length;
+  expect(stagger(source)).toBe(0);
+  expect(stagger(source.replaceAll("index * 40", "index * 60"))).toBe(1);
+
+  const { harness, user, view } = setup();
+  await user.type(field("CEP"), "30130110");
+  const delays: number[] = [];
+  const realSetTimeout = window.setTimeout;
+  window.setTimeout = ((handler: TimerHandler, ms?: number, ...rest: unknown[]) => {
+    delays.push(ms ?? 0);
+    return realSetTimeout(handler, ms, ...rest);
+  }) as typeof window.setTimeout;
+  try {
+    act(() => harness.resolve("found", afonsoPena));
+  } finally {
+    window.setTimeout = realSetTimeout;
+  }
+  // Each field schedules its value at `start` and its wash at `start + 16`.
+  const starts = [...new Set(delays)]
+    .filter((ms) => delays.includes(ms + 16))
+    .sort((a, b) => a - b);
+  expect(starts.length).toBe(4);
+  const steps = starts.slice(1).map((ms, index) => ms - (starts[index] ?? 0));
+  expect(steps.every((step) => step > 0 && step <= 40)).toBe(true);
+  await waitFor(() => expect(markers(view.container).length).toBe(4));
 });
 
 test("partial results fill the city and UF and move focus to Rua", async () => {
