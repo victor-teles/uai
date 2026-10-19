@@ -736,6 +736,17 @@
       "height": 1048
     }
   },
+  "pix-automatico": {
+    "variant": "card",
+    "dark": {
+      "width": 983,
+      "height": 1100
+    },
+    "light": {
+      "width": 983,
+      "height": 1100
+    }
+  },
   "pix-payment": {
     "variant": "card",
     "dark": {

@@ -2529,6 +2529,30 @@
       "categories": ["brazil", "commerce", "checkout"]
     },
     {
+      "name": "pix-automatico",
+      "type": "registry:ui",
+      "title": "Pix Automático",
+      "description": "The authorization step for recurring Pix: clear terms, QR Code or bank-app confirmation, a live waiting state, and an active view with the next charges.",
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "badge",
+        "button",
+        "popover",
+        "toggle",
+        "https://uaiblocks.dev/r/uai-number-tick.json",
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/pix-automatico.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/pix-automatico.tsx"
+        }
+      ],
+      "categories": ["brazil", "commerce", "checkout"]
+    },
+    {
       "name": "installment-picker",
       "type": "registry:ui",
       "title": "Installment Picker",
