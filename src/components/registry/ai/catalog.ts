@@ -1,5 +1,6 @@
 import {
   Activity,
+  CircleHelp,
   ClipboardCheck,
   MessageSquareText,
   Paperclip,
@@ -13,6 +14,7 @@ export type AiItemId =
   | "citation"
   | "attachment"
   | "tool-call"
+  | "agent-question"
   | "response-status"
   | "run-summary";
 
@@ -410,6 +412,139 @@ export function ToolCallPreview({ variant = "card" }: { variant?: ToolCallVarian
       "The header is a disclosure button with aria-expanded and aria-controls for the input and output panel.",
       "Status text sits outside the button in a polite status region, so changes are announced without renaming the control.",
       "Status is conveyed by text as well as icon and color; the running spinner stops under reduced motion.",
+    ],
+  },
+  {
+    id: "agent-question",
+    name: "Agent Question",
+    category: "AI",
+    icon: CircleHelp,
+    description:
+      "Let an agent ask for a decision: single or multiple choice, a recommended option, Something else, number keys, and a record of the answers.",
+    usage: `"use client";
+
+import { RotateCcw } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  AgentQuestion,
+  type AgentQuestionAnswers,
+  AgentQuestionDescription,
+  AgentQuestionFooter,
+  AgentQuestionHeader,
+  AgentQuestionItem,
+  AgentQuestionItems,
+  AgentQuestionOption,
+  AgentQuestionOptions,
+  AgentQuestionOther,
+  AgentQuestionSummary,
+  AgentQuestionTitle,
+  type AgentQuestionVariant,
+} from "@/components/ui/uai/agent-question";
+
+export function AgentQuestionPreview({ variant = "card" }: { variant?: AgentQuestionVariant }) {
+  const [round, setRound] = useState(0);
+  const [answered, setAnswered] = useState(false);
+  const timer = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+
+  // Your agent receives the answers; the preview just waits a moment.
+  const send = (_answers: AgentQuestionAnswers) =>
+    new Promise<void>((resolve) => {
+      timer.current = window.setTimeout(() => {
+        setAnswered(true);
+        resolve();
+      }, 900);
+    });
+
+  return (
+    <div style={{ display: "grid", gap: 12, justifyItems: "start" }}>
+      <p className="m-0 text-[13px]/5 text-muted-foreground">
+        Before I scaffold Kiln’s storefront I need three decisions.
+      </p>
+      <AgentQuestion key={\`\${variant}-\${round}\`} variant={variant} onSubmit={send}>
+        <AgentQuestionHeader />
+        <AgentQuestionItems>
+          <AgentQuestionItem id="database" required>
+            <AgentQuestionTitle>Which database should I set up?</AgentQuestionTitle>
+            <AgentQuestionDescription>
+              I found a Prisma schema and a Drizzle config. Migrations will use the one you pick.
+            </AgentQuestionDescription>
+            <AgentQuestionOptions>
+              <AgentQuestionOption
+                value="postgres"
+                label="Postgres"
+                recommended
+                description="Matches DATABASE_URL in .env.example"
+              />
+              <AgentQuestionOption
+                value="sqlite"
+                label="SQLite"
+                description="Fastest for local work, no server to run"
+              />
+              <AgentQuestionOther />
+            </AgentQuestionOptions>
+          </AgentQuestionItem>
+          <AgentQuestionItem id="seed" type="multiple" required>
+            <AgentQuestionTitle>What should the seed data include?</AgentQuestionTitle>
+            <AgentQuestionDescription>Choose all that apply.</AgentQuestionDescription>
+            <AgentQuestionOptions>
+              <AgentQuestionOption
+                value="users"
+                label="Demo users"
+                description="3 accounts with fixed passwords"
+              />
+              <AgentQuestionOption
+                value="orders"
+                label="Sample orders"
+                description="40 orders across 2 months"
+              />
+              <AgentQuestionOther />
+            </AgentQuestionOptions>
+          </AgentQuestionItem>
+          <AgentQuestionItem id="auth">
+            <AgentQuestionTitle>Add auth now?</AgentQuestionTitle>
+            <AgentQuestionDescription>
+              You can add it later with one command.
+            </AgentQuestionDescription>
+            <AgentQuestionOptions>
+              <AgentQuestionOption value="password" label="Email and password" />
+              <AgentQuestionOption value="magic-link" label="Magic link" />
+              <AgentQuestionOption value="later" label="Not yet" />
+            </AgentQuestionOptions>
+          </AgentQuestionItem>
+        </AgentQuestionItems>
+        <AgentQuestionFooter />
+        <AgentQuestionSummary time="14:02" />
+      </AgentQuestion>
+      {answered ? (
+        <>
+          <p className="m-0 text-[13px]/5 text-foreground">
+            Setting up the database and seeding the storefront.
+          </p>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setAnswered(false);
+              setRound((count) => count + 1);
+            }}
+          >
+            <RotateCcw aria-hidden="true" />
+            Ask again
+          </Button>
+        </>
+      ) : null}
+    </div>
+  );
+}
+`,
+    accessibility: [
+      "Each question is a fieldset whose legend is the title. Single choice is a radio group with arrow keys; multiple choice is a labelled group of checkboxes.",
+      "Keys 1–9 pick the option at that position while focus is inside the question, except while typing in Something else; Enter continues. The groups expose aria-keyshortcuts and the visible key hints are hidden from assistive technology.",
+      "Focus moves to the new question's legend on each step and to the summary heading once answered, which is announced as “Answers sent”.",
+      "“Recommended” is part of the option's accessible name, and option descriptions are attached with aria-describedby.",
     ],
   },
   {

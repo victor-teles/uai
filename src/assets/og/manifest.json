@@ -10,6 +10,17 @@
       "height": 840
     }
   },
+  "agent-question": {
+    "variant": "card",
+    "dark": {
+      "width": 1080,
+      "height": 976
+    },
+    "light": {
+      "width": 1080,
+      "height": 976
+    }
+  },
   "agent-run": {
     "variant": "split",
     "dark": {

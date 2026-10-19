@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  AGENT_QUESTION_VARIANTS,
+  type AgentQuestionVariant,
+} from "@/components/ui/uai/agent-question";
 import { ATTACHMENT_VARIANTS, type AttachmentVariant } from "@/components/ui/uai/attachment";
 import { CITATION_VARIANTS, type CitationVariant } from "@/components/ui/uai/citation";
 import { MESSAGE_VARIANTS, type MessageVariant } from "@/components/ui/uai/message";
@@ -11,6 +15,7 @@ import { RUN_SUMMARY_VARIANTS, type RunSummaryVariant } from "@/components/ui/ua
 import { TOOL_CALL_VARIANTS, type ToolCallVariant } from "@/components/ui/uai/tool-call";
 import type { PreviewControl } from "../preview-chrome";
 import { PreviewStage } from "../preview-chrome";
+import { AgentQuestionPreview } from "./agent-question-preview";
 import { AttachmentPreview } from "./attachment-preview";
 import { CitationPreview } from "./citation-preview";
 import { MessagePreview } from "./message-preview";
@@ -23,6 +28,7 @@ const controls: Record<string, { label: string; variants: readonly string[] }> =
   citation: { label: "citation variant", variants: CITATION_VARIANTS },
   attachment: { label: "attachment variant", variants: ATTACHMENT_VARIANTS },
   "tool-call": { label: "tool call variant", variants: TOOL_CALL_VARIANTS },
+  "agent-question": { label: "agent question variant", variants: AGENT_QUESTION_VARIANTS },
   "response-status": { label: "response status variant", variants: RESPONSE_STATUS_VARIANTS },
   "run-summary": { label: "run summary variant", variants: RUN_SUMMARY_VARIANTS },
 };
@@ -57,6 +63,9 @@ export function AiPreview({ itemId, selection }: { itemId: string; selection: st
         {itemId === "citation" && <CitationPreview variant={selection as CitationVariant} />}
         {itemId === "attachment" && <AttachmentPreview variant={selection as AttachmentVariant} />}
         {itemId === "tool-call" && <ToolCallPreview variant={selection as ToolCallVariant} />}
+        {itemId === "agent-question" && (
+          <AgentQuestionPreview variant={selection as AgentQuestionVariant} />
+        )}
         {itemId === "response-status" && (
           <ResponseStatusPreview variant={selection as ResponseStatusVariant} />
         )}

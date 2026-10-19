@@ -1,3 +1,4 @@
+import { AgentQuestionPreview } from "@/components/registry/ai/agent-question-preview";
 import { AttachmentPreview } from "@/components/registry/ai/attachment-preview";
 import { CitationPreview } from "@/components/registry/ai/citation-preview";
 import { MessagePreview } from "@/components/registry/ai/message-preview";
@@ -12,6 +13,7 @@ export function AiCompositionFixture() {
       <CitationPreview />
       <AttachmentPreview />
       <ToolCallPreview />
+      <AgentQuestionPreview />
       <ResponseStatusPreview />
       <RunSummaryPreview />
     </>
