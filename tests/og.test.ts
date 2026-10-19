@@ -7,6 +7,7 @@ import { findRegistryItem, registryCatalog } from "@/components/registry/catalog
 
 import { getOgTheme, renderRegistryOgImage, renderSiteOgImage } from "@/lib/og";
 import { heroDescription, heroTitle, siteDescription, siteTitle } from "@/lib/site";
+import { contains, intersect, overlaps, roundIn, roundOut } from "../scripts/og-clip";
 
 const ogDir = path.join(import.meta.dirname, "..", "src", "assets", "og");
 const manifest = captures as Record<
@@ -100,4 +101,23 @@ describe("share images", () => {
       }
     }
   }, 30_000);
+
+  test("a capture rect is clipped to the canvas and never reaches the code dock", () => {
+    // Geometry from /components/dashboard-shell at 1440x1000: the block runs 238px
+    // below the canvas, over the "Code example" dock.
+    const canvas = { x: 248, y: 84.4, width: 866, height: 596.2 };
+    const dock = { x: 248, y: 681, width: 866, height: 5592 };
+    const block = { x: 272.3, y: 156.6, width: 818.4, height: 762.1 };
+    expect(overlaps(roundOut(block), dock)).toBe(true);
+    const clip = intersect(roundOut(block), roundIn(canvas));
+    if (!clip) throw new Error("no clip");
+    expect(clip).toEqual({ x: 272, y: 156, width: 819, height: 524 });
+    expect(contains(canvas, clip)).toBe(true);
+    expect(overlaps(clip, dock)).toBe(false);
+    // A block that fits keeps its whole (rounded-out) box, as an element screenshot does.
+    const card = { x: 471.5, y: 252.2, width: 420, height: 276 };
+    expect(intersect(roundOut(card), roundIn(canvas))).toEqual(roundOut(card));
+    // Nothing on the canvas: no rect.
+    expect(intersect({ x: 0, y: 700, width: 10, height: 10 }, roundIn(canvas))).toBeNull();
+  });
 });

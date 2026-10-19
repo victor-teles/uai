@@ -68,23 +68,23 @@
   "approval-queue": {
     "variant": "grouped",
     "dark": {
-      "width": 1058,
-      "height": 1100
+      "width": 1340,
+      "height": 945
     },
     "light": {
-      "width": 1058,
-      "height": 1100
+      "width": 1340,
+      "height": 945
     }
   },
   "article-page": {
     "variant": "centered",
     "dark": {
-      "width": 904,
-      "height": 1100
+      "width": 1340,
+      "height": 945
     },
     "light": {
-      "width": 904,
-      "height": 1100
+      "width": 1340,
+      "height": 945
     }
   },
   "attachment": {
@@ -134,12 +134,12 @@
   "billing-portal": {
     "variant": "overview",
     "dark": {
-      "width": 1303,
-      "height": 1100
+      "width": 1340,
+      "height": 945
     },
     "light": {
-      "width": 1303,
-      "height": 1100
+      "width": 1340,
+      "height": 945
     }
   },
   "breadcrumb-trail": {
@@ -157,11 +157,11 @@
     "variant": "card",
     "dark": {
       "width": 1340,
-      "height": 1002
+      "height": 945
     },
     "light": {
       "width": 1340,
-      "height": 1002
+      "height": 945
     }
   },
   "call-to-action": {
@@ -222,12 +222,12 @@
   "changelog-page": {
     "variant": "timeline",
     "dark": {
-      "width": 1301,
-      "height": 1100
+      "width": 1340,
+      "height": 979
     },
     "light": {
-      "width": 1301,
-      "height": 1100
+      "width": 1340,
+      "height": 979
     }
   },
   "checkout": {
@@ -288,11 +288,11 @@
   "comment-thread": {
     "variant": "threaded",
     "dark": {
-      "width": 1206,
+      "width": 1290,
       "height": 1100
     },
     "light": {
-      "width": 1206,
+      "width": 1290,
       "height": 1100
     }
   },
@@ -365,12 +365,12 @@
   "dashboard-shell": {
     "variant": "split",
     "dark": {
-      "width": 1163,
-      "height": 1100
+      "width": 1340,
+      "height": 945
     },
     "light": {
-      "width": 1163,
-      "height": 1100
+      "width": 1340,
+      "height": 945
     }
   },
   "data-explorer": {
@@ -431,12 +431,12 @@
   "documentation-page": {
     "variant": "columns",
     "dark": {
-      "width": 965,
-      "height": 1100
+      "width": 1340,
+      "height": 945
     },
     "light": {
-      "width": 965,
-      "height": 1100
+      "width": 1340,
+      "height": 945
     }
   },
   "empty-state": {
@@ -464,12 +464,12 @@
   "feature-showcase": {
     "variant": "alternating",
     "dark": {
-      "width": 909,
-      "height": 1100
+      "width": 1340,
+      "height": 945
     },
     "light": {
-      "width": 909,
-      "height": 1100
+      "width": 1340,
+      "height": 945
     }
   },
   "file-analysis": {
@@ -552,12 +552,12 @@
   "incident-dashboard": {
     "variant": "overview",
     "dark": {
-      "width": 1008,
-      "height": 1100
+      "width": 1340,
+      "height": 945
     },
     "light": {
-      "width": 1008,
-      "height": 1100
+      "width": 1340,
+      "height": 945
     }
   },
   "inline-feedback": {
@@ -707,11 +707,11 @@
     "variant": "split",
     "dark": {
       "width": 1340,
-      "height": 1093
+      "height": 945
     },
     "light": {
       "width": 1340,
-      "height": 1093
+      "height": 945
     }
   },
   "page-tabs": {
@@ -773,11 +773,11 @@
     "variant": "cards",
     "dark": {
       "width": 1340,
-      "height": 1015
+      "height": 945
     },
     "light": {
       "width": 1340,
-      "height": 1015
+      "height": 945
     }
   },
   "pricing-toggle": {
@@ -795,11 +795,11 @@
     "variant": "split",
     "dark": {
       "width": 1340,
-      "height": 1036
+      "height": 945
     },
     "light": {
       "width": 1340,
-      "height": 1036
+      "height": 945
     }
   },
   "product-gallery": {
@@ -816,23 +816,23 @@
   "product-listing": {
     "variant": "grid",
     "dark": {
-      "width": 980,
-      "height": 1100
+      "width": 1340,
+      "height": 945
     },
     "light": {
-      "width": 980,
-      "height": 1100
+      "width": 1340,
+      "height": 945
     }
   },
   "profile-page": {
     "variant": "sidebar",
     "dark": {
       "width": 1340,
-      "height": 1008
+      "height": 945
     },
     "light": {
       "width": 1340,
-      "height": 1008
+      "height": 945
     }
   },
   "progress-summary": {
@@ -904,23 +904,23 @@
   "research-session": {
     "variant": "split",
     "dark": {
-      "width": 1102,
-      "height": 1100
+      "width": 1340,
+      "height": 945
     },
     "light": {
-      "width": 1102,
-      "height": 1100
+      "width": 1340,
+      "height": 945
     }
   },
   "resource-manager": {
     "variant": "split",
     "dark": {
       "width": 1340,
-      "height": 1009
+      "height": 945
     },
     "light": {
       "width": 1340,
-      "height": 1009
+      "height": 945
     }
   },
   "response-status": {
@@ -948,11 +948,11 @@
   "run-summary": {
     "variant": "card",
     "dark": {
-      "width": 982,
+      "width": 1126,
       "height": 1100
     },
     "light": {
-      "width": 982,
+      "width": 1126,
       "height": 1100
     }
   },
@@ -981,12 +981,12 @@
   "settings-page": {
     "variant": "stacked",
     "dark": {
-      "width": 1326,
-      "height": 1100
+      "width": 1340,
+      "height": 998
     },
     "light": {
-      "width": 1326,
-      "height": 1100
+      "width": 1340,
+      "height": 998
     }
   },
   "share-menu": {
@@ -1014,11 +1014,11 @@
   "sign-up-card": {
     "variant": "card",
     "dark": {
-      "width": 790,
+      "width": 868,
       "height": 1100
     },
     "light": {
-      "width": 790,
+      "width": 868,
       "height": 1100
     }
   },
@@ -1070,11 +1070,11 @@
     "variant": "split",
     "dark": {
       "width": 1340,
-      "height": 1025
+      "height": 945
     },
     "light": {
       "width": 1340,
-      "height": 1025
+      "height": 945
     }
   },
   "task-list": {
@@ -1114,11 +1114,11 @@
     "variant": "grid",
     "dark": {
       "width": 1340,
-      "height": 1095
+      "height": 945
     },
     "light": {
       "width": 1340,
-      "height": 1095
+      "height": 945
     }
   },
   "thinking": {
@@ -1179,11 +1179,11 @@
   "workspace-setup": {
     "variant": "card",
     "dark": {
-      "width": 742,
+      "width": 1290,
       "height": 1100
     },
     "light": {
-      "width": 742,
+      "width": 1290,
       "height": 1100
     }
   }

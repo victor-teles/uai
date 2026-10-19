@@ -151,6 +151,8 @@ beside the live scene, and `OgTemplate` puts an item's name and description besi
 its specimen. Both use captures of the live specimens from `src/assets/og/`. After
 changing a preview, rebuild, start the site, and refresh the captures with
 `bun run og:capture [id ...]` (set `OG_BASE_URL` if the server is not on port 3100).
+Each capture is clipped to the specimen canvas (`scripts/og-clip.ts`), so the page
+around it never lands in a share image; `e2e/og-capture.e2e.ts` checks that for every item.
 
 ## Install a registry item locally
 
