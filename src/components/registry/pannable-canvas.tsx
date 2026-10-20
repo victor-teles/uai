@@ -31,6 +31,10 @@ const lineHeightPx = 16;
 const interactiveSelector =
   "a, button, input, textarea, select, label, summary, [role='button'], [role='menuitem'], [role='option'], [role='slider'], [role='tab'], [contenteditable='true']";
 
+// Touch drags that start on these stay with the control instead of panning.
+const touchOwnerSelector =
+  "input, textarea, select, [role='slider'], [contenteditable='true'], .uai-canvas-controls";
+
 const clampZoom = (z: number) => Math.min(maxZoom, Math.max(minZoom, z));
 
 /** Grid spacing on screen: the 24px world grid, halved or doubled to stay 12–48px apart. */
@@ -63,6 +67,19 @@ function hasScrollableAncestor(target: Element, boundary: Element, dx: number, d
         dx < 0 ? node.scrollLeft <= 0 : node.scrollLeft + node.clientWidth >= node.scrollWidth - 1;
       if (!atEdge) return true;
     }
+  }
+  return false;
+}
+
+/**
+ * Whether a touch on `target` belongs to a control inside the canvas: text entry,
+ * sliders, and anything that turned off touch panning for its own drag (resize
+ * handles, split panes).
+ */
+function ownsTouch(target: Element, boundary: Element) {
+  if (target.closest(touchOwnerSelector)) return true;
+  for (let node: Element | null = target; node && node !== boundary; node = node.parentElement) {
+    if (window.getComputedStyle(node).touchAction === "none") return true;
   }
   return false;
 }
@@ -261,7 +278,131 @@ export function PannableCanvas({
     };
   }, [panBy, zoomAt]);
 
+  // Touch on narrow layouts, where the canvas keeps `touch-action: pan-y` so the
+  // page still scrolls. A one-finger drag pans the canvas: sideways always, and
+  // vertically while tall content has room to move that way. Vertical movement
+  // the canvas cannot absorb scrolls the page, so a swipe never gets stuck.
+  // Pointer events cannot do this: the browser cancels them as soon as it takes
+  // a vertical swipe for page scrolling.
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    type TouchPan = {
+      id: number;
+      startX: number;
+      startY: number;
+      scrollY: number;
+      from: View;
+      panning: boolean;
+    };
+    let touch: TouchPan | null = null;
+
+    /** Vertical pan range that keeps tall content inside the viewport, widened to include `y`. */
+    const verticalRange = (y: number, z: number) => {
+      const size = measure();
+      if (!size || size.worldHeight * z <= size.height + 1) return [y, y] as const;
+      return [Math.min(y, size.height - size.worldHeight * z), Math.max(y, 0)] as const;
+    };
+
+    const end = () => {
+      if (touch?.panning) {
+        // A pan is not a tap on whatever sits under the finger when it ends.
+        const swallow = (event: Event) => {
+          event.stopPropagation();
+          event.preventDefault();
+        };
+        window.addEventListener("click", swallow, { capture: true, once: true });
+        window.setTimeout(() => window.removeEventListener("click", swallow, true), 0);
+        setPanning(false);
+      }
+      touch = null;
+    };
+
+    const onTouchStart = (event: TouchEvent) => {
+      if (event.touches.length !== 1) return end();
+      // Wide layouts set `touch-action: none` and pan touch through pointer events.
+      if (window.getComputedStyle(viewport).touchAction === "none") return;
+      const target = event.target;
+      if (!(target instanceof Element) || ownsTouch(target, viewport)) return;
+      const point = event.touches[0];
+      if (!point) return;
+      touch = {
+        id: point.identifier,
+        startX: point.clientX,
+        startY: point.clientY,
+        scrollY: window.scrollY,
+        from: viewRef.current,
+        panning: false,
+      };
+    };
+
+    const onTouchMove = (event: TouchEvent) => {
+      const current = touch;
+      if (!current) return;
+      const point = Array.from(event.changedTouches).find((t) => t.identifier === current.id);
+      if (!point) return;
+      // A component inside the canvas claimed this drag, like a kanban card it lifted.
+      if (event.touches.length !== 1 || (!current.panning && event.defaultPrevented)) {
+        return end();
+      }
+      const dx = point.clientX - current.startX;
+      const dy = point.clientY - current.startY;
+      const [low, high] = verticalRange(current.from.y, current.from.z);
+      if (!current.panning) {
+        if (Math.hypot(dx, dy) < dragThreshold) return;
+        const sideways = Math.abs(dx) > Math.abs(dy);
+        const target = event.target instanceof Element ? event.target : viewport;
+        const canMove = sideways || (dy < 0 ? current.from.y > low : current.from.y < high);
+        // Leave the swipe to a scroll area inside the component, or to the page.
+        if (
+          !event.cancelable ||
+          !canMove ||
+          hasScrollableAncestor(target, viewport, sideways ? -dx : 0, sideways ? 0 : -dy)
+        ) {
+          touch = null;
+          return;
+        }
+        current.panning = true;
+        window.getSelection()?.removeAllRanges();
+        setPanning(true);
+      }
+      event.preventDefault();
+      const y = current.from.y + dy;
+      const clampedY = Math.min(high, Math.max(low, y));
+      setView(
+        constrain({
+          ...current.from,
+          x: current.from.x + dx,
+          y: clampedY,
+          resting: false,
+        }),
+      );
+      const scrollTop = current.scrollY - (y - clampedY);
+      if (Math.abs(window.scrollY - scrollTop) >= 1) {
+        window.scrollTo({ top: scrollTop, behavior: "instant" });
+      }
+    };
+
+    viewport.addEventListener("touchstart", onTouchStart, { passive: true });
+    viewport.addEventListener("touchmove", onTouchMove, { passive: false });
+    viewport.addEventListener("touchend", end);
+    viewport.addEventListener("touchcancel", end);
+    return () => {
+      viewport.removeEventListener("touchstart", onTouchStart);
+      viewport.removeEventListener("touchmove", onTouchMove);
+      viewport.removeEventListener("touchend", end);
+      viewport.removeEventListener("touchcancel", end);
+    };
+  }, [constrain, measure]);
+
   const onPointerDown = (event: PointerEvent<HTMLElement>) => {
+    // Narrow layouts pan touch with touch events; see the effect above.
+    if (
+      event.pointerType === "touch" &&
+      window.getComputedStyle(event.currentTarget).touchAction !== "none"
+    ) {
+      return;
+    }
     const middle = event.button === 1;
     if (event.button !== 0 && !middle) return;
     const target = event.target as Element;
