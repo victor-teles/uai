@@ -182,7 +182,7 @@ export function MapLegendItem({
             disabled={disabled}
             onCheckedChange={(checked) => context.toggle(value, checked === true)}
             className={cn(
-              "ml-auto rounded-[5px] border-border-strong bg-transparent shadow-none focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid dark:bg-transparent",
+              "ml-auto rounded-[5px] border-subtle-foreground bg-transparent data-[state=checked]:border-primary data-checked:border-primary shadow-none focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid dark:bg-transparent",
               compact && "size-3.5 [&_svg]:size-3",
             )}
           />

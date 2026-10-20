@@ -327,7 +327,7 @@ export function NewsletterFormConsent({
         aria-invalid={context.status === "consent" || undefined}
         aria-describedby={`${context.id}-message`}
         onCheckedChange={(checked) => context.setConsent(checked === true)}
-        className="m-0 mt-px size-3.5 flex-none cursor-pointer shadow-none focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid [&_svg]:size-3"
+        className="m-0 mt-px size-3.5 flex-none cursor-pointer border-subtle-foreground data-[state=checked]:border-primary data-checked:border-primary shadow-none focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid [&_svg]:size-3"
       />
       <span>{children}</span>
     </Label>

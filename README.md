@@ -2,7 +2,7 @@
 
 **Components that feel finished.**
 
-112 shadcn components and blocks with real motion and micro-interactions built in.
+110 shadcn components and blocks with real motion and micro-interactions built in.
 Copy them with the CLI and own every line.
 
 <p align="center">
@@ -114,7 +114,7 @@ bunx shadcn@latest add https://uaiblocks.dev/r/prompt-composer.json
   </tr>
 </table>
 
-<p align="center"><a href="https://uaiblocks.dev">Browse all 112 items →</a></p>
+<p align="center"><a href="https://uaiblocks.dev">Browse all 110 items →</a></p>
 
 ## Run the site
 
