@@ -51,7 +51,7 @@ export function BrazilPreview({ itemId, selection }: { itemId: string; selection
       <div
         style={{
           width: "100%",
-          maxWidth: itemId === "pix-payment" ? 600 : itemId === "pix-automatico" ? 420 : 400,
+          maxWidth: itemId === "pix-payment" ? 600 : itemId === "pix-automatico" ? 560 : 400,
           minWidth: 0,
           minHeight: itemId === "cep-field" ? 180 : undefined,
           padding: "24px 0",
