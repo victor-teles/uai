@@ -1011,6 +1011,8 @@ function BankSummary({ bank }: { bank: PixAutomaticoBank }) {
       data-slot="pix-automatico-bank-summary"
       className={cn(
         "flex min-w-0 items-center gap-2.5 rounded-[10px] pr-1.5 pl-2.5 shadow-[inset_0_0_0_1px_var(--border)]",
+        // Fades up 4px as the terms come back; instant under reduced motion.
+        "motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-1 motion-safe:duration-180 motion-safe:ease-out-quint",
         compact ? "h-10 rounded-lg" : "h-11",
       )}
     >

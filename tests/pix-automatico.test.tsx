@@ -200,6 +200,12 @@ test("keyboard: arrows select from the field, Enter moves to send, Esc clears th
   // The choice survives Back: the terms show it with Trocar, and Autorizar sends.
   expect(screen.getByRole("button", { name: "Trocar banco, Itaú escolhido" })).toBeTruthy();
   expect(screen.getByRole("button", { name: "Autorizar Pix Automático" })).toBeTruthy();
+  // The row fades up 4px in 180ms, only when motion is allowed.
+  const row = document.querySelector("[data-slot=pix-automatico-bank-summary]")?.className ?? "";
+  for (const token of ["fade-in-0", "slide-in-from-bottom-1", "duration-180", "ease-out-quint"]) {
+    expect(row).toContain(`motion-safe:${token}`);
+  }
+  expect(row).not.toMatch(/(^|\s)animate-in/);
 });
 
 test("disabled banks are reachable but never selected", async () => {
