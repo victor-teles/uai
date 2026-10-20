@@ -1191,12 +1191,17 @@ function PixAutomaticoBankPicker({ className, style }: { className?: string; sty
   const active = visible.find((bank) => bank.id === activeId) ?? null;
 
   // Fine pointers land in the search field; coarse pointers on the heading, so the keyboard
-  // doesn't cover the list.
+  // doesn't cover the list. The same happens when a retried list becomes ready, so focus isn't
+  // lost with the error state's buttons.
+  const landed = useRef<PixAutomaticoBanksStatus | null>(null);
   useEffect(() => {
+    const previous = landed.current;
+    landed.current = banksStatus;
+    if (previous !== null && (previous === "ready" || banksStatus !== "ready")) return;
     const coarse = window.matchMedia?.("(pointer: coarse)").matches;
     if (!coarse && search.current && !search.current.disabled) search.current.focus();
     else heading.current?.focus();
-  }, []);
+  }, [banksStatus]);
 
   // The result count, 400ms after the last keystroke and only while searching.
   const { announce } = context;

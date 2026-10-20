@@ -229,6 +229,9 @@ test("loading and error states", async () => {
   expect(screen.getByText("Não deu para carregar a lista de bancos.")).toBeTruthy();
   await user.click(screen.getByRole("button", { name: "Tentar de novo" }));
   expect(retry).toHaveBeenCalledTimes(1);
+  // Once the retried list is ready, focus goes to the search field instead of <body>.
+  view.rerender(<Card defaultMethod="app" banksStatus="ready" onBanksRetry={retry} />);
+  expect(document.activeElement).toBe(screen.getByRole("combobox", { name: "Buscar banco" }));
 });
 
 test("sending moves focus to the waiting title, which names the bank", async () => {
