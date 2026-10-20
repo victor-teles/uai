@@ -303,18 +303,20 @@ export function InstallmentPickerPreview({
     category: "Brazil",
     icon: Repeat,
     description:
-      "Authorize recurring Pix: clear terms, QR Code or bank-app confirmation, a live waiting state, and the next charges once active.",
+      "Authorize recurring Pix: clear terms, QR Code or a bank picked from a searchable list, a live waiting state that names the bank, and the next charges once active.",
     usage: `"use client";
 
 import { useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
+  PIX_AUTOMATICO_DEFAULT_BANKS,
   PixAutomatico,
   PixAutomaticoActive,
   PixAutomaticoAmount,
   PixAutomaticoAppPending,
   PixAutomaticoAuthorize,
   PixAutomaticoAvatar,
+  type PixAutomaticoBanksStatus,
   PixAutomaticoHeader,
   PixAutomaticoMaxHint,
   PixAutomaticoMethod,
@@ -340,6 +342,13 @@ const variableCharges = [
   { date: "2027-01-05", amount: 163.4 },
 ];
 
+// The example list plus an invented cooperative, so no real bank is ever shown as unavailable.
+const banks = [
+  ...PIX_AUTOMATICO_DEFAULT_BANKS.slice(0, 1),
+  { id: "ipe", name: "Cooperativa Ipê", disabled: true, disabledReason: "Em manutenção" },
+  ...PIX_AUTOMATICO_DEFAULT_BANKS.slice(1),
+];
+
 const charges = [
   { date: "2026-11-05", amount: 89.9 },
   { date: "2026-12-05", amount: 89.9 },
@@ -349,6 +358,9 @@ const charges = [
 export function PixAutomaticoPreview({ variant = "card" }: { variant?: PixAutomaticoVariant }) {
   const [status, setStatus] = useState<PixAutomaticoStatus>("review");
   const [expiresAt, setExpiresAt] = useState<number | undefined>(undefined);
+  const [banksStatus, setBanksStatus] = useState<PixAutomaticoBanksStatus>("ready");
+  // Your app persists the last-used bank (account preference, cookie); the preview keeps it here.
+  const [recentBankId, setRecentBankId] = useState("nubank");
   const variable = variant === "plain";
 
   const go = (next: PixAutomaticoStatus) => {
@@ -373,12 +385,31 @@ export function PixAutomaticoPreview({ variant = "card" }: { variant?: PixAutoma
         <ToggleGroupItem value="expired">Expirado</ToggleGroupItem>
         <ToggleGroupItem value="cancelled">Cancelado</ToggleGroupItem>
       </ToggleGroup>
+      <ToggleGroup
+        type="single"
+        aria-label="Simular lista de bancos"
+        value={banksStatus}
+        onValueChange={(next) => next && setBanksStatus(next as PixAutomaticoBanksStatus)}
+        className="flex-wrap justify-self-center"
+      >
+        <ToggleGroupItem value="ready">Lista pronta</ToggleGroupItem>
+        <ToggleGroupItem value="loading">Carregando bancos</ToggleGroupItem>
+        <ToggleGroupItem value="error">Erro na lista</ToggleGroupItem>
+      </ToggleGroup>
       <PixAutomatico
         variant={variant}
         status={status}
         code={code}
         expiresAt={status === "awaiting" ? expiresAt : undefined}
-        onAuthorize={() => go("awaiting")}
+        banks={banks}
+        banksStatus={banksStatus}
+        onBanksRetry={() => setBanksStatus("ready")}
+        recentBankId={recentBankId}
+        onAuthorize={(payload) => {
+          if (payload.method === "app") setRecentBankId(payload.bank.id);
+          go("awaiting");
+        }}
+        onChangeBank={() => go("review")}
         onRetry={() => go("review")}
         onOtherMethod={() => go("review")}
         onExpire={() => go("expired")}
@@ -437,9 +468,11 @@ export function PixAutomaticoPreview({ variant = "card" }: { variant?: PixAutoma
 `,
     accessibility: [
       "The card is a section named by the product. Terms are a description list, and the CNPJ is read as text.",
-      "The authorization method is a radio group named “Como você quer autorizar?” with arrow keys, Home, and End.",
-      "The status badge is a polite live region that speaks “Aguardando confirmação no banco”, “Pix Automático autorizado”, or “Autorização recusada”; the countdown is a time element that announces once, a minute before it expires.",
-      "Next charges are an ordered list named “Próximas cobranças”, each read as “5 de novembro, R$ 89,90, próxima”. The pulsing phone ring is decorative.",
+      "The authorization method is a radio group named “Como você quer autorizar?” with arrow keys, Home, and End. Arrows only select; a click, tap, or Space on “No app do banco” opens the bank step, so the content never swaps under arrow keys.",
+      "The bank step is a group named “Escolha seu banco”. Its search field is a combobox that controls a single-select listbox named “Bancos” through aria-activedescendant, so focus stays in the field while ↑ and ↓ move. The listbox is one tab stop with Home, End, and type-ahead; Enter selects and moves to “Enviar para o app …”, Esc clears the search and then goes back, and the result count is announced politely while searching. Disabled banks stay reachable and read their reason.",
+      "Focus goes to the search field on open (the heading on touch screens), back to the opener on Voltar, and to the waiting title once the request is sent, so it's never lost when the review goes inert.",
+      "The status badge is a polite live region that speaks “Pedido enviado para o app Itaú. Aguardando confirmação.” (or “Aguardando confirmação no banco” without a bank), “Pix Automático autorizado”, or “Autorização recusada”; the countdown is a time element that announces once, a minute before it expires.",
+      "Next charges are an ordered list named “Próximas cobranças”, each read as “5 de novembro, R$ 89,90, próxima”. The pulsing phone ring and the bank monograms are decorative.",
     ],
   },
 ];

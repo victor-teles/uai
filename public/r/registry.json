@@ -2532,11 +2532,12 @@
       "name": "pix-automatico",
       "type": "registry:ui",
       "title": "Pix Automático",
-      "description": "The authorization step for recurring Pix: clear terms, QR Code or bank-app confirmation, a live waiting state, and an active view with the next charges.",
+      "description": "The authorization step for recurring Pix: clear terms, QR Code or bank-app confirmation with a bank picker, a live waiting state that names the bank, and an active view with the next charges.",
       "dependencies": ["class-variance-authority", "lucide-react"],
       "registryDependencies": [
         "badge",
         "button",
+        "input",
         "popover",
         "toggle",
         "https://uaiblocks.dev/r/uai-number-tick.json",

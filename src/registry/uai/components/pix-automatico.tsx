@@ -1,7 +1,19 @@
 "use client";
 
 import { cva } from "class-variance-authority";
-import { Check, Copy, Info, QrCode, Repeat, Smartphone } from "lucide-react";
+import {
+  Check,
+  ChevronLeft,
+  Copy,
+  Info,
+  LoaderCircle,
+  QrCode,
+  Repeat,
+  Search,
+  SearchX,
+  Smartphone,
+  X,
+} from "lucide-react";
 import {
   type ComponentProps,
   createContext,
@@ -10,12 +22,14 @@ import {
   useContext,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toggleVariants } from "@/components/ui/toggle";
 import { NumberTick } from "@/lib/uai-number-tick";
@@ -38,6 +52,125 @@ export type PixAutomaticoStatus = (typeof PIX_AUTOMATICO_STATUSES)[number];
 export type PixAutomaticoMethod = (typeof PIX_AUTOMATICO_METHODS)[number];
 export type PixAutomaticoPeriod = (typeof PIX_AUTOMATICO_PERIODS)[number];
 export type PixAutomaticoCharge = { date: Date | string; amount: number };
+
+export type PixAutomaticoBank = {
+  /** Stable. Drives the monogram tone and `recentBankId`. */
+  id: string;
+  /** The full, accessible name: "Banco do Brasil". */
+  name: string;
+  /** Used in copy such as "Enviar para o app {shortName}". Falls back to `name`. */
+  shortName?: string;
+  /** From assets you're licensed to use. Rendered as a decorative image; the monogram on error. */
+  logoUrl?: string;
+  /** The 8-digit participant code. Passed through untouched, never shown. */
+  ispb?: string;
+  /** Overrides the derived initials (max 2 characters). */
+  monogram?: string;
+  /** Extra search terms, such as ["bb"] or ["cef", "caixa economica federal"]. */
+  keywords?: readonly string[];
+  disabled?: boolean;
+  /** Shown on a disabled row. Defaults to "Indisponível". */
+  disabledReason?: string;
+};
+
+export type PixAutomaticoBanksStatus = "ready" | "loading" | "error";
+
+export type PixAutomaticoAuthorizePayload =
+  | { method: "qr" }
+  | { method: "app"; bank: PixAutomaticoBank };
+
+/**
+ * Example data, not a registry. Names identify the institutions (nominative use); no logos or
+ * trademarks are bundled, so pass `logoUrl` from assets you're licensed to use. Pix Automático
+ * participation changes, so real integrations should pass their payment provider's participants
+ * through `banks`.
+ */
+export const PIX_AUTOMATICO_DEFAULT_BANKS: readonly PixAutomaticoBank[] = [
+  { id: "nubank", name: "Nubank", monogram: "NU", keywords: ["nu"] },
+  { id: "itau", name: "Itaú", monogram: "IT", keywords: ["itau", "itau unibanco"] },
+  { id: "bb", name: "Banco do Brasil", monogram: "BB", keywords: ["bb"] },
+  { id: "caixa", name: "Caixa", monogram: "CX", keywords: ["cef", "caixa economica federal"] },
+  { id: "bradesco", name: "Bradesco", monogram: "BR" },
+  { id: "santander", name: "Santander", monogram: "SA" },
+  { id: "inter", name: "Inter", monogram: "IN", keywords: ["banco inter"] },
+  { id: "c6", name: "C6 Bank", monogram: "C6" },
+  { id: "mercadopago", name: "Mercado Pago", monogram: "MP" },
+  { id: "picpay", name: "PicPay", monogram: "PP" },
+  { id: "btg", name: "BTG Pactual", monogram: "BT" },
+  { id: "sicoob", name: "Sicoob", monogram: "SC" },
+  { id: "sicredi", name: "Sicredi", monogram: "SI" },
+  { id: "pagbank", name: "PagBank", monogram: "PB", keywords: ["pagseguro"] },
+  { id: "banrisul", name: "Banrisul", monogram: "BA" },
+];
+
+/** Lowercase, without accents: "Itaú" → "itau". */
+function fold(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
+}
+
+const MONOGRAM_STOPWORDS = new Set(["banco", "de", "do", "da", "dos", "das", "e"]);
+
+/** The bank's initials: `monogram`, or two letters derived from its name. */
+export function pixAutomaticoBankMonogram(bank: PixAutomaticoBank) {
+  if (bank.monogram) return bank.monogram.slice(0, 2).toUpperCase();
+  const words = fold(bank.shortName ?? bank.name)
+    .split(/\s+/)
+    .map((word) => word.replace(/[^a-z0-9]/g, ""))
+    .filter((word) => word && !MONOGRAM_STOPWORDS.has(word));
+  const initials =
+    words.length >= 2 ? `${words[0]?.[0]}${words[1]?.[0]}` : (words[0] ?? "").slice(0, 2);
+  return initials.toUpperCase();
+}
+
+export const PIX_AUTOMATICO_BANK_TONES = ["neutral", "primary", "success", "warning"] as const;
+export type PixAutomaticoBankTone = (typeof PIX_AUTOMATICO_BANK_TONES)[number];
+
+/** A stable tone from the bank id (FNV-1a), never a brand color. */
+export function pixAutomaticoBankTone(id: string): PixAutomaticoBankTone {
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < id.length; index++) {
+    hash ^= id.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return PIX_AUTOMATICO_BANK_TONES[hash % 4] as PixAutomaticoBankTone;
+}
+
+function bankShortName(bank: PixAutomaticoBank) {
+  return bank.shortName ?? bank.name;
+}
+
+/** 0 when the text starts with the needle, 1 when a word does, 2 for any substring. */
+function matchIn(text: string, needle: string): { tier: number; at: number } | null {
+  let substring = -1;
+  for (let at = text.indexOf(needle); at !== -1; at = text.indexOf(needle, at + 1)) {
+    if (at === 0) return { tier: 0, at };
+    if (text[at - 1] === " ") return { tier: 1, at };
+    if (substring === -1) substring = at;
+  }
+  return substring === -1 ? null : { tier: 2, at: substring };
+}
+
+type BankMatch = { bank: PixAutomaticoBank; tier: number; highlight: number };
+
+/**
+ * Name-start, then word-start, then substring matches, each tier kept in `banks` order. Matches
+ * that only hit `keywords` come last, so "ban" lists Banco do Brasil before Inter ("banco inter").
+ */
+function searchBanks(banks: readonly PixAutomaticoBank[], query: string): BankMatch[] {
+  const needle = fold(query.trim());
+  const matches: BankMatch[] = [];
+  for (const bank of banks) {
+    const inName = matchIn(fold(bank.name), needle);
+    const inShort = bank.shortName ? matchIn(fold(bank.shortName), needle) : null;
+    const inKeywords = (bank.keywords ?? []).some((keyword) => fold(keyword).includes(needle));
+    const tier = Math.min(inName?.tier ?? 9, inShort?.tier ?? 9, inKeywords ? 3 : 9);
+    if (tier < 9) matches.push({ bank, tier, highlight: inName?.at ?? -1 });
+  }
+  return matches.sort((first, second) => first.tier - second.tier);
+}
 
 export function formatBrl(value: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
@@ -119,11 +252,28 @@ const STATUS_SPOKEN: Partial<Record<PixAutomaticoStatus, string>> = {
   declined: "Autorização recusada",
 };
 
+type PixAutomaticoStep = "terms" | "bank";
+
 type PixAutomaticoContextValue = {
   variant: PixAutomaticoVariant;
   status: PixAutomaticoStatus;
   method: PixAutomaticoMethod;
   setMethod: (method: PixAutomaticoMethod) => void;
+  /** Internal: which review step shows. Only meaningful while status is "review". */
+  step: PixAutomaticoStep;
+  /** Opens the bank step. Focus returns to `opener` (or the checked method) on Back. */
+  openBankPicker: (opener?: HTMLElement | null) => void;
+  closeBankPicker: () => void;
+  banks: readonly PixAutomaticoBank[];
+  banksStatus: PixAutomaticoBanksStatus;
+  onBanksRetry: (() => void) | undefined;
+  recentBank: PixAutomaticoBank | null;
+  bank: PixAutomaticoBank | null;
+  selectBank: (bank: PixAutomaticoBank) => void;
+  changeBank: (() => void) | undefined;
+  pending: boolean;
+  announce: (message: string) => void;
+  waitingTitleId: string;
   secondsLeft: number | null;
   code: string | undefined;
   copied: boolean;
@@ -131,6 +281,7 @@ type PixAutomaticoContextValue = {
   copy: () => Promise<void>;
   titleId: string;
   authorize: () => void;
+  sendToBank: () => void;
   onRetry: (() => void) | undefined;
   onOtherMethod: (() => void) | undefined;
 };
@@ -169,7 +320,22 @@ export type PixAutomaticoProps = Omit<ComponentProps<"section">, "children"> & {
   expiresAt?: Date | string | number;
   /** Fixes the starting clock so server and client render the same countdown. */
   now?: Date | string | number;
-  onAuthorize?: (payload: { method: PixAutomaticoMethod }) => void;
+  /** Receives the chosen bank for the app method. Send the request, then set status="awaiting". */
+  onAuthorize?: (payload: PixAutomaticoAuthorizePayload) => void;
+  /** The bank list, in display order. Defaults to the example list in PIX_AUTOMATICO_DEFAULT_BANKS. */
+  banks?: readonly PixAutomaticoBank[];
+  banksStatus?: PixAutomaticoBanksStatus;
+  /** Shows Tentar de novo when the list fails to load. */
+  onBanksRetry?: () => void;
+  /** Pinned under "Usado da última vez" and selected by default. The component never stores it. */
+  recentBankId?: string;
+  bankId?: string | null;
+  defaultBankId?: string | null;
+  onBankSelect?: (bank: PixAutomaticoBank) => void;
+  /** Shows Trocar banco while awaiting: cancel the open request, then set status="review". */
+  onChangeBank?: () => void;
+  /** The request is in flight: the bank step locks and its button reads Enviando…. */
+  pending?: boolean;
   onRetry?: () => void;
   /** Outra forma de pagamento, after a decline. */
   onOtherMethod?: () => void;
@@ -192,6 +358,15 @@ export function PixAutomatico({
   expiresAt,
   now,
   onAuthorize,
+  banks = PIX_AUTOMATICO_DEFAULT_BANKS,
+  banksStatus = "ready",
+  onBanksRetry,
+  recentBankId,
+  bankId: bankIdProp,
+  defaultBankId = recentBankId ?? null,
+  onBankSelect,
+  onChangeBank,
+  pending = false,
   onRetry,
   onOtherMethod,
   onExpire,
@@ -202,13 +377,22 @@ export function PixAutomatico({
 }: PixAutomaticoProps) {
   const [internalMethod, setInternalMethod] = useState<PixAutomaticoMethod>(defaultMethod);
   const method = methodProp ?? internalMethod;
+  const [internalBankId, setInternalBankId] = useState<string | null>(defaultBankId);
+  const bankId = bankIdProp === undefined ? internalBankId : bankIdProp;
+  const bank = banks.find((item) => item.id === bankId) ?? null;
+  const recentBank = banks.find((item) => item.id === recentBankId) ?? null;
+  const [step, setStep] = useState<PixAutomaticoStep>("terms");
+  const opener = useRef<HTMLElement | null>(null);
+  const returnFocus = useRef(false);
+  const previousStatus = useRef(status);
+  const waitingTitleId = useId();
   const deadline = expiresAt === undefined ? null : toTime(expiresAt);
   // A fixed `now` becomes an offset from the real clock, so the countdown keeps ticking.
   const [offset] = useState(() => (now === undefined ? 0 : toTime(now) - Date.now()));
   const [clock, setClock] = useState(() => (now === undefined ? Date.now() : toTime(now)));
   const [copied, setCopied] = useState(false);
   const [copyFailed, setCopyFailed] = useState(false);
-  const [minuteNotice, setMinuteNotice] = useState("");
+  const [announcement, setAnnouncement] = useState("");
   const expiredNotified = useRef(false);
   const minuteNotified = useRef(false);
   const onExpireRef = useRef(onExpire);
@@ -233,7 +417,7 @@ export function PixAutomatico({
     }
     if (secondsLeft > 0 && secondsLeft <= 60 && !minuteNotified.current) {
       minuteNotified.current = true;
-      setMinuteNotice("Falta 1 minuto para o pedido expirar");
+      setAnnouncement("Falta 1 minuto para o pedido expirar");
     }
   }, [awaiting, secondsLeft]);
 
@@ -242,8 +426,32 @@ export function PixAutomatico({
     if (status !== "review") return;
     expiredNotified.current = false;
     minuteNotified.current = false;
-    setMinuteNotice("");
+    setAnnouncement("");
   }, [status]);
+
+  // Leaving review closes the bank step, and a sent request moves focus to the waiting title so it
+  // isn't lost to <body> when the review goes inert. Trocar banco reopens the step on its own.
+  useEffect(() => {
+    const previous = previousStatus.current;
+    previousStatus.current = status;
+    if (status !== "review") setStep((current) => (previous === "review" ? "terms" : current));
+    if (previous === "review" && status === "awaiting") {
+      document.getElementById(waitingTitleId)?.focus();
+    }
+  }, [status, waitingTitleId]);
+
+  // Back returns focus to whatever opened the step.
+  useEffect(() => {
+    if (step !== "terms" || !returnFocus.current) return;
+    returnFocus.current = false;
+    const target = opener.current?.isConnected
+      ? opener.current
+      : document
+          .getElementById(titleId)
+          ?.closest("section")
+          ?.querySelector<HTMLElement>('[role="radio"][aria-checked="true"]');
+    target?.focus();
+  }, [step, titleId]);
 
   useEffect(() => {
     if (!copied) return;
@@ -254,6 +462,26 @@ export function PixAutomatico({
   const setMethod = (next: PixAutomaticoMethod) => {
     if (methodProp === undefined) setInternalMethod(next);
     onMethodChange?.(next);
+  };
+
+  const openBankPicker = (from?: HTMLElement | null) => {
+    opener.current = from ?? null;
+    setStep("bank");
+  };
+
+  const closeBankPicker = () => {
+    returnFocus.current = true;
+    setStep("terms");
+  };
+
+  const selectBank = (next: PixAutomaticoBank) => {
+    if (next.disabled || pending) return;
+    if (bankIdProp === undefined) setInternalBankId(next.id);
+    onBankSelect?.(next);
+  };
+
+  const sendToBank = () => {
+    if (bank && !bank.disabled && !pending) onAuthorize?.({ method: "app", bank });
   };
 
   const copy = async () => {
@@ -282,7 +510,31 @@ export function PixAutomatico({
         copyFailed,
         copy,
         titleId,
-        authorize: () => onAuthorize?.({ method }),
+        step,
+        openBankPicker,
+        closeBankPicker,
+        banks,
+        banksStatus,
+        onBanksRetry,
+        recentBank,
+        bank,
+        selectBank,
+        changeBank: onChangeBank
+          ? () => {
+              opener.current = null;
+              setStep("bank");
+              onChangeBank();
+            }
+          : undefined,
+        pending,
+        announce: setAnnouncement,
+        waitingTitleId,
+        authorize: () => {
+          if (method === "qr") onAuthorize?.({ method: "qr" });
+          else if (bank) sendToBank();
+          else openBankPicker(document.activeElement as HTMLElement | null);
+        },
+        sendToBank,
         onRetry,
         onOtherMethod,
       }}
@@ -302,7 +554,7 @@ export function PixAutomatico({
       >
         {children}
         <span role="status" className="sr-only">
-          {minuteNotice}
+          {announcement}
         </span>
       </section>
     </PixAutomaticoContext.Provider>
@@ -377,7 +629,10 @@ export function PixAutomaticoStatusBadge({
 }: ComponentProps<"span">) {
   const context = usePixAutomatico("PixAutomaticoStatusBadge");
   const { status } = context;
-  const spoken = STATUS_SPOKEN[status];
+  const spoken =
+    status === "awaiting" && context.method === "app" && context.bank
+      ? `Pedido enviado para o app ${bankShortName(context.bank)}. Aguardando confirmação.`
+      : STATUS_SPOKEN[status];
   return (
     <Badge
       key={status === "declined" ? "declined" : "badge"}
@@ -426,10 +681,37 @@ export function PixAutomaticoStatusBadge({
  * Review: amount, terms, notice, method, authorize
  * -----------------------------------------------------------------------------------------------*/
 
-/** Holds the review content. It collapses with grid rows once the request is sent. */
+const STEP_FLOOR: Record<PixAutomaticoVariant, number> = { card: 340, plain: 340, compact: 300 };
+
+/** The terms leave 8px left in 160ms; they come back in 240ms after a 60ms beat. */
+const termsLeave =
+  "-translate-x-2 opacity-0 [transition:opacity_160ms_cubic-bezier(0.23,1,0.32,1),translate_160ms_cubic-bezier(0.23,1,0.32,1)]";
+const termsEnter =
+  "[transition:opacity_240ms_cubic-bezier(0.23,1,0.32,1)_60ms,translate_240ms_cubic-bezier(0.23,1,0.32,1)_60ms]";
+
+/**
+ * Holds the review content. It collapses with grid rows once the request is sent. The terms and
+ * the bank step share one grid cell, so opening the picker keeps the card's height.
+ */
 export function PixAutomaticoReview({ className, children, ...props }: ComponentProps<"div">) {
   const context = usePixAutomatico("PixAutomaticoReview");
   const open = context.status === "review";
+  const picking = open && context.step === "bank";
+  const terms = useRef<HTMLDivElement>(null);
+  const [termsHeight, setTermsHeight] = useState(0);
+
+  // Lock the bank step to the terms' height, re-measured while it's open (container or font zoom).
+  useLayoutEffect(() => {
+    const node = terms.current;
+    if (!picking || !node) return;
+    const measure = () => setTermsHeight(node.getBoundingClientRect().height);
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [picking]);
+
   return (
     <div
       data-slot="pix-automatico-review"
@@ -443,10 +725,24 @@ export function PixAutomaticoReview({ className, children, ...props }: Component
       )}
       {...props}
     >
-      <div className="min-h-0 min-w-0 overflow-hidden">
-        <div className={cn("grid min-w-0", context.variant === "compact" ? "gap-3" : "gap-4")}>
+      <div className="grid min-h-0 min-w-0 overflow-hidden">
+        <div
+          ref={terms}
+          inert={picking || undefined}
+          className={cn(
+            "grid min-w-0 self-start",
+            context.variant === "compact" ? "gap-3" : "gap-4",
+            "[grid-area:1/1] motion-reduce:transition-none",
+            picking ? termsLeave : termsEnter,
+          )}
+        >
           {children}
         </div>
+        {picking ? (
+          <PixAutomaticoBankPicker
+            style={{ height: Math.max(termsHeight, STEP_FLOOR[context.variant]) }}
+          />
+        ) : null}
       </div>
     </div>
   );
@@ -614,7 +910,11 @@ const METHOD_LABELS: Record<PixAutomaticoMethod, { label: string; icon: typeof Q
   app: { label: "No app do banco", icon: Smartphone },
 };
 
-/** "Como você quer autorizar?": QR Code or No app do banco, as a two-option radio group. */
+/**
+ * "Como você quer autorizar?": QR Code or No app do banco, as a two-option radio group. A click,
+ * tap, or Space on No app do banco opens the bank step; arrow keys only change the selection
+ * (WCAG 3.2.2). Once a bank is chosen it shows under the segment with Trocar.
+ */
 export function PixAutomaticoMethod({
   label = "Como você quer autorizar?",
   className,
@@ -679,7 +979,10 @@ export function PixAutomaticoMethod({
               data-state={checked ? "on" : "off"}
               tabIndex={checked ? 0 : -1}
               disabled={context.status !== "review"}
-              onClick={() => context.setMethod(value)}
+              onClick={(event) => {
+                context.setMethod(value);
+                if (value === "app") context.openBankPicker(event.currentTarget);
+              }}
               className={cn(
                 toggleVariants(),
                 "h-7 min-w-0 cursor-pointer gap-1.5 rounded-full border-0 bg-transparent px-3 text-[12px] font-medium text-subtle-foreground [transition:color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.97] aria-checked:text-foreground data-[state=on]:bg-transparent motion-reduce:transition-none motion-reduce:active:scale-100 [&_svg]:size-3.5",
@@ -691,6 +994,40 @@ export function PixAutomaticoMethod({
           );
         })}
       </div>
+      {/* Added on the way back, not behind the open picker, so opening never changes the height. */}
+      {context.method === "app" && context.bank && context.step === "terms" ? (
+        <BankSummary bank={context.bank} />
+      ) : null}
+    </div>
+  );
+}
+
+/** The chosen bank on the terms step, with Trocar to reopen the picker. */
+function BankSummary({ bank }: { bank: PixAutomaticoBank }) {
+  const context = usePixAutomatico("PixAutomaticoMethod");
+  const compact = context.variant === "compact";
+  return (
+    <div
+      data-slot="pix-automatico-bank-summary"
+      className={cn(
+        "flex min-w-0 items-center gap-2.5 rounded-[10px] pr-1.5 pl-2.5 shadow-[inset_0_0_0_1px_var(--border)]",
+        compact ? "h-10 rounded-lg" : "h-11",
+      )}
+    >
+      <PixAutomaticoBankMark bank={bank} />
+      <span className="min-w-0 flex-1 truncate text-[13px]/[18px] font-medium text-foreground">
+        {bank.name}
+      </span>
+      <Button
+        type="button"
+        variant="secondary"
+        aria-label={`Trocar banco, ${bank.name} escolhido`}
+        disabled={context.status !== "review"}
+        onClick={(event) => context.openBankPicker(event.currentTarget)}
+        className={cn(pillClass, "h-7 bg-secondary px-3 text-[12px] hover:bg-accent")}
+      >
+        Trocar
+      </Button>
     </div>
   );
 }
@@ -698,7 +1035,10 @@ export function PixAutomaticoMethod({
 const pillClass =
   "rounded-full border-0 font-medium [transition:background-color_120ms_ease-out,filter_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100";
 
-/** The one primary action: a full-width 36px pill. Its label stays the same for both methods. */
+/**
+ * The one primary action: a full-width 36px pill. With No app do banco and no bank yet it reads
+ * Escolher banco and opens the bank step; with a bank it sends the request right away.
+ */
 export function PixAutomaticoAuthorize({
   className,
   children,
@@ -721,8 +1061,617 @@ export function PixAutomaticoAuthorize({
       }}
       {...props}
     >
-      {children ?? "Autorizar Pix Automático"}
+      {children ??
+        (context.method === "app" && !context.bank ? "Escolher banco" : "Autorizar Pix Automático")}
     </Button>
+  );
+}
+
+/* -------------------------------------------------------------------------------------------------
+ * Bank picker: the bank step that swaps in for the terms
+ * -----------------------------------------------------------------------------------------------*/
+
+const TONE_CLASSES: Record<PixAutomaticoBankTone, string> = {
+  neutral: "bg-muted text-muted-foreground shadow-[inset_0_0_0_1px_var(--border)]",
+  primary: "bg-[color-mix(in_oklab,var(--primary)_12%,var(--card))] text-primary-ink",
+  success: "bg-[color-mix(in_oklab,var(--success)_12%,var(--card))] text-success-ink",
+  warning: "bg-[color-mix(in_oklab,var(--warning)_12%,var(--card))] text-warning-ink",
+};
+
+export type PixAutomaticoBankMarkProps = Omit<ComponentProps<"span">, "children"> & {
+  bank: PixAutomaticoBank;
+  /** "badge" is the 24px tile on the waiting phone. Defaults to the variant's row size. */
+  size?: "row" | "badge";
+};
+
+/** The bank's tile: the consumer's logo, or its initials on a stable tone. Always decorative. */
+export function PixAutomaticoBankMark({
+  bank,
+  size = "row",
+  className,
+  ...props
+}: PixAutomaticoBankMarkProps) {
+  const context = usePixAutomatico("PixAutomaticoBankMark");
+  const [logoFailed, setLogoFailed] = useState(false);
+  const small = size === "badge" || context.variant === "compact";
+  const logo = bank.logoUrl && !logoFailed;
+  return (
+    <span
+      data-slot="pix-automatico-bank-mark"
+      aria-hidden="true"
+      className={cn(
+        "grid shrink-0 place-items-center overflow-hidden font-semibold tracking-[0.01em]",
+        small ? "size-6 rounded-[7px] text-[10px]/none" : "size-7 rounded-lg text-[11px]/none",
+        logo
+          ? "bg-white shadow-[inset_0_0_0_1px_var(--border)]"
+          : TONE_CLASSES[pixAutomaticoBankTone(bank.id)],
+        className,
+      )}
+      {...props}
+    >
+      {logo ? (
+        // biome-ignore lint/performance/noImgElement: the logo comes from the consumer's assets
+        <img
+          src={bank.logoUrl}
+          alt=""
+          loading="lazy"
+          onError={() => setLogoFailed(true)}
+          className="size-full object-contain"
+        />
+      ) : (
+        pixAutomaticoBankMonogram(bank)
+      )}
+    </span>
+  );
+}
+
+const optionRow =
+  "flex min-w-0 shrink-0 cursor-pointer items-center [transition:background-color_120ms_ease-out] select-none motion-reduce:transition-none";
+
+/** "Banrisul" with the matched part in a <mark>. */
+function Highlight({ text, at, length }: { text: string; at: number; length: number }) {
+  const name = text.normalize("NFC");
+  if (at < 0 || length === 0) return <>{name}</>;
+  return (
+    <>
+      {name.slice(0, at)}
+      <mark className="rounded-[3px] bg-[color-mix(in_oklab,var(--primary)_20%,var(--card))] text-inherit">
+        {name.slice(at, at + length)}
+      </mark>
+      {name.slice(at + length)}
+    </>
+  );
+}
+
+function quoteQuery(query: string) {
+  const trimmed = query.trim();
+  return `“${trimmed.length > 32 ? `${trimmed.slice(0, 32)}…` : trimmed}”`;
+}
+
+/**
+ * The bank step: a search combobox controlling a single-select listbox, the recent bank pinned on
+ * top, and a footer that sends to the selected bank. Focus stays in the field while arrows move.
+ */
+function PixAutomaticoBankPicker({ className, style }: { className?: string; style?: object }) {
+  const context = usePixAutomatico("PixAutomaticoBankPicker");
+  const { banks, bank: selected, recentBank, banksStatus, pending } = context;
+  const compact = context.variant === "compact";
+  const baseId = useId();
+  const headingId = `${baseId}-heading`;
+  const listId = `${baseId}-list`;
+  const optionId = (bank: PixAutomaticoBank) => `${baseId}-${bank.id}`;
+  const [query, setQuery] = useState("");
+  const [activeId, setActiveId] = useState<string | null>(selected?.id ?? null);
+  const [keyboard, setKeyboard] = useState(false);
+  const [overflowing, setOverflowing] = useState(false);
+  const heading = useRef<HTMLHeadingElement>(null);
+  const search = useRef<HTMLInputElement>(null);
+  const list = useRef<HTMLDivElement>(null);
+  const send = useRef<HTMLButtonElement>(null);
+  const typeahead = useRef({ buffer: "", at: 0 });
+  const searching = query.trim() !== "";
+  const ready = banksStatus === "ready";
+
+  const results = searching ? searchBanks(banks, query) : [];
+  const groups: { label: string; rows: { bank: PixAutomaticoBank; highlight: number }[] }[] =
+    searching
+      ? [{ label: "Resultados", rows: results }]
+      : [
+          ...(recentBank
+            ? [{ label: "Usado da última vez", rows: [{ bank: recentBank, highlight: -1 }] }]
+            : []),
+          {
+            label: "Bancos",
+            rows: banks
+              .filter((bank) => bank.id !== recentBank?.id)
+              .map((bank) => ({ bank, highlight: -1 })),
+          },
+        ];
+  const visible = groups.flatMap((group) => group.rows.map((row) => row.bank));
+  const active = visible.find((bank) => bank.id === activeId) ?? null;
+
+  // Fine pointers land in the search field; coarse pointers on the heading, so the keyboard
+  // doesn't cover the list.
+  useEffect(() => {
+    const coarse = window.matchMedia?.("(pointer: coarse)").matches;
+    if (!coarse && search.current && !search.current.disabled) search.current.focus();
+    else heading.current?.focus();
+  }, []);
+
+  // The result count, 400ms after the last keystroke and only while searching.
+  const { announce } = context;
+  useEffect(() => {
+    if (!searching) {
+      announce("");
+      return;
+    }
+    const count = results.length;
+    const timer = window.setTimeout(
+      () =>
+        announce(
+          count === 0
+            ? "Nenhum banco encontrado"
+            : count === 1
+              ? "1 banco encontrado"
+              : `${count} bancos encontrados`,
+        ),
+      400,
+    );
+    return () => window.clearTimeout(timer);
+  }, [searching, results.length, announce]);
+
+  useEffect(() => {
+    if (banksStatus === "loading") announce("Carregando bancos");
+    if (banksStatus === "error") announce("Não deu para carregar a lista de bancos");
+  }, [banksStatus, announce]);
+
+  // The fade mask only shows when the list overflows: re-checked after each render (filtering)
+  // and when the step resizes.
+  const measureOverflow = () => {
+    const node = list.current;
+    if (node) setOverflowing(node.scrollHeight > node.clientHeight + 1);
+  };
+  useLayoutEffect(measureOverflow);
+  useEffect(() => {
+    const node = list.current;
+    if (!node || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(() => {
+      setOverflowing(node.scrollHeight > node.clientHeight + 1);
+    });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!activeId) return;
+    document.getElementById(`${baseId}-${activeId}`)?.scrollIntoView?.({ block: "nearest" });
+  }, [activeId, baseId]);
+
+  const activate = (bank: PixAutomaticoBank | undefined) => {
+    if (!bank) return;
+    setKeyboard(true);
+    setActiveId(bank.id);
+    // Selection follows focus; disabled rows are reachable so their reason is read.
+    context.selectBank(bank);
+  };
+
+  const move = (delta: 1 | -1) => {
+    const index = active ? visible.indexOf(active) : -1;
+    if (index === -1) {
+      const enabled = visible.filter((bank) => !bank.disabled);
+      activate(delta === 1 ? enabled[0] : enabled[enabled.length - 1]);
+      return;
+    }
+    activate(visible[Math.min(visible.length - 1, Math.max(0, index + delta))]);
+  };
+
+  const commit = () => {
+    if (active) context.selectBank(active);
+    send.current?.focus();
+  };
+
+  const clear = () => {
+    setQuery("");
+    search.current?.focus();
+  };
+
+  const useQr = () => {
+    context.setMethod("qr");
+    context.closeBankPicker();
+  };
+
+  const onSearchKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      move(event.key === "ArrowDown" ? 1 : -1);
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      if (active) commit();
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      if (query) setQuery("");
+      else context.closeBankPicker();
+    }
+  };
+
+  const onListKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const enabled = visible.filter((bank) => !bank.disabled);
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      move(event.key === "ArrowDown" ? 1 : -1);
+    } else if (event.key === "Home" || event.key === "End") {
+      event.preventDefault();
+      activate(event.key === "Home" ? enabled[0] : enabled[enabled.length - 1]);
+    } else if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      commit();
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      context.closeBankPicker();
+    } else if (event.key.length === 1 && !event.metaKey && !event.ctrlKey && !event.altKey) {
+      // Type-ahead: a 500ms buffer; repeating one letter cycles through its matches.
+      const now = Date.now();
+      const state = typeahead.current;
+      state.buffer = now - state.at > 500 ? event.key : state.buffer + event.key;
+      state.at = now;
+      const needle = fold(state.buffer);
+      const cycling = needle.length > 1 && new Set(needle).size === 1;
+      const prefix = cycling ? (needle[0] ?? "") : needle;
+      const current = active ? enabled.indexOf(active) : -1;
+      const start = current === -1 ? 0 : current + (needle.length === 1 || cycling ? 1 : 0);
+      const ordered = [...enabled.slice(start), ...enabled.slice(0, start)];
+      activate(ordered.find((bank) => fold(bank.name).startsWith(prefix)));
+    }
+  };
+
+  const sendLabel = pending
+    ? "Enviando…"
+    : selected
+      ? `Enviar para o app ${bankShortName(selected)}`
+      : "Escolha um banco";
+  const canSend = Boolean(selected) && !pending && ready;
+  let position = 0;
+
+  return (
+    // biome-ignore lint/a11y/useSemanticElements: the step is a labelled group inside the card, not a fieldset of form inputs.
+    <div
+      role="group"
+      aria-labelledby={headingId}
+      aria-busy={pending || undefined}
+      data-slot="pix-automatico-bank-picker"
+      className={cn(
+        "grid min-h-0 min-w-0 grid-rows-[auto_auto_minmax(0,1fr)_auto] [grid-area:1/1]",
+        compact ? "gap-2.5" : "gap-3",
+        "motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-right-2 motion-safe:duration-240 motion-safe:delay-[60ms] motion-safe:ease-out-quint motion-safe:fill-mode-backwards",
+        className,
+      )}
+      style={style}
+      onPointerDown={() => setKeyboard(false)}
+    >
+      <div className="flex min-w-0 items-center gap-2">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label="Voltar para os termos"
+          onClick={context.closeBankPicker}
+          className={cn(
+            "shrink-0 rounded-md text-muted-foreground [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-muted hover:text-foreground active:scale-[0.94] motion-reduce:transition-none motion-reduce:active:scale-100",
+            compact ? "size-6" : "size-7",
+          )}
+        >
+          <ChevronLeft className="size-4" strokeWidth={1.75} aria-hidden="true" />
+        </Button>
+        <div className="grid min-w-0">
+          <h4
+            ref={heading}
+            id={headingId}
+            tabIndex={-1}
+            className="m-0 truncate text-[13px]/[18px] font-medium text-foreground outline-none"
+          >
+            Escolha seu banco
+          </h4>
+          {!compact ? (
+            <p className="m-0 truncate text-[12px]/4 text-subtle-foreground">
+              O pedido vai para o app que você escolher.
+            </p>
+          ) : null}
+        </div>
+      </div>
+
+      {banksStatus === "error" ? (
+        <span />
+      ) : (
+        <div
+          className={cn(
+            "flex min-w-0 items-center gap-2 bg-background pr-1.5 pl-[11px] shadow-[inset_0_0_0_1px_var(--border)] [transition:box-shadow_120ms_ease-out] focus-within:shadow-[inset_0_0_0_1px_var(--ring),0_0_0_3px_color-mix(in_oklab,var(--ring)_30%,transparent)] motion-reduce:transition-none",
+            compact ? "h-8 rounded-lg" : "h-9 rounded-[10px]",
+            !ready && "opacity-55",
+          )}
+        >
+          <label htmlFor={`${baseId}-search`} className="sr-only">
+            Buscar banco
+          </label>
+          <Search
+            className="size-3.5 shrink-0 text-subtle-foreground"
+            strokeWidth={1.75}
+            aria-hidden="true"
+          />
+          <Input
+            ref={search}
+            id={`${baseId}-search`}
+            type="search"
+            role="combobox"
+            aria-expanded="true"
+            aria-controls={listId}
+            aria-autocomplete="list"
+            aria-activedescendant={active ? optionId(active) : undefined}
+            autoComplete="off"
+            enterKeyHint="search"
+            spellCheck={false}
+            placeholder="Buscar banco"
+            disabled={!ready}
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            onKeyDown={onSearchKeyDown}
+            className="peer h-auto min-w-0 flex-1 rounded-none border-0 bg-transparent p-0 text-[13px] text-foreground shadow-none outline-none placeholder:text-subtle-foreground focus-visible:border-0 focus-visible:ring-0 disabled:opacity-100 md:text-[13px] dark:bg-transparent [&::-webkit-search-cancel-button]:hidden"
+          />
+          {query ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label="Limpar busca"
+              onClick={clear}
+              className="size-6 shrink-0 rounded-md text-subtle-foreground [transition:background-color_120ms_ease-out,color_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-muted hover:text-foreground active:scale-[0.94] motion-reduce:transition-none motion-reduce:active:scale-100"
+            >
+              <X className="size-3.5" strokeWidth={2} aria-hidden="true" />
+            </Button>
+          ) : null}
+        </div>
+      )}
+
+      <div
+        ref={list}
+        id={listId}
+        role="listbox"
+        aria-label="Bancos"
+        aria-busy={banksStatus === "loading" || undefined}
+        aria-activedescendant={active ? optionId(active) : undefined}
+        tabIndex={ready && visible.length > 0 ? 0 : -1}
+        onKeyDown={onListKeyDown}
+        onFocus={() => {
+          if (!active && visible.length > 0) setActiveId(selected?.id ?? visible[0]?.id ?? null);
+        }}
+        className={cn(
+          "grid min-h-0 min-w-0 content-start overflow-y-auto overscroll-contain outline-none",
+          overflowing && "[mask-image:linear-gradient(black_calc(100%-28px),transparent)]",
+          (banksStatus !== "ready" || (searching && results.length === 0)) && "content-center",
+        )}
+      >
+        {banksStatus === "loading" ? (
+          <div className="grid gap-1">
+            {Array.from({ length: compact ? 3 : 4 }, (_, index) => (
+              <div
+                // biome-ignore lint/suspicious/noArrayIndexKey: fixed skeleton rows.
+                key={index}
+                aria-hidden="true"
+                className={cn("flex items-center gap-2.5 px-2.5", compact ? "h-10" : "h-11")}
+              >
+                <span className="size-7 shrink-0 rounded-lg bg-muted" />
+                <span className="h-3 w-28 rounded-[4px] bg-[linear-gradient(90deg,var(--muted)_0%,color-mix(in_oklab,var(--muted)_55%,var(--card))_50%,var(--muted)_100%)] bg-size-[200%_100%] motion-safe:animate-skeleton-shimmer" />
+              </div>
+            ))}
+          </div>
+        ) : banksStatus === "error" ? (
+          <div className="grid justify-items-center gap-1 px-3 text-center motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-1 motion-safe:duration-180">
+            <p className="m-0 text-[12.5px]/[18px] font-medium text-destructive-ink">
+              Não deu para carregar a lista de bancos.
+            </p>
+            <p className="m-0 text-[12.5px]/[18px] text-muted-foreground">
+              Tente de novo ou use o QR Code.
+            </p>
+            <div className="mt-2 flex flex-wrap justify-center gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={useQr}
+                className={cn(
+                  pillClass,
+                  "h-7 gap-1.5 bg-secondary px-3 text-[12px] hover:bg-accent has-[>svg]:px-3",
+                )}
+              >
+                <QrCode className="size-3.5" strokeWidth={1.75} aria-hidden="true" />
+                Usar QR Code
+              </Button>
+              {context.onBanksRetry ? (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={context.onBanksRetry}
+                  className={cn(pillClass, "h-7 bg-secondary px-3 text-[12px] hover:bg-accent")}
+                >
+                  Tentar de novo
+                </Button>
+              ) : null}
+            </div>
+          </div>
+        ) : searching && results.length === 0 ? (
+          <div className="grid justify-items-center gap-2 px-3 text-center motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-1 motion-safe:duration-180">
+            <span
+              aria-hidden="true"
+              className="mb-1 grid size-10 place-items-center rounded-full bg-muted text-muted-foreground"
+            >
+              <SearchX className="size-4" strokeWidth={1.75} />
+            </span>
+            <p className="m-0 text-[13px]/[18px] font-medium text-foreground">
+              Nenhum banco encontrado para {quoteQuery(query)}
+            </p>
+            <p className="m-0 max-w-[280px] text-[12.5px]/[18px] text-muted-foreground">
+              Confira o nome ou use o QR Code, que funciona com qualquer banco.
+            </p>
+            <div className="mt-1 flex flex-wrap justify-center gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={clear}
+                className={cn(pillClass, "h-7 bg-secondary px-3 text-[12px] hover:bg-accent")}
+              >
+                Limpar busca
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={useQr}
+                className={cn(
+                  pillClass,
+                  "h-7 gap-1.5 bg-secondary px-3 text-[12px] hover:bg-accent has-[>svg]:px-3",
+                )}
+              >
+                <QrCode className="size-3.5" strokeWidth={1.75} aria-hidden="true" />
+                Usar QR Code
+              </Button>
+            </div>
+          </div>
+        ) : (
+          groups.map((group) => {
+            const groupId = `${baseId}-group-${group.label.length}`;
+            return (
+              // biome-ignore lint/a11y/useSemanticElements: an ARIA group of options inside a listbox; a fieldset can't own options.
+              <div
+                key={group.label}
+                role="group"
+                aria-labelledby={groupId}
+                className="grid min-w-0"
+              >
+                <span
+                  id={groupId}
+                  className="px-2.5 pt-1.5 pb-1 text-[11.5px]/4 font-medium text-subtle-foreground first:pt-0"
+                >
+                  {group.label}
+                </span>
+                {group.rows.map(({ bank, highlight }) => {
+                  position += 1;
+                  const isSelected = bank.id === selected?.id;
+                  const isActive = keyboard && bank.id === active?.id;
+                  const reasonId = `${optionId(bank)}-reason`;
+                  return (
+                    // biome-ignore lint/a11y/useKeyWithClickEvents: keys go to the search field or the listbox, which own aria-activedescendant.
+                    <div
+                      key={bank.id}
+                      id={optionId(bank)}
+                      role="option"
+                      aria-selected={isSelected}
+                      aria-disabled={bank.disabled || undefined}
+                      aria-describedby={bank.disabled ? reasonId : undefined}
+                      aria-setsize={visible.length}
+                      aria-posinset={position}
+                      tabIndex={-1}
+                      data-active={isActive || undefined}
+                      onClick={() => {
+                        setKeyboard(false);
+                        setActiveId(bank.id);
+                        context.selectBank(bank);
+                      }}
+                      className={cn(
+                        optionRow,
+                        compact
+                          ? "h-10 gap-[9px] rounded-lg px-2 pointer-coarse:h-11"
+                          : "h-11 gap-2.5 rounded-[10px] px-2.5",
+                        "data-active:outline-2 data-active:-outline-offset-2 data-active:outline-primary data-active:outline-solid",
+                        bank.disabled
+                          ? "cursor-default"
+                          : isSelected
+                            ? "bg-[color-mix(in_oklab,var(--primary)_6%,var(--card))]"
+                            : "hover:bg-muted",
+                      )}
+                    >
+                      <PixAutomaticoBankMark
+                        bank={bank}
+                        className={cn(bank.disabled && "opacity-60 grayscale")}
+                      />
+                      <span
+                        className={cn(
+                          "min-w-0 flex-1 truncate text-[13px]/[18px]",
+                          bank.disabled
+                            ? "font-normal text-subtle-foreground"
+                            : "font-medium text-foreground",
+                        )}
+                      >
+                        <Highlight
+                          text={bank.name}
+                          at={highlight}
+                          length={fold(query.trim()).length}
+                        />
+                      </span>
+                      {bank.disabled ? (
+                        // Read through aria-describedby, so the option's name stays the bank name.
+                        <span
+                          id={reasonId}
+                          aria-hidden="true"
+                          className="shrink-0 text-[11.5px]/4 text-subtle-foreground"
+                        >
+                          {bank.disabledReason ?? "Indisponível"}
+                        </span>
+                      ) : (
+                        <span
+                          aria-hidden="true"
+                          className={cn(
+                            "grid size-4 shrink-0 place-items-center rounded-full",
+                            isSelected
+                              ? "bg-primary text-primary-foreground motion-safe:animate-in motion-safe:fade-in-0 motion-safe:zoom-in-50 motion-safe:duration-180 motion-safe:ease-[cubic-bezier(0.16,1,0.3,1)]"
+                              : "shadow-[inset_0_0_0_1.5px_var(--subtle-foreground)]",
+                          )}
+                        >
+                          {isSelected ? <Check className="size-3" strokeWidth={2.6} /> : null}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      <div className="grid min-w-0 gap-2.5">
+        <div className="flex min-w-0 items-center justify-between gap-2 text-[12px]/4">
+          <span className="text-subtle-foreground">Não achou seu banco?</span>
+          <button
+            type="button"
+            onClick={useQr}
+            className="cursor-pointer rounded-sm font-medium text-primary-ink [transition:opacity_120ms_ease-out,scale_140ms_cubic-bezier(0.23,1,0.32,1)] hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100"
+          >
+            Usar QR Code
+          </button>
+        </div>
+        <Button
+          ref={send}
+          type="button"
+          data-slot="pix-automatico-bank-send"
+          aria-disabled={!canSend || undefined}
+          onClick={() => {
+            if (canSend) context.sendToBank();
+          }}
+          className={cn(
+            pillClass,
+            "h-9 w-full gap-2 bg-primary text-[13px] text-primary-foreground hover:bg-primary",
+            canSend ? "hover:brightness-[1.08]" : "cursor-default",
+            !canSend && !pending && "opacity-45",
+          )}
+        >
+          {pending ? (
+            <LoaderCircle
+              className="size-3.5 motion-safe:animate-spin"
+              strokeWidth={2}
+              aria-hidden="true"
+            />
+          ) : null}
+          <span className="truncate">{sendLabel}</span>
+        </Button>
+      </div>
+    </div>
   );
 }
 
@@ -775,8 +1724,10 @@ export function PixAutomaticoQrCode({
         )}
       >
         <figure
+          id={context.waitingTitleId}
+          tabIndex={-1}
           className={cn(
-            "m-0 grid size-[136px] animate-in place-items-center justify-self-center rounded-xl bg-white p-2.5 shadow-[0_0_0_1px_var(--border)] delay-120 duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] fill-mode-backwards zoom-in-96 motion-reduce:animate-none [&_img]:size-full [&_svg]:size-full",
+            "m-0 grid size-[136px] outline-none animate-in place-items-center justify-self-center rounded-xl bg-white p-2.5 shadow-[0_0_0_1px_var(--border)] delay-120 duration-180 ease-[cubic-bezier(0.16,1,0.3,1)] fill-mode-backwards zoom-in-96 motion-reduce:animate-none [&_img]:size-full [&_svg]:size-full",
             compact && "size-28 p-2",
           )}
         >
@@ -866,7 +1817,10 @@ export function PixAutomaticoQrCode({
   );
 }
 
-/** Awaiting in the bank app: a pulsing phone tile, a shimmering title, and the QR fallback. */
+/**
+ * Awaiting in the bank app: a pulsing phone tile badged with the bank, a shimmering title that
+ * names it, the QR fallback, and Trocar banco when the consumer passes onChangeBank.
+ */
 export function PixAutomaticoAppPending({
   className,
   ...props
@@ -874,6 +1828,8 @@ export function PixAutomaticoAppPending({
   const context = usePixAutomatico("PixAutomaticoAppPending");
   if (context.status !== "awaiting" || context.method !== "app") return null;
   const compact = context.variant === "compact";
+  const { bank } = context;
+  const app = bank ? bankShortName(bank) : null;
   return (
     <div
       data-slot="pix-automatico-app-pending"
@@ -890,30 +1846,57 @@ export function PixAutomaticoAppPending({
         >
           <span className="pointer-events-none absolute -inset-1.5 rounded-[20px] shadow-[0_0_0_1.5px_color-mix(in_oklab,var(--primary)_35%,transparent)] motion-safe:animate-ring-pulse" />
           <Smartphone className="size-5" strokeWidth={1.75} />
+          {bank ? (
+            <PixAutomaticoBankMark
+              bank={bank}
+              size="badge"
+              className="absolute -right-2 -bottom-2 z-1 shadow-[0_0_0_2px_var(--card)] motion-safe:animate-in motion-safe:fade-in-0 motion-safe:zoom-in-50 motion-safe:duration-180 motion-safe:delay-160 motion-safe:ease-[cubic-bezier(0.16,1,0.3,1)] motion-safe:fill-mode-backwards"
+            />
+          ) : null}
         </span>
         <div className="grid min-w-0 gap-1">
-          <p className="m-0 text-[13px]/[18px] font-medium text-foreground">
-            <span className="motion-safe:shimmer-text">Aguardando confirmação no banco</span>
-          </p>
+          <h4
+            id={context.waitingTitleId}
+            tabIndex={-1}
+            className="m-0 text-[13px]/[18px] font-medium text-foreground outline-none"
+          >
+            <span className="motion-safe:shimmer-text">
+              {app ? `Aguardando confirmação no app ${app}` : "Aguardando confirmação no banco"}
+            </span>
+          </h4>
           <p className="m-0 text-[12.5px]/[18px] text-muted-foreground">
-            Enviamos o pedido para o app do seu banco. Pode levar alguns minutos para aparecer.
+            {app
+              ? `Abra o app ${app} e confirme o Pix Automático. O pedido pode levar alguns minutos para aparecer.`
+              : "Enviamos o pedido para o app do seu banco. Pode levar alguns minutos para aparecer."}
           </p>
         </div>
       </div>
-      <div className="flex min-w-0 items-center justify-between gap-2">
+      <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
         <span className="text-[11.5px]/4 text-subtle-foreground">Não apareceu?</span>
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={() => context.setMethod("qr")}
-          className={cn(
-            pillClass,
-            "h-7 gap-1.5 bg-secondary px-3 text-[12px] hover:bg-accent has-[>svg]:px-3",
-          )}
-        >
-          <QrCode className="size-3.5" strokeWidth={1.75} aria-hidden="true" />
-          Usar QR Code
-        </Button>
+        <div className="flex flex-wrap justify-end gap-2">
+          {context.changeBank ? (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={context.changeBank}
+              className={cn(pillClass, "h-7 bg-secondary px-3 text-[12px] hover:bg-accent")}
+            >
+              Trocar banco
+            </Button>
+          ) : null}
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => context.setMethod("qr")}
+            className={cn(
+              pillClass,
+              "h-7 gap-1.5 bg-secondary px-3 text-[12px] hover:bg-accent has-[>svg]:px-3",
+            )}
+          >
+            <QrCode className="size-3.5" strokeWidth={1.75} aria-hidden="true" />
+            Usar QR Code
+          </Button>
+        </div>
       </div>
     </div>
   );

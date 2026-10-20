@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
+  PIX_AUTOMATICO_DEFAULT_BANKS,
   PixAutomatico,
   PixAutomaticoActive,
   PixAutomaticoAmount,
   PixAutomaticoAppPending,
   PixAutomaticoAuthorize,
   PixAutomaticoAvatar,
+  type PixAutomaticoBanksStatus,
   PixAutomaticoHeader,
   PixAutomaticoMaxHint,
   PixAutomaticoMethod,
@@ -34,6 +36,13 @@ const variableCharges = [
   { date: "2027-01-05", amount: 163.4 },
 ];
 
+// The example list plus an invented cooperative, so no real bank is ever shown as unavailable.
+const banks = [
+  ...PIX_AUTOMATICO_DEFAULT_BANKS.slice(0, 1),
+  { id: "ipe", name: "Cooperativa Ipê", disabled: true, disabledReason: "Em manutenção" },
+  ...PIX_AUTOMATICO_DEFAULT_BANKS.slice(1),
+];
+
 const charges = [
   { date: "2026-11-05", amount: 89.9 },
   { date: "2026-12-05", amount: 89.9 },
@@ -43,6 +52,9 @@ const charges = [
 export function PixAutomaticoPreview({ variant = "card" }: { variant?: PixAutomaticoVariant }) {
   const [status, setStatus] = useState<PixAutomaticoStatus>("review");
   const [expiresAt, setExpiresAt] = useState<number | undefined>(undefined);
+  const [banksStatus, setBanksStatus] = useState<PixAutomaticoBanksStatus>("ready");
+  // Your app persists the last-used bank (account preference, cookie); the preview keeps it here.
+  const [recentBankId, setRecentBankId] = useState("nubank");
   const variable = variant === "plain";
 
   const go = (next: PixAutomaticoStatus) => {
@@ -67,12 +79,31 @@ export function PixAutomaticoPreview({ variant = "card" }: { variant?: PixAutoma
         <ToggleGroupItem value="expired">Expirado</ToggleGroupItem>
         <ToggleGroupItem value="cancelled">Cancelado</ToggleGroupItem>
       </ToggleGroup>
+      <ToggleGroup
+        type="single"
+        aria-label="Simular lista de bancos"
+        value={banksStatus}
+        onValueChange={(next) => next && setBanksStatus(next as PixAutomaticoBanksStatus)}
+        className="flex-wrap justify-self-center"
+      >
+        <ToggleGroupItem value="ready">Lista pronta</ToggleGroupItem>
+        <ToggleGroupItem value="loading">Carregando bancos</ToggleGroupItem>
+        <ToggleGroupItem value="error">Erro na lista</ToggleGroupItem>
+      </ToggleGroup>
       <PixAutomatico
         variant={variant}
         status={status}
         code={code}
         expiresAt={status === "awaiting" ? expiresAt : undefined}
-        onAuthorize={() => go("awaiting")}
+        banks={banks}
+        banksStatus={banksStatus}
+        onBanksRetry={() => setBanksStatus("ready")}
+        recentBankId={recentBankId}
+        onAuthorize={(payload) => {
+          if (payload.method === "app") setRecentBankId(payload.bank.id);
+          go("awaiting");
+        }}
+        onChangeBank={() => go("review")}
         onRetry={() => go("review")}
         onOtherMethod={() => go("review")}
         onExpire={() => go("expired")}
