@@ -80,7 +80,10 @@ export function RegistryPreviewCanvas({
   selection: string;
 }) {
   return (
-    <PannableCanvas resetKey={`${itemId}:${selection}`}>
+    <PannableCanvas
+      resetKey={`${itemId}:${selection}`}
+      className={`uai-registry-specimen--${itemId}`}
+    >
       {renderPreview(itemId, selection)}
     </PannableCanvas>
   );
