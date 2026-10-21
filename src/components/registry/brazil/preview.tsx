@@ -13,12 +13,17 @@ import {
   INSTALLMENT_PICKER_VARIANTS,
   type InstallmentPickerVariant,
 } from "@/components/ui/uai/installment-picker";
+import {
+  PIX_AUTOMATICO_VARIANTS,
+  type PixAutomaticoVariant,
+} from "@/components/ui/uai/pix-automatico";
 import { PIX_PAYMENT_VARIANTS, type PixPaymentVariant } from "@/components/ui/uai/pix-payment";
 import { type PreviewControl, PreviewStage } from "../preview-chrome";
 import { BoletoPaymentPreview } from "./boleto-payment-preview";
 import { CepFieldPreview } from "./cep-field-preview";
 import { DocumentFieldPreview } from "./document-field-preview";
 import { InstallmentPickerPreview } from "./installment-picker-preview";
+import { PixAutomaticoPreview } from "./pix-automatico-preview";
 import { PixPaymentPreview } from "./pix-payment-preview";
 
 const controls: Record<string, { label: string; variants: readonly string[] }> = {
@@ -26,6 +31,7 @@ const controls: Record<string, { label: string; variants: readonly string[] }> =
   "cep-field": { label: "CEP field variant", variants: CEP_FIELD_VARIANTS },
   "pix-payment": { label: "Pix payment variant", variants: PIX_PAYMENT_VARIANTS },
   "boleto-payment": { label: "boleto payment variant", variants: BOLETO_PAYMENT_VARIANTS },
+  "pix-automatico": { label: "Pix Automático variant", variants: PIX_AUTOMATICO_VARIANTS },
   "installment-picker": {
     label: "installment picker variant",
     variants: INSTALLMENT_PICKER_VARIANTS,
@@ -58,7 +64,9 @@ export function BrazilPreview({ itemId, selection }: { itemId: string; selection
                 ? selection === "compact"
                   ? 340
                   : 448
-                : 400,
+                : itemId === "pix-automatico"
+                  ? 560
+                  : 400,
           minWidth: 0,
           minHeight: itemId === "cep-field" ? 180 : undefined,
           padding: "24px 0",
@@ -71,6 +79,9 @@ export function BrazilPreview({ itemId, selection }: { itemId: string; selection
         {itemId === "pix-payment" && <PixPaymentPreview variant={selection as PixPaymentVariant} />}
         {itemId === "boleto-payment" && (
           <BoletoPaymentPreview variant={selection as BoletoPaymentVariant} />
+        )}
+        {itemId === "pix-automatico" && (
+          <PixAutomaticoPreview variant={selection as PixAutomaticoVariant} />
         )}
         {itemId === "installment-picker" && (
           <InstallmentPickerPreview variant={selection as InstallmentPickerVariant} />

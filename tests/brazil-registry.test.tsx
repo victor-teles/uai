@@ -10,6 +10,7 @@ test("publishes every Brazil source without drift and keeps examples executable"
     "pix-payment",
     "boleto-payment",
     "installment-picker",
+    "pix-automatico",
   ]);
   for (const item of brazilCatalog) {
     const source = await Bun.file(`src/registry/uai/components/${item.id}.tsx`).text();
