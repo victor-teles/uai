@@ -1377,6 +1377,31 @@
       "categories": ["ai", "agents"]
     },
     {
+      "name": "agent-question",
+      "type": "registry:ui",
+      "title": "Agent Question",
+      "description": "Lets an agent ask for a decision: one to five single or multiple choice questions, a recommended option, Something else, number-key answers, and a record of the answers.",
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "badge",
+        "button",
+        "checkbox",
+        "collapsible",
+        "input",
+        "radio-group",
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/agent-question.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/agent-question.tsx"
+        }
+      ],
+      "categories": ["ai", "agents"]
+    },
+    {
       "name": "response-status",
       "type": "registry:ui",
       "title": "Response Status",
@@ -2617,6 +2642,28 @@
         }
       ],
       "categories": ["brazil", "commerce", "forms"]
+    },
+    {
+      "name": "boleto-payment",
+      "type": "registry:ui",
+      "title": "Boleto Payment",
+      "description": "A boleto with the grouped linha digitável and copy, an ITF barcode drawn from the code, due-date urgency, a BolePix tab, and card, plain, and compact variants.",
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "badge",
+        "button",
+        "toggle",
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/boleto-payment.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/boleto-payment.tsx"
+        }
+      ],
+      "categories": ["brazil", "commerce", "checkout"]
     }
   ]
 }
