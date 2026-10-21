@@ -1804,6 +1804,21 @@ a {
   touch-action: none;
 }
 
+/* Pix Automático's tallest state (the terms with the chosen bank, a 515px card) needs more
+   than the default canvas. Its canvas keeps that height, and the workspace scrolls to the
+   code panel instead of clipping the card. */
+.uai-bench__workspace:has(.uai-registry-specimen--pix-automatico) {
+  overflow-y: auto;
+}
+
+.uai-bench__canvas:has(.uai-registry-specimen--pix-automatico) {
+  flex: 1 0 auto;
+}
+
+.uai-bench .uai-registry-specimen--pix-automatico {
+  min-height: 800px;
+}
+
 .uai-bench__panel + .uai-bench__panel {
   border-top: 1px solid var(--uai-border);
 }
@@ -2323,6 +2338,10 @@ html[data-uai-resizing="y"] * {
     flex: none;
     height: 460px;
     touch-action: pan-y pinch-zoom;
+  }
+
+  .uai-bench .uai-registry-specimen--pix-automatico {
+    height: 860px;
   }
 
   .uai-bench__dock {

@@ -534,7 +534,7 @@ export function SignUpCardCheckbox({ className, disabled, id, ...props }: SignUp
     <Checkbox
       data-slot="sign-up-card-checkbox"
       className={cn(
-        "mt-px size-3.5 shrink-0 rounded-[4px] shadow-none focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:size-3",
+        "mt-px size-3.5 shrink-0 rounded-[4px] border-subtle-foreground data-[state=checked]:border-primary data-checked:border-primary shadow-none focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:size-3",
         className,
       )}
       {...props}
