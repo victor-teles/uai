@@ -1,0 +1,24 @@
+{
+  "name": "team-management",
+  "type": "registry:block",
+  "title": "Team Management",
+  "description": "Members, roles, invitations, access status, search, and confirmed removal.",
+  "dependencies": ["class-variance-authority"],
+  "registryDependencies": [
+    "button",
+    "select",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/confirmation-dialog.json",
+    "https://uaiblocks.dev/r/data-table-toolbar.json",
+    "https://uaiblocks.dev/r/empty-state.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/team-management.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/team-management.tsx"
+    }
+  ],
+  "categories": ["application"]
+}

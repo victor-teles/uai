@@ -56,8 +56,8 @@ jobs:
           IDEA_ID: ${{ inputs.idea || steps.idea.outputs.id }}
         run: |
           # Skeleton: plug the coding agent in here. It must follow CONTRIBUTING.md
-          # › "Add a component" for $IDEA_ID (source, mirror, registry.json, catalog,
-          # <id>-preview.tsx, tests) and leave the changes in the working tree.
+          # › "Add a component" for $IDEA_ID (source, mirror, <id>.json, catalog,
+          # <id>-preview.tsx, <id>-entry.tsx, tests) and leave the changes in the working tree.
           echo "::notice::Generation is not wired yet; nothing was built for $IDEA_ID."
           echo "generated=false" >> "$GITHUB_OUTPUT"
 

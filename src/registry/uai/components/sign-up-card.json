@@ -1,0 +1,25 @@
+{
+  "name": "sign-up-card",
+  "type": "registry:ui",
+  "title": "Sign-up Card",
+  "description": "A compound account creation form with consent, password guidance, and verification feedback.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "checkbox",
+    "input",
+    "label",
+    "separator",
+    "toggle",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/sign-up-card.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/sign-up-card.tsx"
+    }
+  ],
+  "categories": ["authentication", "forms"]
+}

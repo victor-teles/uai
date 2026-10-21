@@ -30,15 +30,21 @@ bun run test:e2e:install    # once, for the browser checks
 4. **Mirror.** Add the install-path re-export the site imports:
    `src/components/ui/uai/<name>.tsx` (components) or `src/components/uai/<name>.tsx`
    (blocks), containing only `export * from "@/registry/uai/<components|blocks>/<name>";`.
-5. **Registry entry.** Add the item to `registry.json` with its `files`, `target`,
-   npm `dependencies`, and `registryDependencies`. List shadcn primitives by bare name
-   (`button`) and Uai items by full URL
-   (`https://uaiblocks.dev/r/<name>.json`). Always include `uai-utils` when
-   you import `cn`, and `uai-theme`.
+5. **Registry entry.** Write `src/registry/uai/<components|blocks>/<name>.json` next
+   to the source: one shadcn registry item with its `name` (the file name), `files`,
+   `target`, npm `dependencies`, and `registryDependencies`. List shadcn primitives by
+   bare name (`button`) and Uai items by full URL
+   (`https://uaiblocks.dev/r/<name>.json`). Always include `uai-utils` when you import
+   `cn`, and `uai-theme`. `registry.json` is generated from these files by
+   `bun run registry:index` (which `registry:build`, `registry:check`, `typecheck`,
+   and `dev` run first); it is git-ignored, so never edit it.
 6. **Catalog and preview.** In `src/components/registry/<group>/`, add
    `<name>-preview.tsx`, a catalog entry in that group's `catalog.ts` whose `usage`
-   is the exact text of the preview file, and a preview control built from the
-   variants constant so every variant can be selected on the page.
+   is the exact text of the preview file, and `<name>-entry.tsx`, which exports the
+   item's preview `entry`: a `variantControl(...)` built from the variants constant so
+   every variant can be selected on the page, and a `render` that stages the preview
+   (usually `SpecimenStage` with the group's label and a `maxWidth`). The site finds
+   the entry by its file name; there is no group map to edit.
 7. **Tests.** Add `tests/<name>.test.tsx` for behaviour and accessibility, and
    extend the group's registry test.
 8. **Share image.** With a production server running, `bun run og:capture <name>`
@@ -110,10 +116,12 @@ files and touch shared lists as little as possible, so the PRs merge in any orde
 
 | Don't | Do |
 | --- | --- |
-| Commit `public/r`. | Run `bun run registry:build`. `public/r` is git-ignored; `dev`, `test`, `build`, and CI rebuild it from `registry.json` and the source. |
+| Commit `public/r` or `registry.json`. | Run `bun run registry:build`. Both are git-ignored; `registry.json` is generated from the per-item `src/registry/uai/**/<id>.json` files, and `dev`, `test`, `build`, and CI rebuild `public/r` from it. |
+| Add the item to `registry.json` or a group preview map. | Add `<id>.json` next to the source and `<id>-entry.tsx` next to `<id>-preview.tsx`. `bun run registry:index` collects them. |
+| List the group's items in `PRODUCT.md` ("The catalog includes …"). | Describe what the group owns; the site lists the items. |
 | Write an item count in the README, docs, comments, or copy. | Use `registryCatalog.length` in code; leave the number out of prose. |
 | Edit a central OG manifest. | Let `bun run og:capture <id>` write `src/assets/og/<id>.json` next to the two PNGs. The image size is read from the PNG. |
-| Append the new item at the very end of `registry.json`, a group's `*ItemId` union, preview map, or a `DESIGN.md` table. | Insert it in reading order, next to its group's siblings. Two PRs then edit different lines. |
+| Append the new item at the very end of a group's `catalog.ts`, its `*ItemId` union, or a `DESIGN.md` table. | Insert it in reading order, next to its group's siblings. Two PRs then edit different lines. |
 
 When a PR does fall behind `main`, merge `origin/main` into the branch (no rebase or
 force-push), keep both sides of every list, run `bun run registry:build`, and run

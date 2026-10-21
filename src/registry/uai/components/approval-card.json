@@ -1,0 +1,22 @@
+{
+  "name": "approval-card",
+  "type": "registry:ui",
+  "title": "Approval Card",
+  "description": "A composable decision surface that keeps risk, evidence, and impact explicit.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "input",
+    "label",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/approval-card.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/approval-card.tsx"
+    }
+  ],
+  "categories": ["ai", "feedback"]
+}

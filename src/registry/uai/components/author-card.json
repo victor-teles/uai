@@ -1,0 +1,21 @@
+{
+  "name": "author-card",
+  "type": "registry:ui",
+  "title": "Author Card",
+  "description": "Author identity with an initials fallback, biography, profile links, and a follow toggle.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "avatar",
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/author-card.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/author-card.tsx"
+    }
+  ],
+  "categories": ["content", "community"]
+}

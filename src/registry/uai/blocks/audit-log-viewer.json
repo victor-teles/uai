@@ -1,0 +1,23 @@
+{
+  "name": "audit-log-viewer",
+  "type": "registry:block",
+  "title": "Audit Log Viewer",
+  "description": "Filters, events, details, and export controls.",
+  "registryDependencies": [
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json",
+    "https://uaiblocks.dev/r/audit-log.json",
+    "https://uaiblocks.dev/r/date-range-picker.json",
+    "https://uaiblocks.dev/r/filter-bar.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/audit-log-viewer.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/audit-log-viewer.tsx"
+    }
+  ],
+  "categories": ["operations", "audit", "security"],
+  "dependencies": ["class-variance-authority"]
+}

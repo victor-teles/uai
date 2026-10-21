@@ -1,0 +1,20 @@
+{
+  "name": "message",
+  "type": "registry:ui",
+  "title": "Message",
+  "description": "User, assistant, system, and tool messages with avatar, header, content, actions, and streaming state.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/message.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/message.tsx"
+    }
+  ],
+  "categories": ["ai", "chat"]
+}

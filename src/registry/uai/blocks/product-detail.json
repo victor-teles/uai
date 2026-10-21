@@ -1,0 +1,22 @@
+{
+  "name": "product-detail",
+  "type": "registry:block",
+  "title": "Product Detail",
+  "description": "Gallery, options, availability, price, delivery, and purchase actions.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/product-gallery.json",
+    "https://uaiblocks.dev/r/quantity-picker.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/product-detail.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/product-detail.tsx"
+    }
+  ],
+  "categories": ["commerce", "product"]
+}

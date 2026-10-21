@@ -1,0 +1,20 @@
+{
+  "name": "testimonial-card",
+  "type": "registry:ui",
+  "title": "Testimonial Card",
+  "description": "A quote with the person, role, organization, and an optional proof link.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "avatar",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/testimonial-card.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/testimonial-card.tsx"
+    }
+  ],
+  "categories": ["marketing", "social-proof"]
+}

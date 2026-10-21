@@ -1,0 +1,21 @@
+{
+  "name": "share-menu",
+  "type": "registry:ui",
+  "title": "Share Menu",
+  "description": "A share menu with native sharing, copy-link feedback, and channel links.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "dropdown-menu",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/share-menu.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/share-menu.tsx"
+    }
+  ],
+  "categories": ["content", "community"]
+}

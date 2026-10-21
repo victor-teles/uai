@@ -232,10 +232,11 @@ for (const item of registry.items) {
   }
 }
 
-// Registry source that registry.json never ships is dead weight.
+// Registry source that registry.json never ships is dead weight. The `<id>.json`
+// beside each source is its registry entry, not shipped source.
 for (const file of walk(path.join(ROOT, "src/registry"))) {
   const relative = path.relative(ROOT, file);
-  if (!declaredFiles.has(relative))
+  if (!declaredFiles.has(relative) && !relative.endsWith(".json"))
     report("orphan-source", relative, "is not listed in registry.json");
 }
 for (const id of catalogById.keys()) {

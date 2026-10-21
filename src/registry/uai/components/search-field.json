@@ -1,0 +1,22 @@
+{
+  "name": "search-field",
+  "type": "registry:ui",
+  "title": "Search Field",
+  "description": "Clearable search with recent queries, loading, empty, and error feedback.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "input",
+    "label",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/search-field.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/search-field.tsx"
+    }
+  ],
+  "categories": ["forms"]
+}

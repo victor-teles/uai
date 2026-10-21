@@ -1,0 +1,23 @@
+{
+  "name": "context-meter",
+  "type": "registry:ui",
+  "title": "Context Meter",
+  "description": "How full a model's context window is: a composer ring, a stacked breakdown, threshold warnings, and compaction that shows what it freed.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "badge",
+    "button",
+    "popover",
+    "https://uaiblocks.dev/r/uai-number-tick.json",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/context-meter.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/context-meter.tsx"
+    }
+  ],
+  "categories": ["ai", "agents"]
+}

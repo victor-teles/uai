@@ -1,0 +1,20 @@
+{
+  "name": "installment-picker",
+  "type": "registry:ui",
+  "title": "Installment Picker",
+  "description": "Card installment choices with amounts, interest terms, and totals in list, tiles, and compact variants.",
+  "dependencies": ["class-variance-authority"],
+  "registryDependencies": [
+    "radio-group",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/installment-picker.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/installment-picker.tsx"
+    }
+  ],
+  "categories": ["brazil", "commerce", "forms"]
+}

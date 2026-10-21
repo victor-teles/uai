@@ -1,0 +1,22 @@
+{
+  "name": "coupon-field",
+  "type": "registry:ui",
+  "title": "Coupon Field",
+  "description": "A compound discount field with rounded, pill, and compact variants.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "input",
+    "label",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/coupon-field.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/coupon-field.tsx"
+    }
+  ],
+  "categories": ["commerce", "forms"]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "uai-number-tick",
+  "type": "registry:lib",
+  "title": "Uai Number Tick",
+  "description": "Moves only the characters of a formatted number that changed, in one grid cell per character so widths never jump. Shared by Metric Card and Price Summary.",
+  "registryDependencies": ["https://uaiblocks.dev/r/uai-theme.json"],
+  "files": [
+    {
+      "path": "src/registry/uai/lib/uai-number-tick.tsx",
+      "type": "registry:lib",
+      "target": "@lib/uai-number-tick.tsx"
+    }
+  ],
+  "categories": ["utility"]
+}

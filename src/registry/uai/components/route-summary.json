@@ -1,0 +1,21 @@
+{
+  "name": "route-summary",
+  "type": "registry:ui",
+  "title": "Route Summary",
+  "description": "Travel modes, stops, totals, and turn-by-turn directions for a route.",
+  "dependencies": ["class-variance-authority"],
+  "registryDependencies": [
+    "button",
+    "toggle",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/route-summary.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/route-summary.tsx"
+    }
+  ],
+  "categories": ["maps", "navigation"]
+}
