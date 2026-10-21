@@ -41,6 +41,9 @@ bun run test:e2e:install    # once, for the browser checks
    variants constant so every variant can be selected on the page.
 7. **Tests.** Add `tests/<name>.test.tsx` for behaviour and accessibility, and
    extend the group's registry test.
+8. **Share image.** With a production server running, `bun run og:capture <name>`
+   writes `src/assets/og/<name>-dark.png`, `<name>-light.png`, and `<name>.json`.
+   Commit all three.
 
 ### Works on Base UI and Radix
 
@@ -70,7 +73,7 @@ CI runs all of these on every pull request and on `main`:
 | `bun run typecheck` | Next route types and TypeScript. |
 | `bun run lint` | Biome formatting and lint rules. |
 | `bun run registry:check` | Mirrors, `registry.json` dependencies, catalog usage vs. preview file, variants reaching the preview, reduced-motion handling, and the static rules from [`quality/premium-rubric.md`](quality/premium-rubric.md) (`scripts/premium-lint.ts`). |
-| `bun run test` | Rebuilds `public/r` and runs the unit tests. |
+| `bun run test` | Rebuilds `public/r` and runs the unit tests, including the share-image and shared-file guards. |
 | `bun run build` | Rebuilds the registry and the production site. |
 | `bun scripts/consumer-check.ts --base base\|radix` | Serves this branch's `public/r`, creates a default Next app, runs `shadcn init` for that base, adds every `registry:ui` and `registry:block` item, then runs `tsc` and `next build`. CI runs both bases. Run `bun run registry:build` first. |
 | `bun run test:e2e` | Every `/components/<id>` page in light and dark, desktop and mobile: a screenshot, axe (serious and critical findings fail), a reduced-motion pass, and the premium rubric's live checks (`e2e/premium.e2e.ts`, desktop). Needs `bun run build` first. |
@@ -100,12 +103,29 @@ from the rubric, signed off by Victor, and never shrink on their own. They live 
 approver and date), because `quality/premium-rubric.md` is Designer's text and is
 kept verbatim.
 
+## Shared files
+
+Several component PRs are usually open at once. Each new item should add its own
+files and touch shared lists as little as possible, so the PRs merge in any order.
+
+| Don't | Do |
+| --- | --- |
+| Commit `public/r`. | Run `bun run registry:build`. `public/r` is git-ignored; `dev`, `test`, `build`, and CI rebuild it from `registry.json` and the source. |
+| Write an item count in the README, docs, comments, or copy. | Use `registryCatalog.length` in code; leave the number out of prose. |
+| Edit a central OG manifest. | Let `bun run og:capture <id>` write `src/assets/og/<id>.json` next to the two PNGs. The image size is read from the PNG. |
+| Append the new item at the very end of `registry.json`, a group's `*ItemId` union, preview map, or a `DESIGN.md` table. | Insert it in reading order, next to its group's siblings. Two PRs then edit different lines. |
+
+When a PR does fall behind `main`, merge `origin/main` into the branch (no rebase or
+force-push), keep both sides of every list, run `bun run registry:build`, and run
+the checks above. A conflict in a shared list is resolved by keeping both entries;
+nothing in it should need hand-counting.
+
 ## Pull requests
 
 - Keep one component or one concern per pull request.
 - Update `DESIGN.md` and `PRODUCT.md` in the same change when the visual contract moves.
-- Never edit the stock shadcn primitives in `src/components/ui/*.tsx` or the
-  generated files in `public/r`.
+- Never edit the stock shadcn primitives in `src/components/ui/*.tsx`. Never commit
+  `public/r`; it is a build output.
 - By contributing, you agree that your work is released under the MIT License.
 
 ## Automation

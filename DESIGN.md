@@ -350,7 +350,7 @@ The distributed components keep their own language: warm graphite, soft medium-w
 - Component pages pair a ruled canvas with crop marks and a sticky inspector holding the title, install command, anatomy, and accessibility checks. The variant switch floats over the bottom of the canvas.
 - Lime is site-only: the brand tile, the install pill, the active variant, the active file marker, and focus. Installed components keep accent blue for their single primary action.
 - Medium weight (500) carries emphasis. 600 is reserved for page titles and one headline per card. Never 700.
-- Ninety-eight registry items (57 components and 41 blocks) with live specimens, usage, installation, and accessibility notes.
+- Every registry item in the catalog (the site prints the live component and block counts) with live specimens, usage, installation, and accessibility notes.
 
 ## Colors
 

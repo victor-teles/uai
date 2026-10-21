@@ -14,7 +14,7 @@
   "type": "module",
   "scripts": {
     "build": "bun run registry:build && next build --webpack",
-    "dev": "next dev --webpack",
+    "dev": "bun run registry:build && next dev --webpack",
     "format": "biome format --write .",
     "lint": "biome check .",
     "registry:build": "shadcn build registry.json",

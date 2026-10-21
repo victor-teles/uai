@@ -6,11 +6,13 @@
  * and theme it opens `/components/<id>`, waits for the resting state, and screenshots
  * the `[data-slot="<id>"]` element inside the live preview at 2x with a transparent
  * background. The images land in `src/assets/og/<id>-<theme>.png`, and
- * `src/assets/og/manifest.json` records the default variant shown on the canvas.
+ * `src/assets/og/<id>.json` records the default variant shown on the canvas. One file per
+ * item, so parallel component PRs never edit the same capture file; the share image reads
+ * each capture's size from its PNG header.
  *
  * Pass item ids as arguments to capture only those items.
  */
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { chromium, type Page } from "@playwright/test";
 import sharp from "sharp";
@@ -21,13 +23,11 @@ import {
   openComponent,
   settle,
   THEMES,
-  type Theme,
 } from "../e2e/helpers";
 import { FLOATING_CHROME, findSpecimen } from "./og-clip";
 
 const baseURL = process.env.OG_BASE_URL ?? "http://127.0.0.1:3100";
 const outDir = path.join(import.meta.dirname, "..", "src", "assets", "og");
-const manifestPath = path.join(outDir, "manifest.json");
 
 /** Captures fit inside the specimen panel (86% x 78% of 640 x 550) at 2x. */
 const maxSize = { width: 1100, height: 860 };
@@ -56,19 +56,8 @@ const transparentCanvas = `
   .uai-bench__dock { visibility: hidden !important; }
 `;
 
-type Size = { width: number; height: number };
-type Manifest = Record<string, { variant: string | null } & Partial<Record<Theme, Size>>>;
-
 const only = process.argv.slice(2);
 const ids = only.length > 0 ? componentIds.filter((id) => only.includes(id)) : componentIds;
-
-function readManifest(): Manifest {
-  try {
-    return JSON.parse(readFileSync(manifestPath, "utf8")) as Manifest;
-  } catch {
-    return {};
-  }
-}
 
 /**
  * The part of the specimen inside the canvas (`findSpecimen` in `og-clip.ts`), never the
@@ -87,12 +76,11 @@ async function captureSpecimen(page: Page, id: string) {
 }
 
 /** Fits the capture to the panel and composites it over its soft shadow. */
-async function withShadow(shot: Buffer, file: string): Promise<Size> {
+async function withShadow(shot: Buffer, file: string) {
   const card = await sharp(shot)
     .resize({ ...maxSize, fit: "inside", withoutEnlargement: true })
     .png()
     .toBuffer({ resolveWithObject: true });
-  const { width, height } = card.info;
   const shadow = await sharp(card.data)
     .ensureAlpha()
     .linear([0, 0, 0, shadowAlpha], [0, 0, 0, 0])
@@ -110,12 +98,10 @@ async function withShadow(shot: Buffer, file: string): Promise<Size> {
     .composite([{ input: card.data, left: shadowPad, top: shadowPad }])
     .png({ compressionLevel: 9, effort: 10, palette: true, quality: 92, dither: 0.5 })
     .toFile(file);
-  return { width: width + shadowPad * 2, height: height + shadowPad * 2 };
 }
 
 async function main() {
   mkdirSync(outDir, { recursive: true });
-  const manifest = readManifest();
   const browser = await chromium.launch();
 
   for (const theme of THEMES) {
@@ -137,22 +123,15 @@ async function main() {
         .catch(() => null);
       await page.addStyleTag({ content: transparentCanvas });
       const { shot, clipped } = await captureSpecimen(page, id);
-      const size = await withShadow(shot, path.join(outDir, `${id}-${theme}.png`));
-      manifest[id] = {
-        ...manifest[id],
-        variant: variant?.match(/"(.*)"/)?.[1] ?? null,
-        [theme]: size,
-      };
+      await withShadow(shot, path.join(outDir, `${id}-${theme}.png`));
+      const capture = { variant: variant?.match(/"(.*)"/)?.[1] ?? null };
+      writeFileSync(path.join(outDir, `${id}.json`), `${JSON.stringify(capture, null, 2)}\n`);
       console.log(`${theme} ${id}${clipped ? " (clipped to the canvas)" : ""}`);
     }
     await context.close();
   }
 
   await browser.close();
-  const sorted = Object.fromEntries(
-    Object.entries(manifest).sort(([a], [b]) => a.localeCompare(b)),
-  );
-  writeFileSync(manifestPath, `${JSON.stringify(sorted, null, 2)}\n`);
 }
 
 await main();
