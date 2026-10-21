@@ -1,7 +1,6 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { ImageResponse } from "next/og";
-import captures from "@/assets/og/manifest.json";
 import {
   type OgSceneCard,
   OgSiteTemplate,
@@ -36,10 +35,6 @@ const lightItems: ReadonlySet<string> = new Set(["product-gallery", "product-lis
 
 export function getOgTheme(item: RegistryCatalogItem): OgTheme {
   return item.category === "Brazil" || lightItems.has(item.id) ? "light" : "dark";
-}
-
-function dataUrl(file: string) {
-  return `data:image/png;base64,${readFileSync(file).toString("base64")}`;
 }
 
 /**
@@ -89,17 +84,20 @@ function loadFonts() {
   return fonts;
 }
 
-type Capture = { variant: string | null } & Partial<
-  Record<OgTheme, { width: number; height: number }>
->;
+/** `src/assets/og/<id>.json`, written by `scripts/og-capture.ts`: one file per item. */
+type Capture = { variant: string | null };
 
 function specimenFor(id: string, theme: OgTheme): OgSpecimen | undefined {
-  const capture = (captures as Record<string, Capture>)[id];
-  const size = capture?.[theme];
-  if (!capture || !size) return undefined;
+  const capturePath = path.join(assets, "og", `${id}.json`);
+  const imagePath = path.join(assets, "og", `${id}-${theme}.png`);
+  if (!existsSync(capturePath) || !existsSync(imagePath)) return undefined;
+  const capture = JSON.parse(readFileSync(capturePath, "utf8")) as Capture;
+  const png = readFileSync(imagePath);
   return {
-    src: dataUrl(path.join(assets, "og", `${id}-${theme}.png`)),
-    ...size,
+    src: `data:image/png;base64,${png.toString("base64")}`,
+    // The size comes from the PNG's IHDR chunk: width and height at bytes 16 and 20.
+    width: png.readUInt32BE(16),
+    height: png.readUInt32BE(20),
     pad: capturePad,
     variant: capture.variant,
     install: id,
