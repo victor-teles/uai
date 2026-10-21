@@ -1,0 +1,23 @@
+{
+  "name": "order-tracking",
+  "type": "registry:block",
+  "title": "Order Tracking",
+  "description": "Status, shipment events, delivery estimates, and support.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "collapsible",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/description-list.json",
+    "https://uaiblocks.dev/r/order-status.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/order-tracking.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/order-tracking.tsx"
+    }
+  ],
+  "categories": ["commerce", "orders"]
+}

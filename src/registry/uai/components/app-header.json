@@ -1,0 +1,21 @@
+{
+  "name": "app-header",
+  "type": "registry:ui",
+  "title": "App Header",
+  "description": "A compound application header with navigation, search, account actions, and responsive overflow.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "input",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/app-header.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/app-header.tsx"
+    }
+  ],
+  "categories": ["navigation", "layout"]
+}

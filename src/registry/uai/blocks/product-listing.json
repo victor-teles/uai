@@ -1,0 +1,23 @@
+{
+  "name": "product-listing",
+  "type": "registry:block",
+  "title": "Product Listing",
+  "description": "Categories, filters, sorting, result counts, and pagination.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "label",
+    "select",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/filter-bar.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/product-listing.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/product-listing.tsx"
+    }
+  ],
+  "categories": ["commerce", "catalog"]
+}

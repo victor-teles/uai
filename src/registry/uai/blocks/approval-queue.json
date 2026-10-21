@@ -1,0 +1,26 @@
+{
+  "name": "approval-queue",
+  "type": "registry:block",
+  "title": "Approval Queue",
+  "description": "Pending decisions grouped by risk, age, owner, and impact.",
+  "registryDependencies": [
+    "button",
+    "label",
+    "radio-group",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json",
+    "https://uaiblocks.dev/r/approval-card.json",
+    "https://uaiblocks.dev/r/empty-state.json",
+    "https://uaiblocks.dev/r/filter-bar.json",
+    "https://uaiblocks.dev/r/metric-card.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/approval-queue.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/approval-queue.tsx"
+    }
+  ],
+  "categories": ["operations", "approvals", "review"],
+  "dependencies": []
+}

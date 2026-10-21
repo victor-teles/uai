@@ -1,0 +1,23 @@
+{
+  "name": "profile-page",
+  "type": "registry:block",
+  "title": "Profile Page",
+  "description": "Identity, account actions, contact details, and recent activity in a sidebar or stacked layout.",
+  "dependencies": ["class-variance-authority"],
+  "registryDependencies": [
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/activity-timeline.json",
+    "https://uaiblocks.dev/r/author-card.json",
+    "https://uaiblocks.dev/r/description-list.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/profile-page.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/profile-page.tsx"
+    }
+  ],
+  "categories": ["application"]
+}

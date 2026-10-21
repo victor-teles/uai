@@ -1,0 +1,26 @@
+{
+  "name": "data-explorer",
+  "type": "registry:block",
+  "title": "Data Explorer",
+  "description": "Query surface, results, saved views, and export actions.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "label",
+    "table",
+    "textarea",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json",
+    "https://uaiblocks.dev/r/data-table-toolbar.json",
+    "https://uaiblocks.dev/r/empty-state.json",
+    "https://uaiblocks.dev/r/page-tabs.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/data-explorer.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/data-explorer.tsx"
+    }
+  ],
+  "categories": ["operations", "data", "query"]
+}

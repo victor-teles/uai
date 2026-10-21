@@ -1,0 +1,20 @@
+{
+  "name": "unsaved-changes-bar",
+  "type": "registry:ui",
+  "title": "Unsaved Changes Bar",
+  "description": "Persistent save and discard actions with busy, error, and page-exit warnings.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/unsaved-changes-bar.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/unsaved-changes-bar.tsx"
+    }
+  ],
+  "categories": ["forms"]
+}

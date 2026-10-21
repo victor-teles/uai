@@ -1,0 +1,26 @@
+{
+  "name": "search-results",
+  "type": "registry:block",
+  "title": "Search Results",
+  "description": "Query controls, filters, ranked results with highlighted terms, empty states, and pagination.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "label",
+    "select",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/empty-state.json",
+    "https://uaiblocks.dev/r/filter-bar.json",
+    "https://uaiblocks.dev/r/search-field.json",
+    "https://uaiblocks.dev/r/skeleton-group.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/search-results.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/search-results.tsx"
+    }
+  ],
+  "categories": ["application"]
+}

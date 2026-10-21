@@ -1,0 +1,22 @@
+{
+  "name": "comparison-table",
+  "type": "registry:ui",
+  "title": "Comparison Table",
+  "description": "Compare plans or products with sticky labels and highlighted differences.",
+  "dependencies": ["lucide-react"],
+  "registryDependencies": [
+    "checkbox",
+    "label",
+    "table",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/comparison-table.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/comparison-table.tsx"
+    }
+  ],
+  "categories": ["data-display"]
+}

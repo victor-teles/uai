@@ -1,0 +1,23 @@
+{
+  "name": "confirmation-dialog",
+  "type": "registry:ui",
+  "title": "Confirmation Dialog",
+  "description": "A native modal that explains impact before destructive actions, with optional typed confirmation.",
+  "registryDependencies": [
+    "alert-dialog",
+    "button",
+    "input",
+    "label",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/confirmation-dialog.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/confirmation-dialog.tsx"
+    }
+  ],
+  "categories": ["feedback", "dialog"],
+  "dependencies": ["class-variance-authority"]
+}

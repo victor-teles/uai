@@ -1,0 +1,20 @@
+{
+  "name": "pricing-toggle",
+  "type": "registry:ui",
+  "title": "Pricing Toggle",
+  "description": "Switch billing periods while keeping prices, billing context, and savings labels in sync.",
+  "registryDependencies": [
+    "toggle",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/pricing-toggle.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/pricing-toggle.tsx"
+    }
+  ],
+  "categories": ["marketing", "pricing"],
+  "dependencies": ["class-variance-authority"]
+}

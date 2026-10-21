@@ -1,0 +1,19 @@
+{
+  "name": "split-pane",
+  "type": "registry:ui",
+  "title": "Split Pane",
+  "description": "Two resizable regions with keyboard controls and saved proportions.",
+  "registryDependencies": [
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/split-pane.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/split-pane.tsx"
+    }
+  ],
+  "categories": ["navigation"],
+  "dependencies": ["class-variance-authority"]
+}

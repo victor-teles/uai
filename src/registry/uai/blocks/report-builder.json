@@ -1,0 +1,22 @@
+{
+  "name": "report-builder",
+  "type": "registry:block",
+  "title": "Report Builder",
+  "description": "Select metrics, dimensions, filters, visualization, and export format.",
+  "registryDependencies": [
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json",
+    "https://uaiblocks.dev/r/filter-bar.json",
+    "https://uaiblocks.dev/r/metric-card.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/report-builder.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/report-builder.tsx"
+    }
+  ],
+  "categories": ["operations", "reporting", "charts"],
+  "dependencies": ["class-variance-authority"]
+}

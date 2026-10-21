@@ -1,0 +1,22 @@
+{
+  "name": "prompt-composer",
+  "type": "registry:ui",
+  "title": "Prompt Composer",
+  "description": "A compound prompt bar with composable add, input, and action regions.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "dropdown-menu",
+    "textarea",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/prompt-composer.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/prompt-composer.tsx"
+    }
+  ],
+  "categories": ["ai", "forms"]
+}

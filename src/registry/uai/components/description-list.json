@@ -1,0 +1,20 @@
+{
+  "name": "description-list",
+  "type": "registry:ui",
+  "title": "Description List",
+  "description": "Labeled facts with responsive alignment and optional actions.",
+  "registryDependencies": [
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/description-list.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/description-list.tsx"
+    }
+  ],
+  "categories": ["data-display"],
+  "dependencies": ["class-variance-authority"]
+}

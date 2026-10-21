@@ -1,0 +1,19 @@
+{
+  "name": "map-frame",
+  "type": "registry:ui",
+  "title": "Map Frame",
+  "description": "A labelled map region that hosts any map library, anchors overlays to its edges, and shows a placeholder basemap.",
+  "dependencies": ["class-variance-authority"],
+  "registryDependencies": [
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/map-frame.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/map-frame.tsx"
+    }
+  ],
+  "categories": ["maps"]
+}

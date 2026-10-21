@@ -1,0 +1,20 @@
+{
+  "name": "run-summary",
+  "type": "registry:ui",
+  "title": "Run Summary",
+  "description": "A summary of completed agent work with stats, changed artifacts, warnings, and next actions.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/run-summary.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/run-summary.tsx"
+    }
+  ],
+  "categories": ["ai", "agents"]
+}

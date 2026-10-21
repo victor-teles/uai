@@ -1,0 +1,21 @@
+{
+  "name": "calendar-view",
+  "type": "registry:ui",
+  "title": "Calendar View",
+  "description": "Day, week, and month layouts with event overflow.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "toggle",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/calendar-view.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/calendar-view.tsx"
+    }
+  ],
+  "categories": ["data-display"]
+}

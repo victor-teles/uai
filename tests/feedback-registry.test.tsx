@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { render } from "@testing-library/react";
 import { feedbackCatalog } from "@/components/registry/feedback/catalog";
-import { getFeedbackPreviewControl } from "@/components/registry/feedback/preview";
+import { getPreviewControl } from "@/components/registry/registry-preview";
 import { FeedbackCompositionFixture } from "./feedback-composition.fixture";
 
 test("publishes every feedback source without drift and keeps examples executable", async () => {
@@ -19,7 +19,7 @@ test("publishes every feedback source without drift and keeps examples executabl
     expect(item.category).toBe("Feedback");
     expect(item.accessibility.length).toBeGreaterThanOrEqual(3);
     expect(source).not.toContain("@/registry/");
-    expect(getFeedbackPreviewControl(item.id)?.options.length).toBe(3);
+    expect(getPreviewControl(item.id)?.options.length).toBe(3);
   }
 });
 

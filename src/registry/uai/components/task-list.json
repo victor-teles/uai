@@ -1,0 +1,20 @@
+{
+  "name": "task-list",
+  "type": "registry:ui",
+  "title": "Task List",
+  "description": "A composable progress list with card, timeline, and compact variants.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "badge",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/task-list.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/task-list.tsx"
+    }
+  ],
+  "categories": ["ai", "data-display"]
+}

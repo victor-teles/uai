@@ -1,0 +1,19 @@
+{
+  "name": "map-marker",
+  "type": "registry:ui",
+  "title": "Map Marker",
+  "description": "Selectable map pins, dots, and price labels with tones, captions, and cluster counts.",
+  "dependencies": ["class-variance-authority"],
+  "registryDependencies": [
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/map-marker.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/map-marker.tsx"
+    }
+  ],
+  "categories": ["maps"]
+}

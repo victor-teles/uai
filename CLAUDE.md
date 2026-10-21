@@ -6,7 +6,8 @@ CSS, and the shadcn registry schema.
 - Use Bun for dependency management and repository scripts.
 - Treat `src/registry/uai` as the source distributed to consumers.
 - Keep component interfaces small and source-owned.
-- Update `registry.json`, documentation, previews, and tests together.
+- Update an item's registry entry (`src/registry/uai/**/<id>.json`), documentation,
+  preview entry (`<id>-entry.tsx`), and tests together.
 - When the visual contract changes, update `DESIGN.md` and `PRODUCT.md` in the
   same change.
 - Run `bun run typecheck`, `bun run lint`, `bun run registry:check`, `bun run test`,
@@ -15,14 +16,17 @@ CSS, and the shadcn registry schema.
 - Read the matching guide in `node_modules/next/dist/docs` before changing a
   Next.js convention or API.
 
-Generated files under `public/r` are build outputs from `registry.json` and the
-registry source files. They are git-ignored: do not edit or commit them, run
-`bun run registry:build`.
+`registry.json` and `src/components/registry/preview-entries.generated.ts` are
+indexes generated from the per-item `<id>.json` and `<id>-entry.tsx` files, and
+`public/r` is built from them. All three are git-ignored: do not edit or commit them,
+run `bun run registry:build`.
 
 Parallel component PRs must not collide. Never write an item count in the README,
 docs, or copy (code uses `registryCatalog.length`); share-image metadata is one
-`src/assets/og/<id>.json` per item, written by `bun run og:capture <id>`; insert new
-entries in shared lists next to their group's siblings, not at the end. To update a
+`src/assets/og/<id>.json` per item, written by `bun run og:capture <id>`; the registry
+entry and the preview entry are per-item files too, never a shared list; insert new
+entries in the remaining shared lists (`catalog.ts`, `DESIGN.md`) next to their group's
+siblings, not at the end. To update a
 stale branch, merge `origin/main`, keep both sides, and run `bun run registry:build`.
 See `CONTRIBUTING.md` › Shared files.
 
