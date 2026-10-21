@@ -6,6 +6,10 @@ import {
 } from "@/components/ui/uai/agent-question";
 import { ATTACHMENT_VARIANTS, type AttachmentVariant } from "@/components/ui/uai/attachment";
 import { CITATION_VARIANTS, type CitationVariant } from "@/components/ui/uai/citation";
+import {
+  CONTEXT_METER_VARIANTS,
+  type ContextMeterVariant,
+} from "@/components/ui/uai/context-meter";
 import { MESSAGE_VARIANTS, type MessageVariant } from "@/components/ui/uai/message";
 import {
   RESPONSE_STATUS_VARIANTS,
@@ -18,6 +22,7 @@ import { PreviewStage } from "../preview-chrome";
 import { AgentQuestionPreview } from "./agent-question-preview";
 import { AttachmentPreview } from "./attachment-preview";
 import { CitationPreview } from "./citation-preview";
+import { ContextMeterPreview } from "./context-meter-preview";
 import { MessagePreview } from "./message-preview";
 import { ResponseStatusPreview } from "./response-status-preview";
 import { RunSummaryPreview } from "./run-summary-preview";
@@ -31,6 +36,7 @@ const controls: Record<string, { label: string; variants: readonly string[] }> =
   "agent-question": { label: "agent question variant", variants: AGENT_QUESTION_VARIANTS },
   "response-status": { label: "response status variant", variants: RESPONSE_STATUS_VARIANTS },
   "run-summary": { label: "run summary variant", variants: RUN_SUMMARY_VARIANTS },
+  "context-meter": { label: "context meter variant", variants: CONTEXT_METER_VARIANTS },
 };
 
 export function getAiPreviewControl(itemId: string): PreviewControl | undefined {
@@ -70,6 +76,9 @@ export function AiPreview({ itemId, selection }: { itemId: string; selection: st
           <ResponseStatusPreview variant={selection as ResponseStatusVariant} />
         )}
         {itemId === "run-summary" && <RunSummaryPreview variant={selection as RunSummaryVariant} />}
+        {itemId === "context-meter" && (
+          <ContextMeterPreview variant={selection as ContextMeterVariant} />
+        )}
       </div>
     </PreviewStage>
   );
