@@ -8,6 +8,7 @@ test("publishes every Brazil source without drift and keeps examples executable"
     "document-field",
     "cep-field",
     "pix-payment",
+    "boleto-payment",
     "installment-picker",
     "pix-automatico",
   ]);
@@ -26,7 +27,7 @@ test("publishes every Brazil source without drift and keeps examples executable"
   }
 });
 
-test("composes all four examples together with unique identifiers", () => {
+test("composes every example together with unique identifiers", () => {
   const view = render(<BrazilCompositionFixture />);
   const ids = Array.from(view.container.querySelectorAll("[id]")).map((element) => element.id);
   expect(new Set(ids).size).toBe(ids.length);

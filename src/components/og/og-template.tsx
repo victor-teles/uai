@@ -44,7 +44,7 @@ export type OgTemplateProps = OgBrand & {
   kind: string;
   /** Muted eyebrow label, such as the component category. */
   eyebrow: string;
-  /** Catalog position such as `07/108`; omitted on site pages. */
+  /** Catalog position such as `07/<catalog length>`; omitted on site pages. */
   position?: string;
   title: string;
   description: string;
@@ -373,7 +373,7 @@ export type OgSiteTemplateProps = OgBrand & {
   /** Canvas size: 1200×630 for Open Graph, 1280×640 for the GitHub social preview. */
   width: number;
   height: number;
-  /** Mono eyebrow, for example `registry · shadcn · 108 items`. */
+  /** Mono eyebrow, for example `registry · shadcn · <catalog length> items`. */
   kind: string;
   eyebrow: string;
   position?: string;
