@@ -1,5 +1,6 @@
 import { AttachmentPreview } from "@/components/registry/ai/attachment-preview";
 import { CitationPreview } from "@/components/registry/ai/citation-preview";
+import { ContextMeterPreview } from "@/components/registry/ai/context-meter-preview";
 import { DiffReviewPreview } from "@/components/registry/ai/diff-review-preview";
 import { MessagePreview } from "@/components/registry/ai/message-preview";
 import { ResponseStatusPreview } from "@/components/registry/ai/response-status-preview";
@@ -16,6 +17,7 @@ export function AiCompositionFixture() {
       <ToolCallPreview />
       <ResponseStatusPreview />
       <RunSummaryPreview />
+      <ContextMeterPreview />
     </>
   );
 }

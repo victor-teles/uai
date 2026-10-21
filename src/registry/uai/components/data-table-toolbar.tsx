@@ -322,7 +322,7 @@ export function DataTableToolbarColumn({
         disabled={disabled}
         checked={columns.value.includes(value)}
         onCheckedChange={(checked) => columns.toggle(value, checked === true)}
-        className="m-0 size-3.5 shadow-none focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid disabled:cursor-default disabled:opacity-100 [&_svg]:size-3"
+        className="m-0 size-3.5 border-subtle-foreground data-[state=checked]:border-primary data-checked:border-primary shadow-none focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid disabled:cursor-default disabled:opacity-100 [&_svg]:size-3"
       />
       {children}
     </Label>

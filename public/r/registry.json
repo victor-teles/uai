@@ -1417,6 +1417,29 @@
       "categories": ["ai", "agents"]
     },
     {
+      "name": "context-meter",
+      "type": "registry:ui",
+      "title": "Context Meter",
+      "description": "How full a model's context window is: a composer ring, a stacked breakdown, threshold warnings, and compaction that shows what it freed.",
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "badge",
+        "button",
+        "popover",
+        "https://uaiblocks.dev/r/uai-number-tick.json",
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/context-meter.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/context-meter.tsx"
+        }
+      ],
+      "categories": ["ai", "agents"]
+    },
+    {
       "name": "map-frame",
       "type": "registry:ui",
       "title": "Map Frame",
@@ -2546,6 +2569,31 @@
           "path": "src/registry/uai/components/pix-payment.tsx",
           "type": "registry:ui",
           "target": "@ui/uai/pix-payment.tsx"
+        }
+      ],
+      "categories": ["brazil", "commerce", "checkout"]
+    },
+    {
+      "name": "pix-automatico",
+      "type": "registry:ui",
+      "title": "Pix Automático",
+      "description": "The authorization step for recurring Pix: clear terms, QR Code or bank-app confirmation with a bank picker, a live waiting state that names the bank, and an active view with the next charges.",
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "badge",
+        "button",
+        "input",
+        "popover",
+        "toggle",
+        "https://uaiblocks.dev/r/uai-number-tick.json",
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/pix-automatico.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/pix-automatico.tsx"
         }
       ],
       "categories": ["brazil", "commerce", "checkout"]

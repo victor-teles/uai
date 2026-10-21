@@ -2,6 +2,7 @@ import {
   Activity,
   ClipboardCheck,
   FileDiff,
+  Gauge,
   MessageSquareText,
   Paperclip,
   Quote,
@@ -16,7 +17,8 @@ export type AiItemId =
   | "attachment"
   | "tool-call"
   | "response-status"
-  | "run-summary";
+  | "run-summary"
+  | "context-meter";
 
 export const aiCatalog: readonly RegistryCatalogItem[] = [
   {
@@ -749,6 +751,164 @@ export function RunSummaryPreview({ variant = "card" }: { variant?: RunSummaryVa
       "The summary is a section labelled by its title; the outcome icon carries a visually hidden outcome label.",
       "Artifacts, warnings, and next steps are lists labelled by their headings. Next steps are ordered.",
       "Each artifact announces its change type (added, modified, or deleted) as text, not only as an icon or strikethrough.",
+    ],
+  },
+  {
+    id: "context-meter",
+    name: "Context Meter",
+    category: "AI",
+    icon: Gauge,
+    description:
+      "How full the context window is: a composer ring, a stacked breakdown, threshold warnings, and compaction that shows what it freed.",
+    usage: `"use client";
+
+import { useEffect, useState } from "react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  ContextMeter,
+  ContextMeterActions,
+  ContextMeterBar,
+  ContextMeterCompactAction,
+  ContextMeterCompacting,
+  ContextMeterContent,
+  ContextMeterFreed,
+  ContextMeterHeader,
+  ContextMeterHint,
+  ContextMeterLegend,
+  ContextMeterStatus,
+  type ContextMeterStatus as ContextMeterStatusValue,
+  ContextMeterSummary,
+  ContextMeterTitle,
+  ContextMeterTrigger,
+  ContextMeterUndoAction,
+  type ContextMeterVariant,
+} from "@/components/ui/uai/context-meter";
+import {
+  PromptComposer,
+  PromptComposerActions,
+  PromptComposerInput,
+  PromptComposerModelSelect,
+  PromptComposerSubmit,
+} from "@/components/ui/uai/prompt-composer";
+
+type Scenario = "normal" | "warning" | "full" | "empty";
+
+const conversation: Record<Scenario, number> = {
+  normal: 44_700,
+  warning: 113_600,
+  full: 138_000,
+  empty: 0,
+};
+
+function segmentsFor(scenario: Scenario, conversationTokens: number) {
+  if (scenario === "empty") return [];
+  const files = scenario === "normal" ? 18_700 : 41_600;
+  return [
+    { id: "system", label: "System prompt", tokens: 3_200 },
+    { id: "tools", label: "Tools", tokens: 9_800 },
+    { id: "files", label: "Files", tokens: files },
+    { id: "conversation", label: "Conversation", tokens: conversationTokens },
+  ];
+}
+
+const models = [
+  { id: "your-model", label: "Your model" },
+  { id: "fast", label: "Fast" },
+] as const;
+
+export function ContextMeterPreview({ variant = "bar" }: { variant?: ContextMeterVariant }) {
+  const [scenario, setScenario] = useState<Scenario>("warning");
+  const [status, setStatus] = useState<ContextMeterStatusValue>("idle");
+  const freed = 61_800;
+  const conversationTokens = conversation[scenario] - (status === "compacted" ? freed : 0);
+  const segments = segmentsFor(scenario, conversationTokens);
+  const used = segments.reduce((sum, segment) => sum + segment.tokens, 0);
+
+  // Your agent summarizes; the meter only shows it happening.
+  useEffect(() => {
+    if (status !== "compacting") return;
+    const timer = window.setTimeout(() => setStatus("compacted"), 1600);
+    return () => window.clearTimeout(timer);
+  }, [status]);
+
+  const meter = (
+    <ContextMeter
+      variant={variant}
+      used={used}
+      limit={200_000}
+      segments={segments}
+      autoCompactAt={0.9}
+      status={status}
+      freed={freed}
+      onCompact={
+        scenario === "normal" || scenario === "empty" ? undefined : () => setStatus("compacting")
+      }
+      onUndoCompact={() => setStatus("idle")}
+    >
+      <ContextMeterTrigger />
+      <ContextMeterContent>
+        <ContextMeterHeader>
+          <ContextMeterTitle />
+          <ContextMeterStatus />
+        </ContextMeterHeader>
+        <ContextMeterSummary />
+        <ContextMeterBar />
+        <ContextMeterLegend />
+        <ContextMeterActions>
+          <ContextMeterHint />
+          <ContextMeterCompacting>Summarizing 38 earlier turns…</ContextMeterCompacting>
+          <ContextMeterFreed>38 turns → 1 summary</ContextMeterFreed>
+          <ContextMeterCompactAction />
+          <ContextMeterUndoAction />
+        </ContextMeterActions>
+      </ContextMeterContent>
+    </ContextMeter>
+  );
+
+  return (
+    <div style={{ display: "grid", gap: 16, justifyItems: "center" }}>
+      <ToggleGroup
+        type="single"
+        aria-label="Context state"
+        value={scenario}
+        onValueChange={(next) => {
+          if (!next) return;
+          setScenario(next as Scenario);
+          setStatus("idle");
+        }}
+        className="flex-wrap justify-self-center"
+      >
+        <ToggleGroupItem value="normal">38%</ToggleGroupItem>
+        <ToggleGroupItem value="warning">84%</ToggleGroupItem>
+        <ToggleGroupItem value="full">96%</ToggleGroupItem>
+        <ToggleGroupItem value="empty">Empty</ToggleGroupItem>
+      </ToggleGroup>
+      {variant === "bar" ? (
+        <div style={{ width: "100%", maxWidth: 340 }}>{meter}</div>
+      ) : (
+        <div style={{ width: "100%", minHeight: 400, display: "grid", alignContent: "end" }}>
+          <PromptComposer variant={variant === "compact" ? "compact" : "rounded"}>
+            <PromptComposerInput
+              placeholder="Ask about the Kiln 4.2 build cache…"
+              aria-label="Message"
+            />
+            <PromptComposerActions>
+              {meter}
+              <PromptComposerModelSelect models={models} />
+              <PromptComposerSubmit />
+            </PromptComposerActions>
+          </PromptComposer>
+        </div>
+      )}
+    </div>
+  );
+}
+`,
+    accessibility: [
+      "Every variant exposes one meter with full numbers in its value text, such as “76,400 of 200,000 tokens, 38 percent”. The trigger is a button named “Context: 38% used”.",
+      "Crossing a threshold, compacting, and finishing compaction are announced once through a visually hidden status, never on the way down.",
+      "State is never color alone: warning and full also show a badge, and the legend gives every segment as text.",
+      "Under reduced motion the ring, segments, and freed region change instantly, with no shimmer or pulse.",
     ],
   },
 ];
