@@ -2595,6 +2595,28 @@
         }
       ],
       "categories": ["brazil", "commerce", "forms"]
+    },
+    {
+      "name": "boleto-payment",
+      "type": "registry:ui",
+      "title": "Boleto Payment",
+      "description": "A boleto with the grouped linha digitável and copy, an ITF barcode drawn from the code, due-date urgency, a BolePix tab, and card, plain, and compact variants.",
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [
+        "badge",
+        "button",
+        "toggle",
+        "https://uaiblocks.dev/r/uai-theme.json",
+        "https://uaiblocks.dev/r/uai-utils.json"
+      ],
+      "files": [
+        {
+          "path": "src/registry/uai/components/boleto-payment.tsx",
+          "type": "registry:ui",
+          "target": "@ui/uai/boleto-payment.tsx"
+        }
+      ],
+      "categories": ["brazil", "commerce", "checkout"]
     }
   ]
 }

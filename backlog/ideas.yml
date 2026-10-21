@@ -18,7 +18,7 @@ ideas:
     title: Boleto Payment
     category: Brazil
     kind: component
-    status: todo
+    status: done
     description: >-
       Shows a boleto bancário for checkout or billing: the amount, the due date, the
       linha digitável with a copy button, a slot for the barcode image, and a clear
