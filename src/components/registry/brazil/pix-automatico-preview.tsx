@@ -55,6 +55,7 @@ export function PixAutomaticoPreview({ variant = "card" }: { variant?: PixAutoma
   const [banksStatus, setBanksStatus] = useState<PixAutomaticoBanksStatus>("ready");
   // Your app persists the last-used bank (account preference, cookie); the preview keeps it here.
   const [recentBankId, setRecentBankId] = useState("nubank");
+  const [pickerOpen, setPickerOpen] = useState(false);
   const variable = variant === "plain";
 
   const go = (next: PixAutomaticoStatus) => {
@@ -79,17 +80,29 @@ export function PixAutomaticoPreview({ variant = "card" }: { variant?: PixAutoma
         <ToggleGroupItem value="expired">Expirado</ToggleGroupItem>
         <ToggleGroupItem value="cancelled">Cancelado</ToggleGroupItem>
       </ToggleGroup>
-      <ToggleGroup
-        type="single"
-        aria-label="Simular lista de bancos"
-        value={banksStatus}
-        onValueChange={(next) => next && setBanksStatus(next as PixAutomaticoBanksStatus)}
-        className="flex-wrap justify-self-center"
+      {/* Only the open bank picker reads the list status. The row keeps its space while hidden,
+          so the card never moves, and inert takes it out of focus and the accessibility tree. */}
+      <div
+        inert={!pickerOpen}
+        aria-hidden={!pickerOpen || undefined}
+        className={
+          pickerOpen
+            ? "justify-self-center opacity-100 transition-opacity duration-180 ease-out motion-reduce:transition-none"
+            : "justify-self-center opacity-0 transition-opacity duration-180 ease-out motion-reduce:transition-none"
+        }
       >
-        <ToggleGroupItem value="ready">Lista pronta</ToggleGroupItem>
-        <ToggleGroupItem value="loading">Carregando bancos</ToggleGroupItem>
-        <ToggleGroupItem value="error">Erro na lista</ToggleGroupItem>
-      </ToggleGroup>
+        <ToggleGroup
+          type="single"
+          aria-label="Simular lista de bancos"
+          value={banksStatus}
+          onValueChange={(next) => next && setBanksStatus(next as PixAutomaticoBanksStatus)}
+          className="flex-wrap justify-self-center"
+        >
+          <ToggleGroupItem value="ready">Lista pronta</ToggleGroupItem>
+          <ToggleGroupItem value="loading">Carregando bancos</ToggleGroupItem>
+          <ToggleGroupItem value="error">Erro na lista</ToggleGroupItem>
+        </ToggleGroup>
+      </div>
       <PixAutomatico
         variant={variant}
         status={status}
@@ -99,6 +112,7 @@ export function PixAutomaticoPreview({ variant = "card" }: { variant?: PixAutoma
         banksStatus={banksStatus}
         onBanksRetry={() => setBanksStatus("ready")}
         recentBankId={recentBankId}
+        onBankPickerOpenChange={setPickerOpen}
         onAuthorize={(payload) => {
           if (payload.method === "app") setRecentBankId(payload.bank.id);
           go("awaiting");

@@ -403,3 +403,19 @@ test("parts throw outside the root", () => {
   );
   console.error = spy;
 });
+
+test("onBankPickerOpenChange follows the picker, including leaving review", async () => {
+  const user = userEvent.setup();
+  const change = mock((_open: boolean) => {});
+  const { rerender } = render(<Card onBankPickerOpenChange={change} />);
+  expect(change).not.toHaveBeenCalled();
+  await user.click(screen.getByRole("radio", { name: "No app do banco" }));
+  expect(change.mock.calls).toEqual([[true]]);
+  await user.click(screen.getByRole("button", { name: "Voltar para os termos" }));
+  expect(change.mock.calls).toEqual([[true], [false]]);
+  await user.click(screen.getByRole("radio", { name: "QR Code" }));
+  await user.click(screen.getByRole("radio", { name: "No app do banco" }));
+  expect(change.mock.calls).toEqual([[true], [false], [true]]);
+  rerender(<Card onBankPickerOpenChange={change} status="awaiting" />);
+  expect(change.mock.calls).toEqual([[true], [false], [true], [false]]);
+});

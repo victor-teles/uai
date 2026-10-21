@@ -332,6 +332,8 @@ export type PixAutomaticoProps = Omit<ComponentProps<"section">, "children"> & {
   bankId?: string | null;
   defaultBankId?: string | null;
   onBankSelect?: (bank: PixAutomaticoBank) => void;
+  /** Fires when the bank picker opens or closes, for UI around the card that follows it. */
+  onBankPickerOpenChange?: (open: boolean) => void;
   /** Shows Trocar banco while awaiting: cancel the open request, then set status="review". */
   onChangeBank?: () => void;
   /** The request is in flight: the bank step locks and its button reads Enviando…. */
@@ -365,6 +367,7 @@ export function PixAutomatico({
   bankId: bankIdProp,
   defaultBankId = recentBankId ?? null,
   onBankSelect,
+  onBankPickerOpenChange,
   onChangeBank,
   pending = false,
   onRetry,
@@ -439,6 +442,17 @@ export function PixAutomatico({
       document.getElementById(waitingTitleId)?.focus();
     }
   }, [status, waitingTitleId]);
+
+  // The picker shows only on the review step, so leaving review closes it for the consumer too.
+  const bankPickerOpen = status === "review" && step === "bank";
+  const bankPickerWasOpen = useRef(bankPickerOpen);
+  const onBankPickerOpenChangeRef = useRef(onBankPickerOpenChange);
+  onBankPickerOpenChangeRef.current = onBankPickerOpenChange;
+  useEffect(() => {
+    if (bankPickerWasOpen.current === bankPickerOpen) return;
+    bankPickerWasOpen.current = bankPickerOpen;
+    onBankPickerOpenChangeRef.current?.(bankPickerOpen);
+  }, [bankPickerOpen]);
 
   // Back returns focus to whatever opened the step.
   useEffect(() => {
