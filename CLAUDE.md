@@ -16,7 +16,15 @@ CSS, and the shadcn registry schema.
   Next.js convention or API.
 
 Generated files under `public/r` are build outputs from `registry.json` and the
-registry source files. Do not edit them by hand.
+registry source files. They are git-ignored: do not edit or commit them, run
+`bun run registry:build`.
+
+Parallel component PRs must not collide. Never write an item count in the README,
+docs, or copy (code uses `registryCatalog.length`); share-image metadata is one
+`src/assets/og/<id>.json` per item, written by `bun run og:capture <id>`; insert new
+entries in shared lists next to their group's siblings, not at the end. To update a
+stale branch, merge `origin/main`, keep both sides, and run `bun run registry:build`.
+See `CONTRIBUTING.md` › Shared files.
 
 ## React composition
 

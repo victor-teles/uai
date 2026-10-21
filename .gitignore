@@ -10,6 +10,8 @@ dist
 
 # output
 out
+# registry documents, rebuilt by `bun run registry:build` (dev, test, and build run it)
+/public/r/
 dist
 *.tgz
 

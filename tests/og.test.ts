@@ -2,7 +2,6 @@ import { describe, expect, test } from "bun:test";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
-import captures from "@/assets/og/manifest.json";
 import { findRegistryItem, registryCatalog } from "@/components/registry/catalog";
 
 import { getOgTheme, renderRegistryOgImage, renderSiteOgImage } from "@/lib/og";
@@ -10,18 +9,15 @@ import { heroDescription, heroTitle, siteDescription, siteTitle } from "@/lib/si
 import { contains, intersect, overlaps, roundIn, roundOut } from "../scripts/og-clip";
 
 const ogDir = path.join(import.meta.dirname, "..", "src", "assets", "og");
-const manifest = captures as Record<
-  string,
-  { variant: string | null; dark?: { width: number }; light?: { width: number } }
->;
 
 describe("share images", () => {
   test("every catalog item has a dark and light specimen capture", () => {
     for (const item of registryCatalog) {
-      const capture = manifest[item.id];
-      expect(capture, item.id).toBeDefined();
+      const capture = JSON.parse(readFileSync(path.join(ogDir, `${item.id}.json`), "utf8")) as {
+        variant: unknown;
+      };
+      expect(capture.variant === null || typeof capture.variant === "string", item.id).toBe(true);
       for (const theme of ["dark", "light"] as const) {
-        expect(capture?.[theme]?.width, `${item.id} ${theme}`).toBeGreaterThan(0);
         expect(existsSync(path.join(ogDir, `${item.id}-${theme}.png`)), `${item.id} ${theme}`).toBe(
           true,
         );
@@ -82,7 +78,7 @@ describe("share images", () => {
   });
 
   test("no specimen capture contains site chrome (the lime signal is site-only)", async () => {
-    for (const id of Object.keys(manifest)) {
+    for (const { id } of registryCatalog) {
       for (const theme of ["dark", "light"] as const) {
         const { data, info } = await sharp(path.join(ogDir, `${id}-${theme}.png`))
           .ensureAlpha()
