@@ -176,6 +176,9 @@ Set `NEXT_PUBLIC_REGISTRY_URL` to the deployed `/r` URL before publishing the
 site. Update the `homepage` in `scripts/registry-index.ts` and the dependency URLs in
 the per-item `src/registry/uai/**/<name>.json` files at the same time. shadcn requires full URLs for custom registry dependencies.
 
+The site deploys to Vercel. `bun run build:workers` builds the same site as a static
+export for Cloudflare Workers; see `docs/cloudflare-workers.md`.
+
 ## Repository layout
 
 - `src/registry/uai`: source files distributed through the registry.

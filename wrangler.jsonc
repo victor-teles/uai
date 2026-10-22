@@ -1,0 +1,25 @@
+/**
+ * Cloudflare Workers config for uaiblocks.dev: a static-assets-only Worker (no script)
+ * serving the static export that `bun run build:workers` writes to `out/`.
+ * See docs/cloudflare-workers.md. No account id or token lives here: CI and local
+ * deploys read CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN from the environment.
+ */
+{
+  "$schema": "https://unpkg.com/wrangler@4.151.3/config-schema.json",
+  "name": "uai",
+  "compatibility_date": "2026-10-21",
+  "assets": {
+    "directory": "./out",
+    // `/components/thinking` serves `components/thinking.html`; `/theming/` redirects to `/theming`.
+    "html_handling": "auto-trailing-slash",
+    // Unknown paths get the Next 404 page with a 404 status.
+    "not_found_handling": "404-page"
+  },
+  "workers_dev": true,
+  "preview_urls": true
+  // Cutover (docs/cloudflare-workers.md, step 5) adds the custom domains:
+  // "routes": [
+  //   { "pattern": "uaiblocks.dev", "custom_domain": true },
+  //   { "pattern": "www.uaiblocks.dev", "custom_domain": true }
+  // ]
+}

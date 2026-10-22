@@ -8,6 +8,8 @@ type ImageProps = { params: Promise<{ id: string }> };
 export const alt = "Uai registry component";
 export const size = ogImageSize;
 export const contentType = ogImageContentType;
+/** Prerendered at build time, which a static export (`build:workers`) requires. */
+export const dynamic = "force-static";
 
 export function generateStaticParams() {
   return registryCatalog.map((item) => ({ id: item.id }));

@@ -2,6 +2,9 @@ import type { MetadataRoute } from "next";
 
 import { absoluteUrl, siteUrl } from "@/lib/site";
 
+/** Prerendered at build time, which a static export (`build:workers`) requires. */
+export const dynamic = "force-static";
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: { userAgent: "*", allow: "/" },
