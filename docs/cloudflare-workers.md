@@ -31,6 +31,7 @@ set `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` in the environment.
 | `/components/<id>.md` rewrite to `/llms.mdx/components/<id>` | `workers-export.ts` copies each document to `components/<id>.md`. |
 | Share images (`opengraph-image`, `twitter-image`) | Prerendered PNGs; `_headers` sets `image/png` on the extensionless files. |
 | `llms.txt`, `llms-full.txt` as `text/markdown` | `_headers`. |
+| `charset=utf-8` on HTML pages, `/components/<id>.md` and `robots.txt` | `_headers`: Workers keeps only the media type an upload declares, so `workers-export.ts` sets these types per route (`/`, each top-level page, `/components/:id`), then puts `text/markdown` back on `/components/:id.md` and plain `text/plain` on the `/components/:id.txt` RSC payloads, which Next's client router reads. |
 | `Access-Control-Allow-Origin: *` and HSTS on every response | `_headers`. |
 | `/_next/static` cached for a year | `_headers`. |
 | 308 from `/path/` to `/path` | `_redirects`. |

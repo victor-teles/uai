@@ -9,8 +9,9 @@
  * - `out/_redirects`: Next's 308 from a trailing slash to the bare path (Workers' own
  *   trailing-slash handling answers 307).
  * - `out/_headers`: the Content-Type of the extensionless share images and Markdown
- *   routes, `charset=utf-8` on the registry JSON and llms files, the long cache on
- *   `/_next/static`, and the CORS and HSTS headers Vercel sends on every response.
+ *   routes, `charset=utf-8` on the registry JSON, llms files, HTML pages, component
+ *   Markdown and `robots.txt` (Workers drops the charset an upload declares), the long
+ *   cache on `/_next/static`, and the CORS and HSTS headers Vercel sends on every response.
  *
  * Host redirects (`www.uaiblocks.dev` and `uaiblocks.vercel.app` to `uaiblocks.dev`)
  * live outside the Worker; see `docs/cloudflare-workers.md`.
@@ -27,14 +28,19 @@ import path from "node:path";
 
 const outDir = path.resolve(process.argv[2] ?? "out");
 
-type HeaderRule = { path: string; headers: Record<string, string> };
+/** `unset` removes a header an earlier, broader rule set (`! Name` in `_headers`). */
+type HeaderRule = { path: string; headers: Record<string, string>; unset?: string[] };
 
 /**
  * One `_headers` rule per URL pattern. An `:id` placeholder stands for one item, so the
  * file stays far below the 100-rule limit however many items the registry has.
  */
-export function headerRules(shareImageRoutes: readonly string[]): HeaderRule[] {
+export function headerRules(
+  shareImageRoutes: readonly string[],
+  htmlRoutes: readonly string[] = [],
+): HeaderRule[] {
   const markdown = { "Content-Type": "text/markdown; charset=utf-8" };
+  const html = { "Content-Type": "text/html; charset=utf-8" };
   return [
     {
       path: "/*",
@@ -61,15 +67,33 @@ export function headerRules(shareImageRoutes: readonly string[]): HeaderRule[] {
     { path: "/llms-full.txt", headers: markdown },
     { path: "/llms.mdx/components/:id", headers: markdown },
     ...shareImageRoutes.map((route) => ({ path: route, headers: { "Content-Type": "image/png" } })),
+    { path: "/robots.txt", headers: { "Content-Type": "text/plain; charset=utf-8" } },
+    // Pages are served from `<route>.html` under an extensionless URL. A placeholder matches
+    // any one segment, so `/components/:id` also matches the `<id>.md` copy and the `<id>.txt`
+    // RSC payload; the two rules after it put their own types back.
+    ...htmlRoutes.map((route) => ({ path: route, headers: html })),
+    ...(htmlRoutes.includes("/components/:id")
+      ? [
+          { path: "/components/:id.md", unset: ["Content-Type"], headers: markdown },
+          // Next's client router only accepts a `text/plain` payload from a static export.
+          {
+            path: "/components/:id.txt",
+            unset: ["Content-Type"],
+            headers: { "Content-Type": "text/plain" },
+          },
+        ]
+      : []),
   ];
 }
 
 export function renderHeaders(rules: readonly HeaderRule[]) {
   return `${rules
-    .map(({ path: rulePath, headers }) =>
-      [rulePath, ...Object.entries(headers).map(([name, value]) => `  ${name}: ${value}`)].join(
-        "\n",
-      ),
+    .map(({ path: rulePath, headers, unset = [] }) =>
+      [
+        rulePath,
+        ...unset.map((name) => `  ! ${name}`),
+        ...Object.entries(headers).map(([name, value]) => `  ${name}: ${value}`),
+      ].join("\n"),
     )
     .join("\n")}\n`;
 }
@@ -98,6 +122,21 @@ function shareImageRoutes(componentsDir: string, ids: readonly string[]) {
   return [...routes];
 }
 
+/**
+ * The HTML pages as `_headers` patterns: each top-level `<name>.html` (`index.html` is `/`)
+ * and one `/components/:id` for the component pages. The 404 pages are left out: they answer
+ * unknown URLs, which no pattern can name.
+ */
+function htmlRoutes(componentsDir: string, ids: readonly string[]) {
+  const routes = readdirSync(outDir)
+    .filter((file) => file.endsWith(".html") && !["404.html", "_not-found.html"].includes(file))
+    .map((file) => (file === "index.html" ? "/" : `/${file.slice(0, -".html".length)}`));
+  if (ids.some((id) => existsSync(path.join(componentsDir, `${id}.html`)))) {
+    routes.push("/components/:id");
+  }
+  return routes.sort();
+}
+
 function main() {
   const componentsDir = path.join(outDir, "components");
   const markdownDir = path.join(outDir, "llms.mdx", "components");
@@ -123,7 +162,9 @@ function main() {
 
   writeFileSync(
     path.join(outDir, "_headers"),
-    renderHeaders(headerRules(shareImageRoutes(componentsDir, ids))),
+    renderHeaders(
+      headerRules(shareImageRoutes(componentsDir, ids), htmlRoutes(componentsDir, ids)),
+    ),
   );
   writeFileSync(path.join(outDir, "_redirects"), renderRedirects());
   console.log(

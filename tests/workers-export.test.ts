@@ -20,8 +20,30 @@ describe("Cloudflare Workers export", () => {
     expect(headers).toContain("/*\n  Access-Control-Allow-Origin: *");
   });
 
+  test("HTML pages, component Markdown and robots.txt declare utf-8, as on Vercel", () => {
+    const headers = renderHeaders(headerRules(shareImages, ["/", "/components/:id", "/theming"]));
+    expect(headers).toContain("/\n  Content-Type: text/html; charset=utf-8");
+    expect(headers).toContain("/components/:id\n  Content-Type: text/html; charset=utf-8");
+    expect(headers).toContain(
+      "/components/:id.md\n  ! Content-Type\n  Content-Type: text/markdown; charset=utf-8",
+    );
+    expect(headers).toContain(
+      "/components/:id.txt\n  ! Content-Type\n  Content-Type: text/plain\n",
+    );
+    expect(headers).toContain("/robots.txt\n  Content-Type: text/plain; charset=utf-8");
+    // The overrides must follow the broader page rule, or the page type would win.
+    expect(headers.indexOf("/components/:id.md")).toBeGreaterThan(
+      headers.indexOf("/components/:id\n"),
+    );
+  });
+
+  test("without component pages, no component overrides are written", () => {
+    const paths = headerRules(shareImages, ["/"]).map((rule) => rule.path);
+    expect(paths).not.toContain("/components/:id.md");
+  });
+
   test("stays inside the Workers limit of 100 header rules", () => {
-    expect(headerRules(shareImages).length).toBeLessThan(100);
+    expect(headerRules(shareImages, ["/", "/components/:id", "/theming"]).length).toBeLessThan(100);
   });
 
   test("a trailing slash redirects to the bare path with a 308", () => {
