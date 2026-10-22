@@ -14,6 +14,7 @@
   "type": "module",
   "scripts": {
     "build": "bun run registry:build && next build --webpack",
+    "build:workers": "bun run registry:build && UAI_STATIC_EXPORT=1 next build --webpack && bun scripts/workers-export.ts",
     "dev": "bun run registry:build && next dev --webpack",
     "format": "biome format --write .",
     "lint": "biome check .",
@@ -23,6 +24,9 @@
     "consumer:check": "bun scripts/consumer-check.ts",
     "og:capture": "bun scripts/og-capture.ts",
     "start": "next start",
+    "preview:workers": "bun x wrangler@4.151.3 dev --port 8787",
+    "deploy:workers": "bun x wrangler@4.151.3 deploy",
+    "deploy:workers:preview": "bun x wrangler@4.151.3 versions upload",
     "test": "bun run registry:build && bun test",
     "test:e2e": "playwright test",
     "test:e2e:install": "playwright install --with-deps chromium",

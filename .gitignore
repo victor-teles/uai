@@ -48,3 +48,6 @@ e2e-artifacts
 # indexes written by `bun run registry:index` from per-item files
 /registry.json
 /src/components/registry/preview-entries.generated.ts
+
+# Cloudflare Workers local state (`bun run preview:workers`)
+.wrangler

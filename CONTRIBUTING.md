@@ -138,14 +138,15 @@ nothing in it should need hand-counting.
 
 ## Automation
 
-Three workflows run on `workflow_dispatch` only until their secrets are set; each
-file has its `schedule` commented out with a note.
+Four workflows run on `workflow_dispatch` only until their secrets are set; the first
+three have their `schedule` commented out with a note.
 
 | Workflow | What it does |
 | --- | --- |
 | `component-factory.yml` | Builds the next `todo` idea from `backlog/ideas.yml` (generation step is a stub for now). |
 | `polish-loop.yml` | Screenshots every item and scores it 1–10 against `quality/premium-rubric.md` with `scripts/design-review.ts`. |
 | `idea-scout.yml` | Proposes new `status: proposed` ideas for `backlog/ideas.yml`. |
+| `deploy-workers.yml` | Builds the static export and uploads it to the Cloudflare `uai` Worker (preview or production). Needs `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`; see `docs/cloudflare-workers.md`. |
 
 To enable them:
 
