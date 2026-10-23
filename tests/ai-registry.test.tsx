@@ -21,7 +21,9 @@ test("publishes every AI source without drift and keeps examples executable", as
     expect(item.category).toBe("AI");
     expect(item.accessibility.length).toBeGreaterThanOrEqual(3);
     expect(source).not.toContain("@/registry/");
-    expect(getPreviewControl(item.id)?.options.length).toBe(3);
+    // Three variants; Agent Question adds its stacked layout states.
+    const stacked = item.id === "agent-question" ? 3 : 0;
+    expect(getPreviewControl(item.id)?.options.length).toBe(3 + stacked);
   }
 });
 
