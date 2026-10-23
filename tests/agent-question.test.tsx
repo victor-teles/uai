@@ -486,3 +486,42 @@ test("stepper is the default layout and keeps its markup", () => {
   expect(screen.queryByRole("list")).toBeNull();
   expect(screen.getByRole("button", { name: "Continue" })).toBeTruthy();
 });
+
+test("stacked root is a real form named by the header; Enter in a field never submits natively", async () => {
+  const user = userEvent.setup();
+  const submit = mock((_a: AgentQuestionAnswers, _m: AgentQuestionSubmitMeta) => {});
+  const { container } = render(<Stacked onSubmit={submit} />);
+  const form = screen.getByRole("form", { name: "0 of 3 answered" });
+  expect(form.tagName).toBe("FORM");
+  expect(form.hasAttribute("role")).toBe(false);
+  expect(container.querySelector("section")).toBeNull();
+  const first = within(items()[0] as HTMLElement);
+  await user.click(first.getByRole("radio", { name: "Something else" }));
+  await user.type(first.getByRole("textbox", { name: "Something else" }), "MySQL{Enter}");
+  expect(submit).not.toHaveBeenCalled();
+  expect(screen.getByRole("form")).toBeTruthy();
+});
+
+test("the stepper root stays a section with no role", () => {
+  const { container } = render(<Questions />);
+  const root = container.querySelector("[data-slot=agent-question]");
+  expect(root?.tagName).toBe("SECTION");
+  expect(root?.hasAttribute("role")).toBe(false);
+  expect(screen.queryByRole("form")).toBeNull();
+});
+
+test("submitLabel sets the stacked submit text and accessible name", async () => {
+  const user = userEvent.setup();
+  const submit = mock((_a: AgentQuestionAnswers, _m: AgentQuestionSubmitMeta) => {});
+  render(<Stacked preselectRecommended submitLabel="Send to Grillado" onSubmit={submit} />);
+  expect(screen.queryByRole("button", { name: "Send answers" })).toBeNull();
+  const button = screen.getByRole("button", { name: "Send to Grillado" });
+  expect(button.textContent).toBe("Send to Grillado");
+  await user.click(button);
+  expect(submit).toHaveBeenCalledTimes(1);
+});
+
+test("submitLabel defaults to Send answers", () => {
+  render(<Stacked />);
+  expect(screen.getByRole("button", { name: "Send answers" })).toBeTruthy();
+});
