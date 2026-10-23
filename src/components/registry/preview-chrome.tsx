@@ -1,12 +1,50 @@
 "use client";
 
-import { type ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  type CSSProperties,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 export type PreviewControl = {
   ariaLabel: string;
   defaultValue: string;
   options: readonly { id: string; label: string }[];
 };
+
+/**
+ * One item's preview on the site: its variant control and the specimen it stages.
+ * Each item keeps its own in `<group>/<id>-entry.tsx`; `scripts/registry-index.ts`
+ * collects them into `preview-entries.generated.ts`.
+ */
+export type PreviewEntry = {
+  control: PreviewControl;
+  render: (selection: string) => ReactNode;
+};
+
+/**
+ * A control over a component's `*_VARIANTS`, labelled by capitalized id, followed by
+ * any preview-only states (rubric L1/L2), which are not component variants.
+ */
+export function variantControl(
+  ariaLabel: string,
+  variants: readonly string[],
+  states: readonly (string | { id: string; label: string })[] = [],
+): PreviewControl {
+  const option = (id: string) => ({ id, label: id.charAt(0).toUpperCase() + id.slice(1) });
+  return {
+    ariaLabel,
+    defaultValue: variants[0] ?? "",
+    options: [
+      ...variants.map(option),
+      ...states.map((state) => (typeof state === "string" ? option(state) : state)),
+    ],
+  };
+}
 
 type SegmentedOption = {
   id: string;
@@ -151,5 +189,35 @@ export function PreviewStage({
         {children}
       </div>
     </div>
+  );
+}
+
+/** The stage most items share: a scene label over a width-capped specimen. */
+export function SpecimenStage({
+  children,
+  label,
+  maxWidth,
+  minHeight,
+  center = false,
+}: {
+  children: ReactNode;
+  label: string;
+  maxWidth: number;
+  minHeight?: number;
+  center?: boolean;
+}) {
+  const style: CSSProperties = {
+    display: center ? "grid" : undefined,
+    justifyItems: center ? "center" : undefined,
+    width: "100%",
+    maxWidth,
+    minWidth: 0,
+    minHeight,
+    padding: "24px 0",
+  };
+  return (
+    <PreviewStage label={label}>
+      <div style={style}>{children}</div>
+    </PreviewStage>
   );
 }

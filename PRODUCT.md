@@ -149,49 +149,49 @@ screen readers, touch input, dark and light themes, and reduced-motion preferenc
 
 ## Forms and usability
 
-The catalog includes Form Field, Search Field, Filter Bar, File Upload, Date Range Picker, Form Error Summary, Unsaved Changes Bar, and Step Indicator. Each ships three named visual variants with replaceable compound children, an interactive preview, installation source, usage code, accessibility notes, and behavior tests.
+Each component ships three named visual variants with replaceable compound children, an interactive preview, installation source, usage code, accessibility notes, and behavior tests.
 
 These components own local interaction and accessibility. Applications own validation policy, remote search, upload transport, persistence, and navigation. File uploads in the workbench simulate progress locally. The date-range example uses fixed release dates and calendar dates without timezone conversion. The unsaved-changes preview disables page-exit warnings while exercising save, discard, and failure states; installed code enables the native warning while dirty, and applications supply SPA navigation blocking.
 
 ## Navigation and layout
 
-The catalog includes App Sidebar, Breadcrumb Trail, Page Tabs, Command Menu, and Split Pane. Each ships three named visual variants with replaceable compound children, an interactive preview, installation source, usage code, accessibility notes, and behavior tests.
+Each component ships three named visual variants with replaceable compound children, an interactive preview, installation source, usage code, accessibility notes, and behavior tests.
 
 These components own local interaction and accessibility: active and collapsed state, disclosure, tab selection, active-option tracking, and pane proportions. Applications own routing, link targets, permissions, command side effects, the surrounding command dialog, global shortcuts, and any server-side persistence. Previews prevent link navigation and keep state locally. The split-pane preview saves its proportion under a preview-only localStorage key.
 
 ## Feedback and state
 
-The catalog includes Status Banner, Progress Summary, Inline Feedback, Confirmation Dialog, Activity Timeline, and Skeleton Group. Each ships three named visual variants with replaceable compound children, an interactive preview, installation source, usage code, accessibility notes, and behavior tests.
+Each component ships three named visual variants with replaceable compound children, an interactive preview, installation source, usage code, accessibility notes, and behavior tests.
 
 These components own live-region urgency, progress semantics, modal focus management, and loading announcements. Applications own the underlying jobs, actions, deletions, event data, and loading policy. The progress preview simulates a contact import locally. The inline-feedback preview resolves and rejects timed promises instead of calling a network. The confirmation-dialog preview only flips local state when the project is "deleted". The skeleton preview toggles between placeholders and the loaded team list so the absence of layout shift is visible.
 
 ## Data display
 
-The catalog includes Data Table Toolbar, Metric Card, Description List, Comparison Table, Kanban Board, Calendar View, and Audit Log. Each ships three named visual variants with replaceable compound children, an interactive preview, installation source, usage code, accessibility notes, and behavior tests.
+Each component ships three named visual variants with replaceable compound children, an interactive preview, installation source, usage code, accessibility notes, and behavior tests.
 
 These components own local interaction and accessibility: search clearing, the column-visibility disclosure, selection-count announcements, difference highlighting, keyboard card movement with live announcements, calendar layout and date navigation, and event-detail disclosure. Applications own data loading, filtering, sorting, export, row selection, board persistence, event sources, and audit retention. Previews use fixed sample data: the calendar pins today to September 30, 2026, the kanban board keeps its order in local state, and the audit-log filter only narrows the sample list.
 
 ## Content and community
 
-The catalog includes Author Card, Comment, Reaction Bar, Share Menu, and Changelog Entry. Each ships three named visual variants with replaceable compound children, an interactive preview, installation source, usage code, accessibility notes, and behavior tests.
+Each component ships three named visual variants with replaceable compound children, an interactive preview, installation source, usage code, accessibility notes, and behavior tests.
 
 These components own local interaction and accessibility: the follow toggle, inline edit focus, moderation disclosure, reaction toggles and the picker menu, menu-button keyboard support, and copy announcements. Applications own identity data, follow and comment persistence, moderation decisions, reaction totals, share URLs and channels, and release content. The comment preview keeps edits in local state and switches the moderation state of a reply with a preview-only select. The reaction preview adds the viewer's reaction to fixed counts. The share preview copies a sample article URL and links to real share intents.
 
 ## Maps
 
-The catalog includes Map Frame, Map Controls, Map Marker, Map Legend, Place Card, and Route Summary. Each ships three named visual variants with replaceable compound children, an interactive preview, installation source, usage code, accessibility notes, and behavior tests. Uai does not ship or depend on a map library: Map Frame hosts whichever map the application mounts, such as MapLibre, Leaflet, Mapbox, or Google Maps, and the other components are the chrome around it.
+Each component ships three named visual variants with replaceable compound children, an interactive preview, installation source, usage code, accessibility notes, and behavior tests. Uai does not ship or depend on a map library: Map Frame hosts whichever map the application mounts, such as MapLibre, Leaflet, Mapbox, or Google Maps, and the other components are the chrome around it.
 
 These components own local interaction and accessibility: the labelled map region and its busy state, named camera buttons and zoom limits, the locate status in words, marker selection as toggle buttons, cluster names, layer visibility checkboxes, the color ramp text alternative, spoken ratings and opening status, and the single-select travel mode group. Applications own the map instance, tiles, projection, camera state, geolocation, marker positioning and clustering, layer data, place data, routing, and attribution text. Previews draw the decorative placeholder basemap instead of real tiles, place markers with percentage offsets, and use the invented Bayview neighborhood around Harbor Street. Zoom, bearing, locate, layer, and travel-mode changes only update local state, and locating resolves on a timer.
 
 ## Marketing and conversion
 
-The catalog includes Announcement Bar, Pricing Toggle, Testimonial Card, Product Gallery, Trust Panel, and Newsletter Form. Each ships three named visual variants with replaceable compound children, an interactive preview, installation source, usage code, accessibility notes, and behavior tests.
+Each component ships three named visual variants with replaceable compound children, an interactive preview, installation source, usage code, accessibility notes, and behavior tests.
 
 These components own local interaction and accessibility: dismissal and its optional persistence, billing-period selection, quote attribution semantics, media selection, zoom, and fullscreen focus management, rating text equivalents, and signup validation and status announcements. Applications own campaign targeting, prices and billing, customer stories, images, trust evidence, and the subscription service. Previews use invented organizations and neutral placeholder artwork, never real trademarks. The announcement preview stores dismissal under a preview-only localStorage key and offers a way to show it again. The newsletter preview resolves a timed promise locally; ana@example.com returns the duplicate state.
 
 ## AI and automation
 
-The catalog includes Message, Citation, Attachment, Tool Call, Agent Question, Response Status, Run Summary, and Context Meter. Each ships three named visual variants with replaceable compound children, an interactive preview, installation source, usage code, accessibility notes, and behavior tests. They extend Prompt Composer, Thinking, and Approval Card into the parts of an agent conversation: who said what, where a claim came from, what was attached, what the agent did, which way to go when it has to ask, where a response stands, what a run changed, and how full the context window is.
+Each component ships three named visual variants with replaceable compound children, an interactive preview, installation source, usage code, accessibility notes, and behavior tests. The components extend Prompt Composer, Thinking, and Approval Card into the parts of an agent conversation: who said what, where a claim came from, what was attached, what the agent did, which way to go when it has to ask, where a response stands, what a run changed, and how full the context window is.
 
 These components own local interaction and accessibility: message roles and streaming busy state, copy confirmation, the citation preview disclosure, upload progress and failure semantics, the tool disclosure, polite status announcements, and focus continuity between Stop and Retry. Applications own model calls, streaming transport, source retrieval, uploads, tool execution, cancellation, and run data. Previews simulate everything locally: the assistant reply streams from a fixed string, the upload advances on a timer, the response status moves from queued to complete on timers, and the tool-call result is chosen from a select.
 
@@ -199,49 +199,49 @@ Diff Review covers the moment before an agent's edit lands: per-change accept an
 
 ## Marketing sites
 
-The catalog includes Hero Section, Feature Showcase, Pricing Section, Testimonials Section, FAQ Section, Call to Action, Waitlist Section, and Contact Section. Each block composes existing Uai components, ships three named layout variants with replaceable compound regions, an interactive preview, installation source, usage code, accessibility notes, and behavior tests. Blocks stack on narrow containers.
+Each block composes existing Uai components, ships three named layout variants with replaceable compound regions, an interactive preview, installation source, usage code, accessibility notes, and behavior tests. Blocks stack on narrow containers.
 
 These blocks own section labelling, layout, and the local interaction of their regions: billing-period selection, question search and disclosure, waitlist confirmation and focus, and contact form states. Applications own copy, media, prices, billing, customer stories, signup storage, message delivery, and support hours. Previews use the invented company Ferrow, invented customers, and neutral SVG artwork, never real trademarks. The waitlist preview resolves a timed promise locally, and ana@example.com returns the already-joined state. The contact preview resolves locally, and addresses ending in @fail.test show the error state.
 
 ## Application surfaces
 
-The catalog includes Dashboard Shell, Settings Page, Profile Page, Team Management, Notification Center, Billing Portal, and Search Results. Each block ships three named layout variants with replaceable compound regions, an interactive preview, installation source, usage code, accessibility notes, and behavior tests. Blocks compose existing Uai components and install them as registry dependencies.
+Each block ships three named layout variants with replaceable compound regions, an interactive preview, installation source, usage code, accessibility notes, and behavior tests. Blocks compose existing Uai components and install them as registry dependencies.
 
 These blocks own layout, labelling, and local interaction: named page and section regions, role selects named after each member, unread state spoken in text, labelled usage meters, a search landmark, and pagination with the current page marked. Applications own routing, data, persistence, permissions, saving, invitations, payments, notification delivery, ranking, and remote search. Previews use fixed sample data for a fictional store, Northwind Goods. The settings preview saves after a short local delay and disables page-exit warnings. Removal, deletion, and cancellation only change local state. The search preview filters a fixed list of help articles.
 
 ## Data and operations
 
-The catalog includes seven operations blocks: Resource Manager, Data Explorer, Import Workflow, Approval Queue, Audit Log Viewer, Incident Dashboard, and Report Builder. Each ships three named layout variants with replaceable compound regions, an interactive preview, installation source, usage code, accessibility notes, and behavior tests. Blocks compose installed Uai components, such as Data Table Toolbar, Description List, Confirmation Dialog, File Upload, Step Indicator, Approval Card, Audit Log, Activity Timeline, and Metric Card, and list them as registry dependencies.
+Each block ships three named layout variants with replaceable compound regions, an interactive preview, installation source, usage code, accessibility notes, and behavior tests. Blocks compose installed Uai components, such as Data Table Toolbar, Description List, Confirmation Dialog, File Upload, Step Indicator, Approval Card, Audit Log, Activity Timeline, and Metric Card, and list them as registry dependencies.
 
 These blocks own layout, region labelling, the inspected-record and import-step state, record-list keyboard movement, and the group-by radio group. Applications own data fetching, persistence, query execution, file parsing and upload, validation rules, approval decisions, audit retention, incident paging and communications, report queries, and export generation. Previews use fixed sample data and local state: the resource manager edits suppliers in memory, the data explorer "runs" a saved query against fixed rows, the import advances on a timer, approvals settle locally, the audit filters only narrow sample events, the incident form appends to a local timeline, and exports only update a status message.
 
 ## Authentication and onboarding blocks
 
-The catalog includes Code Verification, Onboarding Wizard, and Workspace Setup. Each block ships three named layout variants with replaceable compound regions, an interactive preview, installation source, usage code, accessibility notes, and behavior tests. Blocks compose existing Uai components and install them as registry dependencies.
+Each block ships three named layout variants with replaceable compound regions, an interactive preview, installation source, usage code, accessibility notes, and behavior tests. Blocks compose existing Uai components and install them as registry dependencies.
 
 These blocks own layout, labelling, and local interaction: segmented code entry with one-time-code autofill and paste, a paced resend, step validation with focus management, reachable earlier steps, a derived workspace URL, and an invitation list. Applications own authentication, code delivery and checking, rate limits, wizard persistence through `value` and `onValueChange`, workspace creation, URL availability, and invitation delivery. Previews use the invented company Ferrow and the invented customer Larkspur. The code preview accepts 482913, treats 000000 as expired, and rejects other codes after a short local delay. The wizard preview keeps its current step in local state and requires a stop count on the routes step. The workspace preview creates locally, and the URL larkspur returns a taken-URL error.
 
 ## Commerce blocks
 
-The catalog includes Product Detail, Product Listing, Cart Drawer, Checkout, Order Tracking, and Subscription Management. Each block composes existing Uai commerce, form, and feedback components, ships three named layout variants with replaceable compound regions, an interactive preview, installation source, usage code, accessibility notes, and behavior tests. Blocks stack on narrow containers.
+Each block composes existing Uai commerce, form, and feedback components, ships three named layout variants with replaceable compound regions, an interactive preview, installation source, usage code, accessibility notes, and behavior tests. Blocks stack on narrow containers.
 
 These blocks own section labelling, layout, and the local interaction of their regions: option selection and the pending add-to-cart action, sort and filter controls, the modal cart drawer and its focus handoff, checkout step order, validation, focus, and order placement states, the earlier-events disclosure, and the selected plan and billing period. Applications own products, prices, inventory, carts, discounts, taxes, shipping, payment processing, order and shipment data, plans, and billing. Uai never collects card data: the checkout payment region is a slot for a payment provider's hosted fields, and the preview shows inert placeholders. Previews use the invented shop Fieldhouse Ceramics, the invented software Ledgerly, invented customers, and neutral SVG artwork, never real trademarks. In the previews, the code STUDIO10 applies a discount, and the first place-order attempt is declined so the error state is visible.
 
 ## Content and community blocks
 
-The catalog includes Article Page, Documentation Page, Changelog Page, Comment Thread, Community Feed, and Public Profile. Each block ships three named layout variants with replaceable compound regions, an interactive preview, installation source, usage code, accessibility notes, and behavior tests. Blocks compose installed Uai components, such as Author Card, Share Menu, App Sidebar, Breadcrumb Trail, Changelog Entry, Filter Bar, Empty State, Comment, Reaction Bar, and Activity Timeline, and list them as registry dependencies.
+Each block ships three named layout variants with replaceable compound regions, an interactive preview, installation source, usage code, accessibility notes, and behavior tests. Blocks compose installed Uai components, such as Author Card, Share Menu, App Sidebar, Breadcrumb Trail, Changelog Entry, Filter Bar, Empty State, Comment, Reaction Bar, and Activity Timeline, and list them as registry dependencies.
 
 These blocks own layout, region labelling, and local interaction: the article text size, the current table of contents section, changelog category and area filters with a live count, comment sort order and composer, feed filters and pagination, and the follow toggle. Applications own content storage, rich text, moderation decisions and policy, routing, sorting and filtering of their own data, follower data, and share destinations. Previews use fixed sample data for a fictional static-site tool, Kiln, and its invented community. Moderation actions, new comments, and follows only change local state.
 
 ## AI and automation blocks
 
-The catalog includes Conversation Thread, Research Session, File Analysis, and Agent Run. Each block composes the installed AI components, ships three named layout variants with replaceable compound regions, an interactive preview, installation source, usage code, accessibility notes, and behavior tests. Blocks stack on narrow containers and list every composed component as a registry dependency.
+Each block composes the installed AI components, ships three named layout variants with replaceable compound regions, an interactive preview, installation source, usage code, accessibility notes, and behavior tests. Blocks stack on narrow containers and list every composed component as a registry dependency.
 
 These blocks own layout, region labelling, and local interaction: a polite, keyboard-scrollable conversation log that stays pinned to the newest message, labelled plan, activity, synthesis, source, file, finding, task, and approval regions, and an agent activity log. Applications own model calls, streaming transport, search and retrieval, file extraction, tool execution, approvals, cancellation, and run data. Previews simulate everything locally with deterministic timers that are cleared on unmount: the conversation streams a fixed reply word by word, the research session advances a fixed script and writes its synthesis last, the file analysis reads files one at a time and fails the scanned addendum until it is retried, and the agent run pauses at a staging deploy approval and finishes with a partial summary when the deploy is rejected.
 
 ## Brazil
 
-The catalog includes Document Field, CEP Field, Pix Payment, Boleto Payment, and Installment Picker. Each ships three named visual variants with replaceable compound children, an interactive preview, installation source, usage code, accessibility notes, and behavior tests. Default copy is Brazilian Portuguese.
+Each component ships three named visual variants with replaceable compound children, an interactive preview, installation source, usage code, accessibility notes, and behavior tests. Default copy is Brazilian Portuguese.
 
 These components own local interaction and accessibility: CPF and CNPJ masking with a stable caret, check-digit validation including the alphanumeric CNPJ issued from July 2026, CEP masking and lookup timing, Pix copy feedback and the expiry countdown, the boleto's linha digitável grouping, check digits, ITF barcode, copy feedback, and due-date state, and radio grouping for installments. Applications own address lookup, tax-document checks against government records, Pix charge creation and confirmation, boleto registration and payment confirmation, card processing, and interest rates. Previews use fixed sample data: the CEP preview resolves two addresses locally and returns the error state for 99999-999, the Pix preview pins its clock and switches states from preview-only buttons, and its QR code encodes a sample charge for an invented store, Casa Aroeira. The Boleto preview uses a check-digit-valid sample for bank 999 (which doesn't exist) due 24/10/2026, pins `now` per state, and offers BolePix in Card and Plain.
 

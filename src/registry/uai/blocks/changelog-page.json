@@ -1,0 +1,24 @@
+{
+  "name": "changelog-page",
+  "type": "registry:block",
+  "title": "Changelog Page",
+  "description": "Releases grouped by date with version, category, and product area filters.",
+  "dependencies": ["class-variance-authority"],
+  "registryDependencies": [
+    "label",
+    "select",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/changelog-entry.json",
+    "https://uaiblocks.dev/r/empty-state.json",
+    "https://uaiblocks.dev/r/filter-bar.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/changelog-page.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/changelog-page.tsx"
+    }
+  ],
+  "categories": ["content", "changelog"]
+}

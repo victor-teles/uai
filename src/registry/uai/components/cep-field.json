@@ -1,0 +1,22 @@
+{
+  "name": "cep-field",
+  "type": "registry:ui",
+  "title": "CEP Field",
+  "description": "A Brazilian postal code field with masking, address lookup states, and rounded, pill, and compact variants.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "input",
+    "label",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/cep-field.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/cep-field.tsx"
+    }
+  ],
+  "categories": ["brazil", "forms"]
+}

@@ -1,0 +1,55 @@
+name: Deploy to Cloudflare Workers
+
+# Manual only until the cutover in docs/cloudflare-workers.md. Vercel keeps serving
+# uaiblocks.dev until then; this workflow only reaches the `uai` Worker on workers.dev.
+# Enable a `push: branches: [main]` trigger as the last cutover step, not before.
+#
+# Repository secrets (Settings › Secrets and variables › Actions), not set yet:
+#   CLOUDFLARE_API_TOKEN   API token with "Workers Scripts: Edit" on the account
+#   CLOUDFLARE_ACCOUNT_ID  the Cloudflare account id
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "preview uploads a version with its own preview URL; production deploys it"
+        type: choice
+        options: [preview, production]
+        default: preview
+
+concurrency:
+  group: deploy-workers
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Build the static export and deploy (${{ inputs.target }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
+      NEXT_PUBLIC_REGISTRY_URL: https://uaiblocks.dev/r
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Cache Bun packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+      - run: bun install --frozen-lockfile
+      - run: bun run build:workers
+      - name: Upload a preview version
+        if: inputs.target == 'preview'
+        run: bun run deploy:workers:preview --message "${{ github.sha }}"
+      - name: Deploy to production
+        if: inputs.target == 'production'
+        run: bun run deploy:workers --message "${{ github.sha }}"

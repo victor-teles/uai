@@ -1,0 +1,24 @@
+{
+  "name": "comment-thread",
+  "type": "registry:block",
+  "title": "Comment Thread",
+  "description": "Nested replies, reactions, sorting, moderation states, and a comment composer.",
+  "dependencies": ["lucide-react"],
+  "registryDependencies": [
+    "button",
+    "textarea",
+    "toggle",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/comment.json",
+    "https://uaiblocks.dev/r/reaction-bar.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/comment-thread.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/comment-thread.tsx"
+    }
+  ],
+  "categories": ["content", "community"]
+}

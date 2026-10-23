@@ -1,0 +1,20 @@
+{
+  "name": "empty-state",
+  "type": "registry:ui",
+  "title": "Empty State",
+  "description": "A compound blank-slate surface with card, plain, compact, and page variants.",
+  "registryDependencies": [
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/empty-state.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/empty-state.tsx"
+    }
+  ],
+  "categories": ["feedback", "data-display"],
+  "dependencies": ["class-variance-authority"]
+}

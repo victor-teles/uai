@@ -1,0 +1,21 @@
+{
+  "name": "breadcrumb-trail",
+  "type": "registry:ui",
+  "title": "Breadcrumb Trail",
+  "description": "Hierarchy with label truncation, collapsed levels, and a compact mobile fallback.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "breadcrumb",
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/breadcrumb-trail.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/breadcrumb-trail.tsx"
+    }
+  ],
+  "categories": ["navigation"]
+}

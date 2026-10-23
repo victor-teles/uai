@@ -6,6 +6,7 @@
  */
 import { appendFileSync } from "node:fs";
 import path from "node:path";
+import { readRegistryItems } from "../registry-index";
 
 export const IDEA_STATUSES = ["proposed", "todo", "in-progress", "done", "rejected"] as const;
 
@@ -40,7 +41,7 @@ export function validateIdeas(
     if (seen.has(idea.id)) problems.push(`${label}: duplicate id`);
     seen.add(idea.id);
     if (idea.status !== "done" && registryNames.has(idea.id)) {
-      problems.push(`${label}: already exists in registry.json`);
+      problems.push(`${label}: already exists in the registry`);
     }
     if (!idea.title) problems.push(`${label}: missing title`);
     if (!idea.description || idea.description.length < 40) {
@@ -60,10 +61,7 @@ export function validateIdeas(
 }
 
 export async function registryNames(): Promise<Set<string>> {
-  const registry = (await Bun.file(path.join(ROOT, "registry.json")).json()) as {
-    items: { name: string }[];
-  };
-  return new Set(registry.items.map((item) => item.name));
+  return new Set((await readRegistryItems()).map((item) => item.name));
 }
 
 if (import.meta.main) {

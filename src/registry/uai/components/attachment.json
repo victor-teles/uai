@@ -1,0 +1,21 @@
+{
+  "name": "attachment",
+  "type": "registry:ui",
+  "title": "Attachment",
+  "description": "A file with type icon or thumbnail, upload progress, failure and retry, and removal.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "progress",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/attachment.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/attachment.tsx"
+    }
+  ],
+  "categories": ["ai", "files"]
+}

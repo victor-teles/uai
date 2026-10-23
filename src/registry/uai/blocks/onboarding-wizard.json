@@ -1,0 +1,22 @@
+{
+  "name": "onboarding-wizard",
+  "type": "registry:block",
+  "title": "Onboarding Wizard",
+  "description": "Resumable setup steps with validation, progress, optional steps, and completion.",
+  "registryDependencies": [
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/step-indicator.json",
+    "https://uaiblocks.dev/r/status-banner.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/onboarding-wizard.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/onboarding-wizard.tsx"
+    }
+  ],
+  "categories": ["authentication", "onboarding", "forms"],
+  "dependencies": ["class-variance-authority"]
+}

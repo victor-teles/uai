@@ -1,0 +1,22 @@
+{
+  "name": "contact-section",
+  "type": "registry:block",
+  "title": "Contact Section",
+  "description": "Contact options, availability, a message form with its states, and expectations.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/status-banner.json",
+    "https://uaiblocks.dev/r/form-field.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/contact-section.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/contact-section.tsx"
+    }
+  ],
+  "categories": ["marketing", "forms", "support"]
+}

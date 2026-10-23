@@ -1,0 +1,21 @@
+{
+  "name": "call-to-action",
+  "type": "registry:block",
+  "title": "Call to Action",
+  "description": "A closing section with one goal, supporting copy, and reassurance.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/trust-panel.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/call-to-action.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/call-to-action.tsx"
+    }
+  ],
+  "categories": ["marketing", "conversion"]
+}

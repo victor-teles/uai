@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { render } from "@testing-library/react";
 import { aiCatalog } from "@/components/registry/ai/catalog";
-import { getAiPreviewControl } from "@/components/registry/ai/preview";
+import { getPreviewControl } from "@/components/registry/registry-preview";
 import { AiCompositionFixture } from "./ai-composition.fixture";
 
 test("publishes every AI source without drift and keeps examples executable", async () => {
@@ -22,7 +22,8 @@ test("publishes every AI source without drift and keeps examples executable", as
     expect(item.accessibility.length).toBeGreaterThanOrEqual(3);
     expect(source).not.toContain("@/registry/");
     // Diff Review ships unified and compact; split side-by-side is a follow-up.
-    expect(getAiPreviewControl(item.id)?.options.length).toBeGreaterThanOrEqual(2);
+    const variants = item.id === "diff-review" ? 2 : 3;
+    expect(getPreviewControl(item.id)?.options.length).toBe(variants);
   }
 });
 

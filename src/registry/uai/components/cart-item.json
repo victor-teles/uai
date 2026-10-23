@@ -1,0 +1,21 @@
+{
+  "name": "cart-item",
+  "type": "registry:ui",
+  "title": "Cart Item",
+  "description": "A compound cart line with product details, availability, quantity, price, and removal.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json",
+    "https://uaiblocks.dev/r/quantity-picker.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/cart-item.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/cart-item.tsx"
+    }
+  ],
+  "categories": ["commerce", "data-display"]
+}

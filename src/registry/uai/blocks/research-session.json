@@ -1,0 +1,24 @@
+{
+  "name": "research-session",
+  "type": "registry:block",
+  "title": "Research Session",
+  "description": "A research plan, live search activity, sources, and a cited synthesis.",
+  "registryDependencies": [
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json",
+    "https://uaiblocks.dev/r/citation.json",
+    "https://uaiblocks.dev/r/progress-summary.json",
+    "https://uaiblocks.dev/r/response-status.json",
+    "https://uaiblocks.dev/r/task-list.json",
+    "https://uaiblocks.dev/r/thinking.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/research-session.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/research-session.tsx"
+    }
+  ],
+  "categories": ["ai", "research", "sources"],
+  "dependencies": []
+}

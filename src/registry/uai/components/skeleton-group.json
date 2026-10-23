@@ -1,0 +1,20 @@
+{
+  "name": "skeleton-group",
+  "type": "registry:ui",
+  "title": "Skeleton Group",
+  "description": "Composable loading placeholders that match page structure without layout shift.",
+  "registryDependencies": [
+    "skeleton",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/skeleton-group.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/skeleton-group.tsx"
+    }
+  ],
+  "categories": ["feedback", "loading"],
+  "dependencies": ["class-variance-authority"]
+}

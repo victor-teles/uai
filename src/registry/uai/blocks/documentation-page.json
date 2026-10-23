@@ -1,0 +1,22 @@
+{
+  "name": "documentation-page",
+  "type": "registry:block",
+  "title": "Documentation Page",
+  "description": "Navigation, an in-page table of contents with the current section, content, and page actions.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/app-sidebar.json",
+    "https://uaiblocks.dev/r/breadcrumb-trail.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/documentation-page.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/documentation-page.tsx"
+    }
+  ],
+  "categories": ["content", "navigation"]
+}

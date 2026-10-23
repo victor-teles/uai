@@ -1,0 +1,22 @@
+{
+  "name": "notification-center",
+  "type": "registry:block",
+  "title": "Notification Center",
+  "description": "Updates grouped by date with unread state, filters, per-item toggles, and bulk actions.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/empty-state.json",
+    "https://uaiblocks.dev/r/page-tabs.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/notification-center.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/notification-center.tsx"
+    }
+  ],
+  "categories": ["application"]
+}

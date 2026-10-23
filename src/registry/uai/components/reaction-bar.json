@@ -1,0 +1,22 @@
+{
+  "name": "reaction-bar",
+  "type": "registry:ui",
+  "title": "Reaction Bar",
+  "description": "Reaction counts and selected states with accessible names and an add-reaction menu.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "dropdown-menu",
+    "toggle",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/reaction-bar.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/reaction-bar.tsx"
+    }
+  ],
+  "categories": ["content", "community"]
+}

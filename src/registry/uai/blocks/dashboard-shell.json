@@ -1,0 +1,23 @@
+{
+  "name": "dashboard-shell",
+  "type": "registry:block",
+  "title": "Dashboard Shell",
+  "description": "Global navigation, page hierarchy, actions, key metrics, and a layout that stacks on narrow screens.",
+  "dependencies": ["class-variance-authority"],
+  "registryDependencies": [
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/app-sidebar.json",
+    "https://uaiblocks.dev/r/breadcrumb-trail.json",
+    "https://uaiblocks.dev/r/metric-card.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/dashboard-shell.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/dashboard-shell.tsx"
+    }
+  ],
+  "categories": ["application"]
+}

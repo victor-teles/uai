@@ -1,0 +1,21 @@
+{
+  "name": "pix-payment",
+  "type": "registry:ui",
+  "title": "Pix Payment",
+  "description": "A Pix charge with QR code, copy-and-paste code, expiry countdown, payment status, and card, plain, and compact variants.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "badge",
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/pix-payment.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/pix-payment.tsx"
+    }
+  ],
+  "categories": ["brazil", "commerce", "checkout"]
+}

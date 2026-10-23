@@ -1,0 +1,21 @@
+{
+  "name": "progress-summary",
+  "type": "registry:ui",
+  "title": "Progress Summary",
+  "description": "Progress, elapsed time, remaining work, and cancellation in one composable summary.",
+  "registryDependencies": [
+    "button",
+    "progress",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/progress-summary.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/progress-summary.tsx"
+    }
+  ],
+  "categories": ["feedback", "progress"],
+  "dependencies": ["class-variance-authority"]
+}

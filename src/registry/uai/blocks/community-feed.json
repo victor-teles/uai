@@ -1,0 +1,24 @@
+{
+  "name": "community-feed",
+  "type": "registry:block",
+  "title": "Community Feed",
+  "description": "Posts with authors, tags, reactions, filters, and numbered pagination.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "toggle",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/author-card.json",
+    "https://uaiblocks.dev/r/empty-state.json",
+    "https://uaiblocks.dev/r/reaction-bar.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/community-feed.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/community-feed.tsx"
+    }
+  ],
+  "categories": ["content", "community"]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "date-range-picker",
+  "type": "registry:ui",
+  "title": "Date Range Picker",
+  "description": "Presets, date inputs, and a keyboard-navigable calendar for local date ranges.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "input",
+    "label",
+    "toggle",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/date-range-picker.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/date-range-picker.tsx"
+    }
+  ],
+  "categories": ["forms"]
+}
