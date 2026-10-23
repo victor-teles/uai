@@ -1,0 +1,21 @@
+{
+  "name": "testimonials-section",
+  "type": "registry:block",
+  "title": "Testimonials Section",
+  "description": "Customer stories with people, roles, organizations, and a rating summary.",
+  "registryDependencies": [
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/testimonial-card.json",
+    "https://uaiblocks.dev/r/trust-panel.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/testimonials-section.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/testimonials-section.tsx"
+    }
+  ],
+  "categories": ["marketing", "social-proof"],
+  "dependencies": ["class-variance-authority"]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "app-sidebar",
+  "type": "registry:ui",
+  "title": "App Sidebar",
+  "description": "Nested navigation with collapsed mode, a mobile disclosure, and active states.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "collapsible",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/app-sidebar.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/app-sidebar.tsx"
+    }
+  ],
+  "categories": ["navigation"]
+}

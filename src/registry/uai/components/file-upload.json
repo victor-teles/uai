@@ -1,0 +1,21 @@
+{
+  "name": "file-upload",
+  "type": "registry:ui",
+  "title": "File Upload",
+  "description": "File selection and drag and drop with validation, progress, retry, and removal.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "progress",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/file-upload.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/file-upload.tsx"
+    }
+  ],
+  "categories": ["forms"]
+}

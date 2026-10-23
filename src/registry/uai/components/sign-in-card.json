@@ -1,0 +1,24 @@
+{
+  "name": "sign-in-card",
+  "type": "registry:ui",
+  "title": "Sign-in Card",
+  "description": "A compound sign-in form with providers, credentials, recovery, and async feedback.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "input",
+    "label",
+    "separator",
+    "toggle",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/sign-in-card.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/sign-in-card.tsx"
+    }
+  ],
+  "categories": ["authentication", "forms"]
+}

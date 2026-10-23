@@ -1,0 +1,23 @@
+{
+  "name": "comment",
+  "type": "registry:ui",
+  "title": "Comment",
+  "description": "Comments with nested replies, reactions, inline editing, moderation states, and timestamps.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "avatar",
+    "button",
+    "collapsible",
+    "textarea",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/comment.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/comment.tsx"
+    }
+  ],
+  "categories": ["content", "community"]
+}

@@ -1,0 +1,24 @@
+{
+  "name": "data-table-toolbar",
+  "type": "registry:ui",
+  "title": "Data Table Toolbar",
+  "description": "Search, filters, column visibility, export, and bulk actions for selected rows.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "checkbox",
+    "input",
+    "label",
+    "popover",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/data-table-toolbar.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/data-table-toolbar.tsx"
+    }
+  ],
+  "categories": ["data-display"]
+}

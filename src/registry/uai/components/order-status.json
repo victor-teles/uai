@@ -1,0 +1,21 @@
+{
+  "name": "order-status",
+  "type": "registry:ui",
+  "title": "Order Status",
+  "description": "A compound fulfillment timeline with card, plain, and compact variants.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "badge",
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/order-status.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/order-status.tsx"
+    }
+  ],
+  "categories": ["commerce", "data-display"]
+}

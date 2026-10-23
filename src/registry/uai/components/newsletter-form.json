@@ -1,0 +1,23 @@
+{
+  "name": "newsletter-form",
+  "type": "registry:ui",
+  "title": "Newsletter Form",
+  "description": "Email signup with consent, validation, submission, success, and duplicate-email states.",
+  "registryDependencies": [
+    "button",
+    "checkbox",
+    "input",
+    "label",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/newsletter-form.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/newsletter-form.tsx"
+    }
+  ],
+  "categories": ["marketing", "forms"],
+  "dependencies": ["class-variance-authority", "lucide-react"]
+}

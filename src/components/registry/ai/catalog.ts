@@ -2,6 +2,7 @@ import {
   Activity,
   CircleHelp,
   ClipboardCheck,
+  FileDiff,
   Gauge,
   MessageSquareText,
   Mic,
@@ -15,6 +16,7 @@ export type AiItemId =
   | "message"
   | "voice-input"
   | "citation"
+  | "diff-review"
   | "attachment"
   | "tool-call"
   | "agent-question"
@@ -390,6 +392,167 @@ export function CitationPreview({ variant = "number" }: { variant?: CitationVari
       "The preview follows the marker in tab order, so keyboard users can reach the destination link; Escape closes it and returns focus.",
       "Give numbered markers an aria-label that names the source, such as “Source 1: The Future of Heat Pumps”.",
       "All parts render as phrasing content, so citations are valid inside paragraphs. The pop-in is skipped under reduced motion.",
+    ],
+  },
+  {
+    id: "diff-review",
+    name: "Diff Review",
+    category: "AI",
+    icon: FileDiff,
+    description:
+      "Review an agent's edits before they land: a quiet, highlighted diff with per-change accept and reject, live counters, undo, and a multi-file summary.",
+    usage: `"use client";
+
+import { useState } from "react";
+import {
+  DiffReview,
+  DiffReviewFile,
+  type DiffReviewFileData,
+  DiffReviewFileHeader,
+  DiffReviewFileList,
+  DiffReviewFooter,
+  DiffReviewHunks,
+  DiffReviewStale,
+  type DiffReviewValue,
+  type DiffReviewVariant,
+} from "@/components/ui/uai/diff-review";
+
+// Parse your agent's edit with whatever you already use (or diffReviewFilesFromPatch).
+const files: DiffReviewFileData[] = [
+  {
+    path: "src/lib/pricing.ts",
+    hunks: [
+      {
+        id: "pricing-1",
+        header: "export function totalFor(cart)",
+        oldStart: 12,
+        newStart: 12,
+        lines: [
+          { kind: "context", content: "export function totalFor(cart: Cart) {" },
+          { kind: "del", content: "  const subtotal = sum(cart.items.map((i) => i.price));" },
+          { kind: "add", content: "  const subtotal = sum(cart.items, lineTotal);" },
+          { kind: "add", content: "  const discount = applyCoupon(subtotal, cart.coupon);" },
+          { kind: "context", content: "  const shipping = shippingFor(cart);" },
+        ],
+      },
+      {
+        id: "pricing-2",
+        oldStart: 19,
+        newStart: 22,
+        lines: [
+          { kind: "del", content: "  return subtotal + shipping;" },
+          { kind: "add", content: "  return Math.max(0, subtotal - discount + shipping);" },
+          { kind: "add", content: "}" },
+          { kind: "add", content: "" },
+          { kind: "add", content: "const lineTotal = (i: Item) => i.price * i.qty;" },
+        ],
+      },
+    ],
+  },
+  {
+    path: "src/app/cart/page.tsx",
+    hunks: [
+      {
+        id: "cart-1",
+        header: "export default function CartPage()",
+        oldStart: 8,
+        newStart: 8,
+        lines: [
+          { kind: "context", content: "  const cart = useCart();" },
+          { kind: "del", content: "  const total = cart.total;" },
+          { kind: "add", content: "  const total = totalFor(cart);" },
+          {
+            kind: "add",
+            content: '  const saved = cart.coupon ? formatPrice(total.discount) : "";',
+          },
+          { kind: "context", content: "  return (" },
+        ],
+      },
+    ],
+  },
+  {
+    path: "src/lib/coupons.ts",
+    hunks: [
+      {
+        id: "coupons-1",
+        header: "export function applyCoupon(subtotal, code)",
+        oldStart: 4,
+        newStart: 4,
+        lines: [
+          {
+            kind: "context",
+            content: "export function applyCoupon(subtotal: number, code?: string) {",
+          },
+          { kind: "del", content: "  if (!code) return subtotal;" },
+          { kind: "add", content: "  if (!code) return 0;" },
+          { kind: "add", content: "  const rate = rates[code.toUpperCase()] ?? 0;" },
+          { kind: "add", content: "  return Math.round(subtotal * rate);" },
+        ],
+      },
+    ],
+  },
+  {
+    path: "tests/pricing.test.ts",
+    hunks: [
+      {
+        id: "tests-1",
+        oldStart: 30,
+        newStart: 30,
+        lines: [
+          { kind: "context", content: '  it("adds shipping", () => {' },
+          { kind: "add", content: "    expect(totalFor(cartWithCoupon)).toBe(4180);" },
+          { kind: "add", content: "    expect(totalFor(emptyCart)).toBe(0);" },
+          { kind: "context", content: "  });" },
+        ],
+      },
+    ],
+  },
+];
+
+export function DiffReviewPreview({ variant = "unified" }: { variant?: DiffReviewVariant }) {
+  const [value, setValue] = useState<DiffReviewValue>({ "tests-1": "rejected" });
+  const [applied, setApplied] = useState(false);
+
+  return (
+    <DiffReview
+      variant={variant}
+      files={files}
+      value={value}
+      onValueChange={(next) => {
+        setValue(next);
+        setApplied(false);
+      }}
+      stale={["src/lib/coupons.ts"]}
+      applied={applied}
+      onApply={() => setApplied(true)}
+    >
+      {variant === "compact" ? (
+        <DiffReviewFileList />
+      ) : (
+        files.map((file) => (
+          <DiffReviewFile
+            key={file.path}
+            path={file.path}
+            defaultOpen={file.path !== "tests/pricing.test.ts"}
+          >
+            <DiffReviewFileHeader />
+            <DiffReviewStale />
+            <DiffReviewHunks />
+          </DiffReviewFile>
+        ))
+      )}
+      <DiffReviewFooter />
+    </DiffReview>
+  );
+}
+`,
+    accessibility: [
+      "Each file is a section named by its path, and each change is a section named by its range and counts, such as “Lines 19–25: 4 added, 1 removed”.",
+      "Every changed line reaches screen readers with an “added” or “removed” prefix; the highlighted drawing is hidden from them, so color and the +/− signs are never the only signal.",
+      "Accept and reject are real buttons named after the range. They stay in the tab order while visually hidden and appear on hover, focus, or touch.",
+      "With focus in a change, y accepts, n rejects, and ] or [ move between changes (exposed with aria-keyshortcuts). The keys do nothing inside text fields.",
+      "Deciding a change moves focus to its Undo, and Undo returns focus to Accept. A polite status announces each decision and how many remain.",
+      "A file that changed after the edit shows a warning and keeps Accept off for its changes. Under reduced motion there is no wash and no collapse animation.",
     ],
   },
   {

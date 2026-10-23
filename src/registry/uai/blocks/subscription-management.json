@@ -1,0 +1,25 @@
+{
+  "name": "subscription-management",
+  "type": "registry:block",
+  "title": "Subscription Management",
+  "description": "Change plans, usage limits, payment, renewal, and cancellation.",
+  "registryDependencies": [
+    "button",
+    "label",
+    "radio-group",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/confirmation-dialog.json",
+    "https://uaiblocks.dev/r/description-list.json",
+    "https://uaiblocks.dev/r/pricing-toggle.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/subscription-management.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/subscription-management.tsx"
+    }
+  ],
+  "categories": ["commerce", "billing"],
+  "dependencies": ["class-variance-authority"]
+}

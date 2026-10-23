@@ -1,0 +1,22 @@
+{
+  "name": "quantity-picker",
+  "type": "registry:ui",
+  "title": "Quantity Picker",
+  "description": "A compound quantity control with limits, direct input, and stock feedback.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "input",
+    "label",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/quantity-picker.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/quantity-picker.tsx"
+    }
+  ],
+  "categories": ["commerce", "forms"]
+}

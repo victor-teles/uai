@@ -1,0 +1,20 @@
+{
+  "name": "status-banner",
+  "type": "registry:ui",
+  "title": "Status Banner",
+  "description": "Information, success, warning, and error banners with optional actions and dismissal.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/status-banner.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/status-banner.tsx"
+    }
+  ],
+  "categories": ["feedback", "status"]
+}

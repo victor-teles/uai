@@ -1,0 +1,20 @@
+{
+  "name": "map-legend",
+  "type": "registry:ui",
+  "title": "Map Legend",
+  "description": "Layer symbols, counts, a color ramp, and visibility toggles for a map.",
+  "dependencies": ["class-variance-authority"],
+  "registryDependencies": [
+    "checkbox",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/map-legend.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/map-legend.tsx"
+    }
+  ],
+  "categories": ["maps", "data-display"]
+}

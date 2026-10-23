@@ -1,73 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { AiPreview, getAiPreviewControl } from "./ai/preview";
-import { AiBlocksPreview, getAiBlocksPreviewControl } from "./ai-blocks/preview";
-import { AppBlocksPreview, getAppBlocksPreviewControl } from "./app-blocks/preview";
-import { BrazilPreview, getBrazilPreviewControl } from "./brazil/preview";
 import type { RegistryItemId } from "./catalog";
-import { CommerceBlocksPreview, getCommerceBlocksPreviewControl } from "./commerce-blocks/preview";
-import { CommunityPreview, getCommunityPreviewControl } from "./community/preview";
-import {
-  CommunityBlocksPreview,
-  getCommunityBlocksPreviewControl,
-} from "./community-blocks/preview";
-import { CorePreview, getCorePreviewControl } from "./core/preview";
-import { DataDisplayPreview, getDataDisplayPreviewControl } from "./data-display/preview";
-import { FeedbackPreview, getFeedbackPreviewControl } from "./feedback/preview";
-import { FormsPreview, getFormsPreviewControl } from "./forms/preview";
-import { getMapsPreviewControl, MapsPreview } from "./maps/preview";
-import { getMarketingPreviewControl, MarketingPreview } from "./marketing/preview";
-import {
-  getMarketingBlocksPreviewControl,
-  MarketingBlocksPreview,
-} from "./marketing-blocks/preview";
-import { getNavigationPreviewControl, NavigationPreview } from "./navigation/preview";
-import {
-  getOnboardingBlocksPreviewControl,
-  OnboardingBlocksPreview,
-} from "./onboarding-blocks/preview";
-import {
-  getOperationsBlocksPreviewControl,
-  OperationsBlocksPreview,
-} from "./operations-blocks/preview";
 import { PannableCanvas } from "./pannable-canvas";
 import { type PreviewControl, SegmentedControl } from "./preview-chrome";
-
-const groupPreviews = [
-  { getControl: getNavigationPreviewControl, Preview: NavigationPreview },
-  { getControl: getFeedbackPreviewControl, Preview: FeedbackPreview },
-  { getControl: getDataDisplayPreviewControl, Preview: DataDisplayPreview },
-  { getControl: getMarketingPreviewControl, Preview: MarketingPreview },
-  { getControl: getCommunityPreviewControl, Preview: CommunityPreview },
-  { getControl: getAiPreviewControl, Preview: AiPreview },
-  { getControl: getMapsPreviewControl, Preview: MapsPreview },
-  { getControl: getMarketingBlocksPreviewControl, Preview: MarketingBlocksPreview },
-  { getControl: getOnboardingBlocksPreviewControl, Preview: OnboardingBlocksPreview },
-  { getControl: getAppBlocksPreviewControl, Preview: AppBlocksPreview },
-  { getControl: getOperationsBlocksPreviewControl, Preview: OperationsBlocksPreview },
-  { getControl: getCommerceBlocksPreviewControl, Preview: CommerceBlocksPreview },
-  { getControl: getCommunityBlocksPreviewControl, Preview: CommunityBlocksPreview },
-  { getControl: getAiBlocksPreviewControl, Preview: AiBlocksPreview },
-  { getControl: getBrazilPreviewControl, Preview: BrazilPreview },
-  { getControl: getCorePreviewControl, Preview: CorePreview },
-] as const;
+import { previewEntries } from "./preview-entries.generated";
 
 export function getPreviewControl(itemId: RegistryItemId): PreviewControl | undefined {
-  const formsControl = getFormsPreviewControl(itemId);
-  if (formsControl) return formsControl;
-  for (const group of groupPreviews) {
-    const control = group.getControl(itemId);
-    if (control) return control;
-  }
+  return previewEntries[itemId]?.control;
 }
 
 function renderPreview(itemId: RegistryItemId, selection: string) {
-  if (getFormsPreviewControl(itemId)) return <FormsPreview itemId={itemId} selection={selection} />;
-  for (const { getControl, Preview } of groupPreviews) {
-    if (getControl(itemId)) return <Preview itemId={itemId} selection={selection} />;
-  }
-  return null;
+  return previewEntries[itemId]?.render(selection) ?? null;
 }
 
 export function RegistryPreviewCanvas({

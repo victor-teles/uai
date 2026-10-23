@@ -1,0 +1,21 @@
+{
+  "name": "filter-bar",
+  "type": "registry:ui",
+  "title": "Filter Bar",
+  "description": "Composable filters, removable chips, result counts, and reset actions.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "badge",
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/filter-bar.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/filter-bar.tsx"
+    }
+  ],
+  "categories": ["forms"]
+}

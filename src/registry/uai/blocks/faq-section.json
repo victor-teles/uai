@@ -1,0 +1,21 @@
+{
+  "name": "faq-section",
+  "type": "registry:block",
+  "title": "FAQ Section",
+  "description": "Searchable questions with accessible disclosure answers.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "collapsible",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/search-field.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/faq-section.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/faq-section.tsx"
+    }
+  ],
+  "categories": ["marketing", "faq"]
+}

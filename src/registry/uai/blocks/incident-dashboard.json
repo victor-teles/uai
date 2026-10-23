@@ -1,0 +1,26 @@
+{
+  "name": "incident-dashboard",
+  "type": "registry:block",
+  "title": "Incident Dashboard",
+  "description": "Status, impact, timeline, responders, and updates.",
+  "registryDependencies": [
+    "button",
+    "label",
+    "textarea",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json",
+    "https://uaiblocks.dev/r/activity-timeline.json",
+    "https://uaiblocks.dev/r/description-list.json",
+    "https://uaiblocks.dev/r/metric-card.json",
+    "https://uaiblocks.dev/r/status-banner.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/incident-dashboard.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/incident-dashboard.tsx"
+    }
+  ],
+  "categories": ["operations", "incidents", "monitoring"],
+  "dependencies": ["class-variance-authority"]
+}
