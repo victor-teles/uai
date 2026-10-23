@@ -1,0 +1,22 @@
+{
+  "name": "diff-review",
+  "type": "registry:ui",
+  "title": "Diff Review",
+  "description": "Review an agent's edits before they land: a highlighted diff with per-change accept and reject, live counters, undo, and a multi-file summary.",
+  "dependencies": ["@pierre/diffs", "class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "badge",
+    "button",
+    "https://uaiblocks.dev/r/uai-number-tick.json",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/diff-review.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/diff-review.tsx"
+    }
+  ],
+  "categories": ["ai", "code", "review"]
+}
