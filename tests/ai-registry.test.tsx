@@ -21,9 +21,10 @@ test("publishes every AI source without drift and keeps examples executable", as
     expect(item.category).toBe("AI");
     expect(item.accessibility.length).toBeGreaterThanOrEqual(3);
     expect(source).not.toContain("@/registry/");
-    // Three variants; Agent Question adds its stacked layout states.
-    const stacked = item.id === "agent-question" ? 3 : 0;
-    expect(getPreviewControl(item.id)?.options.length).toBe(3 + stacked);
+    // Three variants; Diff Review ships unified and compact (split side-by-side is a
+    // follow-up), and Agent Question adds its three stacked layout states.
+    const variants = item.id === "diff-review" ? 2 : item.id === "agent-question" ? 6 : 3;
+    expect(getPreviewControl(item.id)?.options.length).toBe(variants);
   }
 });
 
