@@ -629,7 +629,7 @@ export function AddressFormCep({
           <CepFieldControl
             className={cn(
               compact ? "w-full" : "w-full max-w-[260px]",
-              found && "border-[color-mix(in_oklab,var(--success)_55%,var(--border))]",
+              "border-input bg-transparent dark:bg-input/30",
               status === "not-found" && "animate-shake motion-reduce:animate-none",
             )}
           >
@@ -660,7 +660,7 @@ export function AddressFormCep({
             </a>
           ) : null}
         </div>
-        <CepFieldMessage className={cn(status === "found" && "text-success-ink")}>
+        <CepFieldMessage>
           {visible ? (
             <span
               key={status}
@@ -687,15 +687,15 @@ export function AddressFormCep({
 
 const fillClass: Record<FillPhase | "resting", string> = {
   resting: "",
-  enter:
-    "border-[color-mix(in_oklab,var(--primary)_40%,var(--border))] bg-[color-mix(in_oklab,var(--primary)_16%,var(--background))] text-transparent transition-none dark:bg-[color-mix(in_oklab,var(--primary)_16%,var(--background))]",
-  wash: "border-[color-mix(in_oklab,var(--primary)_40%,var(--border))] bg-[color-mix(in_oklab,var(--primary)_16%,var(--background))] transition-[color] duration-200 ease-out-quint motion-reduce:transition-none dark:bg-[color-mix(in_oklab,var(--primary)_16%,var(--background))]",
+  enter: "border-ring/60 ring-3 ring-ring/16 text-transparent transition-none",
+  wash: "border-ring/60 ring-3 ring-ring/16 transition-[color] duration-200 ease-out-quint motion-reduce:transition-none",
   settled:
-    "bg-[color-mix(in_oklab,var(--primary)_5%,var(--background))] transition-[color,background-color,border-color,box-shadow] duration-400 ease-out motion-reduce:transition-none dark:bg-[color-mix(in_oklab,var(--primary)_5%,var(--background))]",
+    "transition-[color,border-color,box-shadow] duration-200 ease-out motion-reduce:transition-none",
 };
 
 function controlClass(compact: boolean, phase: FillPhase | undefined, busy: boolean) {
   return cn(
+    "border-input bg-transparent dark:bg-input/30",
     compact && "h-8 rounded-lg py-1.5",
     phase && "pr-8",
     fillClass[phase ?? "resting"],
@@ -1048,7 +1048,7 @@ export function AddressFormState({
             data-filled={phase ? "" : undefined}
             aria-describedby={`${triggerId}-description ${triggerId}-error`}
             className={cn(
-              "w-full min-w-0 gap-1 rounded-[10px] border border-border bg-background px-3 text-[13px] leading-[18px] shadow-none transition-[border-color,background-color,box-shadow] duration-120 ease-out hover:border-border-strong focus-visible:border-border-strong focus-visible:ring-3 focus-visible:ring-primary/24 aria-invalid:border-destructive/70 motion-reduce:transition-none data-[size=default]:h-[38px] data-empty:text-subtle-foreground dark:bg-background dark:hover:bg-background [&_svg]:size-3.5 [&_svg]:text-subtle-foreground",
+              "w-full min-w-0 gap-1 rounded-[10px] border border-input bg-transparent px-3 text-[13px] leading-[18px] shadow-none transition-[border-color,background-color,box-shadow] duration-120 ease-out hover:border-border-strong focus-visible:border-border-strong focus-visible:ring-3 focus-visible:ring-primary/24 aria-invalid:border-destructive/70 motion-reduce:transition-none data-[size=default]:h-[38px] data-empty:text-subtle-foreground dark:bg-input/30 dark:hover:bg-input/30 [&_svg]:size-3.5 [&_svg]:text-subtle-foreground",
               compact && "rounded-lg px-2.5 text-[12.5px] data-[size=default]:h-8",
               fillClass[phase ?? "resting"],
               busy && "text-transparent [&_svg]:opacity-0",

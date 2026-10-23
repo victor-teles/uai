@@ -342,8 +342,11 @@ test("reduced motion fills every field at once and focuses immediately", async (
   expect(document.activeElement?.id).toBe(field("Número").id);
   expect(markers(view.container).length).toBe(4);
   for (const input of markers(view.container)) {
-    expect(input.className).not.toContain("_16%");
-    expect(input.className).toContain("_5%");
+    // Settled at once: base Input fill, no autofill tint, no per-state fill.
+    expect(input.className).not.toContain("ring-ring/16");
+    expect(input.className).not.toContain("color-mix");
+    expect(input.className).toContain("bg-transparent");
+    expect(input.className).toContain("dark:bg-input/30");
   }
 });
 
