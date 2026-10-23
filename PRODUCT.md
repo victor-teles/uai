@@ -195,6 +195,8 @@ Each component ships three named visual variants with replaceable compound child
 
 These components own local interaction and accessibility: message roles and streaming busy state, copy confirmation, the citation preview disclosure, upload progress and failure semantics, the tool disclosure, polite status announcements, and focus continuity between Stop and Retry. Applications own model calls, streaming transport, source retrieval, uploads, tool execution, cancellation, and run data. Previews simulate everything locally: the assistant reply streams from a fixed string, the upload advances on a timer, the response status moves from queued to complete on timers, and the tool-call result is chosen from a select.
 
+Voice Input adds dictation to Prompt Composer. The component owns the recorder overlay, the live waveform, focus moving to Finish and back to the field, Esc and Enter, ⌥ Space while the composer has focus, one polite announcement per step, and the wash over inserted words. Applications own getUserMedia, recording, transcription, permissions, and inserting the transcript into the field; the preview simulates the level with a seeded function and the transcript with timers.
+
 Diff Review covers the moment before an agent's edit lands: per-change accept and reject with undo, counters and footer copy derived from the decisions, a stale-file guard, and a compact multi-file summary for run sidebars. It renders lines with the Apache-2.0 `@pierre/diffs` library; parsing the edit (or calling `diffReviewFilesFromPatch` on a unified patch), applying it, and deciding what is stale stay with the application.
 
 ## Marketing sites
