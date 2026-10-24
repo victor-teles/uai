@@ -789,7 +789,7 @@ export function ToolCallPreview({ variant = "card" }: { variant?: ToolCallVarian
     category: "AI",
     icon: CircleHelp,
     description:
-      "Let an agent ask for a decision: single or multiple choice, a recommended option, Something else, number keys, and a record of the answers.",
+      "Let an agent ask for a decision: single or multiple choice, a recommended option, Something else, number keys, a stacked layout that sends a set of questions at once, and a record of the answers.",
     usage: `"use client";
 
 import { RotateCcw } from "lucide-react";
@@ -803,6 +803,7 @@ import {
   AgentQuestionHeader,
   AgentQuestionItem,
   AgentQuestionItems,
+  type AgentQuestionLayout,
   AgentQuestionOption,
   AgentQuestionOptions,
   AgentQuestionOther,
@@ -811,7 +812,16 @@ import {
   type AgentQuestionVariant,
 } from "@/components/ui/uai/agent-question";
 
-export function AgentQuestionPreview({ variant = "card" }: { variant?: AgentQuestionVariant }) {
+export function AgentQuestionPreview({
+  variant = "card",
+  layout = "stepper",
+  suggested = false,
+}: {
+  variant?: AgentQuestionVariant;
+  layout?: AgentQuestionLayout;
+  /** Start with the suggestions chosen, so a quick look and Send is enough. */
+  suggested?: boolean;
+}) {
   const [round, setRound] = useState(0);
   const [answered, setAnswered] = useState(false);
   const timer = useRef<number | undefined>(undefined);
@@ -831,10 +841,17 @@ export function AgentQuestionPreview({ variant = "card" }: { variant?: AgentQues
       <p className="m-0 text-[13px]/5 text-muted-foreground">
         Before I scaffold Kiln’s storefront I need three decisions.
       </p>
-      <AgentQuestion key={\`\${variant}-\${round}\`} variant={variant} onSubmit={send}>
+      <AgentQuestion
+        key={\`\${layout}-\${variant}-\${suggested}-\${round}\`}
+        layout={layout}
+        variant={variant}
+        preselectRecommended={suggested}
+        recommendedLabel={suggested ? "Suggested" : undefined}
+        onSubmit={send}
+      >
         <AgentQuestionHeader />
         <AgentQuestionItems>
-          <AgentQuestionItem id="database" required>
+          <AgentQuestionItem id="database" label="Database" required>
             <AgentQuestionTitle>Which database should I set up?</AgentQuestionTitle>
             <AgentQuestionDescription>
               I found a Prisma schema and a Drizzle config. Migrations will use the one you pick.
@@ -854,7 +871,7 @@ export function AgentQuestionPreview({ variant = "card" }: { variant?: AgentQues
               <AgentQuestionOther />
             </AgentQuestionOptions>
           </AgentQuestionItem>
-          <AgentQuestionItem id="seed" type="multiple" required>
+          <AgentQuestionItem id="seed" label="Seed data" type="multiple" required>
             <AgentQuestionTitle>What should the seed data include?</AgentQuestionTitle>
             <AgentQuestionDescription>Choose all that apply.</AgentQuestionDescription>
             <AgentQuestionOptions>
@@ -871,14 +888,14 @@ export function AgentQuestionPreview({ variant = "card" }: { variant?: AgentQues
               <AgentQuestionOther />
             </AgentQuestionOptions>
           </AgentQuestionItem>
-          <AgentQuestionItem id="auth">
+          <AgentQuestionItem id="auth" label="Auth">
             <AgentQuestionTitle>Add auth now?</AgentQuestionTitle>
             <AgentQuestionDescription>
               You can add it later with one command.
             </AgentQuestionDescription>
             <AgentQuestionOptions>
               <AgentQuestionOption value="password" label="Email and password" />
-              <AgentQuestionOption value="magic-link" label="Magic link" />
+              <AgentQuestionOption value="magic-link" label="Magic link" recommended={suggested} />
               <AgentQuestionOption value="later" label="Not yet" />
             </AgentQuestionOptions>
           </AgentQuestionItem>
@@ -913,7 +930,9 @@ export function AgentQuestionPreview({ variant = "card" }: { variant?: AgentQues
       "Each question is a fieldset whose legend is the title. Single choice is a radio group with arrow keys; multiple choice is a labelled group of checkboxes.",
       "Keys 1–9 pick the option at that position while focus is inside the question, except while typing in Something else; Enter continues. The groups expose aria-keyshortcuts and the visible key hints are hidden from assistive technology.",
       "Focus moves to the new question's legend on each step and to the summary heading once answered, which is announced as “Answers sent”.",
-      "“Recommended” is part of the option's accessible name, and option descriptions are attached with aria-describedby.",
+      "“Recommended” (or your recommendedLabel) is part of the option's accessible name, and option descriptions are attached with aria-describedby.",
+      'Stacked layout: the root is a form named by its progress line and the questions are a list. The active fieldset has aria-current="step"; ↑/↓, J/K, Home and End move between questions, Tab and pointer make a question active, and Enter sends or jumps to the first required question still missing an answer.',
+      "A preselected recommendation is announced as “{label}, {recommendedLabel}, preselected”, and the header counts the untouched answers, so the dashed outline is never the only cue.",
     ],
   },
   {

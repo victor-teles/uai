@@ -11,6 +11,7 @@ import {
   AgentQuestionHeader,
   AgentQuestionItem,
   AgentQuestionItems,
+  type AgentQuestionLayout,
   AgentQuestionOption,
   AgentQuestionOptions,
   AgentQuestionOther,
@@ -19,7 +20,16 @@ import {
   type AgentQuestionVariant,
 } from "@/components/ui/uai/agent-question";
 
-export function AgentQuestionPreview({ variant = "card" }: { variant?: AgentQuestionVariant }) {
+export function AgentQuestionPreview({
+  variant = "card",
+  layout = "stepper",
+  suggested = false,
+}: {
+  variant?: AgentQuestionVariant;
+  layout?: AgentQuestionLayout;
+  /** Start with the suggestions chosen, so a quick look and Send is enough. */
+  suggested?: boolean;
+}) {
   const [round, setRound] = useState(0);
   const [answered, setAnswered] = useState(false);
   const timer = useRef<number | undefined>(undefined);
@@ -39,10 +49,17 @@ export function AgentQuestionPreview({ variant = "card" }: { variant?: AgentQues
       <p className="m-0 text-[13px]/5 text-muted-foreground">
         Before I scaffold Kiln’s storefront I need three decisions.
       </p>
-      <AgentQuestion key={`${variant}-${round}`} variant={variant} onSubmit={send}>
+      <AgentQuestion
+        key={`${layout}-${variant}-${suggested}-${round}`}
+        layout={layout}
+        variant={variant}
+        preselectRecommended={suggested}
+        recommendedLabel={suggested ? "Suggested" : undefined}
+        onSubmit={send}
+      >
         <AgentQuestionHeader />
         <AgentQuestionItems>
-          <AgentQuestionItem id="database" required>
+          <AgentQuestionItem id="database" label="Database" required>
             <AgentQuestionTitle>Which database should I set up?</AgentQuestionTitle>
             <AgentQuestionDescription>
               I found a Prisma schema and a Drizzle config. Migrations will use the one you pick.
@@ -62,7 +79,7 @@ export function AgentQuestionPreview({ variant = "card" }: { variant?: AgentQues
               <AgentQuestionOther />
             </AgentQuestionOptions>
           </AgentQuestionItem>
-          <AgentQuestionItem id="seed" type="multiple" required>
+          <AgentQuestionItem id="seed" label="Seed data" type="multiple" required>
             <AgentQuestionTitle>What should the seed data include?</AgentQuestionTitle>
             <AgentQuestionDescription>Choose all that apply.</AgentQuestionDescription>
             <AgentQuestionOptions>
@@ -79,14 +96,14 @@ export function AgentQuestionPreview({ variant = "card" }: { variant?: AgentQues
               <AgentQuestionOther />
             </AgentQuestionOptions>
           </AgentQuestionItem>
-          <AgentQuestionItem id="auth">
+          <AgentQuestionItem id="auth" label="Auth">
             <AgentQuestionTitle>Add auth now?</AgentQuestionTitle>
             <AgentQuestionDescription>
               You can add it later with one command.
             </AgentQuestionDescription>
             <AgentQuestionOptions>
               <AgentQuestionOption value="password" label="Email and password" />
-              <AgentQuestionOption value="magic-link" label="Magic link" />
+              <AgentQuestionOption value="magic-link" label="Magic link" recommended={suggested} />
               <AgentQuestionOption value="later" label="Not yet" />
             </AgentQuestionOptions>
           </AgentQuestionItem>
