@@ -1,0 +1,21 @@
+{
+  "name": "metric-card",
+  "type": "registry:ui",
+  "title": "Metric Card",
+  "description": "A value with comparison, trend, and supporting context.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "badge",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-number-tick.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/metric-card.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/metric-card.tsx"
+    }
+  ],
+  "categories": ["data-display"]
+}

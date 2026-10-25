@@ -1,0 +1,23 @@
+{
+  "name": "hero-section",
+  "type": "registry:block",
+  "title": "Hero Section",
+  "description": "Positioning, a primary action, supporting proof, and product media.",
+  "registryDependencies": [
+    "badge",
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/task-list.json",
+    "https://uaiblocks.dev/r/trust-panel.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/hero-section.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/hero-section.tsx"
+    }
+  ],
+  "categories": ["marketing", "hero"],
+  "dependencies": ["class-variance-authority", "lucide-react"]
+}

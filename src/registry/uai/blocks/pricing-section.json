@@ -1,0 +1,22 @@
+{
+  "name": "pricing-section",
+  "type": "registry:block",
+  "title": "Pricing Section",
+  "description": "Plans, billing periods, limits, and purchase actions.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "badge",
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/pricing-toggle.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/pricing-section.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/pricing-section.tsx"
+    }
+  ],
+  "categories": ["marketing", "pricing"]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "public-profile",
+  "type": "registry:block",
+  "title": "Public Profile",
+  "description": "Identity, links, follower counts, pinned work, and recent activity.",
+  "dependencies": ["class-variance-authority"],
+  "registryDependencies": [
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/activity-timeline.json",
+    "https://uaiblocks.dev/r/author-card.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/public-profile.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/public-profile.tsx"
+    }
+  ],
+  "categories": ["content", "community"]
+}

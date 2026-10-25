@@ -1,0 +1,20 @@
+{
+  "name": "place-card",
+  "type": "registry:ui",
+  "title": "Place Card",
+  "description": "Place details with rating, opening status, contact facts, and actions as a card or map popup.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/place-card.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/place-card.tsx"
+    }
+  ],
+  "categories": ["maps"]
+}

@@ -2,8 +2,10 @@ import {
   Activity,
   CircleHelp,
   ClipboardCheck,
+  FileDiff,
   Gauge,
   MessageSquareText,
+  Mic,
   Paperclip,
   Quote,
   Wrench,
@@ -12,7 +14,9 @@ import type { RegistryCatalogItem } from "../catalog";
 
 export type AiItemId =
   | "message"
+  | "voice-input"
   | "citation"
+  | "diff-review"
   | "attachment"
   | "tool-call"
   | "agent-question"
@@ -115,6 +119,208 @@ export function MessagePreview({ variant = "bubble" }: { variant?: MessageVarian
     ],
   },
   {
+    id: "voice-input",
+    name: "Voice Input",
+    category: "AI",
+    icon: Mic,
+    description:
+      "Dictation for the composer: the mic opens into a live waveform with a timer, cancel and finish, then washes the words it added.",
+    usage: `"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  PromptComposer,
+  PromptComposerActions,
+  PromptComposerAdd,
+  PromptComposerFileItem,
+  PromptComposerInput,
+  PromptComposerSubmit,
+} from "@/components/ui/uai/prompt-composer";
+import {
+  VoiceInput,
+  VoiceInputCancel,
+  VoiceInputError,
+  VoiceInputFinish,
+  VoiceInputIndicator,
+  VoiceInputRecorder,
+  type VoiceInputState,
+  VoiceInputStatus,
+  VoiceInputStrip,
+  VoiceInputTimer,
+  VoiceInputTrigger,
+  type VoiceInputVariant,
+  VoiceInputWaveform,
+} from "@/components/ui/uai/voice-input";
+
+const transcript = "Summarize the failing checks on the Kiln 4.2 release branch and suggest a fix.";
+
+// A seeded stand-in for useAudioLevel(stream): speech-like bursts, the same every run.
+function mockLevel() {
+  const k = Math.floor(performance.now() / 33);
+  const syllable = Math.abs(Math.sin(k * 0.37) * Math.sin(k * 0.11 + 1.3));
+  const pause = Math.sin(k * 0.045) > 0.82 ? 0.15 : 1;
+  return Math.min(1, 0.08 + syllable * 0.92 * pause);
+}
+
+export function VoiceInputPreview({ variant = "inline" }: { variant?: VoiceInputVariant }) {
+  const [microphone, setMicrophone] = useState<"allow" | "block">("allow");
+  const [transcription, setTranscription] = useState<"succeeds" | "fails">("succeeds");
+  const [status, setStatus] = useState<VoiceInputState>("idle");
+  const [elapsed, setElapsed] = useState(0);
+  const [value, setValue] = useState("");
+  const [inserted, setInserted] = useState<readonly [number, number]>();
+  const timer = useRef<number>(undefined);
+
+  const later = useCallback((ms: number, run: () => void) => {
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(run, ms);
+  }, []);
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+
+  // Your app records and counts; the preview ticks a clock while "recording".
+  useEffect(() => {
+    if (status !== "recording") return;
+    const tick = window.setInterval(() => setElapsed((seconds) => seconds + 1), 1000);
+    return () => window.clearInterval(tick);
+  }, [status]);
+
+  const insert = () => {
+    const start = value.length === 0 ? 0 : value.length + 1;
+    setValue((current) => (current ? \`\${current} \${transcript}\` : transcript));
+    setInserted([start, start + transcript.length]);
+    setStatus("idle");
+  };
+
+  const transcribe = (fails: boolean) => {
+    setStatus("transcribing");
+    later(1400, () => (fails ? setStatus("error") : insert()));
+  };
+
+  const voice = (children: React.ReactNode, composer?: React.ReactNode) => (
+    <VoiceInput
+      variant={variant}
+      status={status}
+      getLevel={mockLevel}
+      elapsed={elapsed}
+      insertedRange={inserted}
+      onStart={() => {
+        setElapsed(0);
+        setInserted(undefined);
+        setStatus("requesting");
+        later(900, () => setStatus(microphone === "block" ? "denied" : "recording"));
+      }}
+      onCancel={() => {
+        window.clearTimeout(timer.current);
+        setStatus("idle");
+      }}
+      onFinish={() => transcribe(transcription === "fails")}
+      onRetry={() => transcribe(false)}
+    >
+      {composer ?? children}
+      <VoiceInputError />
+    </VoiceInput>
+  );
+
+  const recorder = (
+    <VoiceInputRecorder>
+      <VoiceInputStrip>
+        <VoiceInputIndicator />
+        <VoiceInputTimer />
+        <VoiceInputStatus />
+        <VoiceInputWaveform />
+      </VoiceInputStrip>
+      <VoiceInputCancel />
+      <VoiceInputFinish />
+    </VoiceInputRecorder>
+  );
+
+  return (
+    <div style={{ display: "grid", gap: 16, justifyItems: "center", width: "100%" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center" }}>
+        <ToggleGroup
+          type="single"
+          aria-label="Microphone permission"
+          value={microphone}
+          onValueChange={(next) => next && setMicrophone(next as "allow" | "block")}
+        >
+          <ToggleGroupItem value="allow">Mic allowed</ToggleGroupItem>
+          <ToggleGroupItem value="block">Mic blocked</ToggleGroupItem>
+        </ToggleGroup>
+        <ToggleGroup
+          type="single"
+          aria-label="Transcription result"
+          value={transcription}
+          onValueChange={(next) => next && setTranscription(next as "succeeds" | "fails")}
+        >
+          <ToggleGroupItem value="succeeds">Transcribes</ToggleGroupItem>
+          <ToggleGroupItem value="fails">Fails</ToggleGroupItem>
+        </ToggleGroup>
+      </div>
+      {variant === "pill" ? (
+        <div style={{ display: "grid", gap: 16, justifyItems: "center", minHeight: 240 }}>
+          <p
+            style={{ maxWidth: 340, textAlign: "center" }}
+            className="text-muted-foreground text-sm"
+          >
+            {value || "Tap the mic and say what you need."}
+          </p>
+          {voice(
+            <>
+              <VoiceInputTrigger />
+              {recorder}
+            </>,
+          )}
+        </div>
+      ) : (
+        <div
+          style={{
+            width: "100%",
+            maxWidth: 560,
+            minHeight: 320,
+            display: "grid",
+            alignContent: "end",
+          }}
+        >
+          {voice(
+            null,
+            <PromptComposer
+              variant={variant === "compact" ? "compact" : "rounded"}
+              value={value}
+              onValueChange={(next) => {
+                setValue(next);
+                setInserted(undefined);
+              }}
+            >
+              <PromptComposerAdd>
+                <PromptComposerFileItem />
+              </PromptComposerAdd>
+              <PromptComposerInput
+                placeholder="Ask about the Kiln 4.2 release…"
+                aria-label="Message"
+              />
+              <PromptComposerActions>
+                <VoiceInputTrigger />
+                {recorder}
+                <PromptComposerSubmit />
+              </PromptComposerActions>
+            </PromptComposer>,
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+`,
+    accessibility: [
+      "The mic is a button named “Start dictation” with aria-keyshortcuts; ⌥ Space starts dictation only while focus is inside the composer.",
+      "The recorder is a group named “Dictation”. Focus moves to Finish when it opens and back to the field when it closes; Esc cancels and Enter finishes.",
+      "A polite status says “Recording” once, then “Transcribing”, then “Added n words” or “Dictation cancelled”. The timer and waveform are hidden from assistive tech.",
+      "Denied and failed states describe the mic through aria-describedby, and the mic-off icon and border tint always come with a written line.",
+      "Under reduced motion the strip opens instantly, the bars hold still with a “Recording 0:07” label, and the inserted text is not washed; announcements still happen.",
+    ],
+  },
+  {
     id: "citation",
     name: "Citation",
     category: "AI",
@@ -186,6 +392,167 @@ export function CitationPreview({ variant = "number" }: { variant?: CitationVari
       "The preview follows the marker in tab order, so keyboard users can reach the destination link; Escape closes it and returns focus.",
       "Give numbered markers an aria-label that names the source, such as “Source 1: The Future of Heat Pumps”.",
       "All parts render as phrasing content, so citations are valid inside paragraphs. The pop-in is skipped under reduced motion.",
+    ],
+  },
+  {
+    id: "diff-review",
+    name: "Diff Review",
+    category: "AI",
+    icon: FileDiff,
+    description:
+      "Review an agent's edits before they land: a quiet, highlighted diff with per-change accept and reject, live counters, undo, and a multi-file summary.",
+    usage: `"use client";
+
+import { useState } from "react";
+import {
+  DiffReview,
+  DiffReviewFile,
+  type DiffReviewFileData,
+  DiffReviewFileHeader,
+  DiffReviewFileList,
+  DiffReviewFooter,
+  DiffReviewHunks,
+  DiffReviewStale,
+  type DiffReviewValue,
+  type DiffReviewVariant,
+} from "@/components/ui/uai/diff-review";
+
+// Parse your agent's edit with whatever you already use (or diffReviewFilesFromPatch).
+const files: DiffReviewFileData[] = [
+  {
+    path: "src/lib/pricing.ts",
+    hunks: [
+      {
+        id: "pricing-1",
+        header: "export function totalFor(cart)",
+        oldStart: 12,
+        newStart: 12,
+        lines: [
+          { kind: "context", content: "export function totalFor(cart: Cart) {" },
+          { kind: "del", content: "  const subtotal = sum(cart.items.map((i) => i.price));" },
+          { kind: "add", content: "  const subtotal = sum(cart.items, lineTotal);" },
+          { kind: "add", content: "  const discount = applyCoupon(subtotal, cart.coupon);" },
+          { kind: "context", content: "  const shipping = shippingFor(cart);" },
+        ],
+      },
+      {
+        id: "pricing-2",
+        oldStart: 19,
+        newStart: 22,
+        lines: [
+          { kind: "del", content: "  return subtotal + shipping;" },
+          { kind: "add", content: "  return Math.max(0, subtotal - discount + shipping);" },
+          { kind: "add", content: "}" },
+          { kind: "add", content: "" },
+          { kind: "add", content: "const lineTotal = (i: Item) => i.price * i.qty;" },
+        ],
+      },
+    ],
+  },
+  {
+    path: "src/app/cart/page.tsx",
+    hunks: [
+      {
+        id: "cart-1",
+        header: "export default function CartPage()",
+        oldStart: 8,
+        newStart: 8,
+        lines: [
+          { kind: "context", content: "  const cart = useCart();" },
+          { kind: "del", content: "  const total = cart.total;" },
+          { kind: "add", content: "  const total = totalFor(cart);" },
+          {
+            kind: "add",
+            content: '  const saved = cart.coupon ? formatPrice(total.discount) : "";',
+          },
+          { kind: "context", content: "  return (" },
+        ],
+      },
+    ],
+  },
+  {
+    path: "src/lib/coupons.ts",
+    hunks: [
+      {
+        id: "coupons-1",
+        header: "export function applyCoupon(subtotal, code)",
+        oldStart: 4,
+        newStart: 4,
+        lines: [
+          {
+            kind: "context",
+            content: "export function applyCoupon(subtotal: number, code?: string) {",
+          },
+          { kind: "del", content: "  if (!code) return subtotal;" },
+          { kind: "add", content: "  if (!code) return 0;" },
+          { kind: "add", content: "  const rate = rates[code.toUpperCase()] ?? 0;" },
+          { kind: "add", content: "  return Math.round(subtotal * rate);" },
+        ],
+      },
+    ],
+  },
+  {
+    path: "tests/pricing.test.ts",
+    hunks: [
+      {
+        id: "tests-1",
+        oldStart: 30,
+        newStart: 30,
+        lines: [
+          { kind: "context", content: '  it("adds shipping", () => {' },
+          { kind: "add", content: "    expect(totalFor(cartWithCoupon)).toBe(4180);" },
+          { kind: "add", content: "    expect(totalFor(emptyCart)).toBe(0);" },
+          { kind: "context", content: "  });" },
+        ],
+      },
+    ],
+  },
+];
+
+export function DiffReviewPreview({ variant = "unified" }: { variant?: DiffReviewVariant }) {
+  const [value, setValue] = useState<DiffReviewValue>({ "tests-1": "rejected" });
+  const [applied, setApplied] = useState(false);
+
+  return (
+    <DiffReview
+      variant={variant}
+      files={files}
+      value={value}
+      onValueChange={(next) => {
+        setValue(next);
+        setApplied(false);
+      }}
+      stale={["src/lib/coupons.ts"]}
+      applied={applied}
+      onApply={() => setApplied(true)}
+    >
+      {variant === "compact" ? (
+        <DiffReviewFileList />
+      ) : (
+        files.map((file) => (
+          <DiffReviewFile
+            key={file.path}
+            path={file.path}
+            defaultOpen={file.path !== "tests/pricing.test.ts"}
+          >
+            <DiffReviewFileHeader />
+            <DiffReviewStale />
+            <DiffReviewHunks />
+          </DiffReviewFile>
+        ))
+      )}
+      <DiffReviewFooter />
+    </DiffReview>
+  );
+}
+`,
+    accessibility: [
+      "Each file is a section named by its path, and each change is a section named by its range and counts, such as “Lines 19–25: 4 added, 1 removed”.",
+      "Every changed line reaches screen readers with an “added” or “removed” prefix; the highlighted drawing is hidden from them, so color and the +/− signs are never the only signal.",
+      "Accept and reject are real buttons named after the range. They stay in the tab order while visually hidden and appear on hover, focus, or touch.",
+      "With focus in a change, y accepts, n rejects, and ] or [ move between changes (exposed with aria-keyshortcuts). The keys do nothing inside text fields.",
+      "Deciding a change moves focus to its Undo, and Undo returns focus to Accept. A polite status announces each decision and how many remain.",
+      "A file that changed after the edit shows a warning and keeps Accept off for its changes. Under reduced motion there is no wash and no collapse animation.",
     ],
   },
   {
@@ -422,7 +789,7 @@ export function ToolCallPreview({ variant = "card" }: { variant?: ToolCallVarian
     category: "AI",
     icon: CircleHelp,
     description:
-      "Let an agent ask for a decision: single or multiple choice, a recommended option, Something else, number keys, and a record of the answers.",
+      "Let an agent ask for a decision: single or multiple choice, a recommended option, Something else, number keys, a stacked layout that sends a set of questions at once, and a record of the answers.",
     usage: `"use client";
 
 import { RotateCcw } from "lucide-react";
@@ -436,6 +803,7 @@ import {
   AgentQuestionHeader,
   AgentQuestionItem,
   AgentQuestionItems,
+  type AgentQuestionLayout,
   AgentQuestionOption,
   AgentQuestionOptions,
   AgentQuestionOther,
@@ -444,7 +812,16 @@ import {
   type AgentQuestionVariant,
 } from "@/components/ui/uai/agent-question";
 
-export function AgentQuestionPreview({ variant = "card" }: { variant?: AgentQuestionVariant }) {
+export function AgentQuestionPreview({
+  variant = "card",
+  layout = "stepper",
+  suggested = false,
+}: {
+  variant?: AgentQuestionVariant;
+  layout?: AgentQuestionLayout;
+  /** Start with the suggestions chosen, so a quick look and Send is enough. */
+  suggested?: boolean;
+}) {
   const [round, setRound] = useState(0);
   const [answered, setAnswered] = useState(false);
   const timer = useRef<number | undefined>(undefined);
@@ -464,10 +841,17 @@ export function AgentQuestionPreview({ variant = "card" }: { variant?: AgentQues
       <p className="m-0 text-[13px]/5 text-muted-foreground">
         Before I scaffold Kiln’s storefront I need three decisions.
       </p>
-      <AgentQuestion key={\`\${variant}-\${round}\`} variant={variant} onSubmit={send}>
+      <AgentQuestion
+        key={\`\${layout}-\${variant}-\${suggested}-\${round}\`}
+        layout={layout}
+        variant={variant}
+        preselectRecommended={suggested}
+        recommendedLabel={suggested ? "Suggested" : undefined}
+        onSubmit={send}
+      >
         <AgentQuestionHeader />
         <AgentQuestionItems>
-          <AgentQuestionItem id="database" required>
+          <AgentQuestionItem id="database" label="Database" required>
             <AgentQuestionTitle>Which database should I set up?</AgentQuestionTitle>
             <AgentQuestionDescription>
               I found a Prisma schema and a Drizzle config. Migrations will use the one you pick.
@@ -487,7 +871,7 @@ export function AgentQuestionPreview({ variant = "card" }: { variant?: AgentQues
               <AgentQuestionOther />
             </AgentQuestionOptions>
           </AgentQuestionItem>
-          <AgentQuestionItem id="seed" type="multiple" required>
+          <AgentQuestionItem id="seed" label="Seed data" type="multiple" required>
             <AgentQuestionTitle>What should the seed data include?</AgentQuestionTitle>
             <AgentQuestionDescription>Choose all that apply.</AgentQuestionDescription>
             <AgentQuestionOptions>
@@ -504,14 +888,14 @@ export function AgentQuestionPreview({ variant = "card" }: { variant?: AgentQues
               <AgentQuestionOther />
             </AgentQuestionOptions>
           </AgentQuestionItem>
-          <AgentQuestionItem id="auth">
+          <AgentQuestionItem id="auth" label="Auth">
             <AgentQuestionTitle>Add auth now?</AgentQuestionTitle>
             <AgentQuestionDescription>
               You can add it later with one command.
             </AgentQuestionDescription>
             <AgentQuestionOptions>
               <AgentQuestionOption value="password" label="Email and password" />
-              <AgentQuestionOption value="magic-link" label="Magic link" />
+              <AgentQuestionOption value="magic-link" label="Magic link" recommended={suggested} />
               <AgentQuestionOption value="later" label="Not yet" />
             </AgentQuestionOptions>
           </AgentQuestionItem>
@@ -546,7 +930,9 @@ export function AgentQuestionPreview({ variant = "card" }: { variant?: AgentQues
       "Each question is a fieldset whose legend is the title. Single choice is a radio group with arrow keys; multiple choice is a labelled group of checkboxes.",
       "Keys 1–9 pick the option at that position while focus is inside the question, except while typing in Something else; Enter continues. The groups expose aria-keyshortcuts and the visible key hints are hidden from assistive technology.",
       "Focus moves to the new question's legend on each step and to the summary heading once answered, which is announced as “Answers sent”.",
-      "“Recommended” is part of the option's accessible name, and option descriptions are attached with aria-describedby.",
+      "“Recommended” (or your recommendedLabel) is part of the option's accessible name, and option descriptions are attached with aria-describedby.",
+      'Stacked layout: the root is a form named by its progress line and the questions are a list. The active fieldset has aria-current="step"; ↑/↓, J/K, Home and End move between questions, Tab and pointer make a question active, and Enter sends or jumps to the first required question still missing an answer.',
+      "A preselected recommendation is announced as “{label}, {recommendedLabel}, preselected”, and the header counts the untouched answers, so the dashed outline is never the only cue.",
     ],
   },
   {

@@ -1,0 +1,19 @@
+{
+  "name": "form-error-summary",
+  "type": "registry:ui",
+  "title": "Form Error Summary",
+  "description": "A submission error summary with links that focus the matching fields.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/form-error-summary.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/form-error-summary.tsx"
+    }
+  ],
+  "categories": ["forms"]
+}

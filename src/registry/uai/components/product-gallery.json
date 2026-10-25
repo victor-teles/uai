@@ -1,0 +1,22 @@
+{
+  "name": "product-gallery",
+  "type": "registry:ui",
+  "title": "Product Gallery",
+  "description": "Media selection with thumbnails, zoom, fullscreen viewing, and required alt text.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "dialog",
+    "toggle",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/product-gallery.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/product-gallery.tsx"
+    }
+  ],
+  "categories": ["marketing", "media"]
+}

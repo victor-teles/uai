@@ -1,0 +1,23 @@
+{
+  "name": "checkout",
+  "type": "registry:block",
+  "title": "Checkout",
+  "description": "Guide contact, delivery, payment, review, and confirmation.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/price-summary.json",
+    "https://uaiblocks.dev/r/status-banner.json",
+    "https://uaiblocks.dev/r/step-indicator.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/checkout.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/checkout.tsx"
+    }
+  ],
+  "categories": ["commerce", "checkout"]
+}

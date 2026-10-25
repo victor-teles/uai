@@ -1,0 +1,20 @@
+{
+  "name": "announcement-bar",
+  "type": "registry:ui",
+  "title": "Announcement Bar",
+  "description": "A campaign message with actions, dismissal, and remembered dismissal.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/announcement-bar.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/announcement-bar.tsx"
+    }
+  ],
+  "categories": ["marketing", "banner"]
+}

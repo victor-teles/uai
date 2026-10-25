@@ -1,0 +1,22 @@
+{
+  "name": "form-field",
+  "type": "registry:ui",
+  "title": "Form Field",
+  "description": "Labels, descriptions, requirements, validation, and character counts.",
+  "dependencies": ["class-variance-authority"],
+  "registryDependencies": [
+    "input",
+    "label",
+    "textarea",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/form-field.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/form-field.tsx"
+    }
+  ],
+  "categories": ["forms"]
+}

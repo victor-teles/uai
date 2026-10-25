@@ -1,0 +1,25 @@
+{
+  "name": "agent-question",
+  "type": "registry:ui",
+  "title": "Agent Question",
+  "description": "Lets an agent ask for a decision: one to five single or multiple choice questions, one at a time or stacked with one submit, a recommended option that can be preselected, Something else, number-key answers, and a record of the answers.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "badge",
+    "button",
+    "checkbox",
+    "collapsible",
+    "input",
+    "radio-group",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/agent-question.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/agent-question.tsx"
+    }
+  ],
+  "categories": ["ai", "agents"]
+}

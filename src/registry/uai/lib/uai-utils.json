@@ -1,0 +1,15 @@
+{
+  "name": "uai-utils",
+  "type": "registry:lib",
+  "title": "Uai Utilities",
+  "description": "A small class-name merge utility shared by Uai components.",
+  "dependencies": ["clsx", "tailwind-merge"],
+  "files": [
+    {
+      "path": "src/registry/uai/lib/uai-utils.ts",
+      "type": "registry:lib",
+      "target": "@lib/uai-utils.ts"
+    }
+  ],
+  "categories": ["utility"]
+}

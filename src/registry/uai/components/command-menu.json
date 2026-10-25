@@ -1,0 +1,19 @@
+{
+  "name": "command-menu",
+  "type": "registry:ui",
+  "title": "Command Menu",
+  "description": "Search and run grouped actions with full keyboard navigation.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/command-menu.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/command-menu.tsx"
+    }
+  ],
+  "categories": ["navigation"]
+}

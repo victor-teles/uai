@@ -1,0 +1,23 @@
+{
+  "name": "conversation-thread",
+  "type": "registry:block",
+  "title": "Conversation Thread",
+  "description": "Messages, cited sources, response states, and a prompt composer in one thread.",
+  "registryDependencies": [
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json",
+    "https://uaiblocks.dev/r/citation.json",
+    "https://uaiblocks.dev/r/message.json",
+    "https://uaiblocks.dev/r/prompt-composer.json",
+    "https://uaiblocks.dev/r/response-status.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/conversation-thread.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/conversation-thread.tsx"
+    }
+  ],
+  "categories": ["ai", "chat", "conversation"],
+  "dependencies": []
+}

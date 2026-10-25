@@ -1,0 +1,25 @@
+{
+  "name": "cart-drawer",
+  "type": "registry:block",
+  "title": "Cart Drawer",
+  "description": "Review items, quantities, discounts, totals, and checkout actions.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "button",
+    "sheet",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/cart-item.json",
+    "https://uaiblocks.dev/r/coupon-field.json",
+    "https://uaiblocks.dev/r/price-summary.json",
+    "https://uaiblocks.dev/r/quantity-picker.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/blocks/cart-drawer.tsx",
+      "type": "registry:component",
+      "target": "@components/uai/cart-drawer.tsx"
+    }
+  ],
+  "categories": ["commerce", "cart"]
+}

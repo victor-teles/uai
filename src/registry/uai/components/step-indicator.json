@@ -1,0 +1,19 @@
+{
+  "name": "step-indicator",
+  "type": "registry:ui",
+  "title": "Step Indicator",
+  "description": "Current, complete, optional, blocked, and error steps with explicit status text.",
+  "dependencies": ["class-variance-authority"],
+  "registryDependencies": [
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/step-indicator.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/step-indicator.tsx"
+    }
+  ],
+  "categories": ["forms"]
+}

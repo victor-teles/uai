@@ -1,0 +1,22 @@
+{
+  "name": "document-field",
+  "type": "registry:ui",
+  "title": "Document Field",
+  "description": "A CPF and CNPJ field with masking, check-digit validation, alphanumeric CNPJ support, and rounded, pill, and compact variants.",
+  "dependencies": ["class-variance-authority", "lucide-react"],
+  "registryDependencies": [
+    "badge",
+    "input",
+    "label",
+    "https://uaiblocks.dev/r/uai-theme.json",
+    "https://uaiblocks.dev/r/uai-utils.json"
+  ],
+  "files": [
+    {
+      "path": "src/registry/uai/components/document-field.tsx",
+      "type": "registry:ui",
+      "target": "@ui/uai/document-field.tsx"
+    }
+  ],
+  "categories": ["brazil", "forms"]
+}

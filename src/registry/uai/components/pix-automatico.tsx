@@ -1405,7 +1405,7 @@ function PixAutomaticoBankPicker({ className, style }: { className?: string; sty
       ) : (
         <div
           className={cn(
-            "flex min-w-0 items-center gap-2 bg-background pr-1.5 pl-[11px] shadow-[inset_0_0_0_1px_var(--border)] [transition:box-shadow_120ms_ease-out] focus-within:shadow-[inset_0_0_0_1px_var(--ring),0_0_0_3px_color-mix(in_oklab,var(--ring)_30%,transparent)] motion-reduce:transition-none",
+            "flex min-w-0 items-center gap-2 border border-input bg-transparent pr-1.5 pl-[11px] [transition:border-color_120ms_ease-out,box-shadow_120ms_ease-out] hover:border-border-strong focus-within:border-border-strong focus-within:ring-3 focus-within:ring-primary/24 motion-reduce:transition-none dark:bg-input/30",
             compact ? "h-8 rounded-lg" : "h-9 rounded-[10px]",
             !ready && "opacity-55",
           )}

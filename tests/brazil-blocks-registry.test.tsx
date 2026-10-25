@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { render } from "@testing-library/react";
 import { AddressFormPreview } from "@/components/registry/brazil-blocks/address-form-preview";
 import { brazilBlocksCatalog } from "@/components/registry/brazil-blocks/catalog";
-import { getBrazilBlocksPreviewControl } from "@/components/registry/brazil-blocks/preview";
+import { getPreviewControl } from "@/components/registry/registry-preview";
 import { ADDRESS_FORM_VARIANTS } from "@/registry/uai/blocks/address-form";
 
 test("publishes every Brazil block without drift and keeps examples executable", async () => {
@@ -37,9 +37,9 @@ test("publishes every Brazil block without drift and keeps examples executable",
 });
 
 test("the preview control offers every Address Form variant", () => {
-  expect(getBrazilBlocksPreviewControl("address-form")?.options.map((option) => option.id)).toEqual(
-    [...ADDRESS_FORM_VARIANTS],
-  );
+  expect(getPreviewControl("address-form")?.options.map((option) => option.id)).toEqual([
+    ...ADDRESS_FORM_VARIANTS,
+  ]);
 });
 
 test("renders every variant with unique identifiers", () => {

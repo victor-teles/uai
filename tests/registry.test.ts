@@ -17,7 +17,7 @@ const itemNames = registry.items.map((item) => item.name);
 
 describe("Uai registry", () => {
   test("publishes the theme, the shared libs, and every catalog item", () => {
-    expect(itemNames.slice(0, 2)).toEqual(["uai-theme", "uai-utils"]);
+    expect(itemNames.slice(0, 3)).toEqual(["uai-theme", "uai-number-tick", "uai-utils"]);
     expect([...itemNames].sort()).toEqual(
       [
         "uai-theme",
